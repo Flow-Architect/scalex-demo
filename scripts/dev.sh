@@ -10,17 +10,21 @@ if [ ! -x "$ROOT_DIR/backend/.venv/bin/uvicorn" ]; then
   exit 1
 fi
 
-if [ ! -d "$ROOT_DIR/frontend/node_modules" ]; then
-  echo "Frontend dependencies are missing. Run ./scripts/setup.sh first." >&2
-  exit 1
+if [ "${SCALEX_RUN_FRONTEND:-false}" = "true" ]; then
+  if [ ! -d "$ROOT_DIR/frontend/node_modules" ]; then
+    echo "Frontend dependencies are missing. Frontend setup is planned for the dashboard goal." >&2
+    exit 1
+  fi
+
+  cleanup() {
+    jobs -p | xargs -r kill
+  }
+  trap cleanup EXIT
+
+  (cd "$ROOT_DIR/backend" && .venv/bin/uvicorn app.main:app --reload --port "$BACKEND_PORT") &
+  (cd "$ROOT_DIR/frontend" && npm run dev -- --port "$FRONTEND_PORT") &
+  wait
+else
+  cd "$ROOT_DIR/backend"
+  exec .venv/bin/uvicorn app.main:app --reload --port "$BACKEND_PORT"
 fi
-
-cleanup() {
-  jobs -p | xargs -r kill
-}
-trap cleanup EXIT
-
-(cd "$ROOT_DIR/backend" && .venv/bin/uvicorn app.main:app --reload --port "$BACKEND_PORT") &
-(cd "$ROOT_DIR/frontend" && npm run dev -- --port "$FRONTEND_PORT") &
-
-wait

@@ -14,11 +14,4 @@ else
   exit 1
 fi
 
-if command -v npm >/dev/null 2>&1; then
-  (cd "$ROOT_DIR/frontend" && npm install)
-else
-  echo "npm is required for frontend setup." >&2
-  exit 1
-fi
-
-echo "Setup complete. Copy .env.example to .env before running the full demo."
+echo "Backend setup complete. Copy .env.example to .env before running the full demo."
