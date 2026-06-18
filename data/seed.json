@@ -1,0 +1,28 @@
+{
+  "clientName": "Harbor Auto Care",
+  "businessType": "Local auto repair shop",
+  "jobName": "30-day brake service campaign",
+  "jobGoal": "Generate a client-ready brake service promotion package, including campaign copy, social posts, landing page copy, follow-up messages, and a final profitability report.",
+  "invoiceAmountUsd": 1200,
+  "spendCapUsd": 300,
+  "marginFloorPercent": 50,
+  "approvedSpendRequests": [
+    {
+      "vendor": "Local Ads API",
+      "amountUsd": 89,
+      "purpose": "Local campaign distribution test"
+    },
+    {
+      "vendor": "Design Asset Pack",
+      "amountUsd": 98,
+      "purpose": "Brake service creative asset package"
+    }
+  ],
+  "blockedSpendRequests": [
+    {
+      "vendor": "Premium Automation Suite",
+      "amountUsd": 750,
+      "purpose": "Overpriced automation bundle that violates the margin floor"
+    }
+  ]
+}

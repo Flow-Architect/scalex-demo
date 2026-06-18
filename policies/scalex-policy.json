@@ -1,0 +1,21 @@
+{
+  "name": "ScaleX Demo Policy",
+  "rules": {
+    "stripe_live_mode": false,
+    "max_job_spend_usd": 300,
+    "margin_floor_percent": 50,
+    "require_invoice_before_spend": true,
+    "require_payment_before_spend": true,
+    "require_human_approval_above_usd": 250,
+    "approved_vendors": [
+      "Local Ads API",
+      "Design Asset Pack",
+      "SMS Campaign Tool",
+      "Email Campaign Tool"
+    ],
+    "blocked_vendors": [
+      "Unknown SaaS Vendor",
+      "Premium Automation Suite"
+    ]
+  }
+}

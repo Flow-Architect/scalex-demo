@@ -2,25 +2,24 @@
 
 ## Current priority
 
-Run Codex /goal 1 — Scaffold.
+Run Codex /goal 2 — Backend + SQLite Ledger.
 
 ## Next Codex goal
 
-Create the clean ScaleX hackathon repo scaffold for a sandbox-only demo.
+Build the FastAPI backend and SQLite job ledger for ScaleX.
 
 ## Required outputs for next milestone
 
-- README.md updated.
-- .gitignore created.
-- .env.example created.
-- backend/ skeleton created.
-- frontend/ skeleton created.
-- data/schema.sql created.
-- data/seed.json created.
-- policies/scalex-policy.json created.
-- scripts/setup.sh created.
-- scripts/dev.sh created.
-- scripts/test.sh created.
+- DB initialization from data/schema.sql.
+- SQLite database file at data/scalex.db, ignored by git.
+- FastAPI endpoints:
+  - GET /api/health
+  - POST /api/demo/reset
+  - GET /api/demo/state
+- Demo reset that seeds Harbor Auto Care data.
+- Models/schemas for jobs, events, ledger entries, policy checks, Stripe events, agent outputs, and reports.
+- Unit tests for DB initialization and demo reset/state.
+- scripts/dev.sh verified to start the backend.
 
 ## Do not work on yet
 
