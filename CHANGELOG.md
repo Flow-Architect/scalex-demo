@@ -1,39 +1,147 @@
-# CHANGELOG — ScaleX
+# CHANGELOG - ScaleX
 
-## 2026-06-18
+This file records completed changes in chronological order.
 
-- Completed /goal 2 — Backend + SQLite Ledger.
-- Implemented FastAPI backend endpoints for GET /health, GET /api/health, POST /api/demo/reset, POST /api/demo/seed, and GET /api/demo/state.
-- Implemented SQLite initialization from data/schema.sql and reset support for data/scalex.db.
-- Added repository helpers for jobs, events, ledger entries, policy checks, Stripe events, agent outputs, and reports.
-- Added seed loading from data/seed.json for the fake Harbor Auto Care demo job.
-- Added local policy config loading and summary helpers from policies/scalex-policy.json.
-- Added ledger math helpers for projected profit, projected margin, actual profit, actual margin, approved spend total, blocked spend total, and aggregate ledger totals.
-- Replaced placeholder backend tests with coverage for schema initialization, seed loading, margin calculations, ledger totals, policy persistence, health behavior, and demo state behavior.
-- Updated scripts/setup.sh to install backend dependencies, scripts/test.sh to run backend tests, scripts/dev.sh to start the backend by default, and scripts/reset-demo.sh to call the reset endpoint.
-- Verification performed:
-  - ./scripts/setup.sh passed after allowing package download for backend dependencies.
-  - ./scripts/test.sh passed with 9 tests.
-  - ./scripts/dev.sh started the backend on localhost:8787 after allowing local socket binding.
-  - curl verified GET /health, POST /api/demo/reset, POST /api/demo/seed, and GET /api/demo/state.
-  - data/scalex.db was created locally and remains ignored by git.
-  - grep found no sk_live strings.
-- Suggested commit message: Add SQLite backend foundation
-- Created the ScaleX repo scaffold for the sandbox hackathon demo.
-- Added README.md with product pitch, safety boundary, and local setup placeholders.
-- Added backend FastAPI skeleton, service placeholders, seed package, requirements.txt, and placeholder tests.
-- Added frontend Vite React TypeScript skeleton with Tailwind config and component placeholders.
-- Added SQLite schema, fake Harbor Auto Care seed data, and local policy JSON.
-- Added agent role placeholders, docs placeholders, screenshot directory placeholder, and local helper scripts.
-- Updated STATUS.md and TASKS.md for the next backend ledger goal.
+Use:
+- STATUS.md for current verified state.
+- TASKS.md for the next active handoff.
+- DECISIONS.md for locked decisions.
+- CHANGELOG.md for completed work history.
+
+---
+
+## 2026-06-18 - Goal 0: Roadmap and handoff docs
+
+Commit:
+d0ed7d4 Initialize ScaleX roadmap and Codex handoff docs
+
+Completed:
 - Created initial ScaleX repo memory files.
-- Locked product direction as a sandbox hackathon demo.
+- Added ROADMAP.md.
+- Added AGENTS.md.
+- Added START_HERE.md.
+- Added STATUS.md.
+- Added TASKS.md.
+- Added DECISIONS.md.
+- Added CHANGELOG.md.
+- Added .gitignore.
+- Added .env.example.
+- Locked ScaleX as a sandbox hackathon demo.
 - Locked no-live-money and no-production-data constraints.
-- Prepared repo for Codex /goal-based development.
+- Prepared repo for Codex goal-based development.
 
-## 2026-06-18 — Goal closeout rule
+Verified:
+- Git repo initialized.
+- Branch renamed to main.
+- First clean commit created.
 
+---
+
+## 2026-06-18 - Goal 1: Sandbox scaffold
+
+Commit:
+b12efd5 Initialize ScaleX sandbox scaffold
+
+Completed:
+- Added README.md.
+- Added backend FastAPI scaffold.
+- Added frontend Vite React TypeScript scaffold.
+- Added data/schema.sql.
+- Added fake Harbor Auto Care seed data.
+- Added policies/scalex-policy.json.
+- Added agent role placeholders.
+- Added docs placeholders.
+- Added helper scripts.
+- Updated STATUS.md and TASKS.md.
+
+Verified:
+- Shell scripts passed bash syntax check.
+- data/seed.json parsed successfully.
+- policies/scalex-policy.json parsed successfully.
+- git diff check passed.
+- No live-key patterns were found.
+- SQLite installed on Fedora.
+- data/schema.sql loaded into SQLite memory.
+- Working tree clean after commit.
+
+Not fully verified:
+- Full tests were not run yet.
+- Backend runtime was not fully verified yet.
+- Frontend runtime was not verified yet.
+
+Deferred:
+- Backend persistence moved to Goal 2.
+- Frontend dashboard moved to a later goal.
+- Stripe, GPT-5.5, Hermes, and NemoClaw remained deferred.
+
+---
+
+## 2026-06-18 - Admin: Goal closeout documentation rule
+
+Commit:
+8ff4680 Clarify ScaleX goal closeout docs
+
+Completed:
 - Clarified that STATUS.md is the current-state tracker.
 - Clarified that TASKS.md is the next-action handoff.
 - Clarified that CHANGELOG.md is the chronological history.
-- Decided not to add a separate GOAL_LOG.md unless needed later.
+- Clarified that DECISIONS.md changes only for locked decisions.
+- Decided not to add GOAL_LOG.md unless needed later.
+
+Verified:
+- Working tree clean after commit.
+
+---
+
+## 2026-06-18 - Goal 2: Backend and SQLite Ledger
+
+Commit:
+7bbb130 Add SQLite backend foundation
+
+Completed:
+- Implemented SQLite initialization and reset.
+- Implemented seed loading from data/seed.json.
+- Implemented FastAPI health and demo state endpoints.
+- Added repository helpers for core demo tables.
+- Added service helpers for seed loading and state assembly.
+- Added ledger and profit helper functions.
+- Replaced placeholder backend tests with functional tests.
+- Updated backend setup, test, dev, and reset scripts.
+- Updated STATUS.md and TASKS.md.
+
+Endpoints added or verified:
+- GET /health
+- GET /api/health
+- POST /api/demo/reset
+- POST /api/demo/seed
+- GET /api/demo/state
+
+Verified:
+- ./scripts/setup.sh passed.
+- ./scripts/test.sh passed with 9 tests.
+- ./scripts/dev.sh started FastAPI on 127.0.0.1:8787.
+- GET /health returned OK.
+- POST /api/demo/reset created a fresh SQLite database.
+- POST /api/demo/seed loaded Harbor Auto Care.
+- GET /api/demo/state returned seeded demo state.
+- data/scalex.db was created locally and ignored by Git.
+- No live-key patterns were found.
+- Working tree clean after commit.
+
+Not yet built:
+- Demo runner lifecycle.
+- Full local policy engine behavior.
+- Approved and blocked spend flow.
+- Deterministic agent outputs.
+- Mock Stripe lifecycle.
+- Final profit report.
+- Usable frontend dashboard.
+
+Deferred:
+- Real Stripe test mode waits until local mock flow is stable.
+- GPT-5.5 Auth planning waits until deterministic outputs work.
+- Real Hermes and NemoClaw integrations remain optional.
+- Live money remains out of scope.
+
+Next:
+- Goal 3 - Margin and Policy Engine.
