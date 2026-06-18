@@ -13,3 +13,10 @@
 - Locked product direction as a sandbox hackathon demo.
 - Locked no-live-money and no-production-data constraints.
 - Prepared repo for Codex /goal-based development.
+
+## 2026-06-18 — Goal closeout rule
+
+- Clarified that STATUS.md is the current-state tracker.
+- Clarified that TASKS.md is the next-action handoff.
+- Clarified that CHANGELOG.md is the chronological history.
+- Decided not to add a separate GOAL_LOG.md unless needed later.

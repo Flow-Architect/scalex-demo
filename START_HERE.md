@@ -69,3 +69,17 @@ Before ending a session:
 5. Update DECISIONS.md only if decisions changed.
 6. Run git status.
 7. Suggest a concise commit message.
+
+## Goal closeout rule
+
+Every Codex /goal must end with a clean closeout before starting the next /goal.
+
+Codex must update:
+
+- STATUS.md with current verified state
+- TASKS.md with next action
+- CHANGELOG.md with what changed
+
+Codex should update DECISIONS.md only if a decision changed.
+
+Do not create separate goal-tracking files unless the user explicitly asks. STATUS.md is the current-state tracker.
