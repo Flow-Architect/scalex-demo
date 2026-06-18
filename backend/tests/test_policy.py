@@ -1,9 +1,17 @@
 from contextlib import closing
+from copy import deepcopy
 
 from app.db import get_connection, initialize_database
-from app.repository import create_job, create_policy_check, list_policy_checks
-from app.services.ledger_service import usd_to_cents
-from app.services.policy_service import load_policy_config, policy_summary
+from app.repository import (
+    create_job,
+    create_policy_check,
+    list_events,
+    list_ledger_entries,
+    list_policy_checks,
+)
+from app.services.ledger_service import approved_spend_total, blocked_spend_total, usd_to_cents
+from app.services.payment_service import mark_job_paid
+from app.services.policy_service import apply_spend_request, load_policy_config, policy_summary
 from app.services.seed_service import load_seed_config
 
 
@@ -42,3 +50,180 @@ def test_policy_check_persistence(tmp_path) -> None:
     assert checks[0]["vendor"] == "Premium Automation Suite"
     assert checks[0]["approved"] == 0
     assert checks[0]["requested_amount_cents"] == 75000
+
+
+def test_spend_is_blocked_before_payment_when_required(tmp_path) -> None:
+    db_path = tmp_path / "scalex.db"
+    initialize_database(db_path)
+
+    with closing(get_connection(db_path)) as connection:
+        job = create_job(connection, load_seed_config())
+        result = apply_spend_request(
+            connection,
+            job=job,
+            vendor="Local Ads API",
+            requested_amount_cents=usd_to_cents(89),
+        )
+        events = list_events(connection, job["id"])
+        ledger_entries = list_ledger_entries(connection, job["id"])
+        checks = list_policy_checks(connection, job["id"])
+
+    assert result["decision"]["approved"] is False
+    assert "Payment has not been confirmed" in result["decision"]["reason"]
+    assert result["decision"]["required_action"] == "mark_payment_confirmed"
+    assert result["ledger_entry"] is None
+    assert events[-1]["type"] == "policy_check"
+    assert events[-1]["status"] == "blocked"
+    assert approved_spend_total(ledger_entries) == 0
+    assert blocked_spend_total(checks) == 0
+    assert len(checks) == 1
+
+
+def test_approved_vendor_under_cap_is_approved_after_payment(tmp_path) -> None:
+    db_path = tmp_path / "scalex.db"
+    initialize_database(db_path)
+
+    with closing(get_connection(db_path)) as connection:
+        job = create_job(connection, load_seed_config())
+        mark_job_paid(connection, job)
+        result = apply_spend_request(
+            connection,
+            job=job,
+            vendor="Local Ads API",
+            requested_amount_cents=usd_to_cents(89),
+        )
+        ledger_entries = list_ledger_entries(connection, job["id"])
+        checks = list_policy_checks(connection, job["id"])
+
+    assert result["decision"]["approved"] is True
+    assert result["ledger_entry"] is not None
+    assert approved_spend_total(ledger_entries) == 8900
+    assert len(checks) == 1
+    assert checks[0]["approved"] == 1
+
+
+def test_blocked_vendor_is_blocked_and_does_not_create_spend_entry(tmp_path) -> None:
+    db_path = tmp_path / "scalex.db"
+    initialize_database(db_path)
+
+    with closing(get_connection(db_path)) as connection:
+        job = create_job(connection, load_seed_config())
+        mark_job_paid(connection, job)
+        result = apply_spend_request(
+            connection,
+            job=job,
+            vendor="Premium Automation Suite",
+            requested_amount_cents=usd_to_cents(750),
+            human_approved=True,
+        )
+        ledger_entries = list_ledger_entries(connection, job["id"])
+        checks = list_policy_checks(connection, job["id"])
+
+    assert result["decision"]["approved"] is False
+    assert "blocked by local policy" in result["decision"]["reason"]
+    assert result["ledger_entry"] is None
+    assert approved_spend_total(ledger_entries) == 0
+    assert blocked_spend_total(checks) == 75000
+
+
+def test_spend_over_cap_is_blocked(tmp_path) -> None:
+    db_path = tmp_path / "scalex.db"
+    initialize_database(db_path)
+
+    with closing(get_connection(db_path)) as connection:
+        job = create_job(connection, load_seed_config())
+        mark_job_paid(connection, job)
+        result = apply_spend_request(
+            connection,
+            job=job,
+            vendor="Local Ads API",
+            requested_amount_cents=usd_to_cents(350),
+            human_approved=True,
+        )
+        ledger_entries = list_ledger_entries(connection, job["id"])
+        checks = list_policy_checks(connection, job["id"])
+
+    assert result["decision"]["approved"] is False
+    assert "spend cap" in result["decision"]["reason"]
+    assert approved_spend_total(ledger_entries) == 0
+    assert blocked_spend_total(checks) == 35000
+
+
+def test_human_approval_threshold_block_counts_as_blocked_spend(tmp_path) -> None:
+    db_path = tmp_path / "scalex.db"
+    initialize_database(db_path)
+
+    with closing(get_connection(db_path)) as connection:
+        job = create_job(connection, load_seed_config())
+        mark_job_paid(connection, job)
+        result = apply_spend_request(
+            connection,
+            job=job,
+            vendor="Local Ads API",
+            requested_amount_cents=usd_to_cents(275),
+        )
+        ledger_entries = list_ledger_entries(connection, job["id"])
+        checks = list_policy_checks(connection, job["id"])
+
+    assert result["decision"]["approved"] is False
+    assert "human approval threshold" in result["decision"]["reason"]
+    assert approved_spend_total(ledger_entries) == 0
+    assert blocked_spend_total(checks) == 27500
+
+
+def test_margin_floor_violation_is_blocked(tmp_path) -> None:
+    db_path = tmp_path / "scalex.db"
+    initialize_database(db_path)
+    seed = deepcopy(load_seed_config())
+    seed["spendCapUsd"] = 1000
+    policy_config = deepcopy(load_policy_config())
+    policy_config["rules"]["max_job_spend_usd"] = 1000
+    policy_config["rules"]["require_human_approval_above_usd"] = 1000
+
+    with closing(get_connection(db_path)) as connection:
+        job = create_job(connection, seed)
+        mark_job_paid(connection, job)
+        result = apply_spend_request(
+            connection,
+            job=job,
+            vendor="Local Ads API",
+            requested_amount_cents=usd_to_cents(650),
+            policy_config=policy_config,
+        )
+        ledger_entries = list_ledger_entries(connection, job["id"])
+        checks = list_policy_checks(connection, job["id"])
+
+    assert result["decision"]["approved"] is False
+    assert result["decision"]["margin_after_spend_percent"] == 45.8
+    assert "below the 50% floor" in result["decision"]["reason"]
+    assert approved_spend_total(ledger_entries) == 0
+    assert blocked_spend_total(checks) == 65000
+
+
+def test_policy_checks_persist_for_approved_and_blocked_decisions(tmp_path) -> None:
+    db_path = tmp_path / "scalex.db"
+    initialize_database(db_path)
+
+    with closing(get_connection(db_path)) as connection:
+        job = create_job(connection, load_seed_config())
+        mark_job_paid(connection, job)
+        apply_spend_request(
+            connection,
+            job=job,
+            vendor="Local Ads API",
+            requested_amount_cents=usd_to_cents(89),
+        )
+        apply_spend_request(
+            connection,
+            job=job,
+            vendor="Premium Automation Suite",
+            requested_amount_cents=usd_to_cents(750),
+            human_approved=True,
+        )
+        checks = list_policy_checks(connection, job["id"])
+        ledger_entries = list_ledger_entries(connection, job["id"])
+
+    assert [check["approved"] for check in checks] == [1, 0]
+    assert [check["vendor"] for check in checks] == ["Local Ads API", "Premium Automation Suite"]
+    assert approved_spend_total(ledger_entries) == 8900
+    assert blocked_spend_total(checks) == 75000

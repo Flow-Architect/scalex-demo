@@ -145,3 +145,121 @@ Deferred:
 
 Next:
 - Goal 3 - Margin and Policy Engine.
+
+---
+
+## 2026-06-18 - Goal 3: Margin and Policy Engine
+
+Completed:
+- Added local ledger helpers for margin after requested spend, remaining spend cap, and payment/revenue existence.
+- Implemented local policy spend evaluation from policies/scalex-policy.json.
+- Implemented policy-gated spend persistence:
+  - approved spend creates policy_check, event, and spend ledger entry
+  - blocked spend creates policy_check and event only
+- Added POST /api/demo/mark-paid as a local sandbox payment marker.
+- POST /api/demo/mark-paid records the seeded $1,200 invoice as local revenue without calling Stripe.
+- POST /api/demo/mark-paid is idempotent for the revenue ledger entry.
+- Added POST /api/demo/spend-check for local policy-gated vendor spend checks.
+- Added tests for payment-before-spend, mark-paid idempotence, approved vendors, blocked vendors, spend cap, margin floor, ledger writes, policy check persistence, and totals.
+- Updated STATUS.md and TASKS.md.
+
+Endpoints added or verified:
+- POST /api/demo/mark-paid
+- POST /api/demo/spend-check
+
+Verified:
+- ./scripts/test.sh passed with 20 tests.
+- ./scripts/dev.sh started FastAPI on 127.0.0.1:8787 with approval for local socket binding.
+- GET /health returned OK.
+- POST /api/demo/reset worked.
+- POST /api/demo/seed loaded Harbor Auto Care.
+- POST /api/demo/spend-check before mark-paid blocked spend due to payment requirement.
+- POST /api/demo/mark-paid recorded one $1,200 local sandbox revenue ledger entry.
+- Calling POST /api/demo/mark-paid twice did not duplicate revenue.
+- POST /api/demo/spend-check approved $89 Local Ads API after payment was marked.
+- POST /api/demo/spend-check approved $98 Design Asset Pack after payment was marked.
+- POST /api/demo/spend-check blocked $750 Premium Automation Suite.
+- GET /api/demo/state showed one revenue entry, two approved spend entries, three policy checks, $187 approved spend, $1,013 gross profit, 84.4% actual margin, and $750 blocked spend.
+- data/scalex.db remained ignored by Git.
+
+Not yet built:
+- One-click demo runner.
+- Deterministic agent outputs.
+- Final profit report generation.
+- Full Stripe mock/test lifecycle.
+- Frontend dashboard.
+
+Deferred:
+- Real Stripe test mode remains deferred.
+- GPT-5.5 Auth planning remains deferred.
+- Real Hermes and NemoClaw integrations remain out of scope for current MVP work.
+
+Suggested commit message:
+Implement local policy-gated spend
+
+Next:
+- Goal 4 - One-Click Demo Runner.
+
+---
+
+## 2026-06-18 - Goal 3 follow-up: spend-check amount_cents API contract
+
+Completed:
+- Fixed POST /api/demo/spend-check to accept amount_cents as the primary request amount field.
+- Added requested_amount_cents as a backwards-compatible cents alias.
+- Kept amount_usd and amount as legacy compatibility fields while making amount_cents the documented contract.
+- Changed spend-check routing so amount_cents is passed directly into policy evaluation and ledger writes without dollar conversion.
+- Added clear 400 validation for missing or zero amount_cents.
+- Updated endpoint tests to construct requests from the public amount_cents payload.
+- Updated STATUS.md and TASKS.md.
+
+Verified:
+- ./scripts/test.sh passed with 22 tests.
+- Manual curl using {"vendor":"Local Ads API","amount_cents":8900} was blocked before mark-paid due to payment requirement.
+- POST /api/demo/mark-paid recorded one $1,200 local sandbox revenue ledger entry and remained idempotent.
+- Manual curl using {"vendor":"Local Ads API","amount_cents":8900} approved after mark-paid.
+- Manual curl using {"vendor":"Design Asset Pack","amount_cents":9800} approved after mark-paid.
+- Manual curl using {"vendor":"Premium Automation Suite","amount_cents":75000} blocked after mark-paid.
+- GET /api/demo/state showed revenue_cents 120000, approved_spend_cents 18700, gross_profit_cents 101300, actual_margin_percent 84.4, blocked_spend_cents 75000, ledger entries revenue/spend/spend, and policy checks approved/approved/blocked.
+- Missing or zero amount_cents returned "Spend check amount_cents must be greater than zero."
+
+Suggested commit message:
+Fix spend-check amount_cents contract
+
+Next:
+- Goal 4 - One-Click Demo Runner.
+
+---
+
+## 2026-06-18 - Goal 3 cleanup: blocked spend accounting
+
+Completed:
+- Fixed blocked_spend_cents so prerequisite/payment-gate blocks do not inflate final blocked spend.
+- Kept pre-payment Local Ads API blocks auditable with policy_check and event records.
+- Kept blocked pre-payment spend out of ledger spend entries and out of blocked_spend_cents.
+- Preserved counting for post-payment blocked vendor, cap, human approval threshold, and margin-floor blocks.
+- Added regression coverage for the full manual sequence:
+  - pre-payment $89 Local Ads API block
+  - mark-paid
+  - post-payment $89 Local Ads API approval
+  - post-payment $98 Design Asset Pack approval
+  - post-payment $750 Premium Automation Suite block
+
+Verified:
+- ./scripts/test.sh passed with 24 tests.
+- Manual curl flow passed against http://127.0.0.1:8787:
+  - GET /health returned HTTP 200.
+  - POST /api/demo/reset returned HTTP 200.
+  - POST /api/demo/seed returned HTTP 200.
+  - Pre-payment POST /api/demo/spend-check for {"vendor":"Local Ads API","amount_cents":8900} returned spend_blocked, persisted one policy_check and event, created no ledger entries, and left blocked_spend_cents at 0.
+  - POST /api/demo/mark-paid returned HTTP 200.
+  - Post-payment POST /api/demo/spend-check for {"vendor":"Local Ads API","amount_cents":8900} returned spend_approved.
+  - Post-payment POST /api/demo/spend-check for {"vendor":"Design Asset Pack","amount_cents":9800} returned spend_approved.
+  - Post-payment POST /api/demo/spend-check for {"vendor":"Premium Automation Suite","amount_cents":75000} returned spend_blocked.
+  - GET /api/demo/state showed revenue_cents 120000, approved_spend_cents 18700, blocked_spend_cents 75000, gross_profit_cents 101300, actual_margin_percent 84.4, ledger entries revenue/spend/spend, and policy checks blocked/approved/approved/blocked.
+
+Suggested commit message:
+Fix blocked spend accounting for pre-payment blocks
+
+Next:
+- Goal 4 - One-Click Demo Runner.

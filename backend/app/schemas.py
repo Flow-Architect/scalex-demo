@@ -15,6 +15,16 @@ class HealthResponse(BaseModel):
 class DemoActionResponse(BaseModel):
     status: str
     state: dict[str, Any]
+    decision: dict[str, Any] | None = None
+
+
+class SpendCheckRequest(BaseModel):
+    vendor: str
+    amount_cents: int | None = None
+    requested_amount_cents: int | None = None
+    amount_usd: float | None = None
+    amount: float | None = None
+    human_approved: bool = False
 
 
 class DemoStateResponse(BaseModel):

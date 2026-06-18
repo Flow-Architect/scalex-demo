@@ -120,10 +120,10 @@ def get_event(connection: sqlite3.Connection, event_id: str) -> dict:
 
 def list_events(connection: sqlite3.Connection, job_id: str | None = None) -> list[dict]:
     if job_id is None:
-        rows = connection.execute("SELECT * FROM events ORDER BY created_at, id").fetchall()
+        rows = connection.execute("SELECT * FROM events ORDER BY created_at, rowid").fetchall()
     else:
         rows = connection.execute(
-            "SELECT * FROM events WHERE job_id = ? ORDER BY created_at, id",
+            "SELECT * FROM events WHERE job_id = ? ORDER BY created_at, rowid",
             (job_id,),
         ).fetchall()
     return rows_to_dicts(rows)
@@ -161,10 +161,10 @@ def get_ledger_entry(connection: sqlite3.Connection, entry_id: str) -> dict:
 
 def list_ledger_entries(connection: sqlite3.Connection, job_id: str | None = None) -> list[dict]:
     if job_id is None:
-        rows = connection.execute("SELECT * FROM ledger_entries ORDER BY created_at, id").fetchall()
+        rows = connection.execute("SELECT * FROM ledger_entries ORDER BY created_at, rowid").fetchall()
     else:
         rows = connection.execute(
-            "SELECT * FROM ledger_entries WHERE job_id = ? ORDER BY created_at, id",
+            "SELECT * FROM ledger_entries WHERE job_id = ? ORDER BY created_at, rowid",
             (job_id,),
         ).fetchall()
     return rows_to_dicts(rows)
@@ -219,10 +219,10 @@ def get_policy_check(connection: sqlite3.Connection, check_id: str) -> dict:
 
 def list_policy_checks(connection: sqlite3.Connection, job_id: str | None = None) -> list[dict]:
     if job_id is None:
-        rows = connection.execute("SELECT * FROM policy_checks ORDER BY created_at, id").fetchall()
+        rows = connection.execute("SELECT * FROM policy_checks ORDER BY created_at, rowid").fetchall()
     else:
         rows = connection.execute(
-            "SELECT * FROM policy_checks WHERE job_id = ? ORDER BY created_at, id",
+            "SELECT * FROM policy_checks WHERE job_id = ? ORDER BY created_at, rowid",
             (job_id,),
         ).fetchall()
     return rows_to_dicts(rows)
@@ -263,10 +263,10 @@ def get_stripe_event(connection: sqlite3.Connection, event_id: str) -> dict:
 
 def list_stripe_events(connection: sqlite3.Connection, job_id: str | None = None) -> list[dict]:
     if job_id is None:
-        rows = connection.execute("SELECT * FROM stripe_events ORDER BY created_at, id").fetchall()
+        rows = connection.execute("SELECT * FROM stripe_events ORDER BY created_at, rowid").fetchall()
     else:
         rows = connection.execute(
-            "SELECT * FROM stripe_events WHERE job_id = ? ORDER BY created_at, id",
+            "SELECT * FROM stripe_events WHERE job_id = ? ORDER BY created_at, rowid",
             (job_id,),
         ).fetchall()
     return rows_to_dicts(rows)
@@ -306,10 +306,10 @@ def get_agent_output(connection: sqlite3.Connection, output_id: str) -> dict:
 
 def list_agent_outputs(connection: sqlite3.Connection, job_id: str | None = None) -> list[dict]:
     if job_id is None:
-        rows = connection.execute("SELECT * FROM agent_outputs ORDER BY created_at, id").fetchall()
+        rows = connection.execute("SELECT * FROM agent_outputs ORDER BY created_at, rowid").fetchall()
     else:
         rows = connection.execute(
-            "SELECT * FROM agent_outputs WHERE job_id = ? ORDER BY created_at, id",
+            "SELECT * FROM agent_outputs WHERE job_id = ? ORDER BY created_at, rowid",
             (job_id,),
         ).fetchall()
     return rows_to_dicts(rows)
@@ -364,10 +364,10 @@ def get_report(connection: sqlite3.Connection, report_id: str) -> dict:
 
 def list_reports(connection: sqlite3.Connection, job_id: str | None = None) -> list[dict]:
     if job_id is None:
-        rows = connection.execute("SELECT * FROM reports ORDER BY created_at, id").fetchall()
+        rows = connection.execute("SELECT * FROM reports ORDER BY created_at, rowid").fetchall()
     else:
         rows = connection.execute(
-            "SELECT * FROM reports WHERE job_id = ? ORDER BY created_at, id",
+            "SELECT * FROM reports WHERE job_id = ? ORDER BY created_at, rowid",
             (job_id,),
         ).fetchall()
     return rows_to_dicts(rows)
