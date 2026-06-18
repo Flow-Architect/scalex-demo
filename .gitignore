@@ -1,0 +1,16 @@
+.env
+.env.local
+*.log
+__pycache__/
+.pytest_cache/
+.venv/
+venv/
+node_modules/
+dist/
+.vite/
+.next/
+data/*.db
+data/*.db-*
+recordings/
+demo-assets/recordings/
+.DS_Store
