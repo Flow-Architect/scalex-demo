@@ -45,7 +45,7 @@ def run_demo() -> dict[str, Any]:
             connection,
             job_id=job["id"],
             type="job_complete",
-            title="Harbor Auto Care campaign package completed",
+            title="Harbor Fleet Services campaign package completed",
             detail=(
                 "Completed the compressed local demo lifecycle from intake through final profit report. "
                 "All payment and Stripe records are local sandbox/mock records."
@@ -157,7 +157,7 @@ def _create_final_report(connection, job: dict[str, Any]) -> dict[str, Any]:
 
 
 def _final_report_markdown(totals: dict[str, Any]) -> str:
-    return f"""# Harbor Auto Care Final Profit Report
+    return f"""# Harbor Fleet Services Final Profit Report
 
 Revenue: ${totals['revenue_cents'] / 100:,.0f}
 

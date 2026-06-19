@@ -4,9 +4,10 @@
 
 - Product name: ScaleX.
 - Product type: hackathon demo.
-- Target user: service businesses.
-- Demo client: Harbor Auto Care.
-- Demo job: 30-day brake service campaign.
+- Target user: service teams running revenue-backed service workflows.
+- Demo client: Harbor Fleet Services.
+- Demo business type: regional fleet maintenance provider.
+- Demo job: 30-day fleet brake inspection campaign.
 - Demo invoice amount: $1,200.
 - Demo spend cap: $300.
 - Demo margin floor: 50%.

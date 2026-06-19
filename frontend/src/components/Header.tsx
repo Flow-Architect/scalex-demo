@@ -1,14 +1,42 @@
-export function Header() {
+import { Activity, ShieldCheck } from "lucide-react";
+
+import type { HealthResponse } from "../types";
+
+interface HeaderProps {
+  health: HealthResponse | null;
+  loading: boolean;
+}
+
+export function Header({ health, loading }: HeaderProps) {
+  const isHealthy = health?.status === "ok";
+
   return (
     <header className="border-b border-slate-200 bg-white">
-      <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
+      <div className="mx-auto flex max-w-7xl flex-col gap-4 px-5 py-4 sm:flex-row sm:items-center sm:justify-between lg:px-8">
         <div>
-          <p className="text-sm font-semibold text-emerald-700">ScaleX</p>
-          <p className="text-xs text-slate-500">Sandbox hackathon demo</p>
+          <div className="flex items-center gap-2">
+            <ShieldCheck className="h-5 w-5 text-emerald-700" aria-hidden="true" />
+            <p className="text-sm font-semibold uppercase tracking-wide text-emerald-700">
+              ScaleX
+            </p>
+          </div>
+          <p className="mt-1 text-sm text-slate-600">
+            Profit-aware agent operations for service workflows.
+          </p>
         </div>
-        <span className="text-xs font-medium uppercase tracking-wide text-slate-500">
-          Local only
-        </span>
+        <div className="flex flex-wrap items-center gap-3 text-sm">
+          <span className="inline-flex items-center gap-2 rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-slate-700">
+            <Activity className="h-4 w-4 text-sky-700" aria-hidden="true" />
+            {loading
+              ? "Checking backend"
+              : isHealthy
+                ? "Backend online"
+                : "Backend offline"}
+          </span>
+          <span className="inline-flex rounded-md border border-emerald-200 bg-emerald-50 px-3 py-2 font-medium text-emerald-800">
+            Local sandbox only
+          </span>
+        </div>
       </div>
     </header>
   );

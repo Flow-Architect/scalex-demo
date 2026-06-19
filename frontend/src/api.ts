@@ -1,1 +1,72 @@
-export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8787";
+import type { DemoActionResponse, DemoState, HealthResponse } from "./types";
+
+export const API_BASE_URL =
+  import.meta.env.VITE_API_BASE_URL ?? "http://127.0.0.1:8787";
+
+export class ApiError extends Error {
+  status: number;
+
+  constructor(message: string, status: number) {
+    super(message);
+    this.name = "ApiError";
+    this.status = status;
+  }
+}
+
+export function getHealth(): Promise<HealthResponse> {
+  return request<HealthResponse>("/api/health");
+}
+
+export function getDemoState(): Promise<DemoState> {
+  return request<DemoState>("/api/demo/state");
+}
+
+export function runDemo(): Promise<DemoActionResponse> {
+  return request<DemoActionResponse>("/api/demo/run", { method: "POST" });
+}
+
+export function resetDemo(): Promise<DemoActionResponse> {
+  return request<DemoActionResponse>("/api/demo/reset", { method: "POST" });
+}
+
+async function request<T>(path: string, init?: RequestInit): Promise<T> {
+  const response = await fetch(`${API_BASE_URL}${path}`, {
+    ...init,
+    headers: {
+      "Content-Type": "application/json",
+      ...init?.headers,
+    },
+  });
+
+  const payload = await readJson(response);
+  if (!response.ok) {
+    throw new ApiError(errorMessage(payload, response.statusText), response.status);
+  }
+
+  return payload as T;
+}
+
+async function readJson(response: Response): Promise<unknown> {
+  const text = await response.text();
+  if (!text) {
+    return null;
+  }
+
+  try {
+    return JSON.parse(text);
+  } catch {
+    return text;
+  }
+}
+
+function errorMessage(payload: unknown, fallback: string): string {
+  if (payload && typeof payload === "object" && "detail" in payload) {
+    return String((payload as { detail: unknown }).detail);
+  }
+
+  if (typeof payload === "string") {
+    return payload;
+  }
+
+  return fallback || "Request failed.";
+}

@@ -2,7 +2,7 @@
 
 Target flow:
 
-1. Intake the Harbor Auto Care brake service campaign.
+1. Intake the Harbor Fleet Services fleet brake inspection campaign.
 2. Show the $1,200 invoice and $300 spend cap.
 3. Simulate a Stripe mock/test payment event.
 4. Approve $89 and $98 spend requests.

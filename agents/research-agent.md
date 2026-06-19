@@ -1,3 +1,3 @@
 # Research Agent
 
-Sandbox role: prepare competitor positioning, local market angle, and promotion hook notes for the Harbor Auto Care demo job.
+Sandbox role: prepare competitor positioning, regional fleet service angle, and promotion hook notes for the Harbor Fleet Services demo job.

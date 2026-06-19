@@ -19,7 +19,7 @@ def mark_job_paid(connection: sqlite3.Connection, job: dict[str, Any]) -> dict[s
             connection,
             job_id=job["id"],
             entry_type="revenue",
-            label="Harbor Auto Care sandbox payment",
+            label="Harbor Fleet Services sandbox payment",
             amount_cents=int(job["invoice_amount_cents"]),
             source="local_sandbox_payment_marker",
             entry_id=SANDBOX_REVENUE_ENTRY_ID,
@@ -32,7 +32,7 @@ def mark_job_paid(connection: sqlite3.Connection, job: dict[str, Any]) -> dict[s
         type="payment_confirmed",
         title="Local sandbox payment confirmed",
         detail=(
-            "Recorded local sandbox revenue for the seeded $1,200 Harbor Auto Care invoice. "
+            "Recorded local sandbox revenue for the seeded $1,200 Harbor Fleet Services invoice. "
             "No Stripe call or real payment activity was performed."
         ),
         status="paid",

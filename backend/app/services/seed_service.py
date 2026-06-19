@@ -19,7 +19,7 @@ def seed_demo_database(connection: sqlite3.Connection, seed: dict[str, Any] | No
         connection,
         job_id=job["id"],
         type="job_intake",
-        title="Harbor Auto Care job seeded",
+        title="Harbor Fleet Services job seeded",
         detail=(
             f"{seed_config['jobName']} loaded with ${seed_config['invoiceAmountUsd']} "
             f"invoice, ${seed_config['spendCapUsd']} spend cap, and "

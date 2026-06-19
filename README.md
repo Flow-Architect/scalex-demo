@@ -1,17 +1,20 @@
 # ScaleX
 
-ScaleX is a sandbox hackathon demo for profit-aware agent operations for service businesses.
+ScaleX is a sandbox hackathon demo for profit-aware agent operations for service workflows.
 
-Submission title: **ScaleX: Profit-Aware Agent Operations for Service Businesses**
+Submission title: **ScaleX: Profit-Aware Agent Operations for Service Workflows**
 
-The demo thesis is simple: a service business should be able to give an AI operator a paid job, a budget, and a margin floor, then see the operator invoice, control spend, coordinate work, and report profit without risking live money or production systems.
+ScaleX is a profit-aware agent operations framework for service workflows. It lets agents confirm revenue, spend only inside policy, coordinate work, and produce an auditable profit report.
+
+The demo thesis is simple: a service team should be able to give an AI operator a paid job, a budget, and a margin floor, then see the operator invoice, control spend, coordinate work, and report profit without risking live money or production systems.
 
 ## Demo Scope
 
 The locked demo scenario uses fake data only:
 
-- Client: Harbor Auto Care
-- Job: 30-day brake service campaign
+- Client: Harbor Fleet Services
+- Business type: Regional fleet maintenance provider
+- Job: 30-day fleet brake inspection campaign
 - Invoice: $1,200
 - Spend cap: $300
 - Margin floor: 50%
@@ -31,29 +34,57 @@ ScaleX is not production software. It must stay local and sandbox-safe.
 - Policy enforcement starts as a local policy engine.
 - Hermes is represented by a local Hermes-style orchestration adapter unless a safe test integration is later implemented and documented.
 
-## Current Backend State
+## Current Demo State
 
-This repository contains the project structure, configuration placeholders, demo data, policy file, frontend skeleton, and helper scripts.
+This repository contains the local SQLite ledger, FastAPI demo runner, mock/test-style Stripe records, local policy engine, deterministic agent outputs, and a Vite React dashboard.
 
-The backend currently includes the local SQLite ledger, seed/reset/state endpoints, local policy-gated spend checks, local sandbox payment marker, one-click demo runner, mock/test-style Stripe records, deterministic agent outputs, and final profit report generation. The usable frontend dashboard is planned next.
+The dashboard calls the local backend to run the complete compressed lifecycle and display job intake, margin plan, local mock payment, policy decisions, agent work, ledger entries, and the final profit report.
 
-## Local Setup Placeholder
+## Local Browser Demo
 
-Run the local backend flow with:
+Install local dependencies:
 
 ```bash
 cp .env.example .env
 ./scripts/setup.sh
+```
+
+Start the backend and frontend together:
+
+```bash
 ./scripts/dev.sh
 ```
 
-Then call `POST /api/demo/run` on the local backend to rebuild the complete demo lifecycle.
+Open:
+
+```text
+http://127.0.0.1:5174
+```
+
+Click `Run Demo Job` to call `POST /api/demo/run` and rebuild the local lifecycle.
+
+Useful local endpoints:
+
+```text
+GET  http://127.0.0.1:8787/api/health
+GET  http://127.0.0.1:8787/api/demo/state
+POST http://127.0.0.1:8787/api/demo/run
+POST http://127.0.0.1:8787/api/demo/reset
+```
+
+To run only the backend:
+
+```bash
+SCALEX_BACKEND_ONLY=true ./scripts/dev.sh
+```
 
 Run checks with:
 
 ```bash
 ./scripts/test.sh
 ```
+
+The test script runs backend pytest and the frontend production build.
 
 Reset the demo state with:
 

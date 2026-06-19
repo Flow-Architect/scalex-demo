@@ -9,3 +9,10 @@ else
   echo "Backend test environment is missing. Run ./scripts/setup.sh first." >&2
   exit 1
 fi
+
+if [ -d "$ROOT_DIR/frontend/node_modules" ]; then
+  (cd "$ROOT_DIR/frontend" && npm run build)
+else
+  echo "Frontend dependencies are missing. Run ./scripts/setup.sh first." >&2
+  exit 1
+fi

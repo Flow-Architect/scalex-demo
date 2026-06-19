@@ -4,7 +4,7 @@ You are working in:
 
 /home/ascabrya/dev/scalex-demo
 
-ScaleX is a hackathon demo for profit-aware agent operations for service businesses.
+ScaleX is a hackathon demo for profit-aware agent operations for service workflows.
 
 Do not assume previous chat context. The repo files are the source of truth.
 

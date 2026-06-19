@@ -5,7 +5,7 @@ These rules apply to all Codex work in this repo.
 ## Project identity
 
 Product: ScaleX
-Submission title: ScaleX: Profit-Aware Agent Operations for Service Businesses
+Submission title: ScaleX: Profit-Aware Agent Operations for Service Workflows
 Repo path: /home/ascabrya/dev/scalex-demo
 
 ScaleX is a sandbox hackathon demo. It is not production software.
@@ -57,8 +57,8 @@ unless that integration is actually wired, tested, and documented.
 
 - Working local demo beats architectural perfection.
 - Keep scope small.
-- One client: Harbor Auto Care.
-- One job: 30-day brake service campaign.
+- One client: Harbor Fleet Services.
+- One job: 30-day fleet brake inspection campaign.
 - One invoice: $1,200.
 - Approved spend: $89 and $98.
 - Blocked spend: $750.

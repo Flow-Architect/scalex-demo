@@ -1,8 +1,8 @@
 # ScaleX Codex Roadmap
 
-> **Project path:** `/home/ascabrya/dev/scalex-demo/`  
-> **Purpose:** Build a clean, functional hackathon demo in a sandbox.  
-> **Product:** **ScaleX — Profit-Aware Agent Operations for Service Businesses**  
+> **Project path:** `/home/ascabrya/dev/scalex-demo/`
+> **Purpose:** Build a clean, functional hackathon demo in a sandbox.
+> **Product:** **ScaleX — Profit-Aware Agent Operations for Service Workflows**
 > **Core demo loop:** job intake → margin plan → Stripe test invoice → policy-gated spend → agent work → profit report.
 
 ---
@@ -16,7 +16,7 @@ Codex must follow these rules for the entire repo.
 - **Do not use live Stripe keys.** Only `sk_test_...` keys are allowed.
 - **Do not touch Prometheus, xScaleOS, production Hermes, Windows Hermes, homelab OpenClaw, Recall memory, or real client files.**
 - **Do not commit secrets.** `.env`, `.env.local`, SQLite `.db` files, recordings, and logs must stay ignored.
-- **Use fake demo data only.** The demo client is `Harbor Auto Care`.
+- **Use fake demo data only.** The demo client is `Harbor Fleet Services`.
 - **No autonomous real-world payments.** All money movement is Stripe test mode or simulated ledger events.
 - **Do not claim real NemoClaw/Hermes integration unless it is actually wired.** If local-only, label it clearly as `local policy engine` / `Hermes-style orchestration adapter`.
 
@@ -46,11 +46,11 @@ Codex must follow these rules for the entire repo.
 
 ### Submission Title
 
-**ScaleX: Profit-Aware Agent Operations for Service Businesses**
+**ScaleX: Profit-Aware Agent Operations for Service Workflows**
 
 ### One-Sentence Pitch
 
-> ScaleX lets a service business give an AI agent a job, a budget, and a margin target — then the agent invoices the client, controls spend, delegates work, and reports profit.
+> ScaleX is a profit-aware agent operations framework for service workflows. It lets agents confirm revenue, spend only inside policy, coordinate work, and produce an auditable profit report.
 
 ### Demo Thesis
 
@@ -185,7 +185,7 @@ Create `.env.example` at repo root.
 # ScaleX Hackathon Demo
 APP_ENV=development
 BACKEND_PORT=8787
-FRONTEND_PORT=5173
+FRONTEND_PORT=5174
 DATABASE_PATH=./data/scalex.db
 
 # Reasoning brain
@@ -342,10 +342,10 @@ Create `data/seed.json`.
 
 ```json
 {
-  "clientName": "Harbor Auto Care",
-  "businessType": "Local auto repair shop",
-  "jobName": "30-day brake service campaign",
-  "jobGoal": "Generate a client-ready brake service promotion package, including campaign copy, social posts, landing page copy, follow-up messages, and a final profitability report.",
+  "clientName": "Harbor Fleet Services",
+  "businessType": "Regional fleet maintenance provider",
+  "jobName": "30-day fleet brake inspection campaign",
+  "jobGoal": "Generate a client-ready fleet brake inspection package, including campaign copy, operations handoff notes, landing page copy, follow-up messages, and a final profitability report.",
   "invoiceAmountUsd": 1200,
   "spendCapUsd": 300,
   "marginFloorPercent": 50,
@@ -386,7 +386,7 @@ Recommendation: Renew campaign for another 30 days
 
 ## 7. API Contract
 
-Backend base URL: `http://localhost:8787`
+Backend base URL: `http://127.0.0.1:8787`
 
 ### Required Endpoints
 
@@ -409,7 +409,7 @@ Sequence:
 
 ```text
 1. Reset demo DB state
-2. Create Harbor Auto Care job
+2. Create Harbor Fleet Services job
 3. Generate operating plan
 4. Create Stripe test customer / invoice / payment event or mock equivalents
 5. Record $1,200 revenue ledger entry
@@ -655,7 +655,7 @@ The local adapter should produce visible skill-call events like:
 {
   "skill": "stripe.create_invoice",
   "status": "success",
-  "input": { "amountUsd": 1200, "client": "Harbor Auto Care" },
+  "input": { "amountUsd": 1200, "client": "Harbor Fleet Services" },
   "output": { "invoiceId": "in_test_scalex_001" }
 }
 ```
@@ -891,7 +891,7 @@ Tasks:
 
 Done when:
 
-- User can open `http://localhost:5173`.
+- User can open `http://127.0.0.1:5174`.
 - Click `Run Demo Job`.
 - See full flow and final report.
 
@@ -1165,7 +1165,7 @@ Deliverables:
 - Reset Demo button
 
 Acceptance criteria:
-- frontend starts on localhost:5173.
+- frontend starts on `http://127.0.0.1:5174`.
 - Click Run Demo Job and see the full lifecycle.
 - Final report is visible without scrolling too much.
 - UI labels Stripe as test/mock mode clearly.
@@ -1332,18 +1332,18 @@ Target length: 1:30–2:30.
 
 ### 0:00–0:10
 
-> Service businesses do not need an AI CEO. They need an AI operator that can turn jobs into revenue without losing margin.
+> Service teams do not need an AI CEO. They need an AI operator that can turn workflows into revenue without losing margin.
 
 ### 0:10–0:20
 
-> This is ScaleX: profit-aware agent operations for service businesses.
+> This is ScaleX: profit-aware agent operations for service workflows.
 
 ### 0:20–0:35
 
 Show prompt/job:
 
 ```text
-Onboard Harbor Auto Care for a $1,200 brake campaign.
+Onboard Harbor Fleet Services for a $1,200 fleet brake inspection campaign.
 Spend up to $300 only if margin stays above 50%.
 ```
 

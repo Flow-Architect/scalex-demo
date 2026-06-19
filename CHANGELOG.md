@@ -302,3 +302,133 @@ Add one-click demo runner
 
 Next:
 - Goal 5 - Frontend Demo Dashboard.
+
+---
+
+## 2026-06-19 - Goal 5: Frontend Demo Dashboard
+
+Completed:
+- Replaced the frontend scaffold with a working Vite React TypeScript dashboard.
+- Added typed frontend API calls for:
+  - GET /api/health
+  - GET /api/demo/state
+  - POST /api/demo/run
+  - POST /api/demo/reset
+- Added TypeScript models for the backend demo state, including jobs, events, ledger totals, policy checks, mock Stripe records, agent outputs, and reports.
+- Added dashboard sections for:
+  - product header and backend health
+  - Run Demo Job, Reset Demo, and Refresh controls
+  - Harbor Auto Care job summary
+  - revenue, approved spend, blocked unsafe spend, gross profit, and margin cards
+  - economic loop timeline
+  - local mock/test-style Stripe records
+  - local SQLite ledger entries
+  - local policy guardrails and spend checks
+  - deterministic Finance, Marketing, Research, and Ops outputs
+  - final profit report and exact cents values
+- Added frontend formatting helpers and Vite env typings.
+- Added frontend/package-lock.json.
+- Added localhost CORS support for Vite origins in the FastAPI app.
+- Updated scripts/setup.sh to install frontend dependencies.
+- Updated scripts/dev.sh to start backend and frontend together by default.
+- Updated scripts/test.sh to run backend pytest and frontend npm build.
+- Updated README.md with browser demo instructions.
+- Updated STATUS.md and TASKS.md.
+
+Verified:
+- ./scripts/setup.sh installed backend requirements and frontend npm dependencies.
+- ./scripts/test.sh passed with 26 backend tests and a successful frontend production build.
+- ./scripts/dev.sh started backend on http://127.0.0.1:8787 and frontend on http://127.0.0.1:5174.
+- GET /api/health returned HTTP 200.
+- POST /api/demo/run returned HTTP 200 and the completed lifecycle state.
+- Vite frontend returned HTTP 200.
+- CORS preflight from Origin http://127.0.0.1:5174 to POST /api/demo/run returned HTTP 200 and allowed the frontend origin.
+- Final demo state showed revenue_cents 120000, approved_spend_cents 18700, blocked_spend_cents 75000, gross_profit_cents 101300, actual_margin_percent 84.4, and policy_violations 0.
+- Dashboard state includes Finance, Marketing, Research, and Ops agent outputs.
+- Dashboard state includes local_mock_test Stripe records for customer, invoice, payment_link, and payment.
+- data/scalex.db, frontend/node_modules, frontend/dist, backend/.venv, and backend/.pytest_cache remain ignored by git.
+
+Noted:
+- npm install reported one low-severity advisory in the frontend dependency tree. Audit remediation is deferred unless it affects demo safety or build reliability.
+
+Suggested commit message:
+Build ScaleX demo dashboard
+
+Next:
+- Goal 8 - Hermes + Policy Presentation Polish, or Goal 9 - Final Polish + Submission Prep if the current UI is sufficient for recording.
+
+---
+
+## 2026-06-19 - Goal 5 follow-up: browser verification fix and service workflow positioning
+
+Completed:
+- Added FastAPI CORS allowlist entries for:
+  - http://127.0.0.1:5173
+  - http://localhost:5173
+  - http://127.0.0.1:5174
+  - http://localhost:5174
+- Allowed GET, POST, and OPTIONS for local CORS preflight handling.
+- Changed the frontend API default from http://localhost:8787 to http://127.0.0.1:8787.
+- Changed the default frontend dev port to 5174 in scripts/dev.sh, frontend/vite.config.ts, and .env.example.
+- Added Vite strict port behavior so port conflicts fail visibly instead of silently moving to another port.
+- Updated README local demo instructions to http://127.0.0.1:5174.
+- Updated public-facing positioning to service workflows/service teams while keeping Harbor Auto Care as the demo client.
+- Updated DECISIONS.md to lock the target user as service teams running revenue-backed service workflows.
+- Updated STATUS.md and TASKS.md with the verified current state and next handoff.
+
+Verified:
+- ./scripts/test.sh passed with 26 backend tests and a successful Vite production build.
+- A stale Vite process from this repo was occupying port 5174; it was stopped before verification.
+- ./scripts/dev.sh started backend at http://127.0.0.1:8787 and frontend at http://127.0.0.1:5174.
+- GET /api/health returned HTTP 200.
+- Vite frontend at http://127.0.0.1:5174 returned HTTP 200.
+- Served frontend source shows API base default http://127.0.0.1:8787.
+- Served frontend source shows the updated service workflows positioning.
+- OPTIONS preflight from Origin http://127.0.0.1:5174 returned HTTP 200 for GET /api/health, GET /api/demo/state, POST /api/demo/run, and POST /api/demo/reset.
+- OPTIONS preflight to POST /api/demo/run returned HTTP 200 for all required local frontend origins.
+- POST /api/demo/run returned HTTP 200 and the completed lifecycle state.
+- Final report showed revenue_cents 120000, approved_spend_cents 18700, blocked_spend_cents 75000, gross_profit_cents 101300, actual_margin_percent 84.4, policy_violations 0, and recommendation "Renew campaign for another 30 days".
+- Demo state includes Finance, Marketing, Research, and Ops outputs.
+- Demo state includes local_mock_test Stripe records for customer, invoice, payment_link, and payment.
+
+Noted:
+- No GUI/headless browser binary was available in this shell. Browser-facing behavior was verified through the served Vite source, frontend HTTP 200 response, CORS preflights, and backend API state.
+
+Suggested commit message:
+Fix ScaleX browser demo verification
+
+Next:
+- Required final user-visible browser click-through at http://127.0.0.1:5174, then commit the Goal 5 dashboard plus browser verification fixes.
+
+---
+
+## 2026-06-19 - Goal 5 final cleanup: audit blockers and Harbor Fleet Services reframe
+
+Completed:
+- Removed trailing whitespace from ROADMAP.md so git diff --check can pass.
+- Reframed the prior concrete demo client to Harbor Fleet Services.
+- Reframed the business type to a regional fleet maintenance provider.
+- Reframed the demo job to the 30-day fleet brake inspection campaign.
+- Updated seed data, backend events/report text, deterministic agent outputs, backend tests, frontend dashboard copy, and active docs.
+- Tightened STATUS.md and TASKS.md so manual browser verification at http://127.0.0.1:5174 is required before commit.
+- Kept backend URL http://127.0.0.1:8787 and frontend URL http://127.0.0.1:5174.
+- Kept local CORS allowlist entries for localhost/127.0.0.1 on ports 5173 and 5174.
+
+Verified:
+- ./scripts/test.sh passed with 26 backend tests and a successful Vite production build.
+- git diff --check passed with no output.
+- Live Stripe key grep check returned no matches outside excluded ignored/generated paths.
+- ./scripts/dev.sh started backend at http://127.0.0.1:8787 and frontend at http://127.0.0.1:5174.
+- Vite frontend at http://127.0.0.1:5174 returned HTTP 200.
+- POST /api/demo/run returned HTTP 200 with client_name "Harbor Fleet Services", business_type "Regional fleet maintenance provider", and job_name "30-day fleet brake inspection campaign".
+- Final report values stayed revenue_cents 120000, approved_spend_cents 18700, blocked_spend_cents 75000, gross_profit_cents 101300, actual_margin_percent 84.4, and policy_violations 0.
+- CORS preflight to POST /api/demo/run returned HTTP 200 for http://127.0.0.1:5173, http://localhost:5173, http://127.0.0.1:5174, and http://localhost:5174.
+
+Noted:
+- Shell checks and backend/API verification are not a substitute for the required user-visible browser click-through before commit.
+
+Suggested commit message:
+Finalize Goal 5 browser demo cleanup
+
+Next:
+- Perform the required final user-visible browser click-through at http://127.0.0.1:5174, then commit the Goal 5 cleanup.

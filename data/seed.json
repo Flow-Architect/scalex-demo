@@ -1,8 +1,8 @@
 {
-  "clientName": "Harbor Auto Care",
-  "businessType": "Local auto repair shop",
-  "jobName": "30-day brake service campaign",
-  "jobGoal": "Generate a client-ready brake service promotion package, including campaign copy, social posts, landing page copy, follow-up messages, and a final profitability report.",
+  "clientName": "Harbor Fleet Services",
+  "businessType": "Regional fleet maintenance provider",
+  "jobName": "30-day fleet brake inspection campaign",
+  "jobGoal": "Generate a client-ready fleet brake inspection package, including campaign copy, operations handoff notes, landing page copy, follow-up messages, and a final profitability report.",
   "invoiceAmountUsd": 1200,
   "spendCapUsd": 300,
   "marginFloorPercent": 50,
@@ -10,12 +10,12 @@
     {
       "vendor": "Local Ads API",
       "amountUsd": 89,
-      "purpose": "Local campaign distribution test"
+      "purpose": "Regional fleet campaign distribution test"
     },
     {
       "vendor": "Design Asset Pack",
       "amountUsd": 98,
-      "purpose": "Brake service creative asset package"
+      "purpose": "Fleet brake inspection creative asset package"
     }
   ],
   "blockedSpendRequests": [

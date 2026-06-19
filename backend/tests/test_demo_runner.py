@@ -20,7 +20,7 @@ def test_schema_initialization_creates_expected_tables(tmp_path) -> None:
     assert all(count == 0 for count in counts.values())
 
 
-def test_seed_loading_creates_harbor_job_and_event(tmp_path) -> None:
+def test_seed_loading_creates_harbor_fleet_job_and_event(tmp_path) -> None:
     db_path = tmp_path / "scalex.db"
     initialize_database(db_path)
 
@@ -30,8 +30,8 @@ def test_seed_loading_creates_harbor_job_and_event(tmp_path) -> None:
         current_job = get_demo_job(connection)
 
     assert current_job is not None
-    assert current_job["client_name"] == "Harbor Auto Care"
-    assert current_job["job_name"] == "30-day brake service campaign"
+    assert current_job["client_name"] == "Harbor Fleet Services"
+    assert current_job["job_name"] == "30-day fleet brake inspection campaign"
     assert current_job["invoice_amount_cents"] == 120000
     assert current_job["spend_cap_cents"] == 30000
     assert events[0]["type"] == "job_intake"
@@ -58,7 +58,7 @@ def test_demo_reset_seed_and_state_endpoints(tmp_path, monkeypatch) -> None:
     assert seed_response["status"] == "seeded"
     seeded_state = seed_response["state"]
 
-    assert seeded_state["job"]["client_name"] == "Harbor Auto Care"
+    assert seeded_state["job"]["client_name"] == "Harbor Fleet Services"
     assert seeded_state["ledger"]["totals"]["projected_profit_cents"] == 90000
     assert seeded_state["ledger"]["totals"]["projected_margin_percent"] == 75.0
     assert seeded_state["policy"]["summary"]["max_job_spend_usd"] == 300
@@ -68,7 +68,7 @@ def test_demo_reset_seed_and_state_endpoints(tmp_path, monkeypatch) -> None:
     assert seeded_state["report"] is None
 
     state = demo_state()
-    assert state["job"]["job_name"] == "30-day brake service campaign"
+    assert state["job"]["job_name"] == "30-day fleet brake inspection campaign"
     assert state["database"]["exists"] is True
 
 
@@ -205,8 +205,8 @@ def test_demo_run_endpoint_resets_and_rebuilds_state_on_repeated_runs(tmp_path, 
 
 
 def _assert_complete_demo_state(state: dict) -> None:
-    assert state["job"]["client_name"] == "Harbor Auto Care"
-    assert state["job"]["job_name"] == "30-day brake service campaign"
+    assert state["job"]["client_name"] == "Harbor Fleet Services"
+    assert state["job"]["job_name"] == "30-day fleet brake inspection campaign"
     assert state["job"]["status"] == "complete"
     assert len(state["jobs"]) == 1
 
