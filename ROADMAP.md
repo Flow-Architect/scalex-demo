@@ -1,9 +1,9 @@
 # ScaleX Codex Roadmap
 
 > **Project path:** `/home/ascabrya/dev/scalex-demo/`
-> **Purpose:** Build a clean, functional hackathon demo in a sandbox.
+> **Purpose:** Build a working product-style prototype in a sandbox.
 > **Product:** **ScaleX — Profit-Aware Agent Operations for Service Workflows**
-> **Core demo loop:** job intake → margin plan → Stripe test invoice → policy-gated spend → agent work → profit report.
+> **Core product loop:** job intake → Hermes/GPT-5.5 planning → Stripe test invoice/payment flow → policy/NemoClaw-style spend approval → SQLite ledger/audit records → agent work → profit report.
 
 ---
 
@@ -16,9 +16,9 @@ Codex must follow these rules for the entire repo.
 - **Do not use live Stripe keys.** Only `sk_test_...` keys are allowed.
 - **Do not touch Prometheus, xScaleOS, production Hermes, Windows Hermes, homelab OpenClaw, Recall memory, or real client files.**
 - **Do not commit secrets.** `.env`, `.env.local`, SQLite `.db` files, recordings, and logs must stay ignored.
-- **Use fake demo data only.** The demo client is `Harbor Fleet Services`.
-- **No autonomous real-world payments.** All money movement is Stripe test mode or simulated ledger events.
-- **Do not claim real NemoClaw/Hermes integration unless it is actually wired.** If local-only, label it clearly as `local policy engine` / `Hermes-style orchestration adapter`.
+- **Use sample workflow data only.** The sample client is `Harbor Fleet Services`.
+- **No autonomous real-world payments.** All money movement is Stripe test mode or clearly labeled local ledger events.
+- **Do not claim real NemoClaw/Hermes/Stripe integration unless it is actually wired.** If local-only, label it clearly as `local policy engine`, `Hermes-style orchestration adapter`, or `local fallback Stripe-shaped event`.
 
 ### Scope Rules
 
@@ -28,7 +28,7 @@ Codex must follow these rules for the entire repo.
 - Two spend checks: one approved, one blocked.
 - Four agents: Finance, Marketing, Research, Ops.
 - One final profit report.
-- Working local demo beats architectural perfection.
+- Working local product loop beats architectural perfection.
 
 ### Git Rules
 
@@ -52,9 +52,9 @@ Codex must follow these rules for the entire repo.
 
 > ScaleX is a profit-aware agent operations framework for service workflows. It lets agents confirm revenue, spend only inside policy, coordinate work, and produce an auditable profit report.
 
-### Demo Thesis
+### Product Thesis
 
-Most autonomous agent demos focus on whether an agent can spend money. ScaleX focuses on whether a business can trust an agent to spend **only while protecting margin**.
+Most autonomous agent demos focus on whether an agent can spend money. ScaleX focuses on whether a business can trust an agent to plan, invoice, spend, execute, and report profit **only while protecting margin**.
 
 ### Differentiation
 
@@ -72,10 +72,10 @@ Use a reliable, boring stack optimized for fast local development.
 Frontend: Vite + React + TypeScript + Tailwind
 Backend: FastAPI + Python sqlite3
 Database: SQLite file in ./data/scalex.db
-AI planning: GPT-5.5 Auth via env-configured model, with deterministic fallback
-Stripe: Stripe test mode SDK, with mock fallback
-Policy: local policy engine first; NemoClaw adapter only if available fast
-Hermes: local skill-call orchestration adapter first; real Hermes only if safe/test access is available
+Hermes brain: ScaleX-isolated laptop Hermes install
+AI planning: GPT-5.5 Auth through Hermes, with deterministic fallback
+Stripe: Stripe test mode objects through the orchestration layer, with local fallback
+Policy: NemoClaw or policy safety layer, with local policy engine fallback
 ```
 
 ### Why SQLite?
@@ -93,7 +93,7 @@ Not because SOLVENT uses it — because ScaleX needs a believable, replayable, a
 - agent outputs
 - final reports
 
-A JSON file could work, but SQLite makes the demo look more serious and gives us a real job ledger without running Postgres.
+A JSON file could work, but SQLite gives the prototype a real job ledger without running Postgres.
 
 ---
 
@@ -164,8 +164,7 @@ scalex-demo/
 │   ├── PRODUCT_SPEC.md
 │   ├── ARCHITECTURE.md
 │   ├── DEMO_SCRIPT.md
-│   ├── SUBMISSION_WRITEUP.md
-│   └── CODEX_GOALS.md
+│   └── SUBMISSION_WRITEUP.md
 ├── scripts/
 │   ├── setup.sh
 │   ├── dev.sh
@@ -182,7 +181,7 @@ scalex-demo/
 Create `.env.example` at repo root.
 
 ```env
-# ScaleX Hackathon Demo
+# ScaleX Product Prototype
 APP_ENV=development
 BACKEND_PORT=8787
 FRONTEND_PORT=5174
@@ -194,8 +193,10 @@ SCALEX_REASONING_MODEL=
 OPENAI_API_KEY=
 AI_FALLBACK_MODE=true
 
-# Hermes layer
-HERMES_MODE=local
+# Hermes brain/orchestration layer
+HERMES_MODE=isolated
+HERMES_HOME=
+HERMES_BIN=
 HERMES_BASE_URL=
 HERMES_API_KEY=
 
@@ -210,7 +211,7 @@ POLICY_ENGINE=local
 NEMOCLAW_BASE_URL=
 NEMOCLAW_API_KEY=
 
-# Demo guardrails
+# Prototype guardrails
 DEFAULT_INVOICE_AMOUNT_USD=1200
 DEFAULT_SPEND_CAP_USD=300
 DEFAULT_MARGIN_FLOOR_PERCENT=50
@@ -371,7 +372,7 @@ Create `data/seed.json`.
 }
 ```
 
-Expected final demo numbers:
+Expected final sample-run numbers:
 
 ```text
 Revenue: $1,200
@@ -403,15 +404,15 @@ GET  /api/jobs/{job_id}/report
 
 ### `POST /api/demo/run`
 
-Runs the entire compressed demo and returns the final state.
+Runs the entire compressed sample workflow and returns the final state.
 
 Sequence:
 
 ```text
-1. Reset demo DB state
+1. Reset local DB state
 2. Create Harbor Fleet Services job
 3. Generate operating plan
-4. Create Stripe test customer / invoice / payment event or mock equivalents
+4. Create Stripe test customer / invoice / payment event or local fallback equivalents
 5. Record $1,200 revenue ledger entry
 6. Request $89 spend and approve it
 7. Request $98 spend and approve it
@@ -471,7 +472,7 @@ A spend request is approved only if all checks pass:
 ```text
 Stripe live mode is false
 Invoice exists
-Payment is confirmed/simulated paid
+Payment is confirmed through Stripe test mode or a local fallback event
 Vendor is allowed
 Vendor is not blocked
 Requested amount does not exceed per-transaction approval threshold unless human approved
@@ -485,7 +486,7 @@ Blocked spend must create a policy check event but must **not** create a spend l
 
 ## 9. Agent Outputs
 
-Use deterministic outputs first. GPT-5.5 generation is a stretch enhancement with fallback.
+Use deterministic outputs until Hermes/GPT-5.5 planning is wired, then keep them as the reliability fallback.
 
 ### Finance Agent
 
@@ -569,26 +570,30 @@ Gross Profit: $1,013
 Final Margin: 84.4%
 Blocked Unsafe Spend: $750
 Policy Violations: 0
-Invoice Status: Paid / Simulated Paid
+Invoice Status: Paid / Local Fallback Confirmed
 Recommendation: Renew campaign for another 30 days
 ```
 
 ---
 
-## 11. GPT-5.5 Auth Integration
+## 11. Hermes / GPT-5.5 Auth Planning
 
-Add GPT planning only after local deterministic demo works.
+Goal 6 wires ScaleX to the ScaleX-isolated Hermes brain/orchestration install on the Fedora laptop. Hermes should be the planning/reasoning path, using GPT-5.5 Auth through the isolated Hermes configuration. Deterministic planning remains the reliability fallback when Hermes is unavailable or returns an unusable response.
 
 ### Rules
 
-- Read model from `SCALEX_REASONING_MODEL`.
-- Read API key from `OPENAI_API_KEY`.
+- Use the ScaleX-isolated Hermes install:
+  - code: `/home/ascabrya/.scalex-hermes/hermes-agent`
+  - home/config/auth: `/home/ascabrya/.scalex-hermes/home`
+- Launch Hermes with `HERMES_HOME` pointing at the isolated home directory.
+- Keep OpenAI/Codex auth inside the isolated Hermes home.
+- Read direct model settings from `SCALEX_REASONING_MODEL` only for fallback or local compatibility.
 - Never commit keys.
 - Add `AI_FALLBACK_MODE=true` fallback.
-- If model call fails, use seeded deterministic demo output.
-- The demo must still work offline except for real Stripe test calls.
+- If Hermes/model planning fails, use seeded deterministic output.
+- The product loop must still work locally without external calls, except when explicitly testing Stripe test mode.
 
-### GPT Should Generate
+### Hermes / GPT-5.5 Should Generate
 
 ```text
 Operating plan
@@ -612,26 +617,29 @@ Policy code is the authority, not the model.
 
 ## 12. Stripe Test Mode
 
-### MVP Path
+Stripe test mode is the target payment proof for the product prototype. Local fallback payment records remain the default reliability path until Goal 7 wires Stripe test mode through the orchestration layer.
 
-1. Use `STRIPE_MOCK_MODE=true` first.
-2. Generate fake but realistic Stripe object IDs:
+### Local Fallback Path
+
+1. Use `STRIPE_MOCK_MODE=true` when no test key is configured or Stripe is unavailable.
+2. Generate realistic test-shaped object IDs:
    - `cus_test_scalex_...`
    - `in_test_scalex_...`
    - `plink_test_scalex_...`
 3. Show these in UI.
 4. Record revenue ledger entry.
 
-### Real Test Mode Path
+### Test/Sandbox Integration Path
 
-After MVP works:
+Goal 7:
 
 1. Set `STRIPE_MOCK_MODE=false`.
 2. Use `STRIPE_SECRET_KEY=sk_test_...`.
-3. Create Stripe customer.
-4. Create invoice or payment link.
-5. Display real test object IDs.
-6. Simulate payment status for the demo if webhook setup is too slow.
+3. Create Stripe test customer.
+4. Create test invoice or payment link through the orchestration layer.
+5. Display real Stripe test object IDs.
+6. Record the test payment confirmation or a clearly labeled local fallback payment event.
+7. Write all payment/revenue events to the SQLite audit ledger.
 
 ### Never Do
 
@@ -645,11 +653,22 @@ Autonomous external spend
 
 ---
 
-## 13. Hermes Layer
+## 13. Hermes Brain / Orchestration Layer
 
 Create `backend/app/services/hermes_adapter.py`.
 
-The local adapter should produce visible skill-call events like:
+The target adapter should call the ScaleX-isolated Hermes install for planning and orchestration. The current verified laptop command is:
+
+```bash
+HERMES_HOME="$HOME/.scalex-hermes/home" \
+"$HOME/.scalex-hermes/hermes-agent/venv/bin/hermes" \
+--ignore-rules \
+-z 'Reply with exactly: SCALEX_HERMES_READY'
+```
+
+That command returned `SCALEX_HERMES_READY` on the Fedora laptop, so Goal 6 should wire ScaleX to this isolated Hermes environment without touching production Hermes or Windows Hermes config.
+
+The adapter should produce visible skill-call events like:
 
 ```json
 {
@@ -684,9 +703,9 @@ UI should show these as `Hermes Orchestrator` events.
 
 ## 14. NemoClaw / Policy Layer
 
-Build local policy engine first.
+ScaleX should use NemoClaw or a policy safety layer for spend governance. The local policy engine is the current implemented safety layer and remains the fallback path if NemoClaw is not available in time.
 
-Only add real NemoClaw if setup is fast and does not endanger the MVP.
+Goal 8 should make the policy layer presentation clear and, if safe, wire a NemoClaw-compatible adapter without touching production or homelab services.
 
 ### Local Policy Engine Must Show
 
@@ -783,7 +802,7 @@ Suggested commit:
 
 ```bash
 git add .
-git commit -m "Initialize ScaleX hackathon demo scaffold"
+git commit -m "Initialize ScaleX product prototype scaffold"
 ```
 
 ---
@@ -856,7 +875,7 @@ Tasks:
 
 - Implement `demo_runner.py`.
 - Implement event timeline.
-- Implement simulated Stripe events.
+- Implement local fallback payment events.
 - Implement agent output generation.
 - Implement final report generation.
 - Add `POST /api/demo/run`.
@@ -904,52 +923,55 @@ git commit -m "Build ScaleX demo dashboard"
 
 ---
 
-### Milestone 6 — GPT-5.5 Auth Planning Fallback
+### Milestone 6 — Isolated Hermes Brain + Orchestration
 
-Goal: optional AI-generated planning, safe fallback always available.
+Goal: wire ScaleX to the ScaleX-isolated Hermes brain/orchestration install and use GPT-5.5 Auth through Hermes for planning/reasoning.
 
 Tasks:
 
-- Add planning service.
-- Use env model/key.
-- Add structured prompt.
-- Parse JSON safely.
-- Store plan summary in events or report.
-- Fallback to deterministic output if unavailable.
+- Add a Hermes adapter/service that shells out to the isolated Hermes binary or calls the isolated local Hermes interface if one is exposed.
+- Use `HERMES_HOME=/home/ascabrya/.scalex-hermes/home`.
+- Keep all Hermes state isolated from production or Windows Hermes config.
+- Ask Hermes/GPT-5.5 for the operating plan and agent task list.
+- Parse structured output safely.
+- Store planning/orchestration events in SQLite.
+- Fall back to deterministic output if Hermes is unavailable.
 
 Done when:
 
-- Demo works with no API key.
-- Demo enriches plan if API key/model are present.
-- No model failure can break recording.
+- Product loop works without Hermes by using deterministic fallback.
+- Product loop enriches the plan through isolated Hermes when available.
+- No Hermes/model failure can break the sample run.
+- No production Hermes config is touched.
 
 Suggested commit:
 
 ```bash
 git add .
-git commit -m "Add GPT planning with deterministic fallback"
+git commit -m "Wire isolated Hermes planning adapter"
 ```
 
 ---
 
-### Milestone 7 — Stripe Test Integration
+### Milestone 7 — Stripe Test Mode Through Orchestration
 
-Goal: real Stripe test-mode support behind feature flag.
+Goal: create Stripe test-mode payment/invoice objects through the orchestration layer while preserving the local fallback path.
 
 Tasks:
 
 - Add Stripe package.
-- Implement mock-first Stripe service.
+- Implement Stripe test-mode path behind strict test-mode guards.
 - Add real test-mode path if key exists and `STRIPE_MOCK_MODE=false`.
 - Create customer and invoice/payment link if feasible.
 - Store Stripe object IDs.
-- Keep demo working if Stripe API fails.
+- Emit orchestration and ledger audit events for payment actions.
+- Keep the product loop working if Stripe API fails.
 
 Done when:
 
-- Mock mode works by default.
-- Test mode works when configured.
-- UI clearly labels Stripe as `test mode` or `mock test object`.
+- Local fallback mode works by default.
+- Stripe test mode works when configured.
+- UI clearly labels Stripe as `test mode` or `local fallback`.
 
 Suggested commit:
 
@@ -960,15 +982,15 @@ git commit -m "Add Stripe test-mode invoice flow"
 
 ---
 
-### Milestone 8 — Hermes Skill Log + NemoClaw-Style Labeling
+### Milestone 8 — NemoClaw / Policy Safety Integration and Presentation
 
-Goal: make sponsor stack legible without risking production.
+Goal: make spend governance legible and wire a NemoClaw-compatible policy safety layer if it is safe and available.
 
 Tasks:
 
-- Add Hermes adapter skill-call events.
-- Show skill calls in timeline.
-- Show policy checks as NemoClaw-style guardrails.
+- Show policy checks as policy/NemoClaw-style guardrails.
+- Keep the local policy engine as the enforced fallback.
+- Add a NemoClaw adapter only if it can be configured safely without production or homelab access.
 - Add clear labels:
   - `Hermes Orchestrator`
   - `Stripe Skill`
@@ -979,20 +1001,22 @@ Tasks:
 Done when:
 
 - Judges can see the agent orchestration and safety layer in the UI.
+- The UI clearly shows why the $750 request was blocked.
 - No production Hermes is touched.
+- No homelab/OpenClaw dependency is touched.
 
 Suggested commit:
 
 ```bash
 git add .
-git commit -m "Add Hermes-style skill log and guardrail timeline"
+git commit -m "Add policy safety presentation"
 ```
 
 ---
 
 ### Milestone 9 — Polish + Submission Docs
 
-Goal: make demo and repo presentable.
+Goal: make the product prototype, sample run, and submission assets presentable.
 
 Tasks:
 
@@ -1007,8 +1031,8 @@ Tasks:
 Done when:
 
 - Fresh setup works.
-- Video can be recorded in under 3 minutes.
-- README explains exactly what is real vs simulated.
+- Recorded walkthrough can be completed in under 3 minutes.
+- README explains exactly what is real vs local fallback.
 
 Suggested commit:
 
@@ -1032,7 +1056,7 @@ Officially, Goal mode is intended for defining an outcome and success criteria f
 Repo: /home/ascabrya/dev/scalex-demo
 
 Objective:
-Create the clean ScaleX hackathon repo scaffold for a sandbox-only demo.
+Create the clean ScaleX product prototype scaffold for a sandbox-safe local build.
 
 Constraints:
 - Do not touch any files outside this repo.
@@ -1123,10 +1147,10 @@ Acceptance criteria:
 Repo: /home/ascabrya/dev/scalex-demo
 
 Objective:
-Create a one-click compressed demo runner that executes the full ScaleX job lifecycle.
+Create a one-click compressed sample runner that executes the full ScaleX job lifecycle.
 
 Constraints:
-- Default mode must be sandbox/mock.
+- Default mode must be sandbox-safe local fallback.
 - No real network calls required.
 - Must generate a complete timeline and final report.
 
@@ -1150,7 +1174,7 @@ Acceptance criteria:
 Repo: /home/ascabrya/dev/scalex-demo
 
 Objective:
-Build the ScaleX single-page dashboard for the hackathon demo.
+Build the ScaleX single-page dashboard for the product prototype sample run.
 
 Constraints:
 - Clean, polished, product-like UI.
@@ -1168,89 +1192,93 @@ Acceptance criteria:
 - frontend starts on `http://127.0.0.1:5174`.
 - Click Run Demo Job and see the full lifecycle.
 - Final report is visible without scrolling too much.
-- UI labels Stripe as test/mock mode clearly.
+- UI labels Stripe as test/local fallback mode clearly.
 - npm build passes.
 ```
 
-### `/goal` 6 — GPT-5.5 Planning Fallback
+### `/goal` 6 — Isolated Hermes Brain + Orchestration
 
 ```text
 /goal
 Repo: /home/ascabrya/dev/scalex-demo
 
 Objective:
-Add GPT-5.5 Auth planning support with a deterministic fallback.
+Wire ScaleX to the ScaleX-isolated Hermes brain/orchestration install and use GPT-5.5 Auth through Hermes for planning/reasoning.
 
 Constraints:
-- Read model from SCALEX_REASONING_MODEL.
-- Read key from OPENAI_API_KEY.
+- Use the isolated Hermes install at /home/ascabrya/.scalex-hermes/hermes-agent.
+- Use isolated Hermes home/config/auth at /home/ascabrya/.scalex-hermes/home.
+- Do not touch production Hermes or Windows Hermes config.
 - Do not commit secrets.
-- Demo must still work if model call fails.
+- Product loop must still work if Hermes/model planning fails.
 
 Deliverables:
-- planning_service.py
-- Structured prompt for operating plan and agent task list
-- Safe JSON parsing
+- backend/app/services/hermes_adapter.py
+- Structured Hermes prompt for operating plan and agent task list
+- Safe structured output parsing
 - Fallback plan from seed outputs
-- UI indicator for AI-generated vs fallback plan
+- SQLite events showing Hermes planning/orchestration or fallback planning
+- UI indicator for Hermes-generated vs fallback plan
 
 Acceptance criteria:
-- Works with no API key.
-- Uses model if env vars are present.
-- Model failure cannot break POST /api/demo/run.
+- Works without Hermes by using deterministic fallback.
+- Uses isolated Hermes when available and verified.
+- Hermes/model failure cannot break POST /api/demo/run.
+- No production Hermes config is read or written.
 - Tests pass.
 ```
 
-### `/goal` 7 — Stripe Test Mode
+### `/goal` 7 — Stripe Test Mode Through the Orchestration Layer
 
 ```text
 /goal
 Repo: /home/ascabrya/dev/scalex-demo
 
 Objective:
-Add Stripe test-mode invoice support while preserving mock fallback.
+Add Stripe test-mode invoice/payment support through the orchestration layer while preserving local fallback behavior.
 
 Constraints:
 - Never use live Stripe keys.
 - STRIPE_LIVE_MODE must remain false.
-- Mock mode must remain default.
-- If Stripe fails, demo continues with mock test objects.
+- Local fallback must remain available.
+- If Stripe fails, product loop continues with local fallback test-shaped objects.
 
 Deliverables:
 - stripe_service.py
-- Mock Stripe customer/invoice/payment events
-- Optional real test customer/invoice/payment link path when STRIPE_MOCK_MODE=false and sk_test key exists
-- UI displays test object IDs
+- Local fallback Stripe customer/invoice/payment events
+- Real Stripe test customer/invoice/payment link path when STRIPE_MOCK_MODE=false and sk_test key exists
+- Hermes/orchestration events for payment actions
+- UI displays Stripe test object IDs or clearly labeled local fallback IDs
 
 Acceptance criteria:
-- Mock path works by default.
+- Local fallback path works by default.
 - No live mode path exists unless explicitly disabled by code guards.
-- Revenue ledger entry is recorded after simulated/test payment.
+- Revenue ledger entry is recorded after Stripe test payment or local fallback payment confirmation.
 - Tests pass.
 ```
 
-### `/goal` 8 — Hermes + Policy Presentation Polish
+### `/goal` 8 — NemoClaw / Policy Safety Integration and Presentation
 
 ```text
 /goal
 Repo: /home/ascabrya/dev/scalex-demo
 
 Objective:
-Make the Hermes-style orchestration and policy guardrails clear in the demo UI.
+Make spend governance clear and, if safe, wire a NemoClaw-compatible policy safety layer while keeping the local policy engine as fallback.
 
 Constraints:
 - Do not connect to production Hermes.
-- Local adapter must be honest and clearly named.
+- Do not connect to homelab/OpenClaw.
+- Do not use real client data.
 - Do not claim real NemoClaw unless actually integrated.
 
 Deliverables:
-- hermes_adapter.py local skill-call wrapper
-- Skill-call events in DB and UI timeline
+- NemoClaw/policy adapter if safe, otherwise explicit local policy safety layer
 - Policy guardrail panel with spend cap, margin floor, vendor allowlist, blocked vendor, payment-before-spend rule
 - UI labels for Hermes Orchestrator, Stripe Skill, Policy Guardrail, Agent Work
 
 Acceptance criteria:
-- Timeline makes the stack legible to judges.
+- Timeline and policy panel make the stack legible to judges.
 - Policy panel clearly explains why $750 was blocked.
 - No production endpoints are required.
 ```
@@ -1262,7 +1290,7 @@ Acceptance criteria:
 Repo: /home/ascabrya/dev/scalex-demo
 
 Objective:
-Polish ScaleX for recording and submission.
+Polish ScaleX for recording and submission as a working product-style prototype.
 
 Constraints:
 - Keep scope narrow.
@@ -1281,7 +1309,7 @@ Acceptance criteria:
 - scripts/setup.sh works.
 - scripts/dev.sh starts backend and frontend.
 - scripts/test.sh passes.
-- Demo can be run and recorded in under 3 minutes.
+- Sample Harbor Fleet Services run can be recorded in under 3 minutes.
 - README clearly says test/sandbox only.
 ```
 
@@ -1366,7 +1394,7 @@ Show Stripe test invoice:
 ```text
 Customer created
 Invoice created
-Payment received / simulated paid
+Payment received / local fallback payment confirmed
 Revenue booked: $1,200
 ```
 
@@ -1434,32 +1462,38 @@ Frontend starts locally.
 SQLite DB initializes and resets.
 Run Demo Job works from UI.
 Timeline shows full job lifecycle.
-Stripe test/mock invoice appears.
+Stripe test invoice or clearly labeled local fallback invoice appears.
 Policy approves safe spend.
 Policy blocks unsafe spend.
 Agents produce client-ready deliverables.
 Final report shows correct revenue/spend/profit/margin.
-No live keys, real client data, or production integrations exist.
-Demo can be recorded in under 3 minutes.
+No live keys, real client data, or production integrations are used.
+Sample Harbor Fleet Services run can be recorded in under 3 minutes.
 Repo is clean enough to publish on GitHub.
 ```
 
 ---
 
-## 21. Stretch Only After MVP
+## 21. Remaining Product Roadmap
 
-Only do these after the core demo is stable:
+The remaining roadmap after Goal 5 is:
 
 ```text
-Real Stripe test-mode invoice object creation
-Real NemoClaw adapter
-Real Hermes test/sandbox integration
+Goal 6 - Isolated Hermes Brain + Orchestration
+Goal 7 - Stripe Test Mode through the orchestration layer
+Goal 8 - NemoClaw / policy safety integration and presentation
+Goal 9 - Final polish and submission assets
+```
+
+Additional optional work after the product prototype is stable:
+
+```text
 Report export button
 Animated event replay
 Public deployment
 ```
 
-Do not do these for MVP:
+Do not do these for the hackathon submission:
 
 ```text
 Live $1 proof
@@ -1483,9 +1517,11 @@ The winning demo is:
 
 ```text
 A service job comes in.
-ScaleX gets paid in Stripe test mode.
-ScaleX protects margin with policy.
-ScaleX coordinates agents.
+Hermes/GPT-5.5 plans the work.
+ScaleX gets paid in Stripe test mode or a clearly labeled local fallback.
+ScaleX protects margin with policy/NemoClaw-style governance.
+ScaleX records audit-backed execution in SQLite.
+ScaleX coordinates agent work.
 ScaleX delivers work.
 ScaleX reports profit.
 ```

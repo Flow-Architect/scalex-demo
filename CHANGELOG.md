@@ -26,7 +26,7 @@ Completed:
 - Added CHANGELOG.md.
 - Added .gitignore.
 - Added .env.example.
-- Locked ScaleX as a sandbox hackathon demo.
+- Locked ScaleX as a sandbox-safe hackathon prototype.
 - Locked no-live-money and no-production-data constraints.
 - Prepared repo for Codex goal-based development.
 
@@ -86,7 +86,7 @@ Completed:
 - Clarified that TASKS.md is the next-action handoff.
 - Clarified that CHANGELOG.md is the chronological history.
 - Clarified that DECISIONS.md changes only for locked decisions.
-- Decided not to add GOAL_LOG.md unless needed later.
+- Decided not to add a separate goal-tracking file unless needed later.
 
 Verified:
 - Working tree clean after commit.
@@ -432,3 +432,34 @@ Finalize Goal 5 browser demo cleanup
 
 Next:
 - Perform the required final user-visible browser click-through at http://127.0.0.1:5174, then commit the Goal 5 cleanup.
+
+---
+
+## 2026-06-19 - Documentation goal: product-prototype roadmap update
+
+Completed:
+- Reframed ScaleX from local-only sample framing to a working product-style prototype with test/sandbox integrations as the target.
+- Updated ROADMAP.md so the remaining roadmap is:
+  - Goal 6 - Isolated Hermes Brain + Orchestration
+  - Goal 7 - Stripe Test Mode through the orchestration layer
+  - Goal 8 - NemoClaw / policy safety integration and presentation
+  - Goal 9 - Final polish and submission assets
+- Removed the obsolete roadmap tree reference to the excluded goal-tracking doc.
+- Locked DECISIONS.md around the product prototype standard, fallback purpose, test/sandbox integration target, isolated Hermes install, and no-live-money/no-real-client-data constraints.
+- Updated README.md, docs/PRODUCT_SPEC.md, docs/ARCHITECTURE.md, docs/DEMO_SCRIPT.md, docs/SUBMISSION_WRITEUP.md, AGENTS.md, START_HERE.md, .env.example, STATUS.md, and TASKS.md to match the product-prototype direction.
+- Recorded that the ScaleX-isolated Hermes install is verified on the Fedora laptop, while real ScaleX-to-Hermes integration is still the next coding goal.
+
+Verified:
+- Documentation-only change; no backend/frontend integration code was attempted.
+- No secrets were added.
+- No new tracking files were created.
+- Wording scan found no remaining forbidden product-direction phrases in the source-of-truth docs.
+- git diff --check passed with no output.
+- Secret-pattern scan returned no matches for live Stripe keys, project API keys, or webhook secrets outside ignored/generated paths.
+- git status showed only intended documentation and .env.example modifications.
+
+Suggested commit message:
+Update ScaleX product prototype roadmap
+
+Next:
+- Goal 6 - Wire ScaleX to the isolated Hermes brain/orchestration install.

@@ -8,15 +8,15 @@ Product: ScaleX
 Submission title: ScaleX: Profit-Aware Agent Operations for Service Workflows
 Repo path: /home/ascabrya/dev/scalex-demo
 
-ScaleX is a sandbox hackathon demo. It is not production software.
+ScaleX is a working product-style prototype in a sandbox. It is not production software.
 
-## Core demo loop
+## Core product loop
 
 Job Intake
-→ Margin Plan
-→ Stripe Test Invoice or Mock Stripe Event
-→ Payment Simulation
-→ Policy-Gated Spend
+→ Hermes/GPT-5.5 Planning
+→ Stripe Test Invoice / Payment Flow
+→ Policy/NemoClaw-Style Spend Approval
+→ SQLite Ledger / Audit Records
 → Agent Work
 → Profit Report
 
@@ -37,12 +37,12 @@ Job Intake
 
 Only claim what is actually implemented.
 
-Allowed wording if local-only:
+Allowed wording before an integration is wired:
 
 - local policy engine
 - Hermes-style orchestration adapter
-- Stripe mock/test event
-- sandbox demo
+- local fallback Stripe-shaped event
+- sandbox product prototype
 
 Do not claim:
 
@@ -55,7 +55,7 @@ unless that integration is actually wired, tested, and documented.
 
 ## Build rules
 
-- Working local demo beats architectural perfection.
+- Working local product loop beats architectural perfection.
 - Keep scope small.
 - One client: Harbor Fleet Services.
 - One job: 30-day fleet brake inspection campaign.
@@ -82,16 +82,21 @@ Database:
 - schema in data/schema.sql
 
 Policy:
-- local policy engine first
-- NemoClaw adapter only if available quickly and safely
+- NemoClaw or policy safety layer target
+- local policy engine fallback required
 
 AI planning:
-- GPT-5.5 Auth through env-configured model if available
+- GPT-5.5 Auth through isolated Hermes if available
 - deterministic fallback required
 
 Stripe:
-- test mode or mock mode only
-- mock fallback required
+- test mode target
+- local fallback required
+
+Hermes:
+- use the ScaleX-isolated laptop Hermes install
+- code: /home/ascabrya/.scalex-hermes/hermes-agent
+- home/config/auth: /home/ascabrya/.scalex-hermes/home
 
 ## Documentation rules
 

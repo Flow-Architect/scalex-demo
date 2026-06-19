@@ -4,7 +4,7 @@ You are working in:
 
 /home/ascabrya/dev/scalex-demo
 
-ScaleX is a hackathon demo for profit-aware agent operations for service workflows.
+ScaleX is a working product-style prototype for profit-aware agent operations in service workflows.
 
 Do not assume previous chat context. The repo files are the source of truth.
 
@@ -26,13 +26,13 @@ Then inspect:
 
 ## Current product goal
 
-Build a functional local demo showing:
+Build a functional local product loop showing:
 
 Job Intake
-→ Margin Plan
-→ Stripe Test Invoice or Mock Stripe Event
-→ Payment Simulation
-→ Policy-Gated Spend
+→ Hermes/GPT-5.5 Planning
+→ Stripe Test Invoice / Payment Flow
+→ Policy/NemoClaw-Style Spend Approval
+→ SQLite Ledger / Audit Records
 → Agent Work
 → Profit Report
 
@@ -47,6 +47,9 @@ Job Intake
 - Must run locally from this Fedora laptop repo.
 - Keep repo clean and GitHub-ready.
 - Do not claim real Hermes, NemoClaw, or Stripe integration unless it is actually wired and working.
+- Use the ScaleX-isolated Hermes install for the next integration target:
+  - code: /home/ascabrya/.scalex-hermes/hermes-agent
+  - home/config/auth: /home/ascabrya/.scalex-hermes/home
 
 ## Session startup requirement
 
@@ -57,6 +60,8 @@ At the start of a new Codex session:
 3. Summarize what is incomplete.
 4. Recommend the next /goal.
 5. Wait for approval before editing.
+
+Current next recommended /goal: Goal 6 - Wire ScaleX to isolated Hermes brain/orchestration.
 
 ## Session closeout requirement
 

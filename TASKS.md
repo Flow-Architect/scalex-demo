@@ -2,82 +2,61 @@
 
 ## Current priority
 
-Perform the required final user-visible browser click-through at http://127.0.0.1:5174, then commit the Goal 5 dashboard, browser verification fixes, and Harbor Fleet Services cleanup.
+Goal 6 - Wire ScaleX to the isolated Hermes brain/orchestration install.
 
 ## Next recommended goal
 
-Run Codex /goal 8 - Hermes + Policy Presentation Polish, or skip to /goal 9 - Final Polish + Submission Prep if the dashboard is already sufficient for recording.
+Run Codex /goal 6 - Isolated Hermes Brain + Orchestration.
 
 ## Why this is next
 
-The local dashboard now has the required API defaults, CORS origins, strict frontend port behavior, service workflows positioning, and Harbor Fleet Services concrete demo example. The remaining MVP risk is presentation clarity: judges should quickly understand that ScaleX is coordinating local skill-style steps, using mock/test-style Stripe records, enforcing a local policy engine, and protecting job margin.
+Goal 5 is complete and the laptop repo was verified with `./scripts/test.sh` before this documentation update. The next product risk is proving that ScaleX can use Hermes as the agent brain/orchestration layer instead of only relying on deterministic local planning.
 
-Goal 6 and Goal 7 are stretch integrations. They are not required before recording if the local dashboard already tells the core story.
+The ScaleX-isolated Hermes install is already verified on the Fedora laptop:
 
-## Required outputs before commit
+```text
+code: /home/ascabrya/.scalex-hermes/hermes-agent
+home/config/auth: /home/ascabrya/.scalex-hermes/home
+ready check: SCALEX_HERMES_READY
+```
 
-- Manual browser verification is required before commit; shell/headless checks are not a substitute.
-- Confirm the browser opens http://127.0.0.1:5174.
-- Confirm the dashboard shows backend online and API base http://127.0.0.1:8787.
-- Click Run Demo Job and confirm the dashboard shows:
-  - $1,200 revenue / 120000 cents
-  - $187 approved spend / 18700 cents
-  - $750 blocked unsafe spend / 75000 cents
-  - $1,013 gross profit / 101300 cents
-  - 84.4% margin
-  - Finance, Marketing, Research, and Ops outputs
-  - local mock/test-style Stripe records
-- Confirm dashboard copy references Harbor Fleet Services and the 30-day fleet brake inspection workflow.
-- Confirm dashboard copy says service workflows/service teams, not small-business-only positioning.
-- Confirm git status does not stage .env, data/scalex.db, venvs, pycache, logs, node_modules, frontend/dist, or other generated artifacts.
-- Suggested commit message: Finalize Goal 5 browser demo cleanup
+ScaleX has not yet been wired to call that isolated Hermes install.
 
-## Required outputs for next milestone
+## Required outputs for Goal 6
 
-- Add local Hermes-style skill-call events or a structured local orchestration log.
-- Keep the adapter honest: label it "Hermes-style local adapter" or similar wording.
-- Do not connect to production Hermes.
-- Show skill-call style steps in the UI timeline or a dedicated orchestration section:
-  - job.create
-  - planning.generate
-  - stripe.create_customer
-  - stripe.create_invoice
-  - stripe.confirm_payment
-  - policy.check_spend
-  - ledger.record_revenue
-  - ledger.record_spend
-  - agent.run_finance
-  - agent.run_marketing
-  - agent.run_research
-  - agent.run_ops
-  - report.generate
-- Improve policy presentation only where it helps the recording:
-  - spend cap
-  - margin floor
-  - payment-before-spend rule
-  - vendor allowlist
-  - vendor blocklist
-  - clear reason the $750 Premium Automation Suite request was blocked
-- Keep the final report values unchanged:
-  - revenue_cents 120000
-  - approved_spend_cents 18700
-  - blocked_spend_cents 75000
-  - gross_profit_cents 101300
-  - actual_margin_percent about 84.4
-  - policy_violations 0
-- Run ./scripts/test.sh.
+- Add a backend Hermes adapter/service scoped to the ScaleX-isolated Hermes install.
+- Use `HERMES_HOME=/home/ascabrya/.scalex-hermes/home`.
+- Do not read or write production Hermes or Windows Hermes config.
+- Use Hermes/GPT-5.5 for the operating plan and agent task list when available.
+- Preserve deterministic fallback for reliability.
+- Persist Hermes planning/orchestration or fallback events in SQLite.
+- Expose enough state for the dashboard to label Hermes-generated vs fallback planning honestly.
+- Run `./scripts/test.sh`.
+- Run `git diff --check`.
 - Update STATUS.md, TASKS.md, and CHANGELOG.md at closeout.
+
+## Required product facts to preserve
+
+- Harbor Fleet Services remains the sample workflow, not the whole product.
+- Invoice remains $1,200.
+- Approved spend remains $89 Local Ads API and $98 Design Asset Pack.
+- Blocked spend remains $750 Premium Automation Suite.
+- Margin floor remains 50%.
+- Final report remains $1,200 revenue, $187 approved spend, $1,013 gross profit, about 84.4% margin, and 0 policy violations.
+- SQLite remains the audit ledger.
+- Fallback paths are for safety and reliability, not the preferred final product story.
 
 ## Do not work on yet
 
 - Live Stripe.
-- Real customer data.
+- Real client data.
 - Public deployment.
-- Real Prometheus/Hermes connection.
-- Homelab/OpenClaw connection.
-- Real NemoClaw integration.
+- Production Prometheus or production Hermes.
+- Windows Hermes config.
+- Homelab/OpenClaw.
+- Recall memory.
+- Live NemoClaw or external policy calls unless explicitly scoped and safe.
+- Real Stripe test-mode integration before Goal 7.
 - Complex auth.
 - Multi-client dashboard.
-- GPT-5.5 planning integration unless explicitly approved as a stretch goal.
-- Real Stripe SDK/test-mode integration unless explicitly approved as a stretch goal.
 - Production packaging.

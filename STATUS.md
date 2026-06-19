@@ -5,17 +5,20 @@ Last updated: 2026-06-19
 ## Verified current state
 
 - Project folder exists at /home/ascabrya/dev/scalex-demo.
-- Last completed goal: /goal 5 final cleanup - audit blockers, verification gate wording, and Harbor Fleet Services reframe.
-- ScaleX is positioned as a profit-aware agent operations framework for service workflows / service teams.
-- Harbor Fleet Services is the concrete demo client; it is an example service workflow, not the whole product category.
-- README.md describes ScaleX as a local sandbox hackathon demo and uses http://127.0.0.1:5174 for the browser demo.
+- Last completed implementation goal: Goal 5 - frontend dashboard, browser verification fixes, and Harbor Fleet Services cleanup.
+- Goal 5 is complete.
+- Current documentation goal: product-prototype roadmap and handoff update.
+- ScaleX is positioned as a working product-style prototype for profit-aware agent operations in service workflows.
+- Harbor Fleet Services is the sample workflow; it is an example service run, not the whole product category.
+- README.md describes ScaleX as a working product-style prototype and uses http://127.0.0.1:5174 for the browser walkthrough.
+- Laptop repo state was clean and current at the start of this documentation goal.
 - .gitignore exists and ignores local env files, SQLite database files, logs, venvs, node_modules, frontend build output, and recordings.
 - .env.example exists with sandbox defaults, including FRONTEND_PORT=5174, STRIPE_LIVE_MODE=false, and STRIPE_MOCK_MODE=true.
 - data/schema.sql exists with the local SQLite ledger tables, including reports.blocked_spend_cents.
-- data/seed.json exists with fake Harbor Fleet Services demo data.
-- policies/scalex-policy.json exists with local demo policy rules.
+- data/seed.json exists with synthetic Harbor Fleet Services sample data.
+- policies/scalex-policy.json exists with local product-loop policy rules.
 - agents/ contains Finance, Marketing, Research, and Ops role placeholders.
-- docs/ contains scaffold documentation placeholders.
+- docs/ contains product, architecture, walkthrough, and submission documentation.
 - FastAPI backend exposes:
   - GET /health
   - GET /api/health
@@ -41,16 +44,16 @@ Last updated: 2026-06-19
 - scripts/setup.sh installs backend Python dependencies and frontend npm dependencies.
 - scripts/test.sh runs backend pytest and frontend npm build.
 - POST /api/demo/reset creates a fresh local SQLite database at data/scalex.db.
-- POST /api/demo/seed loads the fake Harbor Fleet Services job from data/seed.json.
+- POST /api/demo/seed loads the synthetic Harbor Fleet Services job from data/seed.json.
 - POST /api/demo/mark-paid records a local sandbox revenue ledger entry for the seeded $1,200 job invoice and creates a payment-confirmed event without calling Stripe.
 - POST /api/demo/spend-check persists a policy_check for every spend request.
 - Approved spend requests create spend ledger entries.
 - Blocked spend requests do not create spend ledger entries.
 - Pre-payment prerequisite blocks still create policy_check records and events, but they do not create spend ledger entries or count toward blocked_spend_cents.
-- POST /api/demo/run resets and rebuilds the complete compressed local demo lifecycle:
+- POST /api/demo/run resets and rebuilds the complete compressed local product loop:
   - seeds the Harbor Fleet Services job
-  - records job intake, margin plan, payment gate, mock Stripe, payment, policy, agent work, profit report, and job complete timeline events
-  - creates local mock/test-style Stripe records for customer, invoice, payment link, and payment confirmation
+  - records job intake, margin plan, payment gate, local fallback Stripe-shaped payment records, policy, agent work, profit report, and job complete timeline events
+  - creates local fallback Stripe-shaped records for customer, invoice, payment link, and payment confirmation
   - marks local sandbox payment confirmed
   - approves $89 Local Ads API spend
   - approves $98 Design Asset Pack spend
@@ -58,7 +61,7 @@ Last updated: 2026-06-19
   - creates deterministic Finance, Marketing, Research, and Ops outputs
   - creates the final profit report
   - marks the job complete
-- GET /api/demo/state returns job, jobs, events, timeline_events, mock Stripe events, ledger entries, ledger totals, policy checks, agent outputs, reports, and the latest final report.
+- GET /api/demo/state returns job, jobs, events, timeline_events, local fallback payment records, ledger entries, ledger totals, policy checks, agent outputs, reports, and the latest final report.
 - Frontend dashboard exists at frontend/src/App.tsx and connected components.
 - Frontend dashboard displays:
   - product header and service workflows positioning
@@ -67,7 +70,7 @@ Last updated: 2026-06-19
   - active Harbor Fleet Services job summary
   - revenue, approved spend, blocked unsafe spend, gross profit, and margin cards
   - timeline events
-  - local mock/test-style Stripe records
+  - local fallback Stripe-shaped payment records
   - ledger entries
   - local policy guardrails and spend checks
   - deterministic Finance, Marketing, Research, and Ops outputs
@@ -103,16 +106,25 @@ Last updated: 2026-06-19
     - http://127.0.0.1:5174
     - http://localhost:5174
   - Demo state includes Finance, Marketing, Research, and Ops agent outputs.
-  - Demo state includes local_mock_test Stripe records for customer, invoice, payment_link, and payment.
+  - Demo state includes fallback payment records with mode local_mock_test for customer, invoice, payment_link, and payment.
   - data/scalex.db, frontend/node_modules, frontend/dist, backend/.venv, and backend/.pytest_cache remain ignored by git.
+- User-provided verified environment for this documentation goal:
+  - Fedora laptop repo at /home/ascabrya/dev/scalex-demo is current and tested.
+  - ./scripts/test.sh passed on the laptop before this documentation goal.
+  - ScaleX-isolated Hermes Agent v0.16.0 is installed:
+    - code: /home/ascabrya/.scalex-hermes/hermes-agent
+    - home/config/auth: /home/ascabrya/.scalex-hermes/home
+  - Isolated Hermes is configured with OpenAI Codex auth and gpt-5.5.
+  - The isolated Hermes readiness command returned SCALEX_HERMES_READY.
 
 ## Not yet built
 
-- GPT-5.5 planning service.
-- Hermes-style orchestration adapter behavior beyond placeholder naming.
-- Real Stripe test-mode support.
+- Real ScaleX-to-isolated-Hermes brain/orchestration integration.
+- GPT-5.5 planning through Hermes inside the ScaleX product loop.
+- Stripe test-mode support through the orchestration layer.
+- NemoClaw or external policy safety adapter.
 - Demo recording.
-- Submission docs beyond placeholders.
+- Final submission polish and recording assets.
 
 ## Not yet verified
 
@@ -124,10 +136,10 @@ Last updated: 2026-06-19
 
 ## Deferred / revisit
 
-- Real Stripe test-mode support remains deferred; current flow uses local mock/test-style Stripe records only.
-- Real Hermes, NemoClaw, GPT planning, public deployment, live money, production data, and real customer workflows remain out of scope for current MVP work.
+- Local fallback payment records remain in place for reliability and safety until Stripe test mode is wired.
+- Production Hermes, Windows Hermes config, Prometheus production data, homelab/OpenClaw, Recall memory, public deployment, live money, production data, and real customer workflows remain out of scope.
 - npm install reports one low-severity advisory in the frontend dependency tree; dependency audit remediation is deferred unless it affects demo safety or build reliability.
 
 ## Current priority
 
-Perform the required final visual browser click-through in the user's browser at http://127.0.0.1:5174, then commit the Goal 5 dashboard, browser verification fixes, and Harbor Fleet Services cleanup. After that, run Codex /goal 8 - Hermes + Policy Presentation Polish, or skip to /goal 9 - Final Polish + Submission Prep if the UI is sufficient for recording.
+Goal 6 - wire ScaleX to the isolated Hermes brain/orchestration install while preserving deterministic fallback behavior and all sandbox safety rules.

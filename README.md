@@ -1,16 +1,16 @@
 # ScaleX
 
-ScaleX is a sandbox hackathon demo for profit-aware agent operations for service workflows.
+ScaleX is a working product-style prototype for profit-aware agent operations in service workflows.
 
 Submission title: **ScaleX: Profit-Aware Agent Operations for Service Workflows**
 
-ScaleX is a profit-aware agent operations framework for service workflows. It lets agents confirm revenue, spend only inside policy, coordinate work, and produce an auditable profit report.
+ScaleX is a profit-aware agent operations framework for service workflows. It lets an operator confirm revenue, plan work, spend only inside policy, coordinate agent outputs, and produce an auditable profit report.
 
-The demo thesis is simple: a service team should be able to give an AI operator a paid job, a budget, and a margin floor, then see the operator invoice, control spend, coordinate work, and report profit without risking live money or production systems.
+The product thesis is simple: a service team should be able to give an AI operator a paid job, a budget, and a margin floor, then see the operator invoice, control spend, coordinate work, and report profit without risking live money or production systems.
 
-## Demo Scope
+## Sample Workflow
 
-The locked demo scenario uses fake data only:
+The locked sample run uses synthetic data only:
 
 - Client: Harbor Fleet Services
 - Business type: Regional fleet maintenance provider
@@ -30,15 +30,30 @@ ScaleX is not production software. It must stay local and sandbox-safe.
 - No live payments.
 - No real client data.
 - No production Hermes, Prometheus, OpenClaw, Recall, or xScaleOS connections.
-- Stripe is mock/test mode only.
-- Policy enforcement starts as a local policy engine.
-- Hermes is represented by a local Hermes-style orchestration adapter unless a safe test integration is later implemented and documented.
+- Stripe is test/sandbox mode only, with local fallback records for reliability.
+- Policy enforcement currently runs through a local policy engine.
+- Hermes integration is next and must use the ScaleX-isolated laptop install, not production Hermes.
 
-## Current Demo State
+## Current Prototype State
 
-This repository contains the local SQLite ledger, FastAPI demo runner, mock/test-style Stripe records, local policy engine, deterministic agent outputs, and a Vite React dashboard.
+Implemented today:
 
-The dashboard calls the local backend to run the complete compressed lifecycle and display job intake, margin plan, local mock payment, policy decisions, agent work, ledger entries, and the final profit report.
+- FastAPI backend.
+- SQLite audit ledger at `data/scalex.db`.
+- Local policy engine enforcing payment-before-spend, vendor, spend-cap, and margin-floor rules.
+- Local fallback Stripe-shaped records for customer, invoice, payment link, and payment confirmation.
+- Deterministic Finance, Marketing, Research, and Ops outputs.
+- Vite React dashboard.
+- One-click Harbor Fleet Services sample run with the locked final report numbers.
+
+Next target:
+
+- Wire ScaleX to the isolated Hermes brain/orchestration install on this laptop.
+- Use GPT-5.5 Auth through Hermes for planning/reasoning.
+- Add Stripe test-mode payment/invoice objects through the orchestration layer.
+- Add NemoClaw or a policy safety adapter if it can be done safely.
+
+The dashboard calls the local backend to run the complete compressed lifecycle and display job intake, planning, payment state, policy decisions, agent work, ledger entries, and the final profit report.
 
 ## Local Browser Demo
 
@@ -61,7 +76,7 @@ Open:
 http://127.0.0.1:5174
 ```
 
-Click `Run Demo Job` to call `POST /api/demo/run` and rebuild the local lifecycle.
+Click `Run Demo Job` to call `POST /api/demo/run` and rebuild the local sample workflow.
 
 Useful local endpoints:
 
@@ -94,14 +109,14 @@ Reset the demo state with:
 
 These commands are local-only. They must not use live Stripe mode or production service credentials.
 
-## Core Demo Loop
+## Core Product Loop
 
 ```text
 Job Intake
--> Margin Plan
--> Stripe Test Invoice or Mock Stripe Event
--> Payment Simulation
--> Policy-Gated Spend
+-> Hermes/GPT-5.5 Planning
+-> Stripe Test Invoice / Payment Flow
+-> Policy/NemoClaw-Style Spend Approval
+-> SQLite Ledger / Audit Records
 -> Agent Work
 -> Profit Report
 ```
