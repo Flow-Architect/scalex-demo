@@ -10,6 +10,7 @@ import {
 import { API_BASE_URL, getDemoState, getHealth, resetDemo, runDemo } from "./api";
 import { AgentWorkboard } from "./components/AgentWorkboard";
 import { Header } from "./components/Header";
+import { HermesPanel } from "./components/HermesPanel";
 import { JobIntakeCard } from "./components/JobIntakeCard";
 import { LedgerPanel } from "./components/LedgerPanel";
 import { MetricsCards } from "./components/MetricsCards";
@@ -41,8 +42,8 @@ export default function App() {
         complete: Boolean(state?.job),
       },
       {
-        label: "Margin locked",
-        complete: hasEvent(state, "margin_plan"),
+        label: "Hermes planned",
+        complete: state?.planning_run?.status === "completed",
       },
       {
         label: "Mock payment confirmed",
@@ -263,6 +264,12 @@ export default function App() {
             />
           </div>
         </section>
+
+        <HermesPanel
+          hermes={state?.hermes ?? null}
+          planningRun={state?.planning_run ?? null}
+          calls={state?.orchestration_calls ?? []}
+        />
 
         <section className="grid gap-6 xl:grid-cols-[1.2fr_0.8fr]">
           <Timeline events={state?.timeline_events ?? state?.events ?? []} />

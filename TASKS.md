@@ -2,37 +2,38 @@
 
 ## Current priority
 
-Goal 6 - Wire ScaleX to the isolated Hermes brain/orchestration install.
+Goal 7 - Stripe Test Mode through the orchestration layer.
 
 ## Next recommended goal
 
-Run Codex /goal 6 - Isolated Hermes Brain + Orchestration.
+Run Codex /goal 7 - wire Stripe test-mode objects through the existing orchestration call sequence.
 
 ## Why this is next
 
-Goal 5 is complete and the laptop repo was verified with `./scripts/test.sh` before this documentation update. The next product risk is proving that ScaleX can use Hermes as the agent brain/orchestration layer instead of only relying on deterministic local planning.
+Goal 6 is complete: the normal product path now uses the real ScaleX-isolated Hermes Agent install with the `scalex-operator` skill and `skills` toolset. The dashboard proves Hermes ran and the SQLite audit trail records planning and orchestration calls.
 
-The ScaleX-isolated Hermes install is already verified on the Fedora laptop:
+The next product proof gap is payment realism. Stripe is still represented by local mock/test-style records, which is acceptable for Goal 6 but should be replaced with Stripe test-mode objects in Goal 7.
 
-```text
-code: /home/ascabrya/.scalex-hermes/hermes-agent
-home/config/auth: /home/ascabrya/.scalex-hermes/home
-ready check: SCALEX_HERMES_READY
-```
+## Required outputs for Goal 7
 
-ScaleX has not yet been wired to call that isolated Hermes install.
-
-## Required outputs for Goal 6
-
-- Add a backend Hermes adapter/service scoped to the ScaleX-isolated Hermes install.
-- Use `HERMES_HOME=/home/ascabrya/.scalex-hermes/home`.
-- Do not read or write production Hermes or Windows Hermes config.
-- Use Hermes/GPT-5.5 for the operating plan and agent task list when available.
-- Preserve deterministic fallback for reliability.
-- Persist Hermes planning/orchestration or fallback events in SQLite.
-- Expose enough state for the dashboard to label Hermes-generated vs fallback planning honestly.
+- Keep live Stripe mode disabled.
+- Use only Stripe test mode keys and objects.
+- Route Stripe test-mode customer, invoice, payment link, and payment confirmation through the existing orchestration layer.
+- Preserve fallback local Stripe-shaped records for tests and safety.
+- Keep `policy.check_spend` and ledger writes controlled by ScaleX code.
+- Do not implement NemoClaw yet.
+- Keep final economics unchanged:
+  - $1,200 revenue
+  - $187 approved spend
+  - $750 blocked spend
+  - $1,013 gross profit
+  - about 84.4% margin
+  - 0 policy violations
+- Expose Stripe test-mode object IDs and fallback state honestly in the API and dashboard.
+- Add tests that do not require live Stripe or real payments.
 - Run `./scripts/test.sh`.
 - Run `git diff --check`.
+- Run the live-key grep safety check.
 - Update STATUS.md, TASKS.md, and CHANGELOG.md at closeout.
 
 ## Required product facts to preserve
@@ -42,9 +43,10 @@ ScaleX has not yet been wired to call that isolated Hermes install.
 - Approved spend remains $89 Local Ads API and $98 Design Asset Pack.
 - Blocked spend remains $750 Premium Automation Suite.
 - Margin floor remains 50%.
-- Final report remains $1,200 revenue, $187 approved spend, $1,013 gross profit, about 84.4% margin, and 0 policy violations.
+- Hermes plans and proposes orchestration only.
+- ScaleX code remains the authority for spend policy, payment actions, ledger writes, and reports.
 - SQLite remains the audit ledger.
-- Fallback paths are for safety and reliability, not the preferred final product story.
+- Fallback paths are for safety and tests, not the preferred product story.
 
 ## Do not work on yet
 
@@ -55,8 +57,7 @@ ScaleX has not yet been wired to call that isolated Hermes install.
 - Windows Hermes config.
 - Homelab/OpenClaw.
 - Recall memory.
-- Live NemoClaw or external policy calls unless explicitly scoped and safe.
-- Real Stripe test-mode integration before Goal 7.
+- Live NemoClaw or external policy calls before Goal 8.
 - Complex auth.
 - Multi-client dashboard.
 - Production packaging.

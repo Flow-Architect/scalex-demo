@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from datetime import datetime, timezone
+import json
 
 UTC = timezone.utc
 import sqlite3
@@ -127,6 +128,162 @@ def list_events(connection: sqlite3.Connection, job_id: str | None = None) -> li
         rows = connection.execute(
             "SELECT * FROM events WHERE job_id = ? ORDER BY created_at, rowid",
             (job_id,),
+        ).fetchall()
+    return rows_to_dicts(rows)
+
+
+def create_planning_run(
+    connection: sqlite3.Connection,
+    *,
+    job_id: str,
+    mode: str,
+    provider: str,
+    model: str,
+    source: str,
+    status: str,
+    prompt_version: str,
+    prompt_text: str,
+    result_json: dict | list | None,
+    summary: str | None,
+    error: str | None,
+    planning_run_id: str | None = None,
+) -> dict:
+    planning_run_id = planning_run_id or f"plan_{uuid4().hex}"
+    created_at = utc_now()
+    completed_at = utc_now()
+    connection.execute(
+        """
+        INSERT INTO planning_runs (
+          id, job_id, mode, provider, model, source, status, prompt_version,
+          prompt_text, result_json, summary, error, created_at, completed_at
+        )
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """,
+        (
+            planning_run_id,
+            job_id,
+            mode,
+            provider,
+            model,
+            source,
+            status,
+            prompt_version,
+            prompt_text,
+            _json_text(result_json),
+            summary,
+            error,
+            created_at,
+            completed_at,
+        ),
+    )
+    return get_planning_run(connection, planning_run_id)
+
+
+def get_planning_run(connection: sqlite3.Connection, planning_run_id: str) -> dict:
+    row = connection.execute("SELECT * FROM planning_runs WHERE id = ?", (planning_run_id,)).fetchone()
+    planning_run = row_to_dict(row)
+    if planning_run is None:
+        raise LookupError(f"Planning run not found: {planning_run_id}")
+    return planning_run
+
+
+def list_planning_runs(connection: sqlite3.Connection, job_id: str | None = None) -> list[dict]:
+    if job_id is None:
+        rows = connection.execute("SELECT * FROM planning_runs ORDER BY created_at, rowid").fetchall()
+    else:
+        rows = connection.execute(
+            "SELECT * FROM planning_runs WHERE job_id = ? ORDER BY created_at, rowid",
+            (job_id,),
+        ).fetchall()
+    return rows_to_dicts(rows)
+
+
+def get_latest_planning_run(connection: sqlite3.Connection, job_id: str | None = None) -> dict | None:
+    if job_id is None:
+        row = connection.execute("SELECT * FROM planning_runs ORDER BY created_at DESC, rowid DESC LIMIT 1").fetchone()
+    else:
+        row = connection.execute(
+            "SELECT * FROM planning_runs WHERE job_id = ? ORDER BY created_at DESC, rowid DESC LIMIT 1",
+            (job_id,),
+        ).fetchone()
+    return row_to_dict(row)
+
+
+def create_orchestration_call(
+    connection: sqlite3.Connection,
+    *,
+    job_id: str,
+    sequence: int,
+    tool_name: str,
+    tool_input_json: dict | list | str | int | float | bool | None,
+    tool_output_json: dict | list | str | int | float | bool | None,
+    status: str,
+    duration_ms: int,
+    error: str | None = None,
+    planning_run_id: str | None = None,
+    call_id: str | None = None,
+) -> dict:
+    call_id = call_id or f"orch_{uuid4().hex}"
+    created_at = utc_now()
+    connection.execute(
+        """
+        INSERT INTO orchestration_calls (
+          id, job_id, planning_run_id, sequence, tool_name, tool_input_json,
+          tool_output_json, status, duration_ms, error, created_at
+        )
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """,
+        (
+            call_id,
+            job_id,
+            planning_run_id,
+            sequence,
+            tool_name,
+            _json_text(tool_input_json),
+            _json_text(tool_output_json),
+            status,
+            duration_ms,
+            error,
+            created_at,
+        ),
+    )
+    return get_orchestration_call(connection, call_id)
+
+
+def get_orchestration_call(connection: sqlite3.Connection, call_id: str) -> dict:
+    row = connection.execute("SELECT * FROM orchestration_calls WHERE id = ?", (call_id,)).fetchone()
+    call = row_to_dict(row)
+    if call is None:
+        raise LookupError(f"Orchestration call not found: {call_id}")
+    return call
+
+
+def list_orchestration_calls(
+    connection: sqlite3.Connection,
+    job_id: str | None = None,
+    planning_run_id: str | None = None,
+) -> list[dict]:
+    if planning_run_id is not None:
+        rows = connection.execute(
+            """
+            SELECT * FROM orchestration_calls
+            WHERE planning_run_id = ?
+            ORDER BY sequence, created_at, rowid
+            """,
+            (planning_run_id,),
+        ).fetchall()
+    elif job_id is not None:
+        rows = connection.execute(
+            """
+            SELECT * FROM orchestration_calls
+            WHERE job_id = ?
+            ORDER BY sequence, created_at, rowid
+            """,
+            (job_id,),
+        ).fetchall()
+    else:
+        rows = connection.execute(
+            "SELECT * FROM orchestration_calls ORDER BY sequence, created_at, rowid"
         ).fetchall()
     return rows_to_dicts(rows)
 
@@ -398,3 +555,9 @@ def update_job_status(connection: sqlite3.Connection, job_id: str, status: str) 
         (status, utc_now(), job_id),
     )
     return get_job(connection, job_id)
+
+
+def _json_text(value: dict | list | str | int | float | bool | None) -> str | None:
+    if value is None:
+        return None
+    return json.dumps(value, sort_keys=True)

@@ -11,6 +11,8 @@ The Harbor Fleet Services fleet brake inspection campaign is the sample run, not
 ## Implemented Today
 
 - Local FastAPI backend and Vite React dashboard.
+- Real isolated Hermes Agent planning through a ScaleX `scalex-operator` skill.
+- Orchestration audit trail for the proposed and executed ScaleX tool sequence.
 - SQLite audit ledger for jobs, events, Stripe-shaped records, ledger entries, policy checks, agent outputs, and reports.
 - Local policy engine that blocks unsafe spend before it reaches the ledger.
 - Local fallback payment records for the sample Stripe-style customer, invoice, payment link, and payment confirmation.
@@ -18,8 +20,6 @@ The Harbor Fleet Services fleet brake inspection campaign is the sample run, not
 
 ## Target Integrations
 
-- ScaleX-isolated Hermes brain/orchestration on the Fedora laptop.
-- GPT-5.5 Auth through Hermes for planning and reasoning.
 - Stripe test-mode invoice/payment objects through the orchestration layer.
 - NemoClaw or a policy safety layer for spend governance, with the current local policy engine as fallback.
 

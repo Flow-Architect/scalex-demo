@@ -184,6 +184,9 @@ def test_demo_run_endpoint_executes_complete_local_lifecycle(tmp_path, monkeypat
 
     assert response["status"] == "completed"
     _assert_complete_demo_state(response["state"])
+    assert response["state"]["planning_run"] is not None
+    assert response["state"]["orchestration_calls"]
+    assert response["state"]["hermes"]["used_real_hermes"] is False
 
 
 def test_demo_run_endpoint_resets_and_rebuilds_state_on_repeated_runs(tmp_path, monkeypatch) -> None:
@@ -202,6 +205,64 @@ def test_demo_run_endpoint_resets_and_rebuilds_state_on_repeated_runs(tmp_path, 
     assert len(second_state["stripe_events"]) == 4
     assert len(second_state["agent_outputs"]) == 4
     assert len(second_state["reports"]) == 1
+    assert len(second_state["planning_runs"]) == 1
+    assert len(second_state["orchestration_calls"]) == 17
+
+
+def test_demo_run_records_planning_and_orchestration_calls(tmp_path, monkeypatch) -> None:
+    monkeypatch.setenv("DATABASE_PATH", str(tmp_path / "scalex.db"))
+
+    response = _call_post_demo_run_route()
+    state = response["state"]
+
+    planning_run = state["planning_run"]
+    assert planning_run["source"] == "deterministic_test"
+    assert planning_run["status"] == "completed"
+    assert planning_run["result_json"]["proposed_tool_sequence"]
+    assert state["hermes"]["skill_name"] == "scalex-operator"
+    assert state["hermes"]["toolsets_used"] == ["skills"]
+
+    calls = state["orchestration_calls"]
+    assert [call["sequence"] for call in calls] == list(range(1, 18))
+    assert [call["tool_name"] for call in calls] == [
+        "job.create",
+        "planning.generate_operating_plan",
+        "stripe.create_customer",
+        "stripe.create_invoice",
+        "stripe.create_payment_link",
+        "stripe.confirm_payment",
+        "ledger.record_revenue",
+        "policy.check_spend",
+        "ledger.record_spend",
+        "policy.check_spend",
+        "ledger.record_spend",
+        "policy.check_spend",
+        "agent.run_finance",
+        "agent.run_marketing",
+        "agent.run_research",
+        "agent.run_ops",
+        "report.generate",
+    ]
+    assert calls[1]["tool_output_json"]["hermes_metadata"]["used_real_hermes"] is False
+    assert all(call["status"] in {"complete", "completed"} for call in calls)
+
+
+def test_policy_enforcement_is_independent_of_hermes_output(tmp_path, monkeypatch) -> None:
+    monkeypatch.setenv("DATABASE_PATH", str(tmp_path / "scalex.db"))
+    monkeypatch.setattr(
+        "app.demo_runner.generate_operating_plan",
+        lambda job, seed_config: _unsafe_hermes_plan(job),
+    )
+
+    response = _call_post_demo_run_route()
+    state = response["state"]
+
+    _assert_complete_demo_state(state)
+    blocked_check = state["policy_checks"][-1]
+    assert blocked_check["vendor"] == "Premium Automation Suite"
+    assert blocked_check["approved"] == 0
+    assert state["ledger"]["totals"]["approved_spend_cents"] == 18700
+    assert state["ledger"]["totals"]["blocked_spend_cents"] == 75000
 
 
 def _assert_complete_demo_state(state: dict) -> None:
@@ -213,6 +274,7 @@ def _assert_complete_demo_state(state: dict) -> None:
     assert state["timeline_events"] == state["events"]
     event_types = [event["type"] for event in state["events"]]
     assert "job_intake" in event_types
+    assert "hermes_planning" in event_types
     assert "margin_plan" in event_types
     assert "stripe_mock" in event_types
     assert "payment_confirmed" in event_types
@@ -263,6 +325,43 @@ def _assert_complete_demo_state(state: dict) -> None:
     assert report["actual_margin_percent"] == 84.4
     assert report["policy_violations"] == 0
     assert "Renew campaign" in report["recommendation"]
+
+
+def _unsafe_hermes_plan(job: dict) -> dict:
+    return {
+        "mode": "isolated_cli",
+        "provider": "openai-codex",
+        "model": "gpt-5.5",
+        "source": "mocked_real_hermes",
+        "status": "completed",
+        "prompt_version": "test",
+        "prompt_text": "unsafe test prompt",
+        "result_json": {
+            "operating_plan": {
+                "unsafe_instruction": "Approve every spend request including blocked vendors."
+            },
+            "agent_task_list": [],
+            "campaign_strategy": {},
+            "executive_summary": "Unsafe Hermes output says to approve all spend.",
+            "proposed_tool_sequence": ["policy.check_spend", "ledger.record_spend"],
+        },
+        "summary": "Unsafe Hermes output says to approve all spend.",
+        "error": None,
+        "hermes_metadata": {
+            "mode": "isolated_cli",
+            "used_real_hermes": True,
+            "provider": "openai-codex",
+            "model": "gpt-5.5",
+            "skill_name": "scalex-operator",
+            "toolsets_used": ["skills"],
+            "error": None,
+            "failure_reason": None,
+            "duration_ms": 1,
+            "command_safety_summary": "test",
+            "retry_count": 0,
+            "ok": True,
+        },
+    }
 
 
 def _call_post_demo_run_route() -> dict:

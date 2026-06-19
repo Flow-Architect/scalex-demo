@@ -463,3 +463,40 @@ Update ScaleX product prototype roadmap
 
 Next:
 - Goal 6 - Wire ScaleX to the isolated Hermes brain/orchestration install.
+
+---
+
+## 2026-06-19 - Goal 6: Isolated Hermes Agent skill-backed orchestration
+
+Completed:
+- Added isolated Hermes config support for CLI path, home, provider, model, timeout, real/test mode, output cap, skill name, skill source path, and toolsets.
+- Added repo-owned Hermes skill source at `hermes/skills/scalex-operator/SKILL.md`.
+- Wired product-mode planning to the real ScaleX-isolated Hermes Agent CLI.
+- Constrained the Hermes planning invocation to `--toolsets skills` and `--skills scalex-operator`.
+- Preserved deterministic planning only for automated tests and `HERMES_TEST_MODE=true`.
+- Added strict JSON planning with one repair retry.
+- Added SQLite `planning_runs` and `orchestration_calls` tables.
+- Added repository helpers for planning runs and orchestration calls.
+- Routed `POST /api/demo/run` through the Hermes-backed orchestration path.
+- Recorded ordered orchestration calls for job creation, Hermes planning, Stripe-shaped records, revenue ledger, policy checks, spend ledger records, agent outputs, and report generation.
+- Kept ScaleX code as the authority for policy, payment-shaped records, ledger writes, and reports.
+- Added API state fields for `planning_runs`, `planning_run`, `orchestration_calls`, and `hermes`.
+- Added frontend Hermes Brain / Orchestration panel showing real-Hermes status, provider/model, skill/tool context, planning result, proposed sequence, ordered tool calls, and error state.
+- Added backend tests for Hermes command construction, test-mode fallback, planning/orchestration persistence, demo-run completion, unchanged economics, and policy independence from Hermes output.
+- Updated README, docs, STATUS.md, TASKS.md, DECISIONS.md, and CHANGELOG.md.
+
+Verified:
+- Inspected isolated Hermes `tools --help`, `skills --help`, `profile --help`, root `--help`, and `-z --help` behavior.
+- Inspected `hermes tools list --platform cli`; ScaleX uses `--toolsets skills` to avoid broad default CLI toolsets for the planning call.
+- Synced `scalex-operator` into `/home/ascabrya/.scalex-hermes/home/skills/scalex-operator`.
+- Ran product path with `HERMES_TEST_MODE=false` and `HERMES_REQUIRE_REAL=true`.
+- `POST /api/demo/run` completed through real Hermes and returned `used_real_hermes=true`, `provider=openai-codex`, `model=gpt-5.5`, `skill_name=scalex-operator`, and `toolsets_used=["skills"]`.
+- Product response included one real-Hermes `planning_run` and 17 ordered `orchestration_calls`.
+- Headless Chrome verified the dashboard at `http://127.0.0.1:5174` rendered real Hermes proof, skill/tool context, ordered call count, and unchanged final economics.
+- `./scripts/test.sh` passed with 30 backend tests and a successful Vite production build.
+
+Suggested commit message:
+Wire isolated Hermes skill orchestration
+
+Next:
+- Goal 7 - Stripe Test Mode through the orchestration layer.

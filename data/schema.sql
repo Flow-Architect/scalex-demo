@@ -25,6 +25,46 @@ CREATE TABLE IF NOT EXISTS events (
   FOREIGN KEY(job_id) REFERENCES jobs(id) ON DELETE CASCADE
 );
 
+CREATE TABLE IF NOT EXISTS planning_runs (
+  id TEXT PRIMARY KEY,
+  job_id TEXT NOT NULL,
+  mode TEXT NOT NULL,
+  provider TEXT NOT NULL,
+  model TEXT NOT NULL,
+  source TEXT NOT NULL,
+  status TEXT NOT NULL,
+  prompt_version TEXT NOT NULL,
+  prompt_text TEXT NOT NULL,
+  result_json TEXT,
+  summary TEXT,
+  error TEXT,
+  created_at TEXT NOT NULL,
+  completed_at TEXT,
+  FOREIGN KEY(job_id) REFERENCES jobs(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS orchestration_calls (
+  id TEXT PRIMARY KEY,
+  job_id TEXT NOT NULL,
+  planning_run_id TEXT,
+  sequence INTEGER NOT NULL,
+  tool_name TEXT NOT NULL,
+  tool_input_json TEXT NOT NULL,
+  tool_output_json TEXT,
+  status TEXT NOT NULL,
+  duration_ms INTEGER NOT NULL,
+  error TEXT,
+  created_at TEXT NOT NULL,
+  FOREIGN KEY(job_id) REFERENCES jobs(id) ON DELETE CASCADE,
+  FOREIGN KEY(planning_run_id) REFERENCES planning_runs(id) ON DELETE SET NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_planning_runs_job_created
+  ON planning_runs(job_id, created_at);
+
+CREATE INDEX IF NOT EXISTS idx_orchestration_calls_job_sequence
+  ON orchestration_calls(job_id, sequence);
+
 CREATE TABLE IF NOT EXISTS ledger_entries (
   id TEXT PRIMARY KEY,
   job_id TEXT NOT NULL,

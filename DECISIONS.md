@@ -40,6 +40,7 @@
 - Use the ScaleX-isolated laptop Hermes install for Hermes brain/orchestration work:
   - code: /home/ascabrya/.scalex-hermes/hermes-agent
   - home/config/auth: /home/ascabrya/.scalex-hermes/home
-- GPT-5.5 Auth should run through isolated Hermes for planning/reasoning, with deterministic fallback.
+- GPT-5.5 Auth runs through isolated Hermes for product-mode planning/reasoning, with deterministic fallback only for tests or `HERMES_TEST_MODE=true`.
+- ScaleX's Hermes skill source lives in the repo at hermes/skills/scalex-operator/SKILL.md and is synced into the isolated Hermes home for product-mode `--skills scalex-operator` runs.
 - Stripe test mode through the orchestration layer is the target payment proof, with local fallback.
 - NemoClaw or a policy safety layer is the target spend governance path, with the local policy engine as fallback.

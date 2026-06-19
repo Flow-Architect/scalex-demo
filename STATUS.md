@@ -5,141 +5,98 @@ Last updated: 2026-06-19
 ## Verified current state
 
 - Project folder exists at /home/ascabrya/dev/scalex-demo.
-- Last completed implementation goal: Goal 5 - frontend dashboard, browser verification fixes, and Harbor Fleet Services cleanup.
-- Goal 5 is complete.
-- Current documentation goal: product-prototype roadmap and handoff update.
-- ScaleX is positioned as a working product-style prototype for profit-aware agent operations in service workflows.
-- Harbor Fleet Services is the sample workflow; it is an example service run, not the whole product category.
-- README.md describes ScaleX as a working product-style prototype and uses http://127.0.0.1:5174 for the browser walkthrough.
-- Laptop repo state was clean and current at the start of this documentation goal.
-- .gitignore exists and ignores local env files, SQLite database files, logs, venvs, node_modules, frontend build output, and recordings.
-- .env.example exists with sandbox defaults, including FRONTEND_PORT=5174, STRIPE_LIVE_MODE=false, and STRIPE_MOCK_MODE=true.
-- data/schema.sql exists with the local SQLite ledger tables, including reports.blocked_spend_cents.
-- data/seed.json exists with synthetic Harbor Fleet Services sample data.
-- policies/scalex-policy.json exists with local product-loop policy rules.
-- agents/ contains Finance, Marketing, Research, and Ops role placeholders.
-- docs/ contains product, architecture, walkthrough, and submission documentation.
-- FastAPI backend exposes:
-  - GET /health
-  - GET /api/health
-  - POST /api/demo/reset
-  - POST /api/demo/seed
-  - POST /api/demo/run
-  - POST /api/demo/mark-paid
-  - POST /api/demo/spend-check
-  - GET /api/demo/state
-- Backend CORS allows the local Vite frontend origins:
-  - http://127.0.0.1:5173
-  - http://localhost:5173
-  - http://127.0.0.1:5174
-  - http://localhost:5174
-- Backend CORS allows GET, POST, and OPTIONS for local browser preflights.
-- Frontend API client defaults to http://127.0.0.1:8787 unless VITE_API_BASE_URL overrides it.
-- Vite dev server defaults to port 5174 with strictPort enabled.
-- scripts/dev.sh starts both backend and frontend by default:
-  - backend: http://127.0.0.1:8787
-  - frontend: http://127.0.0.1:5174
-- scripts/dev.sh passes --strictPort so a frontend port conflict fails visibly instead of silently moving to another port.
-- scripts/dev.sh can start only the backend with SCALEX_BACKEND_ONLY=true.
-- scripts/setup.sh installs backend Python dependencies and frontend npm dependencies.
-- scripts/test.sh runs backend pytest and frontend npm build.
-- POST /api/demo/reset creates a fresh local SQLite database at data/scalex.db.
-- POST /api/demo/seed loads the synthetic Harbor Fleet Services job from data/seed.json.
-- POST /api/demo/mark-paid records a local sandbox revenue ledger entry for the seeded $1,200 job invoice and creates a payment-confirmed event without calling Stripe.
-- POST /api/demo/spend-check persists a policy_check for every spend request.
-- Approved spend requests create spend ledger entries.
-- Blocked spend requests do not create spend ledger entries.
-- Pre-payment prerequisite blocks still create policy_check records and events, but they do not create spend ledger entries or count toward blocked_spend_cents.
-- POST /api/demo/run resets and rebuilds the complete compressed local product loop:
-  - seeds the Harbor Fleet Services job
-  - records job intake, margin plan, payment gate, local fallback Stripe-shaped payment records, policy, agent work, profit report, and job complete timeline events
-  - creates local fallback Stripe-shaped records for customer, invoice, payment link, and payment confirmation
-  - marks local sandbox payment confirmed
-  - approves $89 Local Ads API spend
-  - approves $98 Design Asset Pack spend
-  - blocks $750 Premium Automation Suite spend
-  - creates deterministic Finance, Marketing, Research, and Ops outputs
-  - creates the final profit report
-  - marks the job complete
-- GET /api/demo/state returns job, jobs, events, timeline_events, local fallback payment records, ledger entries, ledger totals, policy checks, agent outputs, reports, and the latest final report.
-- Frontend dashboard exists at frontend/src/App.tsx and connected components.
-- Frontend dashboard displays:
-  - product header and service workflows positioning
-  - backend health/status
-  - Run Demo Job, Reset Demo, and Refresh controls
-  - active Harbor Fleet Services job summary
-  - revenue, approved spend, blocked unsafe spend, gross profit, and margin cards
-  - timeline events
-  - local fallback Stripe-shaped payment records
-  - ledger entries
-  - local policy guardrails and spend checks
-  - deterministic Finance, Marketing, Research, and Ops outputs
-  - final profit report and recommendation
-  - exact final cents values for report auditability
+- Last completed implementation goal: Goal 6 - isolated Hermes Agent skill-backed orchestration.
+- ScaleX is a working product-style prototype for profit-aware agent operations in service workflows.
+- Harbor Fleet Services remains the synthetic sample workflow.
+- Locked economics remain unchanged:
+  - revenue_cents: 120000
+  - approved_spend_cents: 18700
+  - blocked_spend_cents: 75000
+  - gross_profit_cents: 101300
+  - actual_margin_percent: 84.4
+  - policy_violations: 0
+- FastAPI backend exposes the existing demo endpoints plus Hermes/orchestration state through `GET /api/demo/state` and `POST /api/demo/run`.
+- `.env.example` contains product-mode isolated Hermes defaults:
+  - `HERMES_MODE=isolated_cli`
+  - `HERMES_CLI_PATH=/home/ascabrya/.scalex-hermes/hermes-agent/venv/bin/hermes`
+  - `HERMES_HOME=/home/ascabrya/.scalex-hermes/home`
+  - `HERMES_MODEL=gpt-5.5`
+  - `HERMES_PROVIDER=openai-codex`
+  - `HERMES_REQUIRE_REAL=true`
+  - `HERMES_TEST_MODE=false`
+  - `HERMES_SKILL_NAME=scalex-operator`
+  - `HERMES_TOOLSETS=skills`
+- Repo-owned Hermes skill source exists at `hermes/skills/scalex-operator/SKILL.md`.
+- The backend syncs that skill into the isolated Hermes home for product-mode `--skills scalex-operator` runs if needed.
+- Product-mode Hermes call uses:
+  - configured `HERMES_CLI_PATH`
+  - configured isolated `HERMES_HOME`
+  - `--ignore-rules`
+  - `--toolsets skills`
+  - `--skills scalex-operator`
+  - `--provider openai-codex`
+  - `-m gpt-5.5`
+  - `-z` / oneshot prompt
+- Hermes is used only for planning and proposed orchestration.
+- ScaleX code remains the authority for Stripe-shaped records, policy checks, ledger writes, agent outputs, and reports.
+- If Hermes fails in product mode, `POST /api/demo/run` returns a visible `hermes_failed` state with the planning error instead of pretending the run succeeded.
+- Tests default to `HERMES_TEST_MODE=true`; automated tests do not require real Hermes auth.
+- SQLite schema now includes:
+  - `planning_runs`
+  - `orchestration_calls`
+- API state now includes:
+  - `planning_runs`
+  - `planning_run`
+  - `orchestration_calls`
+  - `hermes`
+- Frontend dashboard includes a Hermes Brain / Orchestration panel showing:
+  - Hermes mode
+  - `used_real_hermes`
+  - provider/model
+  - skill/tool context
+  - planning result
+  - proposed sequence
+  - ordered recorded tool calls
+  - visible Hermes error state if present
 - Verified on 2026-06-19:
-  - ./scripts/test.sh passed with 26 backend tests and a successful Vite production build.
-  - Final cleanup rerun: ./scripts/test.sh passed with 26 backend tests and a successful Vite production build.
-  - git diff --check passed with no output.
-  - Live Stripe key grep check returned no matches outside excluded ignored/generated paths.
-  - A stale Vite process from this repo was occupying port 5174; it was stopped before verification.
-  - ./scripts/dev.sh started backend at http://127.0.0.1:8787 and frontend at http://127.0.0.1:5174.
-  - GET /api/health returned HTTP 200.
-  - Vite frontend at http://127.0.0.1:5174 returned HTTP 200.
-  - Served frontend source shows API base default http://127.0.0.1:8787.
-  - Served frontend source shows the updated service workflows positioning.
-  - CORS preflight from Origin http://127.0.0.1:5174 returned HTTP 200 for:
-    - GET /api/health
-    - GET /api/demo/state
-    - POST /api/demo/run
-    - POST /api/demo/reset
-  - CORS preflight to POST /api/demo/run returned HTTP 200 for all required origins:
-    - http://127.0.0.1:5173
-    - http://localhost:5173
-    - http://127.0.0.1:5174
-    - http://localhost:5174
-  - POST /api/demo/run returned HTTP 200 and the expected completed lifecycle state.
-  - Final cleanup POST /api/demo/run returned HTTP 200 with client_name "Harbor Fleet Services", business_type "Regional fleet maintenance provider", and job_name "30-day fleet brake inspection campaign".
-  - Final report values were revenue_cents 120000, approved_spend_cents 18700, blocked_spend_cents 75000, gross_profit_cents 101300, actual_margin_percent 84.4, policy_violations 0, and recommendation "Renew campaign for another 30 days".
-  - Final cleanup CORS preflight to POST /api/demo/run returned HTTP 200 for all required origins:
-    - http://127.0.0.1:5173
-    - http://localhost:5173
-    - http://127.0.0.1:5174
-    - http://localhost:5174
-  - Demo state includes Finance, Marketing, Research, and Ops agent outputs.
-  - Demo state includes fallback payment records with mode local_mock_test for customer, invoice, payment_link, and payment.
-  - data/scalex.db, frontend/node_modules, frontend/dist, backend/.venv, and backend/.pytest_cache remain ignored by git.
-- User-provided verified environment for this documentation goal:
-  - Fedora laptop repo at /home/ascabrya/dev/scalex-demo is current and tested.
-  - ./scripts/test.sh passed on the laptop before this documentation goal.
-  - ScaleX-isolated Hermes Agent v0.16.0 is installed:
-    - code: /home/ascabrya/.scalex-hermes/hermes-agent
-    - home/config/auth: /home/ascabrya/.scalex-hermes/home
-  - Isolated Hermes is configured with OpenAI Codex auth and gpt-5.5.
-  - The isolated Hermes readiness command returned SCALEX_HERMES_READY.
+  - Inspected isolated Hermes `tools --help`, `skills --help`, `profile --help`, root `--help`, and `-z --help` behavior.
+  - `hermes tools list --platform cli` showed broad default CLI toolsets; ScaleX product runs constrain the invocation to `--toolsets skills`.
+  - Synced `scalex-operator` skill into `/home/ascabrya/.scalex-hermes/home/skills/scalex-operator`.
+  - Started local product run with `HERMES_TEST_MODE=false` and `HERMES_REQUIRE_REAL=true`.
+  - `POST /api/demo/run` returned HTTP 200 and `status=completed`.
+  - Product-mode response showed `used_real_hermes=true`, `provider=openai-codex`, `model=gpt-5.5`, `skill_name=scalex-operator`, and `toolsets_used=["skills"]`.
+  - Product-mode response included one `planning_run` with `source=real_hermes`.
+  - Product-mode response included 17 ordered `orchestration_calls`.
+  - Headless Chrome verified the dashboard at `http://127.0.0.1:5174` rendered:
+    - `used_real_hermes=true`
+    - `openai-codex / gpt-5.5`
+    - `scalex-operator / skills`
+    - `17 calls`
+    - revenue cents 120000
+    - approved spend cents 18700
+    - gross profit cents 101300
+    - actual margin 84.4%
+  - `./scripts/test.sh` passed with 30 backend tests and a successful Vite production build.
 
 ## Not yet built
 
-- Real ScaleX-to-isolated-Hermes brain/orchestration integration.
-- GPT-5.5 planning through Hermes inside the ScaleX product loop.
-- Stripe test-mode support through the orchestration layer.
+- Real Stripe test-mode customer/invoice/payment-link/payment objects through the orchestration layer.
 - NemoClaw or external policy safety adapter.
-- Demo recording.
-- Final submission polish and recording assets.
+- Demo recording and final submission assets.
 
 ## Not yet verified
 
 - Fresh-clone setup on a clean machine.
 - Manual recorded browser walkthrough.
-- Screenshot/video capture quality.
-- Manual browser verification after the Harbor Fleet Services cleanup. Shell checks, served-source checks, CORS preflights, and backend API state are useful but are not a substitute for the required user-visible browser click-through before commit.
-- Actual GUI/headless browser DOM inspection from this shell; no browser or Playwright binary was available in the prior verification pass.
+- Screenshot/video capture quality for final submission.
 
 ## Deferred / revisit
 
-- Local fallback payment records remain in place for reliability and safety until Stripe test mode is wired.
+- Stripe steps still use clearly labeled local mock/test-style records for Goal 6.
+- Local policy engine remains the spend authority until a safe NemoClaw/policy safety adapter is explicitly wired.
 - Production Hermes, Windows Hermes config, Prometheus production data, homelab/OpenClaw, Recall memory, public deployment, live money, production data, and real customer workflows remain out of scope.
-- npm install reports one low-severity advisory in the frontend dependency tree; dependency audit remediation is deferred unless it affects demo safety or build reliability.
+- npm install previously reported one low-severity advisory in the frontend dependency tree; dependency audit remediation remains deferred unless it affects demo safety or build reliability.
 
 ## Current priority
 
-Goal 6 - wire ScaleX to the isolated Hermes brain/orchestration install while preserving deterministic fallback behavior and all sandbox safety rules.
+Goal 7 - Stripe Test Mode through the orchestration layer.

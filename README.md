@@ -32,7 +32,7 @@ ScaleX is not production software. It must stay local and sandbox-safe.
 - No production Hermes, Prometheus, OpenClaw, Recall, or xScaleOS connections.
 - Stripe is test/sandbox mode only, with local fallback records for reliability.
 - Policy enforcement currently runs through a local policy engine.
-- Hermes integration is next and must use the ScaleX-isolated laptop install, not production Hermes.
+- Hermes planning uses the ScaleX-isolated laptop install, not production Hermes.
 
 ## Current Prototype State
 
@@ -40,6 +40,9 @@ Implemented today:
 
 - FastAPI backend.
 - SQLite audit ledger at `data/scalex.db`.
+- Real ScaleX-isolated Hermes Agent planning through the `scalex-operator` skill.
+- Hermes invocation is constrained to the `skills` toolset for the planning call.
+- SQLite planning run and orchestration call audit records.
 - Local policy engine enforcing payment-before-spend, vendor, spend-cap, and margin-floor rules.
 - Local fallback Stripe-shaped records for customer, invoice, payment link, and payment confirmation.
 - Deterministic Finance, Marketing, Research, and Ops outputs.
@@ -48,12 +51,10 @@ Implemented today:
 
 Next target:
 
-- Wire ScaleX to the isolated Hermes brain/orchestration install on this laptop.
-- Use GPT-5.5 Auth through Hermes for planning/reasoning.
 - Add Stripe test-mode payment/invoice objects through the orchestration layer.
 - Add NemoClaw or a policy safety adapter if it can be done safely.
 
-The dashboard calls the local backend to run the complete compressed lifecycle and display job intake, planning, payment state, policy decisions, agent work, ledger entries, and the final profit report.
+The dashboard calls the local backend to run the complete compressed lifecycle and display job intake, Hermes planning, orchestration/tool calls, payment state, policy decisions, agent work, ledger entries, and the final profit report.
 
 ## Local Browser Demo
 
@@ -77,6 +78,17 @@ http://127.0.0.1:5174
 ```
 
 Click `Run Demo Job` to call `POST /api/demo/run` and rebuild the local sample workflow.
+
+Normal laptop runs use the ScaleX-isolated Hermes install:
+
+```text
+HERMES_HOME=/home/ascabrya/.scalex-hermes/home
+HERMES_CLI_PATH=/home/ascabrya/.scalex-hermes/hermes-agent/venv/bin/hermes
+HERMES_SKILL_NAME=scalex-operator
+HERMES_TOOLSETS=skills
+```
+
+The repo-owned Hermes skill source is `hermes/skills/scalex-operator/SKILL.md`. The backend syncs it into the isolated Hermes home before product-mode planning if needed. Automated tests set `HERMES_TEST_MODE=true` and do not require Hermes auth.
 
 Useful local endpoints:
 

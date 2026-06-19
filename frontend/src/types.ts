@@ -98,6 +98,60 @@ export interface AgentOutput {
   created_at: string;
 }
 
+export interface PlanningResult {
+  operating_plan: unknown;
+  agent_task_list: unknown[];
+  campaign_strategy: unknown;
+  executive_summary: string;
+  proposed_tool_sequence: string[];
+}
+
+export interface PlanningRun {
+  id: string;
+  job_id: string;
+  mode: string;
+  provider: string;
+  model: string;
+  source: string;
+  status: string;
+  prompt_version: string;
+  prompt_text: string;
+  result_json: PlanningResult | null;
+  summary: string | null;
+  error: string | null;
+  created_at: string;
+  completed_at: string | null;
+}
+
+export interface OrchestrationCall {
+  id: string;
+  job_id: string;
+  planning_run_id: string | null;
+  sequence: number;
+  tool_name: string;
+  tool_input_json: unknown;
+  tool_output_json: unknown;
+  status: string;
+  duration_ms: number;
+  error: string | null;
+  created_at: string;
+}
+
+export interface HermesMetadata {
+  mode: string;
+  used_real_hermes: boolean;
+  provider: string | null;
+  model: string | null;
+  skill_name: string | null;
+  toolsets_used: string[];
+  error: string | null;
+  failure_reason: string | null;
+  duration_ms: number;
+  command_safety_summary: string;
+  retry_count?: number;
+  ok?: boolean;
+}
+
 export interface ProfitReport {
   id: string;
   job_id: string;
@@ -141,6 +195,10 @@ export interface DemoState {
   };
   events: DemoEvent[];
   timeline_events: DemoEvent[];
+  planning_runs: PlanningRun[];
+  planning_run: PlanningRun | null;
+  orchestration_calls: OrchestrationCall[];
+  hermes: HermesMetadata;
   policy_checks: PolicyCheck[];
   stripe_events: StripeEvent[];
   agent_outputs: AgentOutput[];

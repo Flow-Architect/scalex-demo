@@ -36,6 +36,10 @@ class DemoStateResponse(BaseModel):
     policy: dict[str, Any]
     events: list[dict[str, Any]]
     timeline_events: list[dict[str, Any]]
+    planning_runs: list[dict[str, Any]]
+    planning_run: dict[str, Any] | None
+    orchestration_calls: list[dict[str, Any]]
+    hermes: dict[str, Any]
     policy_checks: list[dict[str, Any]]
     stripe_events: list[dict[str, Any]]
     agent_outputs: list[dict[str, Any]]

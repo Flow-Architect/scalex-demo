@@ -1,24 +1,33 @@
 """One-click local demo runner for the ScaleX lifecycle.
 
-The runner composes existing local services only. It resets and rebuilds
-the sandbox ledger without calling Stripe, GPT, Hermes, NemoClaw, or any
-external production system.
+The runner composes the ScaleX product loop. Product mode calls the
+ScaleX-isolated Hermes CLI for planning, then ScaleX code executes the
+payment-shaped, policy, ledger, agent, and report steps locally.
 """
 
 from __future__ import annotations
 
 from contextlib import closing
+import time
 from typing import Any
 
 from . import repository
 from .db import database_path, get_connection, reset_database
-from .services.agent_service import create_demo_agent_outputs
+from .services.agent_service import create_demo_agent_output, record_demo_agent_work_complete
+from .services.hermes_adapter import sanitize_text
 from .services.ledger_service import ledger_totals, usd_to_cents
 from .services.payment_service import mark_job_paid
+from .services.planning_service import generate_operating_plan
 from .services.policy_service import apply_spend_request
 from .services.seed_service import load_seed_config, seed_demo_database
 from .services.state_service import build_demo_state
-from .services.stripe_service import create_mock_stripe_lifecycle
+from .services.stripe_service import (
+    confirm_mock_stripe_payment,
+    create_mock_stripe_customer,
+    create_mock_stripe_invoice,
+    create_mock_stripe_payment_link,
+    record_mock_stripe_lifecycle_note,
+)
 
 
 FINAL_RECOMMENDATION = "Renew campaign for another 30 days"
@@ -31,15 +40,153 @@ def run_demo() -> dict[str, Any]:
 
     with closing(get_connection()) as connection:
         seed_config = load_seed_config()
+        sequence = 0
+
+        job_started_at = time.monotonic()
         job = seed_demo_database(connection, seed_config)
+        sequence = _record_orchestration_call(
+            connection,
+            job_id=job["id"],
+            sequence=sequence + 1,
+            tool_name="job.create",
+            tool_input_json={
+                "client_name": seed_config["clientName"],
+                "job_name": seed_config["jobName"],
+                "invoice_amount_cents": int(job["invoice_amount_cents"]),
+                "spend_cap_cents": int(job["spend_cap_cents"]),
+            },
+            tool_output_json={"job": job},
+            status="complete",
+            duration_ms=_duration_ms(job_started_at),
+        )
+
+        planning_started_at = time.monotonic()
+        planning_result = generate_operating_plan(job, seed_config)
+        planning_run = repository.create_planning_run(
+            connection,
+            job_id=job["id"],
+            mode=planning_result["mode"],
+            provider=planning_result["provider"],
+            model=planning_result["model"],
+            source=planning_result["source"],
+            status=planning_result["status"],
+            prompt_version=planning_result["prompt_version"],
+            prompt_text=planning_result["prompt_text"],
+            result_json=planning_result["result_json"],
+            summary=planning_result["summary"],
+            error=planning_result["error"],
+        )
+        planning_metadata = planning_result["hermes_metadata"]
+        sequence = _record_orchestration_call(
+            connection,
+            job_id=job["id"],
+            sequence=sequence + 1,
+            tool_name="planning.generate_operating_plan",
+            tool_input_json={
+                "job_id": job["id"],
+                "prompt_version": planning_result["prompt_version"],
+            },
+            tool_output_json={
+                "planning_run_id": planning_run["id"],
+                "planning_result": planning_result["result_json"],
+                "hermes_metadata": planning_metadata,
+            },
+            status=planning_result["status"],
+            duration_ms=int(planning_metadata.get("duration_ms") or _duration_ms(planning_started_at)),
+            error=planning_result["error"],
+            planning_run_id=planning_run["id"],
+        )
+        _record_planning_event(connection, job, planning_result, planning_run)
+
+        if planning_result["status"] != "completed":
+            repository.update_job_status(connection, job["id"], "hermes_error")
+            connection.commit()
+            state = build_demo_state(connection)
+            state["database"]["path"] = str(database_path())
+            state["database"]["exists"] = database_path().exists()
+            return {
+                "status": "hermes_failed",
+                "state": state,
+                "decision": {
+                    "error": planning_result["error"],
+                    "planning_run_id": planning_run["id"],
+                },
+            }
+
+        planning_run_id = planning_run["id"]
 
         _record_margin_plan(connection, job)
         _record_payment_gate_note(connection, job)
-        create_mock_stripe_lifecycle(connection, job)
-        mark_job_paid(connection, job)
-        _run_policy_spend_sequence(connection, job)
-        create_demo_agent_outputs(connection, job)
-        _create_final_report(connection, job)
+
+        sequence, _customer = _execute_tool(
+            connection,
+            job=job,
+            sequence=sequence,
+            planning_run_id=planning_run_id,
+            tool_name="stripe.create_customer",
+            tool_input_json={"job_id": job["id"], "client_name": job["client_name"]},
+            operation=lambda: create_mock_stripe_customer(connection, job),
+        )
+        sequence, _invoice = _execute_tool(
+            connection,
+            job=job,
+            sequence=sequence,
+            planning_run_id=planning_run_id,
+            tool_name="stripe.create_invoice",
+            tool_input_json={"job_id": job["id"], "amount_cents": int(job["invoice_amount_cents"])},
+            operation=lambda: create_mock_stripe_invoice(connection, job),
+        )
+        sequence, _payment_link = _execute_tool(
+            connection,
+            job=job,
+            sequence=sequence,
+            planning_run_id=planning_run_id,
+            tool_name="stripe.create_payment_link",
+            tool_input_json={"job_id": job["id"], "invoice_amount_cents": int(job["invoice_amount_cents"])},
+            operation=lambda: create_mock_stripe_payment_link(connection, job),
+        )
+        sequence, _payment = _execute_tool(
+            connection,
+            job=job,
+            sequence=sequence,
+            planning_run_id=planning_run_id,
+            tool_name="stripe.confirm_payment",
+            tool_input_json={"job_id": job["id"], "mode": "local_mock_test"},
+            operation=lambda: confirm_mock_stripe_payment(connection, job),
+        )
+        record_mock_stripe_lifecycle_note(connection, job)
+        sequence, _revenue = _execute_tool(
+            connection,
+            job=job,
+            sequence=sequence,
+            planning_run_id=planning_run_id,
+            tool_name="ledger.record_revenue",
+            tool_input_json={"job_id": job["id"], "amount_cents": int(job["invoice_amount_cents"])},
+            operation=lambda: mark_job_paid(connection, job),
+        )
+        sequence = _run_policy_spend_sequence(connection, job, sequence, planning_run_id)
+
+        for agent_name in ("Finance", "Marketing", "Research", "Ops"):
+            sequence, _agent_output = _execute_tool(
+                connection,
+                job=job,
+                sequence=sequence,
+                planning_run_id=planning_run_id,
+                tool_name=f"agent.run_{agent_name.lower()}",
+                tool_input_json={"job_id": job["id"], "agent_name": agent_name},
+                operation=lambda agent_name=agent_name: create_demo_agent_output(connection, job, agent_name),
+            )
+        record_demo_agent_work_complete(connection, job)
+
+        sequence, _report = _execute_tool(
+            connection,
+            job=job,
+            sequence=sequence,
+            planning_run_id=planning_run_id,
+            tool_name="report.generate",
+            tool_input_json={"job_id": job["id"]},
+            operation=lambda: _create_final_report(connection, job),
+        )
         repository.update_job_status(connection, job["id"], "complete")
         repository.create_event(
             connection,
@@ -99,27 +246,55 @@ def _record_payment_gate_note(connection, job: dict[str, Any]) -> None:
     connection.commit()
 
 
-def _run_policy_spend_sequence(connection, job: dict[str, Any]) -> list[dict[str, Any]]:
-    return [
-        apply_spend_request(
-            connection,
-            job=job,
-            vendor="Local Ads API",
-            requested_amount_cents=usd_to_cents(89),
-        ),
-        apply_spend_request(
-            connection,
-            job=job,
-            vendor="Design Asset Pack",
-            requested_amount_cents=usd_to_cents(98),
-        ),
-        apply_spend_request(
-            connection,
-            job=job,
-            vendor="Premium Automation Suite",
-            requested_amount_cents=usd_to_cents(750),
-        ),
+def _run_policy_spend_sequence(
+    connection,
+    job: dict[str, Any],
+    sequence: int,
+    planning_run_id: str,
+) -> int:
+    spend_requests = [
+        ("Local Ads API", usd_to_cents(89)),
+        ("Design Asset Pack", usd_to_cents(98)),
+        ("Premium Automation Suite", usd_to_cents(750)),
     ]
+    for vendor, amount_cents in spend_requests:
+        sequence, result = _execute_tool(
+            connection,
+            job=job,
+            sequence=sequence,
+            planning_run_id=planning_run_id,
+            tool_name="policy.check_spend",
+            tool_input_json={
+                "job_id": job["id"],
+                "vendor": vendor,
+                "requested_amount_cents": amount_cents,
+            },
+            operation=lambda vendor=vendor, amount_cents=amount_cents: apply_spend_request(
+                connection,
+                job=job,
+                vendor=vendor,
+                requested_amount_cents=amount_cents,
+            ),
+        )
+        ledger_entry = result.get("ledger_entry")
+        if ledger_entry is not None:
+            sequence = _record_orchestration_call(
+                connection,
+                job_id=job["id"],
+                sequence=sequence + 1,
+                tool_name="ledger.record_spend",
+                tool_input_json={
+                    "job_id": job["id"],
+                    "policy_check_id": result["policy_check"]["id"],
+                    "vendor": vendor,
+                    "amount_cents": amount_cents,
+                },
+                tool_output_json={"ledger_entry": ledger_entry},
+                status="complete",
+                duration_ms=0,
+                planning_run_id=planning_run_id,
+            )
+    return sequence
 
 
 def _create_final_report(connection, job: dict[str, Any]) -> dict[str, Any]:
@@ -172,3 +347,113 @@ Final margin: {totals['actual_margin_percent']}%
 Policy violations: 0
 
 Recommendation: {FINAL_RECOMMENDATION}."""
+
+
+def _execute_tool(
+    connection,
+    *,
+    job: dict[str, Any],
+    sequence: int,
+    planning_run_id: str,
+    tool_name: str,
+    tool_input_json: dict[str, Any],
+    operation,
+) -> tuple[int, Any]:
+    next_sequence = sequence + 1
+    started_at = time.monotonic()
+    try:
+        output = operation()
+    except Exception as exc:
+        _record_orchestration_call(
+            connection,
+            job_id=job["id"],
+            sequence=next_sequence,
+            tool_name=tool_name,
+            tool_input_json=tool_input_json,
+            tool_output_json=None,
+            status="failed",
+            duration_ms=_duration_ms(started_at),
+            error=sanitize_text(str(exc)),
+            planning_run_id=planning_run_id,
+        )
+        connection.commit()
+        raise
+
+    _record_orchestration_call(
+        connection,
+        job_id=job["id"],
+        sequence=next_sequence,
+        tool_name=tool_name,
+        tool_input_json=tool_input_json,
+        tool_output_json=output,
+        status="complete",
+        duration_ms=_duration_ms(started_at),
+        planning_run_id=planning_run_id,
+    )
+    return next_sequence, output
+
+
+def _record_orchestration_call(
+    connection,
+    *,
+    job_id: str,
+    sequence: int,
+    tool_name: str,
+    tool_input_json: dict[str, Any],
+    tool_output_json: Any,
+    status: str,
+    duration_ms: int,
+    error: str | None = None,
+    planning_run_id: str | None = None,
+) -> int:
+    repository.create_orchestration_call(
+        connection,
+        job_id=job_id,
+        planning_run_id=planning_run_id,
+        sequence=sequence,
+        tool_name=tool_name,
+        tool_input_json=tool_input_json,
+        tool_output_json=tool_output_json,
+        status=status,
+        duration_ms=duration_ms,
+        error=error,
+    )
+    connection.commit()
+    return sequence
+
+
+def _record_planning_event(
+    connection,
+    job: dict[str, Any],
+    planning_result: dict[str, Any],
+    planning_run: dict[str, Any],
+) -> dict[str, Any]:
+    metadata = planning_result["hermes_metadata"]
+    if planning_result["status"] == "completed":
+        used_real = bool(metadata.get("used_real_hermes"))
+        return repository.create_event(
+            connection,
+            job_id=job["id"],
+            type="hermes_planning",
+            title="Hermes operating plan generated",
+            detail=(
+                f"{planning_result['summary']} "
+                f"Planning run {planning_run['id']} used_real_hermes={str(used_real).lower()}."
+            ),
+            status="complete",
+            event_id="evt_harbor_hermes_planning",
+        )
+
+    return repository.create_event(
+        connection,
+        job_id=job["id"],
+        type="hermes_integration_error",
+        title="Hermes planning failed",
+        detail=planning_result["error"] or "Hermes failed before returning a usable plan.",
+        status="failed",
+        event_id="evt_harbor_hermes_error",
+    )
+
+
+def _duration_ms(started_at: float) -> int:
+    return round((time.monotonic() - started_at) * 1000)

@@ -7,6 +7,8 @@ from .config import REPO_ROOT, get_settings, resolve_repo_path
 TABLE_NAMES = (
     "jobs",
     "events",
+    "planning_runs",
+    "orchestration_calls",
     "ledger_entries",
     "policy_checks",
     "stripe_events",
