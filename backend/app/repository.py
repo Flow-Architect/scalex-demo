@@ -323,6 +323,7 @@ def create_report(
     job_id: str,
     revenue_cents: int,
     approved_spend_cents: int,
+    blocked_spend_cents: int,
     gross_profit_cents: int,
     margin_percent: float,
     policy_violations: int,
@@ -335,16 +336,17 @@ def create_report(
     connection.execute(
         """
         INSERT INTO reports (
-          id, job_id, revenue_cents, approved_spend_cents, gross_profit_cents,
+          id, job_id, revenue_cents, approved_spend_cents, blocked_spend_cents, gross_profit_cents,
           margin_percent, policy_violations, recommendation, report_markdown, created_at
         )
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """,
         (
             report_id,
             job_id,
             revenue_cents,
             approved_spend_cents,
+            blocked_spend_cents,
             gross_profit_cents,
             margin_percent,
             policy_violations,
@@ -384,3 +386,15 @@ def get_latest_report(connection: sqlite3.Connection, job_id: str | None = None)
             (job_id,),
         ).fetchone()
     return row_to_dict(row)
+
+
+def update_job_status(connection: sqlite3.Connection, job_id: str, status: str) -> dict:
+    connection.execute(
+        """
+        UPDATE jobs
+        SET status = ?, updated_at = ?
+        WHERE id = ?
+        """,
+        (status, utc_now(), job_id),
+    )
+    return get_job(connection, job_id)

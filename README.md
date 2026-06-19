@@ -31,19 +31,23 @@ ScaleX is not production software. It must stay local and sandbox-safe.
 - Policy enforcement starts as a local policy engine.
 - Hermes is represented by a local Hermes-style orchestration adapter unless a safe test integration is later implemented and documented.
 
-## Current Scaffold
+## Current Backend State
 
-This repository currently contains the project structure, configuration placeholders, demo data, policy file, backend skeleton, frontend skeleton, and helper scripts. The working backend ledger, policy engine, demo runner, and dashboard are planned in later goals.
+This repository contains the project structure, configuration placeholders, demo data, policy file, frontend skeleton, and helper scripts.
+
+The backend currently includes the local SQLite ledger, seed/reset/state endpoints, local policy-gated spend checks, local sandbox payment marker, one-click demo runner, mock/test-style Stripe records, deterministic agent outputs, and final profit report generation. The usable frontend dashboard is planned next.
 
 ## Local Setup Placeholder
 
-After the backend and frontend are implemented, the intended local flow is:
+Run the local backend flow with:
 
 ```bash
 cp .env.example .env
 ./scripts/setup.sh
 ./scripts/dev.sh
 ```
+
+Then call `POST /api/demo/run` on the local backend to rebuild the complete demo lifecycle.
 
 Run checks with:
 

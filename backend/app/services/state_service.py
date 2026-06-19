@@ -13,8 +13,14 @@ def build_demo_state(connection: sqlite3.Connection) -> dict[str, Any]:
     job_id = job["id"] if job else None
     ledger_entries = repository.list_ledger_entries(connection, job_id)
     policy_checks = repository.list_policy_checks(connection, job_id)
-    reports = repository.list_reports(connection, job_id)
+    totals = ledger_totals(job, ledger_entries, policy_checks)
+    reports = [
+        _enrich_report(report, totals)
+        for report in repository.list_reports(connection, job_id)
+    ]
+    latest_report = _enrich_report(repository.get_latest_report(connection, job_id), totals)
     seed_config = load_seed_config()
+    events = repository.list_events(connection, job_id)
 
     return {
         "mode": "local_sqlite",
@@ -25,18 +31,19 @@ def build_demo_state(connection: sqlite3.Connection) -> dict[str, Any]:
         "jobs": jobs,
         "ledger": {
             "entries": ledger_entries,
-            "totals": ledger_totals(job, ledger_entries, policy_checks),
+            "totals": totals,
         },
         "policy": {
             "config": load_policy_config(),
             "summary": policy_summary(),
         },
-        "events": repository.list_events(connection, job_id),
+        "events": events,
+        "timeline_events": events,
         "policy_checks": policy_checks,
         "stripe_events": repository.list_stripe_events(connection, job_id),
         "agent_outputs": repository.list_agent_outputs(connection, job_id),
         "reports": reports,
-        "report": repository.get_latest_report(connection, job_id),
+        "report": latest_report,
         "report_placeholder": {
             "status": "pending",
             "expected_revenue_cents": usd_to_cents(seed_config["invoiceAmountUsd"]),
@@ -46,3 +53,12 @@ def build_demo_state(connection: sqlite3.Connection) -> dict[str, Any]:
             "recommendation": "Renew campaign for another 30 days",
         },
     }
+
+
+def _enrich_report(report: dict[str, Any] | None, totals: dict[str, Any]) -> dict[str, Any] | None:
+    if report is None:
+        return None
+    enriched = dict(report)
+    enriched.setdefault("blocked_spend_cents", totals["blocked_spend_cents"])
+    enriched["actual_margin_percent"] = enriched.get("margin_percent", totals["actual_margin_percent"])
+    return enriched

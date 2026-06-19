@@ -4,7 +4,7 @@ import pytest
 from fastapi import HTTPException
 
 from app.db import TABLE_NAMES, get_connection, initialize_database, table_counts
-from app.main import demo_spend_check, demo_state, health, mark_demo_paid, reset_demo, seed_demo
+from app.main import app, demo_spend_check, demo_state, health, mark_demo_paid, reset_demo, seed_demo
 from app.repository import get_demo_job, list_events
 from app.schemas import SpendCheckRequest
 from app.services.seed_service import seed_demo_database
@@ -175,3 +175,98 @@ def test_spend_check_endpoint_accepts_requested_amount_cents_alias(tmp_path, mon
     )
 
     assert response["decision"]["requested_amount_cents"] == 8900
+
+
+def test_demo_run_endpoint_executes_complete_local_lifecycle(tmp_path, monkeypatch) -> None:
+    monkeypatch.setenv("DATABASE_PATH", str(tmp_path / "scalex.db"))
+
+    response = _call_post_demo_run_route()
+
+    assert response["status"] == "completed"
+    _assert_complete_demo_state(response["state"])
+
+
+def test_demo_run_endpoint_resets_and_rebuilds_state_on_repeated_runs(tmp_path, monkeypatch) -> None:
+    monkeypatch.setenv("DATABASE_PATH", str(tmp_path / "scalex.db"))
+
+    first_response = _call_post_demo_run_route()
+    second_response = _call_post_demo_run_route()
+
+    first_state = first_response["state"]
+    second_state = second_response["state"]
+    _assert_complete_demo_state(first_state)
+    _assert_complete_demo_state(second_state)
+    assert len(second_state["jobs"]) == 1
+    assert len(second_state["ledger"]["entries"]) == 3
+    assert len(second_state["policy_checks"]) == 3
+    assert len(second_state["stripe_events"]) == 4
+    assert len(second_state["agent_outputs"]) == 4
+    assert len(second_state["reports"]) == 1
+
+
+def _assert_complete_demo_state(state: dict) -> None:
+    assert state["job"]["client_name"] == "Harbor Auto Care"
+    assert state["job"]["job_name"] == "30-day brake service campaign"
+    assert state["job"]["status"] == "complete"
+    assert len(state["jobs"]) == 1
+
+    assert state["timeline_events"] == state["events"]
+    event_types = [event["type"] for event in state["events"]]
+    assert "job_intake" in event_types
+    assert "margin_plan" in event_types
+    assert "stripe_mock" in event_types
+    assert "payment_confirmed" in event_types
+    assert "agent_work" in event_types
+    assert "profit_report" in event_types
+    assert "job_complete" in event_types
+
+    stripe_events = state["stripe_events"]
+    assert [event["stripe_object_type"] for event in stripe_events] == [
+        "customer",
+        "invoice",
+        "payment_link",
+        "payment",
+    ]
+    assert all(event["mode"] == "local_mock_test" for event in stripe_events)
+    assert all(event["stripe_object_id"].startswith(("cus_mock", "in_mock", "plink_mock", "pay_mock")) for event in stripe_events)
+
+    ledger_entries = state["ledger"]["entries"]
+    assert [entry["entry_type"] for entry in ledger_entries] == ["revenue", "spend", "spend"]
+    assert [entry["amount_cents"] for entry in ledger_entries] == [120000, 8900, 9800]
+
+    totals = state["ledger"]["totals"]
+    assert totals["revenue_cents"] == 120000
+    assert totals["approved_spend_cents"] == 18700
+    assert totals["blocked_spend_cents"] == 75000
+    assert totals["gross_profit_cents"] == 101300
+    assert totals["actual_margin_percent"] == 84.4
+
+    policy_checks = state["policy_checks"]
+    assert [check["vendor"] for check in policy_checks] == [
+        "Local Ads API",
+        "Design Asset Pack",
+        "Premium Automation Suite",
+    ]
+    assert [check["approved"] for check in policy_checks] == [1, 1, 0]
+    assert [check["requested_amount_cents"] for check in policy_checks] == [8900, 9800, 75000]
+
+    agent_outputs = state["agent_outputs"]
+    assert [output["agent_name"] for output in agent_outputs] == ["Finance", "Marketing", "Research", "Ops"]
+    assert all(output["status"] == "complete" for output in agent_outputs)
+
+    report = state["report"]
+    assert report is not None
+    assert report["revenue_cents"] == 120000
+    assert report["approved_spend_cents"] == 18700
+    assert report["blocked_spend_cents"] == 75000
+    assert report["gross_profit_cents"] == 101300
+    assert report["actual_margin_percent"] == 84.4
+    assert report["policy_violations"] == 0
+    assert "Renew campaign" in report["recommendation"]
+
+
+def _call_post_demo_run_route() -> dict:
+    for route in app.routes:
+        if getattr(route, "path", None) == "/api/demo/run" and "POST" in getattr(route, "methods", set()):
+            return route.endpoint()
+    raise AssertionError("POST /api/demo/run route is not registered")

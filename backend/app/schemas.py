@@ -35,6 +35,7 @@ class DemoStateResponse(BaseModel):
     ledger: dict[str, Any]
     policy: dict[str, Any]
     events: list[dict[str, Any]]
+    timeline_events: list[dict[str, Any]]
     policy_checks: list[dict[str, Any]]
     stripe_events: list[dict[str, Any]]
     agent_outputs: list[dict[str, Any]]

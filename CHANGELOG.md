@@ -263,3 +263,42 @@ Fix blocked spend accounting for pre-payment blocks
 
 Next:
 - Goal 4 - One-Click Demo Runner.
+
+---
+
+## 2026-06-19 - Goal 4: One-Click Demo Runner
+
+Completed:
+- Implemented backend/app/demo_runner.py as the complete compressed local lifecycle runner.
+- Added POST /api/demo/run.
+- Added local mock/test-style Stripe event persistence for customer, invoice, payment link, and payment confirmation.
+- Added deterministic Finance, Marketing, Research, and Ops agent outputs.
+- Added final profit report creation with blocked_spend_cents persisted.
+- Added job completion status update and job_complete timeline event.
+- Added timeline_events to demo state as an explicit alias for events.
+- Enriched report responses with actual_margin_percent.
+- Added tests for POST /api/demo/run lifecycle behavior and repeated reset/rebuild behavior.
+- Kept the one-click path free of pre-payment policy_check blocks so final blocked_spend_cents remains 75000.
+- Updated STATUS.md and TASKS.md.
+
+Endpoints added or verified:
+- POST /api/demo/run
+- GET /api/demo/state
+
+Verified:
+- ./scripts/test.sh passed with 26 tests.
+- ./scripts/dev.sh started FastAPI on http://127.0.0.1:8787 with approval for local socket binding.
+- POST /api/demo/run returned status completed.
+- GET /api/demo/state showed one complete Harbor Auto Care job.
+- GET /api/demo/state showed mock Stripe object types customer, invoice, payment_link, and payment.
+- GET /api/demo/state showed ledger entries revenue, spend, spend.
+- GET /api/demo/state showed policy checks approved Local Ads API, approved Design Asset Pack, and blocked Premium Automation Suite.
+- GET /api/demo/state showed agent outputs Finance, Marketing, Research, and Ops.
+- GET /api/demo/state showed final report values revenue_cents 120000, approved_spend_cents 18700, blocked_spend_cents 75000, gross_profit_cents 101300, actual_margin_percent 84.4, policy_violations 0, and recommendation "Renew campaign for another 30 days".
+- data/scalex.db remained ignored by Git.
+
+Suggested commit message:
+Add one-click demo runner
+
+Next:
+- Goal 5 - Frontend Demo Dashboard.

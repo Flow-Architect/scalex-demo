@@ -78,6 +78,7 @@ CREATE TABLE IF NOT EXISTS reports (
   job_id TEXT NOT NULL,
   revenue_cents INTEGER NOT NULL,
   approved_spend_cents INTEGER NOT NULL,
+  blocked_spend_cents INTEGER NOT NULL,
   gross_profit_cents INTEGER NOT NULL,
   margin_percent REAL NOT NULL,
   policy_violations INTEGER NOT NULL,

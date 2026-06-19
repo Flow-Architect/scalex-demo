@@ -78,6 +78,7 @@ class ProfitReport:
     job_id: str
     revenue_cents: int
     approved_spend_cents: int
+    blocked_spend_cents: int
     gross_profit_cents: int
     margin_percent: float
     policy_violations: int

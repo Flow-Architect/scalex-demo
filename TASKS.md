@@ -2,31 +2,32 @@
 
 ## Current priority
 
-Run Codex /goal 4 — One-Click Demo Runner.
+Run Codex /goal 5 — Frontend Demo Dashboard.
 
 ## Next Codex goal
 
-Create a one-click compressed demo runner that executes the local ScaleX lifecycle from seeded job through final profit report.
+Create a usable local frontend dashboard for the completed backend one-click demo runner.
 
 ## Required outputs for next milestone
 
-- Implement backend/app/demo_runner.py around the existing reset, seed, mark-paid, policy, ledger, and state services.
-- Add POST /api/demo/run.
-- Demo runner should create a complete local timeline for:
-  - job intake
-  - margin plan
-  - local sandbox payment confirmation
-  - approved $89 Local Ads API spend using amount_cents: 8900
-  - approved $98 Design Asset Pack spend using amount_cents: 9800
-  - blocked $750 Premium Automation Suite spend using amount_cents: 75000
-  - deterministic Finance, Marketing, Research, and Ops outputs
-  - final profit report
-- Final report should show $1,200 revenue, $187 approved spend, $1,013 gross profit, about 84.4% margin, and $750 blocked unsafe spend.
-- Demo runner totals must keep prerequisite/payment-gate blocks out of blocked_spend_cents.
-- Final blocked_spend_cents must be 75000 even if the timeline includes a pre-payment Local Ads API block.
-- Tests should verify POST /api/demo/run returns full state with events, ledger entries, policy checks, agent outputs, and report.
-- Keep payment local/sandbox-only and do not add real Stripe calls.
-- Use the documented POST /api/demo/spend-check amount_cents contract when wiring runner/API calls.
+- Wire the Vite React TypeScript frontend to the existing backend API.
+- Add a primary "Run Demo" control that calls POST /api/demo/run.
+- Load and refresh state from GET /api/demo/state.
+- Display the Harbor Auto Care job summary.
+- Display metric cards for:
+  - $1,200 revenue
+  - $187 approved spend
+  - $750 blocked unsafe spend
+  - $1,013 gross profit
+  - 84.4% margin
+- Display timeline events from state.timeline_events or state.events.
+- Display mock Stripe/test-style records clearly as local/mock/test records.
+- Display policy checks for Local Ads API, Design Asset Pack, and Premium Automation Suite.
+- Display deterministic Finance, Marketing, Research, and Ops outputs.
+- Display the final profit report and renewal recommendation.
+- Keep copy truthful: local policy engine, local sandbox payment marker, mock/test-style Stripe records, deterministic agent outputs.
+- Add frontend build/test verification only as far as the current scaffold supports it.
+- Keep backend API compatibility intact.
 
 ## Do not work on yet
 
@@ -35,10 +36,9 @@ Create a one-click compressed demo runner that executes the local ScaleX lifecyc
 - Public deployment.
 - Real Prometheus/Hermes connection.
 - Homelab/OpenClaw connection.
-- Real NemoClaw integration unless local scaffold is already stable.
+- Real NemoClaw integration.
 - Complex auth.
 - Multi-client dashboard.
-- Frontend dashboard polish.
 - GPT-5.5 planning integration.
 - Real Hermes integration.
 - Real Stripe SDK/test-mode integration.

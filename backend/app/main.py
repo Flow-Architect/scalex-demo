@@ -2,6 +2,7 @@ from contextlib import closing
 
 from fastapi import FastAPI, HTTPException
 
+from .demo_runner import run_demo
 from .db import database_path, get_connection, initialize_database, reset_database
 from . import repository
 from .schemas import DemoActionResponse, DemoStateResponse, HealthResponse, SpendCheckRequest
@@ -45,6 +46,14 @@ def seed_demo() -> dict:
     with closing(get_connection()) as connection:
         seed_demo_database(connection)
     return {"status": "seeded", "state": _current_state()}
+
+
+@app.post("/api/demo/run", response_model=DemoActionResponse)
+def run_demo_endpoint() -> dict:
+    try:
+        return run_demo()
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
 
 
 @app.post("/api/demo/mark-paid", response_model=DemoActionResponse)
