@@ -58,6 +58,21 @@ class StripeEvent:
     status: str
     amount_cents: int
     mode: str
+    provider_mode: str | None
+    livemode: bool
+    raw_object_json: str | None
+    currency: str | None
+    customer_id: str | None
+    invoice_id: str | None
+    payment_link_id: str | None
+    payment_link_url: str | None
+    hosted_invoice_url: str | None
+    checkout_session_id: str | None
+    payment_intent_id: str | None
+    idempotency_key: str | None
+    diagnostic_reason: str | None
+    invoice_status: str | None
+    paid: bool | None
     created_at: str
 
 

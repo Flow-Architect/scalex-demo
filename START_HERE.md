@@ -4,7 +4,9 @@ You are working in:
 
 /home/ascabrya/dev/scalex-demo
 
-ScaleX is a working product-style prototype for profit-aware agent operations in service workflows.
+ScaleX is a live working product-style prototype for profit-aware agent operations in service
+workflows. Product mode is real-integration-first; test doubles are for automated tests,
+CI, offline development, or explicitly labeled diagnostics.
 
 Do not assume previous chat context. The repo files are the source of truth.
 
@@ -38,7 +40,8 @@ Job Intake
 
 ## Hard constraints
 
-- No live Stripe money.
+- No live Stripe money in Goal 7.
+- Future live-money Stripe work is allowed only through Verified Live Mode.
 - No real client data.
 - No Prometheus production data.
 - No Windows Hermes dependency.
@@ -47,6 +50,10 @@ Job Intake
 - Must run locally from this Fedora laptop repo.
 - Keep repo clean and GitHub-ready.
 - Do not claim real Hermes, NemoClaw, or Stripe integration unless it is actually wired and working.
+- Do not propose fallback-first implementation goals.
+- Do not say product mode must work when an integration is unavailable unless that means a visible
+  integration error or an explicitly configured test/diagnostic path.
+- Product acceptance criteria should prove real integration usage.
 - Use the ScaleX-isolated Hermes install for the next integration target:
   - code: /home/ascabrya/.scalex-hermes/hermes-agent
   - home/config/auth: /home/ascabrya/.scalex-hermes/home
@@ -61,7 +68,7 @@ At the start of a new Codex session:
 4. Recommend the next /goal.
 5. Wait for approval before editing.
 
-Current next recommended /goal: Goal 6 - Wire ScaleX to isolated Hermes brain/orchestration.
+Current next recommended /goal: Goal 8 - NemoClaw / policy safety integration and presentation.
 
 ## Session closeout requirement
 

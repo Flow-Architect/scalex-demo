@@ -1,4 +1,4 @@
-"""Local sandbox payment marker for the ScaleX demo."""
+"""Payment/revenue markers for the ScaleX demo."""
 
 import sqlite3
 from typing import Any
@@ -10,7 +10,16 @@ SANDBOX_REVENUE_ENTRY_ID = "led_harbor_sandbox_revenue"
 SANDBOX_PAYMENT_EVENT_ID = "evt_harbor_payment_confirmed"
 
 
-def mark_job_paid(connection: sqlite3.Connection, job: dict[str, Any]) -> dict[str, Any]:
+def mark_job_paid(
+    connection: sqlite3.Connection,
+    job: dict[str, Any],
+    *,
+    ledger_source: str = "local_sandbox_payment_marker",
+    ledger_label: str = "Harbor Fleet Services sandbox payment",
+    event_title: str = "Local sandbox payment confirmed",
+    event_detail: str | None = None,
+    event_status: str = "paid",
+) -> dict[str, Any]:
     try:
         ledger_entry = repository.get_ledger_entry(connection, SANDBOX_REVENUE_ENTRY_ID)
         created = False
@@ -19,9 +28,9 @@ def mark_job_paid(connection: sqlite3.Connection, job: dict[str, Any]) -> dict[s
             connection,
             job_id=job["id"],
             entry_type="revenue",
-            label="Harbor Fleet Services sandbox payment",
+            label=ledger_label,
             amount_cents=int(job["invoice_amount_cents"]),
-            source="local_sandbox_payment_marker",
+            source=ledger_source,
             entry_id=SANDBOX_REVENUE_ENTRY_ID,
         )
         created = True
@@ -30,12 +39,13 @@ def mark_job_paid(connection: sqlite3.Connection, job: dict[str, Any]) -> dict[s
         connection,
         job_id=job["id"],
         type="payment_confirmed",
-        title="Local sandbox payment confirmed",
-        detail=(
+        title=event_title,
+        detail=event_detail
+        or (
             "Recorded local sandbox revenue for the seeded $1,200 Harbor Fleet Services invoice. "
             "No Stripe call or real payment activity was performed."
         ),
-        status="paid",
+        status=event_status,
         event_id=SANDBOX_PAYMENT_EVENT_ID,
     )
     connection.commit()

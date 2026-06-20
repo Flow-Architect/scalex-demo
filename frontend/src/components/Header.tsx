@@ -34,7 +34,7 @@ export function Header({ health, loading }: HeaderProps) {
                 : "Backend offline"}
           </span>
           <span className="inline-flex rounded-md border border-emerald-200 bg-emerald-50 px-3 py-2 font-medium text-emerald-800">
-            Local sandbox only
+            Product test mode
           </span>
         </div>
       </div>

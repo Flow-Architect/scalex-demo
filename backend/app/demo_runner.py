@@ -22,11 +22,13 @@ from .services.policy_service import apply_spend_request
 from .services.seed_service import load_seed_config, seed_demo_database
 from .services.state_service import build_demo_state
 from .services.stripe_service import (
-    confirm_mock_stripe_payment,
-    create_mock_stripe_customer,
-    create_mock_stripe_invoice,
-    create_mock_stripe_payment_link,
-    record_mock_stripe_lifecycle_note,
+    StripeIntegrationError,
+    confirm_stripe_payment_status,
+    create_stripe_customer,
+    create_stripe_invoice,
+    payment_ledger_metadata,
+    prepare_stripe_payment_url,
+    record_stripe_lifecycle_note,
 )
 
 
@@ -118,43 +120,21 @@ def run_demo() -> dict[str, Any]:
         _record_margin_plan(connection, job)
         _record_payment_gate_note(connection, job)
 
-        sequence, _customer = _execute_tool(
-            connection,
-            job=job,
-            sequence=sequence,
-            planning_run_id=planning_run_id,
-            tool_name="stripe.create_customer",
-            tool_input_json={"job_id": job["id"], "client_name": job["client_name"]},
-            operation=lambda: create_mock_stripe_customer(connection, job),
-        )
-        sequence, _invoice = _execute_tool(
-            connection,
-            job=job,
-            sequence=sequence,
-            planning_run_id=planning_run_id,
-            tool_name="stripe.create_invoice",
-            tool_input_json={"job_id": job["id"], "amount_cents": int(job["invoice_amount_cents"])},
-            operation=lambda: create_mock_stripe_invoice(connection, job),
-        )
-        sequence, _payment_link = _execute_tool(
-            connection,
-            job=job,
-            sequence=sequence,
-            planning_run_id=planning_run_id,
-            tool_name="stripe.create_payment_link",
-            tool_input_json={"job_id": job["id"], "invoice_amount_cents": int(job["invoice_amount_cents"])},
-            operation=lambda: create_mock_stripe_payment_link(connection, job),
-        )
-        sequence, _payment = _execute_tool(
-            connection,
-            job=job,
-            sequence=sequence,
-            planning_run_id=planning_run_id,
-            tool_name="stripe.confirm_payment",
-            tool_input_json={"job_id": job["id"], "mode": "local_mock_test"},
-            operation=lambda: confirm_mock_stripe_payment(connection, job),
-        )
-        record_mock_stripe_lifecycle_note(connection, job)
+        try:
+            sequence, payment_status = _run_stripe_sequence(connection, job, sequence, planning_run_id)
+        except StripeIntegrationError as exc:
+            _record_stripe_error(connection, job, exc)
+            repository.update_job_status(connection, job["id"], "stripe_error")
+            connection.commit()
+            state = build_demo_state(connection)
+            state["database"]["path"] = str(database_path())
+            state["database"]["exists"] = database_path().exists()
+            return {
+                "status": "stripe_failed",
+                "state": state,
+                "decision": {"error": sanitize_text(str(exc))},
+            }
+
         sequence, _revenue = _execute_tool(
             connection,
             job=job,
@@ -162,7 +142,11 @@ def run_demo() -> dict[str, Any]:
             planning_run_id=planning_run_id,
             tool_name="ledger.record_revenue",
             tool_input_json={"job_id": job["id"], "amount_cents": int(job["invoice_amount_cents"])},
-            operation=lambda: mark_job_paid(connection, job),
+            operation=lambda: mark_job_paid(
+                connection,
+                job,
+                **payment_ledger_metadata(payment_status),
+            ),
         )
         sequence = _run_policy_spend_sequence(connection, job, sequence, planning_run_id)
 
@@ -195,7 +179,7 @@ def run_demo() -> dict[str, Any]:
             title="Harbor Fleet Services campaign package completed",
             detail=(
                 "Completed the compressed local demo lifecycle from intake through final profit report. "
-                "All payment and Stripe records are local sandbox/mock records."
+                "Stripe/payment records are labeled with their actual execution mode."
             ),
             status="complete",
             event_id=JOB_COMPLETE_EVENT_ID,
@@ -206,6 +190,62 @@ def run_demo() -> dict[str, Any]:
     state["database"]["path"] = str(database_path())
     state["database"]["exists"] = database_path().exists()
     return {"status": "completed", "state": state}
+
+
+def _run_stripe_sequence(
+    connection,
+    job: dict[str, Any],
+    sequence: int,
+    planning_run_id: str,
+) -> tuple[int, dict[str, Any]]:
+    sequence, customer = _execute_tool(
+        connection,
+        job=job,
+        sequence=sequence,
+        planning_run_id=planning_run_id,
+        tool_name="stripe.create_customer",
+        tool_input_json={"job_id": job["id"], "client_name": job["client_name"]},
+        operation=lambda: create_stripe_customer(connection, job),
+    )
+    sequence, invoice_result = _execute_tool(
+        connection,
+        job=job,
+        sequence=sequence,
+        planning_run_id=planning_run_id,
+        tool_name="stripe.create_invoice",
+        tool_input_json={
+            "job_id": job["id"],
+            "customer_id": customer.get("customer_id"),
+            "amount_cents": int(job["invoice_amount_cents"]),
+        },
+        operation=lambda: create_stripe_invoice(connection, job, customer),
+    )
+    sequence, invoice = _execute_tool(
+        connection,
+        job=job,
+        sequence=sequence,
+        planning_run_id=planning_run_id,
+        tool_name="stripe.prepare_payment_url",
+        tool_input_json={
+            "job_id": job["id"],
+            "invoice_id": invoice_result.get("invoice_id"),
+        },
+        operation=lambda: prepare_stripe_payment_url(connection, job, invoice_result),
+    )
+    sequence, payment_status = _execute_tool(
+        connection,
+        job=job,
+        sequence=sequence,
+        planning_run_id=planning_run_id,
+        tool_name="stripe.confirm_payment_status",
+        tool_input_json={
+            "job_id": job["id"],
+            "invoice_id": invoice.get("invoice_id"),
+        },
+        operation=lambda: confirm_stripe_payment_status(connection, job, invoice),
+    )
+    record_stripe_lifecycle_note(connection, job, payment_status)
+    return sequence, payment_status
 
 
 def _record_margin_plan(connection, job: dict[str, Any]) -> None:
@@ -244,6 +284,20 @@ def _record_payment_gate_note(connection, job: dict[str, Any]) -> None:
         event_id="evt_harbor_policy_payment_gate",
     )
     connection.commit()
+
+
+def _record_stripe_error(connection, job: dict[str, Any], exc: StripeIntegrationError) -> dict[str, Any]:
+    event = repository.create_event(
+        connection,
+        job_id=job["id"],
+        type="stripe_integration_error",
+        title="Stripe test-mode integration failed",
+        detail=sanitize_text(str(exc)),
+        status="failed",
+        event_id="evt_harbor_stripe_integration_error",
+    )
+    connection.commit()
+    return event
 
 
 def _run_policy_spend_sequence(

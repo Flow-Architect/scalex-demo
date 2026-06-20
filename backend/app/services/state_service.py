@@ -34,6 +34,10 @@ def build_demo_state(connection: sqlite3.Connection) -> dict[str, Any]:
         for call in repository.list_orchestration_calls(connection, job_id)
     ]
     hermes_metadata = _latest_hermes_metadata(latest_planning_run, orchestration_calls)
+    stripe_events = [
+        _decode_stripe_event(event)
+        for event in repository.list_stripe_events(connection, job_id)
+    ]
 
     return {
         "mode": "local_sqlite",
@@ -56,8 +60,9 @@ def build_demo_state(connection: sqlite3.Connection) -> dict[str, Any]:
         "planning_run": latest_planning_run,
         "orchestration_calls": orchestration_calls,
         "hermes": hermes_metadata,
+        "stripe": _stripe_summary(stripe_events, events),
         "policy_checks": policy_checks,
-        "stripe_events": repository.list_stripe_events(connection, job_id),
+        "stripe_events": stripe_events,
         "agent_outputs": repository.list_agent_outputs(connection, job_id),
         "reports": reports,
         "report": latest_report,
@@ -93,6 +98,15 @@ def _decode_orchestration_call(call: dict[str, Any]) -> dict[str, Any]:
     decoded = dict(call)
     decoded["tool_input_json"] = _decode_json(decoded.get("tool_input_json"))
     decoded["tool_output_json"] = _decode_json(decoded.get("tool_output_json"))
+    return decoded
+
+
+def _decode_stripe_event(event: dict[str, Any]) -> dict[str, Any]:
+    decoded = dict(event)
+    decoded["raw_object_json"] = _decode_json(decoded.get("raw_object_json"))
+    if decoded.get("paid") is not None:
+        decoded["paid"] = bool(decoded["paid"])
+    decoded["livemode"] = bool(decoded.get("livemode"))
     return decoded
 
 
@@ -151,3 +165,53 @@ def _latest_hermes_metadata(
         return fallback
 
     return default
+
+
+def _stripe_summary(
+    stripe_events: list[dict[str, Any]],
+    events: list[dict[str, Any]],
+) -> dict[str, Any]:
+    error_event = next(
+        (
+            event
+            for event in reversed(events)
+            if event["type"] == "stripe_integration_error"
+        ),
+        None,
+    )
+    latest_invoice = _latest_event_with(stripe_events, "invoice_id")
+    latest_customer = _latest_event_with(stripe_events, "customer_id")
+    latest_payment = _latest_event_with(stripe_events, "paid")
+    latest_diagnostic = _latest_event_with(stripe_events, "diagnostic_reason")
+    provider_modes = [
+        event.get("provider_mode") or event.get("mode")
+        for event in stripe_events
+        if event.get("provider_mode") or event.get("mode")
+    ]
+    stripe_mode = provider_modes[-1] if provider_modes else "not_configured"
+
+    return {
+        "stripe_mode": stripe_mode,
+        "used_real_stripe": any(mode == "stripe_test" for mode in provider_modes),
+        "livemode": any(bool(event.get("livemode")) for event in stripe_events) if stripe_events else None,
+        "customer_id": latest_customer.get("customer_id") if latest_customer else None,
+        "invoice_id": latest_invoice.get("invoice_id") if latest_invoice else None,
+        "hosted_invoice_url": latest_invoice.get("hosted_invoice_url") if latest_invoice else None,
+        "invoice_status": latest_invoice.get("invoice_status") if latest_invoice else None,
+        "paid": latest_payment.get("paid") if latest_payment else None,
+        "error": error_event["detail"] if error_event else None,
+        "diagnostic_reason": (
+            latest_diagnostic.get("diagnostic_reason") if latest_diagnostic else None
+        ),
+    }
+
+
+def _latest_event_with(events: list[dict[str, Any]], field: str) -> dict[str, Any] | None:
+    return next(
+        (
+            event
+            for event in reversed(events)
+            if event.get(field) not in (None, "")
+        ),
+        None,
+    )

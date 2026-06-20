@@ -8,7 +8,9 @@ Product: ScaleX
 Submission title: ScaleX: Profit-Aware Agent Operations for Service Workflows
 Repo path: /home/ascabrya/dev/scalex-demo
 
-ScaleX is a working product-style prototype in a sandbox. It is not production software.
+ScaleX is a live working product-style prototype. Product mode is real-integration-first in
+the appropriate environment; test doubles are for automated tests, CI, offline development,
+or explicitly labeled diagnostics.
 
 ## Core product loop
 
@@ -23,8 +25,8 @@ Job Intake
 ## Non-negotiable safety rules
 
 - Do not touch files outside this repo.
-- Do not use live Stripe keys.
-- Do not create live payments.
+- For Goal 7, do not use live Stripe keys and do not create live-money payments.
+- Future live-money Stripe work is allowed only through a documented Verified Live Mode.
 - Do not use real client data.
 - Do not connect to Prometheus production data.
 - Do not connect to Windows Hermes production config.
@@ -41,21 +43,21 @@ Allowed wording before an integration is wired:
 
 - local policy engine
 - Hermes-style orchestration adapter
-- local fallback Stripe-shaped event
+- Stripe test-double event for tests/diagnostics
 - sandbox product prototype
 
 Do not claim:
 
 - real NemoClaw integration
 - real Hermes production integration
-- live Stripe money movement
+- live Stripe money movement outside Verified Live Mode
 - real customer workflow
 
 unless that integration is actually wired, tested, and documented.
 
 ## Build rules
 
-- Working local product loop beats architectural perfection.
+- Working product-mode integration proof beats architectural perfection.
 - Keep scope small.
 - One client: Harbor Fleet Services.
 - One job: 30-day fleet brake inspection campaign.
@@ -83,15 +85,28 @@ Database:
 
 Policy:
 - NemoClaw or policy safety layer target
-- local policy engine fallback required
+- local policy engine may support tests/diagnostics until Goal 8 wires a real safety adapter
 
 AI planning:
-- GPT-5.5 Auth through isolated Hermes if available
-- deterministic fallback required
+- GPT-5.5 Auth through isolated Hermes in product mode
+- deterministic test-double planning required for automated tests
 
 Stripe:
-- test mode target
-- local fallback required
+- real Stripe test-mode API path is the Goal 7 product path
+- Stripe test-double mode is for tests/CI/explicit diagnostics only
+
+## Product-mode integration rules
+
+- Do not propose fallback-first implementation goals.
+- Do not say "the product loop must work when an integration is unavailable" unless the
+  behavior is a visible integration error or an explicitly configured test/diagnostic mode.
+- Product acceptance criteria should prove real integration usage.
+- Future Stripe work must distinguish:
+  - Stripe test mode: real Stripe API calls with test keys and no live-money movement.
+  - Stripe live-money mode: real Stripe live API capability.
+  - Verified Live Mode: the only allowed future path for live-money actions.
+- Hermes may plan and propose payment steps, but ScaleX code must enforce keys, modes,
+  caps, allowlists, confirmations, and audit records.
 
 Hermes:
 - use the ScaleX-isolated laptop Hermes install

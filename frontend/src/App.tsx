@@ -33,6 +33,7 @@ export default function App() {
   const totals = state?.ledger.totals ?? null;
   const report = state?.report ?? null;
   const placeholder = state?.report_placeholder ?? null;
+  const stripe = state?.stripe ?? null;
   const isBusy = busyAction !== null;
 
   const story = useMemo(
@@ -46,8 +47,12 @@ export default function App() {
         complete: state?.planning_run?.status === "completed",
       },
       {
-        label: "Mock payment confirmed",
-        complete: hasEvent(state, "payment_confirmed"),
+        label: "Stripe invoice created",
+        complete: Boolean(stripe?.invoice_id),
+      },
+      {
+        label: "Payment status recorded",
+        complete: hasEvent(state, "payment_confirmed") || stripe?.paid === false || stripe?.paid === true,
       },
       {
         label: "Safe spend approved",
@@ -66,7 +71,7 @@ export default function App() {
         complete: Boolean(report),
       },
     ],
-    [report, state],
+    [report, state, stripe],
   );
 
   useEffect(() => {
@@ -116,7 +121,11 @@ export default function App() {
       const response = await runDemo();
       setState(response.state);
       setHealth(await getHealth());
-      setNotice("Demo lifecycle completed locally.");
+      if (response.status === "completed") {
+        setNotice("Demo lifecycle completed.");
+      } else {
+        setError(String(response.decision?.error ?? `Run ended with status ${response.status}.`));
+      }
     } catch (caught) {
       setError(errorMessage(caught));
     } finally {
@@ -252,7 +261,7 @@ export default function App() {
             <MetricsCards totals={totals} report={report} placeholder={placeholder} />
             <div className="grid gap-6 lg:grid-cols-2">
               <JobIntakeCard job={state?.job ?? null} totals={totals} />
-              <StripePanel events={state?.stripe_events ?? []} />
+              <StripePanel events={state?.stripe_events ?? []} summary={state?.stripe ?? null} />
             </div>
           </div>
 

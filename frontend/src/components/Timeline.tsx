@@ -85,6 +85,9 @@ function iconForEvent(type: string) {
     case "policy_check":
       return ShieldCheck;
     case "stripe_mock":
+    case "stripe_test":
+    case "stripe_test_double":
+    case "stripe_integration_error":
     case "payment_confirmed":
       return CreditCard;
     case "agent_work":
@@ -100,7 +103,7 @@ function iconForEvent(type: string) {
 
 function statusClass(status: string): string {
   const base = "inline-flex w-fit rounded-md border px-2 py-1 text-xs font-medium";
-  if (status === "blocked") {
+  if (status === "blocked" || status === "failed") {
     return `${base} border-rose-200 bg-rose-50 text-rose-800`;
   }
   if (status === "paid" || status === "complete" || status === "approved") {

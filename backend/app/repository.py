@@ -396,6 +396,21 @@ def create_stripe_event(
     status: str,
     amount_cents: int,
     mode: str,
+    provider_mode: str | None = None,
+    livemode: bool = False,
+    raw_object_json: dict | list | None = None,
+    currency: str | None = None,
+    customer_id: str | None = None,
+    invoice_id: str | None = None,
+    payment_link_id: str | None = None,
+    payment_link_url: str | None = None,
+    hosted_invoice_url: str | None = None,
+    checkout_session_id: str | None = None,
+    payment_intent_id: str | None = None,
+    idempotency_key: str | None = None,
+    diagnostic_reason: str | None = None,
+    invoice_status: str | None = None,
+    paid: bool | None = None,
     event_id: str | None = None,
 ) -> dict:
     event_id = event_id or f"str_{uuid4().hex}"
@@ -403,11 +418,39 @@ def create_stripe_event(
     connection.execute(
         """
         INSERT INTO stripe_events (
-          id, job_id, stripe_object_type, stripe_object_id, status, amount_cents, mode, created_at
+          id, job_id, stripe_object_type, stripe_object_id, status, amount_cents, mode,
+          provider_mode, livemode, raw_object_json, currency, customer_id, invoice_id,
+          payment_link_id, payment_link_url, hosted_invoice_url, checkout_session_id,
+          payment_intent_id, idempotency_key, diagnostic_reason, invoice_status, paid,
+          created_at
         )
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """,
-        (event_id, job_id, stripe_object_type, stripe_object_id, status, amount_cents, mode, created_at),
+        (
+            event_id,
+            job_id,
+            stripe_object_type,
+            stripe_object_id,
+            status,
+            amount_cents,
+            mode,
+            provider_mode,
+            1 if livemode else 0,
+            _json_text(raw_object_json),
+            currency,
+            customer_id,
+            invoice_id,
+            payment_link_id,
+            payment_link_url,
+            hosted_invoice_url,
+            checkout_session_id,
+            payment_intent_id,
+            idempotency_key,
+            diagnostic_reason,
+            invoice_status,
+            None if paid is None else 1 if paid else 0,
+            created_at,
+        ),
     )
     return get_stripe_event(connection, event_id)
 

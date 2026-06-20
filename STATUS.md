@@ -1,88 +1,146 @@
 # STATUS - ScaleX
 
-Last updated: 2026-06-19
+Last updated: 2026-06-20
 
 ## Verified current state
 
 - Project folder exists at /home/ascabrya/dev/scalex-demo.
-- Last completed implementation goal: Goal 6 - isolated Hermes Agent skill-backed orchestration.
-- ScaleX is a working product-style prototype for profit-aware agent operations in service workflows.
-- Harbor Fleet Services remains the synthetic sample workflow.
-- Locked economics remain unchanged:
-  - revenue_cents: 120000
-  - approved_spend_cents: 18700
-  - blocked_spend_cents: 75000
-  - gross_profit_cents: 101300
-  - actual_margin_percent: 84.4
-  - policy_violations: 0
-- FastAPI backend exposes the existing demo endpoints plus Hermes/orchestration state through `GET /api/demo/state` and `POST /api/demo/run`.
-- `.env.example` contains product-mode isolated Hermes defaults:
-  - `HERMES_MODE=isolated_cli`
-  - `HERMES_CLI_PATH=/home/ascabrya/.scalex-hermes/hermes-agent/venv/bin/hermes`
-  - `HERMES_HOME=/home/ascabrya/.scalex-hermes/home`
-  - `HERMES_MODEL=gpt-5.5`
-  - `HERMES_PROVIDER=openai-codex`
-  - `HERMES_REQUIRE_REAL=true`
-  - `HERMES_TEST_MODE=false`
-  - `HERMES_SKILL_NAME=scalex-operator`
-  - `HERMES_TOOLSETS=skills`
-- Repo-owned Hermes skill source exists at `hermes/skills/scalex-operator/SKILL.md`.
-- The backend syncs that skill into the isolated Hermes home for product-mode `--skills scalex-operator` runs if needed.
-- Product-mode Hermes call uses:
-  - configured `HERMES_CLI_PATH`
-  - configured isolated `HERMES_HOME`
-  - `--ignore-rules`
-  - `--toolsets skills`
-  - `--skills scalex-operator`
-  - `--provider openai-codex`
-  - `-m gpt-5.5`
-  - `-z` / oneshot prompt
-- Hermes is used only for planning and proposed orchestration.
-- ScaleX code remains the authority for Stripe-shaped records, policy checks, ledger writes, agent outputs, and reports.
-- If Hermes fails in product mode, `POST /api/demo/run` returns a visible `hermes_failed` state with the planning error instead of pretending the run succeeded.
-- Tests default to `HERMES_TEST_MODE=true`; automated tests do not require real Hermes auth.
-- SQLite schema now includes:
-  - `planning_runs`
-  - `orchestration_calls`
-- API state now includes:
-  - `planning_runs`
-  - `planning_run`
-  - `orchestration_calls`
-  - `hermes`
-- Frontend dashboard includes a Hermes Brain / Orchestration panel showing:
-  - Hermes mode
-  - `used_real_hermes`
-  - provider/model
-  - skill/tool context
-  - planning result
-  - proposed sequence
-  - ordered recorded tool calls
-  - visible Hermes error state if present
-- Verified on 2026-06-19:
-  - Inspected isolated Hermes `tools --help`, `skills --help`, `profile --help`, root `--help`, and `-z --help` behavior.
-  - `hermes tools list --platform cli` showed broad default CLI toolsets; ScaleX product runs constrain the invocation to `--toolsets skills`.
-  - Synced `scalex-operator` skill into `/home/ascabrya/.scalex-hermes/home/skills/scalex-operator`.
-  - Started local product run with `HERMES_TEST_MODE=false` and `HERMES_REQUIRE_REAL=true`.
-  - `POST /api/demo/run` returned HTTP 200 and `status=completed`.
-  - Product-mode response showed `used_real_hermes=true`, `provider=openai-codex`, `model=gpt-5.5`, `skill_name=scalex-operator`, and `toolsets_used=["skills"]`.
-  - Product-mode response included one `planning_run` with `source=real_hermes`.
-  - Product-mode response included 17 ordered `orchestration_calls`.
-  - Headless Chrome verified the dashboard at `http://127.0.0.1:5174` rendered:
-    - `used_real_hermes=true`
-    - `openai-codex / gpt-5.5`
-    - `scalex-operator / skills`
-    - `17 calls`
-    - revenue cents 120000
-    - approved spend cents 18700
-    - gross profit cents 101300
-    - actual margin 84.4%
-  - `./scripts/test.sh` passed with 30 backend tests and a successful Vite production build.
+- Latest committed baseline before this goal: `76bb8e5 Wire isolated Hermes skill orchestration`.
+- Last completed uncommitted implementation goal: Goal 7 - real Stripe test-mode invoice/payment flow through orchestration.
+- ScaleX is a live working product-style prototype for profit-aware agent operations in service workflows.
+- Product mode is real-integration-first:
+  - real isolated Hermes Agent for planning/orchestration proposals
+  - real Stripe test-mode API calls for Goal 7 payment/invoice records
+  - SQLite as the audit ledger
+  - local policy engine until Goal 8 wires a real NemoClaw/NemoClaw-style safety adapter if safely available
+- Mock/fallback/test-double paths are for automated tests, CI, offline development, or explicitly labeled diagnostics only.
+- Product-mode real integration failures surface visible error states instead of silently falling back.
 
-## Not yet built
+## Goal 6 state
 
-- Real Stripe test-mode customer/invoice/payment-link/payment objects through the orchestration layer.
-- NemoClaw or external policy safety adapter.
-- Demo recording and final submission assets.
+- Goal 6 is complete.
+- Product-mode Hermes uses the ScaleX-isolated Hermes install with:
+  - provider: `openai-codex`
+  - model: `gpt-5.5`
+  - skill: `scalex-operator`
+  - toolsets: `skills`
+- Hermes plans and proposes orchestration only.
+- ScaleX code remains the authority for Stripe actions, policy checks, ledger writes, agent outputs, and reports.
+
+## Goal 7 state
+
+- Goal 7 is complete for real Stripe test-mode invoice creation/finalization.
+- Product mode now proves real isolated Hermes plus real Stripe test-mode invoice flow.
+- Added Stripe SDK dependency in `backend/requirements.txt`.
+- Installed the updated backend requirements into the repo-local venv for verification; `import stripe` succeeds with Stripe SDK `15.2.1`.
+- Added Stripe config for:
+  - `STRIPE_MODE=test`
+  - `STRIPE_SECRET_KEY`
+  - `STRIPE_TEST_MODE=true`
+  - `STRIPE_LIVE_MODE=false`
+  - `STRIPE_TEST_DOUBLE_MODE=false`
+  - `STRIPE_CURRENCY=usd`
+  - `STRIPE_IDEMPOTENCY_PREFIX=scalex-demo`
+  - deferred `STRIPE_SUCCESS_URL`, `STRIPE_CANCEL_URL`, and `STRIPE_WEBHOOK_SECRET`
+- Added future Verified Live Mode placeholders only:
+  - `STRIPE_LIVE_MONEY_ENABLED=false`
+  - `STRIPE_LIVE_REQUIRE_VERIFIED=true`
+  - `SCALEX_LIVE_MAX_AMOUNT_CENTS=0`
+  - `SCALEX_LIVE_ALLOWED_CUSTOMER_EMAILS=`
+  - `SCALEX_LIVE_CONFIRMATION_PHRASE=LIVE_MONEY_APPROVED`
+- Expanded `stripe_events` to store real Stripe test object details:
+  - `provider_mode`
+  - `livemode`
+  - `raw_object_json`
+  - `currency`
+  - `customer_id`
+  - `invoice_id`
+  - `payment_link_id`
+  - `payment_link_url`
+  - `hosted_invoice_url`
+  - `checkout_session_id`
+  - `payment_intent_id`
+  - `idempotency_key`
+  - `diagnostic_reason`
+  - `invoice_status`
+  - `paid`
+- Product-mode Stripe path now:
+  - rejects missing `STRIPE_SECRET_KEY`
+  - rejects live mode
+  - rejects future live-money mode
+  - rejects live Stripe keys
+  - rejects non-`sk_test_` keys for Goal 7
+  - creates a Stripe test customer
+  - creates a Stripe test invoice item
+  - creates and finalizes a Stripe test invoice
+  - stores hosted invoice URL, invoice status, paid state, idempotency keys, and sanitized raw objects
+  - asserts returned Stripe objects have `livemode=false`
+- Stripe test-double mode remains available only when `STRIPE_TEST_DOUBLE_MODE=true`.
+- Demo orchestration records Stripe steps as:
+  - `stripe.create_customer`
+  - `stripe.create_invoice`
+  - `stripe.prepare_payment_url`
+  - `stripe.confirm_payment_status`
+- If Stripe product mode is not configured or Stripe fails, `POST /api/demo/run` returns `status=stripe_failed`, sets the job to `stripe_error`, records the failed orchestration call, and exposes the sanitized error in API state.
+- Payment status is honest:
+  - Stripe-paid invoices can record Stripe-paid revenue.
+  - Open/unpaid finalized invoices are shown as unpaid.
+  - The compressed run may continue economics only as an explicitly labeled local test confirmation, not as a Stripe-paid invoice.
+- API state now includes a `stripe` summary with mode, `used_real_stripe`, `livemode`, customer ID, invoice ID, hosted invoice URL, invoice status, paid state, and visible error/diagnostic reason.
+- Frontend Stripe panel now shows real Stripe test mode vs test-double mode, object IDs, hosted invoice URL, `livemode=false`, invoice status, paid state, and error state.
+
+## Locked economics
+
+The locked sample workflow remains unchanged:
+
+- revenue_cents: 120000
+- approved_spend_cents: 18700
+- blocked_spend_cents: 75000
+- gross_profit_cents: 101300
+- actual_margin_percent: 84.4
+- policy_violations: 0
+
+## Verified on 2026-06-19
+
+- `./scripts/test.sh` passed with 39 backend tests and a successful Vite production build.
+- Product-mode Stripe misconfiguration probe passed with:
+  - `STRIPE_TEST_DOUBLE_MODE=false`
+  - `STRIPE_LIVE_MODE=false`
+  - no `STRIPE_SECRET_KEY` in the process environment
+  - response `status=stripe_failed`
+  - job status `stripe_error`
+  - `used_real_stripe=false`
+  - zero `stripe_events`
+  - failed orchestration call `stripe.create_customer`
+  - visible error: `STRIPE_SECRET_KEY is required for product-mode Stripe test integration.`
+- No local `.env` file was present, and the shell environment did not expose `STRIPE_SECRET_KEY`.
+- Stripe SDK import verification passed with installed version `15.2.1`.
+
+## Verified on 2026-06-20
+
+- Real full product-path verification passed with real isolated Hermes and real Stripe test mode.
+- Hermes proof:
+  - `used_real_hermes=True`
+  - `provider=openai-codex`
+  - `model=gpt-5.5`
+  - `skill=scalex-operator`
+- Stripe proof:
+  - `used_real_stripe=True`
+  - `stripe_mode=stripe_test`
+  - `livemode=False`
+  - real Stripe customer ID returned with `cus_` prefix
+  - real Stripe invoice ID returned with `in_` prefix
+  - `hosted_invoice_url_present=True`
+  - `hosted_invoice_url_host=invoice.stripe.com`
+  - `invoice_status=open`
+  - `paid=False`
+- Payment status remained honest:
+  - the Stripe test invoice is open and unpaid
+  - revenue/profit display remains the compressed-run business result
+  - ScaleX must not claim a Stripe-paid invoice unless Stripe reports `paid=True`
+- Final economics stayed unchanged:
+  - `gross_profit_cents=101300`
+  - `actual_margin_percent=84.4`
 
 ## Not yet verified
 
@@ -90,13 +148,21 @@ Last updated: 2026-06-19
 - Manual recorded browser walkthrough.
 - Screenshot/video capture quality for final submission.
 
+## Not yet built
+
+- NemoClaw or external policy safety adapter.
+- Verified Live Mode live-money execution.
+- Demo recording and final submission assets.
+
 ## Deferred / revisit
 
-- Stripe steps still use clearly labeled local mock/test-style records for Goal 6.
-- Local policy engine remains the spend authority until a safe NemoClaw/policy safety adapter is explicitly wired.
-- Production Hermes, Windows Hermes config, Prometheus production data, homelab/OpenClaw, Recall memory, public deployment, live money, production data, and real customer workflows remain out of scope.
+- Local policy engine remains the spend authority until Goal 8.
+- Stripe webhooks are deferred.
+- Checkout Session and Payment Link flows are deferred; Goal 7 uses invoice-first Stripe test mode.
+- Live-money payments are deferred to Verified Live Mode and are not implemented in Goal 7.
+- Production Hermes, Windows Hermes config, Prometheus production data, homelab/OpenClaw, Recall memory, public deployment, production data, and real customer workflows remain out of scope.
 - npm install previously reported one low-severity advisory in the frontend dependency tree; dependency audit remediation remains deferred unless it affects demo safety or build reliability.
 
 ## Current priority
 
-Goal 7 - Stripe Test Mode through the orchestration layer.
+Goal 8 - NemoClaw / policy safety integration and presentation.

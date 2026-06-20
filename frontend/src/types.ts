@@ -85,7 +85,35 @@ export interface StripeEvent {
   status: string;
   amount_cents: number;
   mode: string;
+  provider_mode: string | null;
+  livemode: boolean;
+  raw_object_json: unknown;
+  currency: string | null;
+  customer_id: string | null;
+  invoice_id: string | null;
+  payment_link_id: string | null;
+  payment_link_url: string | null;
+  hosted_invoice_url: string | null;
+  checkout_session_id: string | null;
+  payment_intent_id: string | null;
+  idempotency_key: string | null;
+  diagnostic_reason: string | null;
+  invoice_status: string | null;
+  paid: boolean | null;
   created_at: string;
+}
+
+export interface StripeSummary {
+  stripe_mode: string;
+  used_real_stripe: boolean;
+  livemode: boolean | null;
+  customer_id: string | null;
+  invoice_id: string | null;
+  hosted_invoice_url: string | null;
+  invoice_status: string | null;
+  paid: boolean | null;
+  error: string | null;
+  diagnostic_reason: string | null;
 }
 
 export interface AgentOutput {
@@ -199,6 +227,7 @@ export interface DemoState {
   planning_run: PlanningRun | null;
   orchestration_calls: OrchestrationCall[];
   hermes: HermesMetadata;
+  stripe: StripeSummary;
   policy_checks: PolicyCheck[];
   stripe_events: StripeEvent[];
   agent_outputs: AgentOutput[];

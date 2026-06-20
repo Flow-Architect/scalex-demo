@@ -1,12 +1,12 @@
 # ScaleX
 
-ScaleX is a working product-style prototype for profit-aware agent operations in service workflows.
+ScaleX is a live working product-style prototype for profit-aware agent operations in service workflows.
 
 Submission title: **ScaleX: Profit-Aware Agent Operations for Service Workflows**
 
 ScaleX is a profit-aware agent operations framework for service workflows. It lets an operator confirm revenue, plan work, spend only inside policy, coordinate agent outputs, and produce an auditable profit report.
 
-The product thesis is simple: a service team should be able to give an AI operator a paid job, a budget, and a margin floor, then see the operator invoice, control spend, coordinate work, and report profit without risking live money or production systems.
+The product thesis is simple: a service team should be able to give an AI operator a paid job, a budget, and a margin floor, then see the operator invoice, control spend, coordinate work, and report profit with real integrations in the appropriate environment.
 
 ## Sample Workflow
 
@@ -24,14 +24,16 @@ The locked sample run uses synthetic data only:
 
 ## Safety Boundary
 
-ScaleX is not production software. It must stay local and sandbox-safe.
+ScaleX is not production software. Product mode is real-integration-first, but each
+integration must run in the appropriate environment.
 
-- No live Stripe keys.
-- No live payments.
+- Goal 7 uses real Stripe test mode with `sk_test_...` keys and no live-money movement.
+- Live-money payments are a future capability only through Verified Live Mode.
 - No real client data.
 - No production Hermes, Prometheus, OpenClaw, Recall, or xScaleOS connections.
-- Stripe is test/sandbox mode only, with local fallback records for reliability.
-- Policy enforcement currently runs through a local policy engine.
+- Stripe test doubles are for automated tests, CI, local offline development, or explicitly labeled diagnostics.
+- Product-mode integration failures must surface visible errors.
+- Policy enforcement currently runs through a local policy engine until Goal 8 wires a real safety adapter if safely available.
 - Hermes planning uses the ScaleX-isolated laptop install, not production Hermes.
 
 ## Current Prototype State
@@ -44,15 +46,16 @@ Implemented today:
 - Hermes invocation is constrained to the `skills` toolset for the planning call.
 - SQLite planning run and orchestration call audit records.
 - Local policy engine enforcing payment-before-spend, vendor, spend-cap, and margin-floor rules.
-- Local fallback Stripe-shaped records for customer, invoice, payment link, and payment confirmation.
+- Real Stripe test-mode invoice flow through the orchestration layer.
+- Stripe test-double records are available for automated tests, CI, offline development, and diagnostics.
 - Deterministic Finance, Marketing, Research, and Ops outputs.
 - Vite React dashboard.
 - One-click Harbor Fleet Services sample run with the locked final report numbers.
 
 Next target:
 
-- Add Stripe test-mode payment/invoice objects through the orchestration layer.
-- Add NemoClaw or a policy safety adapter if it can be done safely.
+- Add NemoClaw or a NemoClaw-style policy safety adapter if it can be done safely.
+- Add future Verified Live Mode before any live-money Stripe capability.
 
 The dashboard calls the local backend to run the complete compressed lifecycle and display job intake, Hermes planning, orchestration/tool calls, payment state, policy decisions, agent work, ledger entries, and the final profit report.
 
@@ -77,7 +80,10 @@ Open:
 http://127.0.0.1:5174
 ```
 
-Click `Run Demo Job` to call `POST /api/demo/run` and rebuild the local sample workflow.
+Click `Run Demo Job` to call `POST /api/demo/run` and rebuild the sample workflow.
+In product mode, Stripe requires a local `.env` `sk_test_...` key and returns
+a visible Stripe integration error if test mode is not configured. Automated tests
+and CI use `STRIPE_TEST_DOUBLE_MODE=true`.
 
 Normal laptop runs use the ScaleX-isolated Hermes install:
 
@@ -119,7 +125,7 @@ Reset the demo state with:
 ./scripts/reset-demo.sh
 ```
 
-These commands are local-only. They must not use live Stripe mode or production service credentials.
+These commands must not use live Stripe mode or production service credentials for Goal 7.
 
 ## Core Product Loop
 

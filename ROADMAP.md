@@ -1,7 +1,7 @@
 # ScaleX Codex Roadmap
 
 > **Project path:** `/home/ascabrya/dev/scalex-demo/`
-> **Purpose:** Build a working product-style prototype in a sandbox.
+> **Purpose:** Build a live working product-style prototype with real integrations in the appropriate mode.
 > **Product:** **ScaleX — Profit-Aware Agent Operations for Service Workflows**
 > **Core product loop:** job intake → Hermes/GPT-5.5 planning → Stripe test invoice/payment flow → policy/NemoClaw-style spend approval → SQLite ledger/audit records → agent work → profit report.
 
@@ -13,12 +13,14 @@ Codex must follow these rules for the entire repo.
 
 ### Safety / Sandbox Rules
 
-- **Do not use live Stripe keys.** Only `sk_test_...` keys are allowed.
+- **For Goal 7, do not use live Stripe keys.** Stripe test mode requires `sk_test_...` keys.
+- **Future live-money Stripe work is allowed only through Verified Live Mode.**
 - **Do not touch Prometheus, xScaleOS, production Hermes, Windows Hermes, homelab OpenClaw, Recall memory, or real client files.**
 - **Do not commit secrets.** `.env`, `.env.local`, SQLite `.db` files, recordings, and logs must stay ignored.
 - **Use sample workflow data only.** The sample client is `Harbor Fleet Services`.
-- **No autonomous real-world payments.** All money movement is Stripe test mode or clearly labeled local ledger events.
-- **Do not claim real NemoClaw/Hermes/Stripe integration unless it is actually wired.** If local-only, label it clearly as `local policy engine`, `Hermes-style orchestration adapter`, or `local fallback Stripe-shaped event`.
+- **No autonomous real-world payments.** Goal 7 uses Stripe test mode only; future live-money actions must pass Verified Live Mode.
+- **Do not claim real NemoClaw/Hermes/Stripe integration unless it is actually wired.** If test-double or diagnostic-only, label it clearly.
+- **Product mode is real-integration-first.** If a real integration is unavailable in product mode, surface a visible integration error instead of silently falling back.
 
 ### Scope Rules
 
@@ -28,7 +30,7 @@ Codex must follow these rules for the entire repo.
 - Two spend checks: one approved, one blocked.
 - Four agents: Finance, Marketing, Research, Ops.
 - One final profit report.
-- Working local product loop beats architectural perfection.
+- Working product-mode integration proof beats architectural perfection.
 
 ### Git Rules
 
@@ -72,10 +74,10 @@ Use a reliable, boring stack optimized for fast local development.
 Frontend: Vite + React + TypeScript + Tailwind
 Backend: FastAPI + Python sqlite3
 Database: SQLite file in ./data/scalex.db
-Hermes brain: ScaleX-isolated laptop Hermes install
-AI planning: GPT-5.5 Auth through Hermes, with deterministic fallback
-Stripe: Stripe test mode objects through the orchestration layer, with local fallback
-Policy: NemoClaw or policy safety layer, with local policy engine fallback
+Hermes brain: real ScaleX-isolated laptop Hermes install in product mode
+AI planning: GPT-5.5 Auth through Hermes, with deterministic test-double planning for tests only
+Stripe: real Stripe test-mode objects through the orchestration layer for Goal 7
+Policy: NemoClaw or NemoClaw-style safety adapter target, with local policy support for tests/diagnostics
 ```
 
 ### Why SQLite?
@@ -187,7 +189,7 @@ BACKEND_PORT=8787
 FRONTEND_PORT=5174
 DATABASE_PATH=./data/scalex.db
 
-# Reasoning brain
+# Reasoning brain compatibility
 MODEL_PROVIDER=openai
 SCALEX_REASONING_MODEL=
 OPENAI_API_KEY=
@@ -200,11 +202,24 @@ HERMES_BIN=
 HERMES_BASE_URL=
 HERMES_API_KEY=
 
-# Stripe test mode only
-STRIPE_SECRET_KEY=sk_test_xxx
-STRIPE_WEBHOOK_SECRET=whsec_xxx
+# Stripe product path for Goal 7: real Stripe test-mode API calls
+STRIPE_MODE=test
+STRIPE_SECRET_KEY=
+STRIPE_TEST_MODE=true
 STRIPE_LIVE_MODE=false
-STRIPE_MOCK_MODE=true
+STRIPE_TEST_DOUBLE_MODE=false
+STRIPE_CURRENCY=usd
+STRIPE_IDEMPOTENCY_PREFIX=scalex-demo
+STRIPE_SUCCESS_URL=
+STRIPE_CANCEL_URL=
+STRIPE_WEBHOOK_SECRET=
+
+# Future Verified Live Mode placeholders only; Goal 7 does not execute live-money charges
+STRIPE_LIVE_MONEY_ENABLED=false
+STRIPE_LIVE_REQUIRE_VERIFIED=true
+SCALEX_LIVE_MAX_AMOUNT_CENTS=0
+SCALEX_LIVE_ALLOWED_CUSTOMER_EMAILS=
+SCALEX_LIVE_CONFIRMATION_PHRASE=LIVE_MONEY_APPROVED
 
 # Policy / NemoClaw
 POLICY_ENGINE=local
@@ -412,7 +427,7 @@ Sequence:
 1. Reset local DB state
 2. Create Harbor Fleet Services job
 3. Generate operating plan
-4. Create Stripe test customer / invoice / payment event or local fallback equivalents
+4. Create Stripe test customer and invoice through the orchestration layer
 5. Record $1,200 revenue ledger entry
 6. Request $89 spend and approve it
 7. Request $98 spend and approve it
@@ -472,7 +487,8 @@ A spend request is approved only if all checks pass:
 ```text
 Stripe live mode is false
 Invoice exists
-Payment is confirmed through Stripe test mode or a local fallback event
+Payment status is confirmed honestly through Stripe test mode; any compressed local test
+confirmation must be explicitly labeled and must not pretend a Stripe-paid invoice occurred.
 Vendor is allowed
 Vendor is not blocked
 Requested amount does not exceed per-transaction approval threshold unless human approved
@@ -486,7 +502,7 @@ Blocked spend must create a policy check event but must **not** create a spend l
 
 ## 9. Agent Outputs
 
-Use deterministic outputs until Hermes/GPT-5.5 planning is wired, then keep them as the reliability fallback.
+Use deterministic outputs for tests and diagnostics. Product-mode planning uses the real isolated Hermes path.
 
 ### Finance Agent
 
@@ -551,7 +567,7 @@ The page should make this obvious within 5 seconds:
 
 ```text
 ScaleX accepted a paid job.
-ScaleX got paid in Stripe test mode.
+ScaleX created a Stripe test invoice and recorded payment status honestly.
 ScaleX approved safe spend.
 ScaleX blocked unsafe spend.
 ScaleX coordinated agents.
@@ -570,7 +586,7 @@ Gross Profit: $1,013
 Final Margin: 84.4%
 Blocked Unsafe Spend: $750
 Policy Violations: 0
-Invoice Status: Paid / Local Fallback Confirmed
+Invoice Status: Stripe Paid / Open / Local Test Confirmation
 Recommendation: Renew campaign for another 30 days
 ```
 
@@ -578,7 +594,9 @@ Recommendation: Renew campaign for another 30 days
 
 ## 11. Hermes / GPT-5.5 Auth Planning
 
-Goal 6 wires ScaleX to the ScaleX-isolated Hermes brain/orchestration install on the Fedora laptop. Hermes should be the planning/reasoning path, using GPT-5.5 Auth through the isolated Hermes configuration. Deterministic planning remains the reliability fallback when Hermes is unavailable or returns an unusable response.
+Goal 6 is complete. ScaleX product mode uses the ScaleX-isolated Hermes brain/orchestration
+install on the Fedora laptop for planning/reasoning, using GPT-5.5 Auth through the isolated
+Hermes configuration. Deterministic planning is a test/diagnostic path only.
 
 ### Rules
 
@@ -587,11 +605,11 @@ Goal 6 wires ScaleX to the ScaleX-isolated Hermes brain/orchestration install on
   - home/config/auth: `/home/ascabrya/.scalex-hermes/home`
 - Launch Hermes with `HERMES_HOME` pointing at the isolated home directory.
 - Keep OpenAI/Codex auth inside the isolated Hermes home.
-- Read direct model settings from `SCALEX_REASONING_MODEL` only for fallback or local compatibility.
+- Read direct model settings from `SCALEX_REASONING_MODEL` only for local compatibility.
 - Never commit keys.
-- Add `AI_FALLBACK_MODE=true` fallback.
-- If Hermes/model planning fails, use seeded deterministic output.
-- The product loop must still work locally without external calls, except when explicitly testing Stripe test mode.
+- Tests may use `HERMES_TEST_MODE=true` for deterministic test-double planning.
+- If Hermes/model planning fails in product mode, surface a visible Hermes integration error.
+- Do not silently replace failed product-mode Hermes planning with deterministic output.
 
 ### Hermes / GPT-5.5 Should Generate
 
@@ -617,39 +635,45 @@ Policy code is the authority, not the model.
 
 ## 12. Stripe Test Mode
 
-Stripe test mode is the target payment proof for the product prototype. Local fallback payment records remain the default reliability path until Goal 7 wires Stripe test mode through the orchestration layer.
+Goal 7 makes real Stripe test-mode API calls the product payment path. Test doubles are
+allowed only for automated tests, CI, local offline development, or explicitly labeled
+diagnostics.
 
-### Local Fallback Path
+### Goal 7 Product Path
 
-1. Use `STRIPE_MOCK_MODE=true` when no test key is configured or Stripe is unavailable.
-2. Generate realistic test-shaped object IDs:
-   - `cus_test_scalex_...`
-   - `in_test_scalex_...`
-   - `plink_test_scalex_...`
-3. Show these in UI.
-4. Record revenue ledger entry.
+1. Use `STRIPE_TEST_MODE=true`.
+2. Use `STRIPE_TEST_DOUBLE_MODE=false`.
+3. Use `STRIPE_LIVE_MODE=false`.
+4. Require `STRIPE_SECRET_KEY` to start with `sk_test_`.
+5. Reject missing, live, or malformed keys.
+6. Create a real Stripe test customer.
+7. Create a real Stripe test invoice item for the $1,200 Harbor Fleet Services job.
+8. Create and finalize a real Stripe test invoice.
+9. Store `livemode=false`, customer ID, invoice ID, hosted invoice URL, invoice status,
+   paid status, idempotency keys, and sanitized raw object JSON in SQLite.
+10. If Stripe test mode fails in product mode, return a visible Stripe integration error.
 
-### Test/Sandbox Integration Path
+### Payment Status Rule
 
-Goal 7:
+ScaleX records payment status honestly:
 
-1. Set `STRIPE_MOCK_MODE=false`.
-2. Use `STRIPE_SECRET_KEY=sk_test_...`.
-3. Create Stripe test customer.
-4. Create test invoice or payment link through the orchestration layer.
-5. Display real Stripe test object IDs.
-6. Record the test payment confirmation or a clearly labeled local fallback payment event.
-7. Write all payment/revenue events to the SQLite audit ledger.
+- If Stripe says the invoice is paid, ScaleX may record Stripe-paid revenue.
+- If Stripe says the invoice is open/finalized but unpaid, ScaleX must show that status.
+- If the compressed workflow uses a local test confirmation to keep the economics flowing,
+  it must be explicitly labeled as local test confirmation and must not claim the invoice
+  is Stripe-paid.
 
-### Never Do
+### Test-Double Path
 
-```text
-STRIPE_LIVE_MODE=true
-Live charges
-Live payouts
-Real customer data
-Autonomous external spend
-```
+Tests/CI may set `STRIPE_TEST_DOUBLE_MODE=true`. Test-double records must identify their
+mode as `test_double` and must not be described as the product payment path.
+
+### Future Verified Live Mode
+
+Stripe live-money mode is a future hardening milestone, not part of Goal 7. Live-money
+execution is allowed only through Verified Live Mode, which requires explicit config,
+operator confirmation, amount caps, customer allowlists, policy approval, and SQLite audit
+records. Hermes may propose a payment step but must never directly execute live-money actions.
 
 ---
 
@@ -686,7 +710,8 @@ job.create
 planning.generate
 stripe.create_customer
 stripe.create_invoice
-stripe.confirm_payment
+stripe.prepare_payment_url
+stripe.confirm_payment_status
 policy.check_spend
 ledger.record_revenue
 ledger.record_spend
@@ -703,9 +728,12 @@ UI should show these as `Hermes Orchestrator` events.
 
 ## 14. NemoClaw / Policy Layer
 
-ScaleX should use NemoClaw or a policy safety layer for spend governance. The local policy engine is the current implemented safety layer and remains the fallback path if NemoClaw is not available in time.
+ScaleX should use NemoClaw or a NemoClaw-style policy safety adapter for product-mode spend
+governance. The local policy engine remains deterministic safety/test support until Goal 8.
 
-Goal 8 should make the policy layer presentation clear and, if safe, wire a NemoClaw-compatible adapter without touching production or homelab services.
+Goal 8 should make the policy layer presentation clear and, if safely available, wire a real
+NemoClaw-compatible adapter without touching production or homelab services. If a real adapter
+is not safely available, product mode must label the local safety layer honestly.
 
 ### Local Policy Engine Must Show
 
@@ -875,7 +903,7 @@ Tasks:
 
 - Implement `demo_runner.py`.
 - Implement event timeline.
-- Implement local fallback payment events.
+- Implement clearly labeled payment events for the current Stripe mode.
 - Implement agent output generation.
 - Implement final report generation.
 - Add `POST /api/demo/run`.
@@ -923,7 +951,7 @@ git commit -m "Build ScaleX demo dashboard"
 
 ---
 
-### Milestone 6 — Isolated Hermes Brain + Orchestration
+### Milestone 6 — Isolated Hermes Brain + Orchestration — Complete
 
 Goal: wire ScaleX to the ScaleX-isolated Hermes brain/orchestration install and use GPT-5.5 Auth through Hermes for planning/reasoning.
 
@@ -935,13 +963,14 @@ Tasks:
 - Ask Hermes/GPT-5.5 for the operating plan and agent task list.
 - Parse structured output safely.
 - Store planning/orchestration events in SQLite.
-- Fall back to deterministic output if Hermes is unavailable.
+- Use deterministic output only for tests/diagnostics.
+- Surface visible Hermes errors in product mode.
 
 Done when:
 
-- Product loop works without Hermes by using deterministic fallback.
-- Product loop enriches the plan through isolated Hermes when available.
-- No Hermes/model failure can break the sample run.
+- Tests work without Hermes by using deterministic test-double planning.
+- Product mode uses isolated Hermes.
+- Hermes/model failure becomes a visible product-mode error.
 - No production Hermes config is touched.
 
 Suggested commit:
@@ -953,25 +982,35 @@ git commit -m "Wire isolated Hermes planning adapter"
 
 ---
 
-### Milestone 7 — Stripe Test Mode Through Orchestration
+### Milestone 7 — Real Stripe Test-Mode Invoice Flow Through Orchestration — Complete
 
-Goal: create Stripe test-mode payment/invoice objects through the orchestration layer while preserving the local fallback path.
+Goal: create real Stripe test-mode customer and invoice objects through the orchestration layer.
 
 Tasks:
 
 - Add Stripe package.
-- Implement Stripe test-mode path behind strict test-mode guards.
-- Add real test-mode path if key exists and `STRIPE_MOCK_MODE=false`.
-- Create customer and invoice/payment link if feasible.
-- Store Stripe object IDs.
+- Implement real Stripe test-mode path behind strict guards.
+- Require `STRIPE_SECRET_KEY=sk_test_...`, `STRIPE_TEST_MODE=true`, and `STRIPE_LIVE_MODE=false`.
+- Reject missing, live, or malformed keys in product mode.
+- Create customer, invoice item, invoice, and finalized hosted invoice URL.
+- Store Stripe object IDs, `livemode=false`, invoice status, paid state, idempotency keys, and sanitized raw object JSON.
 - Emit orchestration and ledger audit events for payment actions.
-- Keep the product loop working if Stripe API fails.
+- Return a visible Stripe integration error if Stripe API setup or calls fail in product mode.
+- Keep test-double Stripe records available for tests/CI only.
 
 Done when:
 
-- Local fallback mode works by default.
-- Stripe test mode works when configured.
-- UI clearly labels Stripe as `test mode` or `local fallback`.
+- Product mode uses real Stripe test mode when configured.
+- Test-double mode works only when explicitly enabled for tests/CI.
+- UI clearly labels Stripe as `stripe_test` or `test_double`.
+- No live Stripe key is accepted in Goal 7.
+
+Verified in the current implementation:
+
+- `./scripts/test.sh` passes with backend Stripe service tests and frontend production build.
+- Product-mode Stripe setup without `STRIPE_SECRET_KEY` returns a visible `stripe_failed` state.
+- Automated tests use `STRIPE_TEST_DOUBLE_MODE=true` and do not make network calls.
+- Real Stripe API manual verification still requires a local `sk_test_...` key.
 
 Suggested commit:
 
@@ -982,14 +1021,45 @@ git commit -m "Add Stripe test-mode invoice flow"
 
 ---
 
+### Milestone 7B — Production Hardening / Verified Live Mode
+
+Goal: add the only allowed future path for live-money Stripe payments.
+
+Tasks:
+
+- Keep live-money mode disabled by default.
+- Require explicit local/secrets config for live-money mode.
+- Reject test keys when live-money mode is requested.
+- Reject live keys when Stripe test mode is requested.
+- Require typed operator confirmation: `LIVE_MONEY_APPROVED`.
+- Require `SCALEX_LIVE_MAX_AMOUNT_CENTS`.
+- Require customer email/domain or verified customer ID allowlist.
+- Require pre-charge review state before creating, finalizing, or confirming a live payment.
+- Record who/what/when, amount, mode, customer, approval text/hash, policy result, and operator confirmation in SQLite.
+- Keep Hermes limited to proposing payment steps; ScaleX code executes and enforces safeguards.
+- Surface a visible blocked/error state if verification fails.
+
+Done when:
+
+- Live-money mode cannot run without all verification controls.
+- Live-money audit records are complete.
+- No silent fallback can pretend a live charge happened.
+
+Suggested commit:
+
+```bash
+git add .
+git commit -m "Add Verified Live Mode payment safeguards"
+```
+
 ### Milestone 8 — NemoClaw / Policy Safety Integration and Presentation
 
-Goal: make spend governance legible and wire a NemoClaw-compatible policy safety layer if it is safe and available.
+Goal: make spend governance legible and wire a real NemoClaw-compatible policy safety layer if it is safe and available.
 
 Tasks:
 
 - Show policy checks as policy/NemoClaw-style guardrails.
-- Keep the local policy engine as the enforced fallback.
+- Keep the local policy engine as deterministic test/diagnostic support.
 - Add a NemoClaw adapter only if it can be configured safely without production or homelab access.
 - Add clear labels:
   - `Hermes Orchestrator`
@@ -997,6 +1067,7 @@ Tasks:
   - `Policy Guardrail`
   - `Local Policy Engine`
 - If real NemoClaw is integrated, label accurately.
+- If only the local safety layer is available, label it honestly and do not claim real NemoClaw.
 
 Done when:
 
@@ -1032,7 +1103,7 @@ Done when:
 
 - Fresh setup works.
 - Recorded walkthrough can be completed in under 3 minutes.
-- README explains exactly what is real vs local fallback.
+- README explains exactly what is real integration, test-double mode, and future Verified Live Mode.
 
 Suggested commit:
 
@@ -1150,14 +1221,14 @@ Objective:
 Create a one-click compressed sample runner that executes the full ScaleX job lifecycle.
 
 Constraints:
-- Default mode must be sandbox-safe local fallback.
+- Default test mode must be sandbox-safe; product mode should use real integrations where wired.
 - No real network calls required.
 - Must generate a complete timeline and final report.
 
 Deliverables:
 - backend/app/demo_runner.py
 - POST /api/demo/run
-- Events for job creation, operating plan, Stripe test invoice, payment confirmation, spend checks, agent work, final report
+- Events for job creation, operating plan, payment/invoice proof, payment confirmation, spend checks, agent work, final report
 - Deterministic agent outputs
 
 Acceptance criteria:
@@ -1192,7 +1263,7 @@ Acceptance criteria:
 - frontend starts on `http://127.0.0.1:5174`.
 - Click Run Demo Job and see the full lifecycle.
 - Final report is visible without scrolling too much.
-- UI labels Stripe as test/local fallback mode clearly.
+- UI labels Stripe mode clearly.
 - npm build passes.
 ```
 
@@ -1203,57 +1274,59 @@ Acceptance criteria:
 Repo: /home/ascabrya/dev/scalex-demo
 
 Objective:
-Wire ScaleX to the ScaleX-isolated Hermes brain/orchestration install and use GPT-5.5 Auth through Hermes for planning/reasoning.
+Wire ScaleX to the ScaleX-isolated Hermes brain/orchestration install and use GPT-5.5 Auth through Hermes for product-mode planning/reasoning.
 
 Constraints:
 - Use the isolated Hermes install at /home/ascabrya/.scalex-hermes/hermes-agent.
 - Use isolated Hermes home/config/auth at /home/ascabrya/.scalex-hermes/home.
 - Do not touch production Hermes or Windows Hermes config.
 - Do not commit secrets.
-- Product loop must still work if Hermes/model planning fails.
+- Product mode must show a visible Hermes integration error if Hermes/model planning fails.
 
 Deliverables:
 - backend/app/services/hermes_adapter.py
 - Structured Hermes prompt for operating plan and agent task list
 - Safe structured output parsing
-- Fallback plan from seed outputs
-- SQLite events showing Hermes planning/orchestration or fallback planning
-- UI indicator for Hermes-generated vs fallback plan
+- Deterministic test-double plan for automated tests only
+- SQLite events showing Hermes planning/orchestration or explicit test-double planning
+- UI indicator for Hermes-generated vs test-double plan
 
 Acceptance criteria:
-- Works without Hermes by using deterministic fallback.
-- Uses isolated Hermes when available and verified.
-- Hermes/model failure cannot break POST /api/demo/run.
+- Tests work without Hermes by using deterministic test-double planning.
+- Product mode uses isolated Hermes.
+- Hermes/model failure returns a visible `hermes_failed` state.
 - No production Hermes config is read or written.
 - Tests pass.
 ```
 
-### `/goal` 7 — Stripe Test Mode Through the Orchestration Layer
+### `/goal` 7 — Real Stripe Test-Mode Invoice Flow Through Orchestration
 
 ```text
 /goal
 Repo: /home/ascabrya/dev/scalex-demo
 
 Objective:
-Add Stripe test-mode invoice/payment support through the orchestration layer while preserving local fallback behavior.
+Add real Stripe test-mode invoice/payment support through the orchestration layer.
 
 Constraints:
-- Never use live Stripe keys.
+- Never use live Stripe keys in Goal 7.
 - STRIPE_LIVE_MODE must remain false.
-- Local fallback must remain available.
-- If Stripe fails, product loop continues with local fallback test-shaped objects.
+- STRIPE_TEST_MODE must be true for product mode.
+- STRIPE_TEST_DOUBLE_MODE is for tests/CI only.
+- If Stripe fails in product mode, return a visible Stripe integration error.
 
 Deliverables:
 - stripe_service.py
-- Local fallback Stripe customer/invoice/payment events
-- Real Stripe test customer/invoice/payment link path when STRIPE_MOCK_MODE=false and sk_test key exists
-- Hermes/orchestration events for payment actions
-- UI displays Stripe test object IDs or clearly labeled local fallback IDs
+- Real Stripe test customer, invoice item, invoice, and finalized hosted invoice URL path
+- Test-double Stripe customer/invoice/payment events for tests/CI only
+- Hermes/orchestration events for Stripe payment actions
+- UI displays Stripe test object IDs, hosted invoice URL, `livemode=false`, invoice status, and paid state
 
 Acceptance criteria:
-- Local fallback path works by default.
-- No live mode path exists unless explicitly disabled by code guards.
-- Revenue ledger entry is recorded after Stripe test payment or local fallback payment confirmation.
+- Product mode rejects missing, live, or malformed Stripe keys.
+- Product mode uses real Stripe test mode and does not silently use test doubles.
+- No live-money execution exists in Goal 7.
+- Revenue ledger entry is recorded after Stripe-paid status or explicitly labeled local test confirmation.
 - Tests pass.
 ```
 
@@ -1264,7 +1337,7 @@ Acceptance criteria:
 Repo: /home/ascabrya/dev/scalex-demo
 
 Objective:
-Make spend governance clear and, if safe, wire a NemoClaw-compatible policy safety layer while keeping the local policy engine as fallback.
+Make spend governance clear and, if safe, wire a real NemoClaw-compatible policy safety layer while keeping the local policy engine for tests/diagnostics.
 
 Constraints:
 - Do not connect to production Hermes.
@@ -1273,7 +1346,7 @@ Constraints:
 - Do not claim real NemoClaw unless actually integrated.
 
 Deliverables:
-- NemoClaw/policy adapter if safe, otherwise explicit local policy safety layer
+- NemoClaw/policy adapter if safe, otherwise explicitly labeled local policy safety layer
 - Policy guardrail panel with spend cap, margin floor, vendor allowlist, blocked vendor, payment-before-spend rule
 - UI labels for Hermes Orchestrator, Stripe Skill, Policy Guardrail, Agent Work
 
@@ -1310,7 +1383,7 @@ Acceptance criteria:
 - scripts/dev.sh starts backend and frontend.
 - scripts/test.sh passes.
 - Sample Harbor Fleet Services run can be recorded in under 3 minutes.
-- README clearly says test/sandbox only.
+- README clearly distinguishes Stripe test mode, future Verified Live Mode, and unsupported live-money execution.
 ```
 
 ---
@@ -1394,7 +1467,7 @@ Show Stripe test invoice:
 ```text
 Customer created
 Invoice created
-Payment received / local fallback payment confirmed
+Invoice paid or open status shown honestly
 Revenue booked: $1,200
 ```
 
@@ -1462,12 +1535,12 @@ Frontend starts locally.
 SQLite DB initializes and resets.
 Run Demo Job works from UI.
 Timeline shows full job lifecycle.
-Stripe test invoice or clearly labeled local fallback invoice appears.
+Stripe test invoice appears in product mode, or an explicit test-double invoice appears only in test/diagnostic mode.
 Policy approves safe spend.
 Policy blocks unsafe spend.
 Agents produce client-ready deliverables.
 Final report shows correct revenue/spend/profit/margin.
-No live keys, real client data, or production integrations are used.
+No live Stripe keys are used in Goal 7; no real client data is used.
 Sample Harbor Fleet Services run can be recorded in under 3 minutes.
 Repo is clean enough to publish on GitHub.
 ```
@@ -1476,13 +1549,12 @@ Repo is clean enough to publish on GitHub.
 
 ## 21. Remaining Product Roadmap
 
-The remaining roadmap after Goal 5 is:
+The remaining roadmap after Goal 7 is:
 
 ```text
-Goal 6 - Isolated Hermes Brain + Orchestration
-Goal 7 - Stripe Test Mode through the orchestration layer
 Goal 8 - NemoClaw / policy safety integration and presentation
 Goal 9 - Final polish and submission assets
+Goal 7B / Production Hardening - Verified Live Mode for future live-money payments
 ```
 
 Additional optional work after the product prototype is stable:
@@ -1496,7 +1568,7 @@ Public deployment
 Do not do these for the hackathon submission:
 
 ```text
-Live $1 proof
+Ad hoc live $1 proof outside Verified Live Mode
 Real customer onboarding
 Real 30-day campaign
 Multi-client accounts
@@ -1518,7 +1590,7 @@ The winning demo is:
 ```text
 A service job comes in.
 Hermes/GPT-5.5 plans the work.
-ScaleX gets paid in Stripe test mode or a clearly labeled local fallback.
+ScaleX creates a real Stripe test-mode invoice and records payment status honestly.
 ScaleX protects margin with policy/NemoClaw-style governance.
 ScaleX records audit-backed execution in SQLite.
 ScaleX coordinates agent work.

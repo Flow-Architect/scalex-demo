@@ -229,8 +229,8 @@ def test_demo_run_records_planning_and_orchestration_calls(tmp_path, monkeypatch
         "planning.generate_operating_plan",
         "stripe.create_customer",
         "stripe.create_invoice",
-        "stripe.create_payment_link",
-        "stripe.confirm_payment",
+        "stripe.prepare_payment_url",
+        "stripe.confirm_payment_status",
         "ledger.record_revenue",
         "policy.check_spend",
         "ledger.record_spend",
@@ -265,6 +265,25 @@ def test_policy_enforcement_is_independent_of_hermes_output(tmp_path, monkeypatc
     assert state["ledger"]["totals"]["blocked_spend_cents"] == 75000
 
 
+def test_product_mode_stripe_failure_is_visible_and_not_test_double(tmp_path, monkeypatch) -> None:
+    monkeypatch.setenv("DATABASE_PATH", str(tmp_path / "scalex.db"))
+    monkeypatch.setenv("STRIPE_TEST_DOUBLE_MODE", "false")
+    monkeypatch.delenv("STRIPE_SECRET_KEY", raising=False)
+
+    response = _call_post_demo_run_route()
+    state = response["state"]
+
+    assert response["status"] == "stripe_failed"
+    assert "STRIPE_SECRET_KEY is required" in response["decision"]["error"]
+    assert state["job"]["status"] == "stripe_error"
+    assert state["stripe"]["used_real_stripe"] is False
+    assert state["stripe"]["error"]
+    assert state["stripe_events"] == []
+    assert state["ledger"]["entries"] == []
+    assert state["orchestration_calls"][-1]["tool_name"] == "stripe.create_customer"
+    assert state["orchestration_calls"][-1]["status"] == "failed"
+
+
 def _assert_complete_demo_state(state: dict) -> None:
     assert state["job"]["client_name"] == "Harbor Fleet Services"
     assert state["job"]["job_name"] == "30-day fleet brake inspection campaign"
@@ -276,7 +295,7 @@ def _assert_complete_demo_state(state: dict) -> None:
     assert "job_intake" in event_types
     assert "hermes_planning" in event_types
     assert "margin_plan" in event_types
-    assert "stripe_mock" in event_types
+    assert "stripe_test_double" in event_types
     assert "payment_confirmed" in event_types
     assert "agent_work" in event_types
     assert "profit_report" in event_types
@@ -285,12 +304,16 @@ def _assert_complete_demo_state(state: dict) -> None:
     stripe_events = state["stripe_events"]
     assert [event["stripe_object_type"] for event in stripe_events] == [
         "customer",
+        "invoice_item",
         "invoice",
-        "payment_link",
-        "payment",
+        "payment_status",
     ]
-    assert all(event["mode"] == "local_mock_test" for event in stripe_events)
-    assert all(event["stripe_object_id"].startswith(("cus_mock", "in_mock", "plink_mock", "pay_mock")) for event in stripe_events)
+    assert all(event["mode"] == "test_double" for event in stripe_events)
+    assert all(event["livemode"] is False for event in stripe_events)
+    assert state["stripe"]["stripe_mode"] == "test_double"
+    assert state["stripe"]["used_real_stripe"] is False
+    assert state["stripe"]["invoice_id"] == "in_test_double_harbor_brake_1200"
+    assert state["stripe"]["paid"] is False
 
     ledger_entries = state["ledger"]["entries"]
     assert [entry["entry_type"] for entry in ledger_entries] == ["revenue", "spend", "spend"]

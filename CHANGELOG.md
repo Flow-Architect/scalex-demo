@@ -500,3 +500,52 @@ Wire isolated Hermes skill orchestration
 
 Next:
 - Goal 7 - Stripe Test Mode through the orchestration layer.
+
+---
+
+## 2026-06-19 - Goal 7: Real Stripe test-mode invoice flow
+
+Completed:
+- Corrected roadmap/docs so ScaleX product mode is real-integration-first.
+- Documented that mock/fallback/test-double paths are for tests, CI, offline development, or explicit diagnostics only.
+- Added the Verified Live Mode direction for future live-money capability.
+- Added Stripe SDK dependency.
+- Installed updated backend requirements into the repo-local venv for verification; Stripe SDK import reports version `15.2.1`.
+- Added Stripe Goal 7 config, plus future Verified Live Mode placeholders without implementing live-money execution.
+- Removed the legacy `STRIPE_MOCK_MODE` backend setting so `STRIPE_TEST_DOUBLE_MODE` is the only test-double switch.
+- Expanded `stripe_events` for real Stripe test objects, including mode, `livemode`, raw sanitized object JSON, customer ID, invoice ID, hosted invoice URL, invoice status, paid state, and idempotency key.
+- Implemented the invoice-first Stripe test-mode path:
+  - create customer
+  - create invoice item
+  - create invoice
+  - finalize invoice
+  - record hosted invoice URL and honest payment status
+- Kept Stripe test-double mode available only through `STRIPE_TEST_DOUBLE_MODE=true`.
+- Routed Stripe work through orchestration calls:
+  - `stripe.create_customer`
+  - `stripe.create_invoice`
+  - `stripe.prepare_payment_url`
+  - `stripe.confirm_payment_status`
+- Added visible `stripe_failed` handling for missing or failed product-mode Stripe configuration.
+- Adjusted invoice finalization to use the installed Stripe SDK's public invoice instance method.
+- Updated API state and frontend Stripe panel to show Stripe mode, `used_real_stripe`, `livemode`, customer ID, invoice ID, hosted invoice URL, invoice status, paid state, and error/diagnostic reason.
+- Added backend tests for Stripe setting guards, live-key rejection, live-mode rejection, malformed-key rejection, `livemode=false` assertion, idempotency keys, sanitized Stripe errors, successful invoice flow, paid invoice status, product-mode no-test-double behavior, and unchanged economics.
+- Updated README, ROADMAP, AGENTS, START_HERE, STATUS, TASKS, DECISIONS, docs, and `.env.example`.
+
+Verified:
+- `./scripts/test.sh` passed with 39 backend tests and a successful Vite production build.
+- Product-mode Stripe misconfiguration probe returned `status=stripe_failed`, job status `stripe_error`, zero Stripe events, failed call `stripe.create_customer`, and visible missing-key error.
+- `import stripe` succeeded in the repo-local backend venv with Stripe SDK `15.2.1`.
+- Real full product-path verification passed with real isolated Hermes and real Stripe test mode.
+- Hermes proof: `used_real_hermes=True`, `provider=openai-codex`, `model=gpt-5.5`, `skill=scalex-operator`.
+- Stripe proof: `used_real_stripe=True`, `stripe_mode=stripe_test`, `livemode=False`, real `cus_` customer ID, real `in_` invoice ID, `hosted_invoice_url_present=True`, `hosted_invoice_url_host=invoice.stripe.com`, `invoice_status=open`, and `paid=False`.
+- Payment status is honest: the Stripe test invoice is open and unpaid, revenue/profit remains the compressed-run business result, and ScaleX must not claim Stripe-paid invoice unless Stripe reports `paid=True`.
+- Final economics stayed unchanged: `gross_profit_cents=101300` and `actual_margin_percent=84.4`.
+- `git diff --check` passed with no output.
+- Required live-key grep returned no matches.
+
+Suggested commit message:
+Add Stripe test-mode invoice flow
+
+Next:
+- Goal 8 - NemoClaw / policy safety integration and presentation, with Verified Live Mode kept as a later production-hardening milestone.

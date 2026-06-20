@@ -241,7 +241,7 @@ def deterministic_test_plan(job: dict[str, Any], seed_config: dict[str, Any] | N
                 "through profit report while preserving the 50% margin floor."
             ),
             "phases": [
-                "Confirm the $1,200 job and create sandbox payment records.",
+                "Confirm the $1,200 job and create Stripe test-mode invoice records.",
                 "Record revenue before any vendor spend is evaluated.",
                 "Submit vendor spend requests to ScaleX policy code.",
                 "Coordinate Finance, Marketing, Research, and Ops deliverables.",
@@ -290,8 +290,8 @@ def expected_tool_sequence() -> list[str]:
         "planning.generate_operating_plan",
         "stripe.create_customer",
         "stripe.create_invoice",
-        "stripe.create_payment_link",
-        "stripe.confirm_payment",
+        "stripe.prepare_payment_url",
+        "stripe.confirm_payment_status",
         "ledger.record_revenue",
         "policy.check_spend",
         "ledger.record_spend",
