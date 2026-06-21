@@ -154,6 +154,8 @@ def run_hermes_oneshot(prompt: str, settings: Settings | None = None) -> HermesR
     if completed.returncode != 0:
         detail = stderr or stdout or "Hermes exited without diagnostic output."
         failure_reason = f"Hermes exited with code {completed.returncode}: {detail}"
+    else:
+        failure_reason = _stdout_failure(stdout)
 
     return _result(
         settings=settings,
@@ -331,6 +333,17 @@ def _clean_output(value: object, settings: Settings) -> str:
     if len(text) <= max_chars:
         return text
     return f"{text[:max_chars]}\n[truncated to {max_chars} chars]"
+
+
+def _stdout_failure(stdout: str) -> str | None:
+    lowered = stdout.strip().lower()
+    if not lowered:
+        return None
+    if lowered.startswith("api call failed"):
+        return f"Hermes API call failed: {sanitize_text(stdout.strip())}"
+    if "http 429" in lowered or "usage limit has been reached" in lowered:
+        return f"Hermes API call failed: {sanitize_text(stdout.strip())}"
+    return None
 
 
 def _toolsets(settings: Settings) -> list[str]:

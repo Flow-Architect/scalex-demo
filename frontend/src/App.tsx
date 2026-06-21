@@ -35,6 +35,7 @@ import {
   Users,
   WalletCards,
   Workflow,
+  X,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
@@ -47,6 +48,8 @@ import {
   resetDemo,
   runDemo,
   saveOnboarding,
+  deleteWorkflow,
+  selectWorkflow,
 } from "./api";
 import { formatCurrency, formatDateTime, formatPercent, humanize } from "./format";
 import type {
@@ -66,12 +69,23 @@ import type {
   PolicySummary,
   StripeEvent,
   StripeSummary,
+  WorkflowConfig,
 } from "./types";
 
 type BusyAction = "initial" | "refresh" | "run" | "reset" | null;
 type StageStatus = "pending" | "current" | "complete" | "blocked" | "error";
 type Tone = "emerald" | "sky" | "amber" | "rose" | "teal" | "violet" | "slate";
 type AppView = "workflow" | "customers" | "runs" | "audit" | "integrations";
+type WorkflowNodeKey =
+  | "intake"
+  | "hermes"
+  | "stripe"
+  | "payment"
+  | "policy"
+  | "spend"
+  | "agents"
+  | "audit"
+  | "report";
 
 interface OnboardingDraft {
   clientName: string;
@@ -86,6 +100,7 @@ interface OnboardingDraft {
 }
 
 interface WorkflowNode {
+  key: WorkflowNodeKey;
   name: string;
   status: StageStatus;
   proof: string;
@@ -197,11 +212,11 @@ export default function App() {
   const [authError, setAuthError] = useState<string | null>(null);
   const [loginForm, setLoginForm] = useState({ username: "", password: "" });
   const [activeView, setActiveView] = useState<AppView>("workflow");
-  const [onboardingComplete, setOnboardingComplete] = useState(readOnboardingComplete);
   const [onboardingDraft, setOnboardingDraft] = useState<OnboardingDraft>(HARBOR_ONBOARDING_DRAFT);
   const [onboardingError, setOnboardingError] = useState<string | null>(null);
   const [health, setHealth] = useState<HealthResponse | null>(null);
   const [state, setState] = useState<DemoState | null>(null);
+  const [selectedNodeKey, setSelectedNodeKey] = useState<WorkflowNodeKey | null>(null);
   const [busyAction, setBusyAction] = useState<BusyAction>("initial");
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
@@ -213,6 +228,9 @@ export default function App() {
   const money = useMemo(() => moneySnapshot(state), [state]);
   const auditRows = useMemo(() => auditRowCount(state), [state]);
   const runStatus = runStatusLabel(state, busyAction, error);
+  const activeWorkflow = state?.workflow ?? null;
+  const displayCustomer = activeWorkflow?.client_name ?? state?.job?.client_name ?? "No workflow selected";
+  const displayJob = activeWorkflow?.job_name ?? state?.job?.job_name ?? "Create or select a workflow";
   const showExecutionReplay =
     busyAction === "run" || runCompletedMoment || Boolean(state?.report);
 
@@ -221,12 +239,15 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    if (!state?.job || onboardingComplete) {
+    if (state?.workflow) {
+      setOnboardingDraft(draftFromWorkflow(state.workflow));
       return;
     }
 
-    setOnboardingDraft(draftFromJob(state.job));
-  }, [onboardingComplete, state?.job]);
+    if (state?.job) {
+      setOnboardingDraft(draftFromJob(state.job));
+    }
+  }, [state?.job, state?.workflow]);
 
   useEffect(() => {
     if (busyAction !== "run") {
@@ -265,6 +286,9 @@ export default function App() {
       ]);
       setHealth(healthResponse);
       setState(stateResponse);
+      if (!stateResponse.workflow && stateResponse.workflows.length === 0) {
+        setActiveView("customers");
+      }
     } catch (caught) {
       setError(errorMessage(caught));
     } finally {
@@ -315,8 +339,7 @@ export default function App() {
       setAuth(authResponse);
       setState(null);
       setHealth(null);
-      setOnboardingComplete(false);
-      writeOnboardingComplete(false);
+      setSelectedNodeKey(null);
       setActiveView("workflow");
     } catch (caught) {
       setAuthError(errorMessage(caught));
@@ -356,7 +379,7 @@ export default function App() {
       if (response.status === "completed") {
         setPlaybackIndex(PLAYBACK_STEPS.length - 1);
         setRunCompletedMoment(true);
-        setNotice("Demo lifecycle completed with API proof loaded.");
+        setNotice("Workflow run completed with API proof loaded.");
       } else {
         setError(String(response.decision?.error ?? `Run ended with status ${response.status}.`));
       }
@@ -376,7 +399,7 @@ export default function App() {
       const response = await resetDemo();
       setState(response.state);
       setHealth(await getHealth());
-      setNotice("Demo state reset.");
+      setNotice("Local workflows and run history reset.");
     } catch (caught) {
       setError(errorMessage(caught));
     } finally {
@@ -393,10 +416,8 @@ export default function App() {
       const response = await saveOnboarding(onboardingRequestFromDraft(onboardingDraft));
       setState(response.state);
       setHealth(await getHealth());
-      setOnboardingComplete(true);
-      writeOnboardingComplete(true);
       setActiveView("workflow");
-      setNotice("Local onboarding saved. The workflow is ready to run.");
+      setNotice("Local workflow saved and selected. It is ready to run.");
     } catch (caught) {
       setOnboardingError(errorMessage(caught));
     } finally {
@@ -413,12 +434,66 @@ export default function App() {
       const response = await saveOnboarding(onboardingRequestFromDraft(HARBOR_ONBOARDING_DRAFT));
       setState(response.state);
       setHealth(await getHealth());
-      setOnboardingComplete(true);
-      writeOnboardingComplete(true);
       setActiveView("workflow");
       setNotice("Harbor Fleet Services sample loaded.");
     } catch (caught) {
       setOnboardingError(errorMessage(caught));
+    } finally {
+      setBusyAction(null);
+    }
+  }
+
+  async function handleSelectWorkflow(workflowId: string) {
+    setBusyAction("refresh");
+    setError(null);
+    setNotice(null);
+    try {
+      const response = await selectWorkflow(workflowId);
+      setState(response.state);
+      setHealth(await getHealth());
+      setActiveView("workflow");
+      setSelectedNodeKey(null);
+      setNotice("Workflow selected. The next run will use this customer and economics.");
+    } catch (caught) {
+      setError(errorMessage(caught));
+    } finally {
+      setBusyAction(null);
+    }
+  }
+
+  async function handleDeleteWorkflow(workflowId: string) {
+    setBusyAction("reset");
+    setError(null);
+    setNotice(null);
+    try {
+      const response = await deleteWorkflow(workflowId);
+      setState(response.state);
+      setHealth(await getHealth());
+      setSelectedNodeKey(null);
+      setNotice("Local workflow deleted. Run history remains in SQLite.");
+    } catch (caught) {
+      setError(errorMessage(caught));
+    } finally {
+      setBusyAction(null);
+    }
+  }
+
+  async function handleInspectRun(runId: string) {
+    setBusyAction("refresh");
+    setError(null);
+    setNotice(null);
+    try {
+      const [healthResponse, stateResponse] = await Promise.all([
+        getHealth(),
+        getDemoState(runId),
+      ]);
+      setHealth(healthResponse);
+      setState(stateResponse);
+      setActiveView("runs");
+      setSelectedNodeKey(null);
+      setNotice("Historical run loaded from SQLite.");
+    } catch (caught) {
+      setError(errorMessage(caught));
     } finally {
       setBusyAction(null);
     }
@@ -452,21 +527,6 @@ export default function App() {
     );
   }
 
-  if (!onboardingComplete) {
-    return (
-      <OnboardingScreen
-        auth={auth}
-        busy={busyAction === "reset"}
-        draft={onboardingDraft}
-        error={onboardingError ?? authError}
-        onDraftChange={setOnboardingDraft}
-        onLogout={handleLogout}
-        onSubmit={handleSaveOnboarding}
-        onUseHarborSample={handleUseHarborSample}
-      />
-    );
-  }
-
   return (
     <main className="min-h-screen bg-stone-100 text-zinc-950">
       <div className="min-h-screen lg:grid lg:grid-cols-[17rem_minmax(0,1fr)]">
@@ -476,10 +536,7 @@ export default function App() {
           busy={isBusy}
           onLogout={handleLogout}
           onNavigate={setActiveView}
-          onStartOnboarding={() => {
-            setOnboardingComplete(false);
-            writeOnboardingComplete(false);
-          }}
+          onStartOnboarding={() => setActiveView("customers")}
         />
         <div className="min-w-0">
           {activeView === "workflow" ? (
@@ -502,7 +559,7 @@ export default function App() {
               <div className="flex flex-col gap-2 sm:flex-row">
                 <button
                   className="inline-flex min-h-11 items-center justify-center gap-2 rounded-md bg-emerald-400 px-4 py-3 text-sm font-semibold text-zinc-950 transition hover:bg-emerald-300 disabled:cursor-not-allowed disabled:bg-zinc-600 disabled:text-zinc-300"
-                  disabled={isBusy}
+                  disabled={isBusy || !activeWorkflow}
                   onClick={handleRunDemo}
                   type="button"
                 >
@@ -511,7 +568,7 @@ export default function App() {
                   ) : (
                     <Play className="h-4 w-4" aria-hidden="true" />
                   )}
-                  Run Demo Job
+                  Start Run
                 </button>
                 <button
                   className="inline-flex min-h-11 items-center justify-center gap-2 rounded-md border border-white/20 bg-white/10 px-4 py-3 text-sm font-semibold text-white transition hover:bg-white/15 disabled:cursor-not-allowed disabled:text-zinc-500"
@@ -524,7 +581,7 @@ export default function App() {
                   ) : (
                     <RotateCcw className="h-4 w-4" aria-hidden="true" />
                   )}
-                  Reset
+                  Reset Data
                 </button>
                 <button
                   className="inline-flex min-h-11 items-center justify-center gap-2 rounded-md border border-white/20 bg-white/10 px-4 py-3 text-sm font-semibold text-white transition hover:bg-white/15 disabled:cursor-not-allowed disabled:text-zinc-500"
@@ -551,9 +608,10 @@ export default function App() {
                     ScaleX ran a live AI business workflow.
                   </h1>
                   <p className="mt-4 max-w-4xl text-base leading-7 text-zinc-300 lg:text-lg">
-                    One Harbor Fleet Services job went from intake to Hermes planning,
-                    Stripe test invoicing, policy-gated spend, agent work, and an
-                    audited profit report.
+                    {displayCustomer} is configured for {displayJob}. Start a run to
+                    send the selected workflow through Hermes planning, Stripe test
+                    invoicing, policy-gated spend, agent work, and an audited profit
+                    report.
                   </p>
                 </div>
 
@@ -576,16 +634,33 @@ export default function App() {
                 </div>
               </div>
 
-              <ProfitProtectedHero money={money} />
+              <ProfitProtectedHero money={money} workflow={activeWorkflow} />
             </div>
 
             <HeroStackProof state={state} health={health} auditRows={auditRows} />
+
+            {!activeWorkflow ? (
+              <div className="flex flex-col gap-3 rounded-lg border border-amber-300/40 bg-amber-300/10 p-4 text-sm text-amber-100 sm:flex-row sm:items-center sm:justify-between">
+                <span>Create or select a local workflow in Customers before starting a run.</span>
+                <button
+                  className="inline-flex min-h-10 items-center justify-center gap-2 rounded-md border border-amber-200/50 bg-white/10 px-3 font-semibold text-white transition hover:bg-white/15"
+                  onClick={() => setActiveView("customers")}
+                  type="button"
+                >
+                  <Users className="h-4 w-4" aria-hidden="true" />
+                  Open Customers
+                </button>
+              </div>
+            ) : null}
 
             <WorkflowCanvas
               auditRows={auditRows}
               busy={busyAction === "run"}
               money={money}
+              onSelectNode={setSelectedNodeKey}
               playbackIndex={playbackIndex}
+              selectedNodeKey={selectedNodeKey}
+              onCloseNode={() => setSelectedNodeKey(null)}
               state={state}
             />
 
@@ -663,10 +738,16 @@ export default function App() {
               auditRows={auditRows}
               health={health}
               money={money}
-              onStartOnboarding={() => {
-                setOnboardingComplete(false);
-                writeOnboardingComplete(false);
-              }}
+              onDeleteWorkflow={handleDeleteWorkflow}
+              onDraftChange={setOnboardingDraft}
+              onInspectRun={handleInspectRun}
+              onSaveWorkflow={handleSaveOnboarding}
+              onSelectWorkflow={handleSelectWorkflow}
+              onStartOnboarding={() => setActiveView("customers")}
+              onUseHarborSample={handleUseHarborSample}
+              onboardingBusy={busyAction === "reset"}
+              onboardingDraft={onboardingDraft}
+              onboardingError={onboardingError}
               state={state}
             />
           )}
@@ -1120,18 +1201,25 @@ function WorkflowCanvas({
   auditRows,
   busy,
   money,
+  onCloseNode,
+  onSelectNode,
   playbackIndex,
+  selectedNodeKey,
   state,
 }: {
   auditRows: number;
   busy: boolean;
   money: MoneySnapshot;
+  onCloseNode: () => void;
+  onSelectNode: (key: WorkflowNodeKey) => void;
   playbackIndex: number;
+  selectedNodeKey: WorkflowNodeKey | null;
   state: DemoState | null;
 }) {
   const nodes = buildWorkflowNodes(state, money, auditRows, busy, playbackIndex);
   const approvedChecks = state?.policy_checks.filter(isApproved) ?? [];
   const blockedChecks = state?.policy_checks.filter((check) => !isApproved(check)) ?? [];
+  const selectedNode = nodes.find((node) => node.key === selectedNodeKey) ?? null;
 
   return (
     <section className="rounded-lg border border-white/15 bg-zinc-900/80 p-4">
@@ -1157,11 +1245,21 @@ function WorkflowCanvas({
             blockedChecks={blockedChecks}
             key={node.name}
             node={node}
+            onSelect={() => onSelectNode(node.key)}
             showBranches={node.name === "Spend Decision"}
             showConnector={index < nodes.length - 1}
           />
         ))}
       </div>
+      {selectedNode ? (
+        <WorkflowNodeDrawer
+          auditRows={auditRows}
+          money={money}
+          node={selectedNode}
+          onClose={onCloseNode}
+          state={state}
+        />
+      ) : null}
     </section>
   );
 }
@@ -1170,19 +1268,25 @@ function WorkflowNodeCard({
   approvedChecks,
   blockedChecks,
   node,
+  onSelect,
   showBranches,
   showConnector,
 }: {
   approvedChecks: PolicyCheck[];
   blockedChecks: PolicyCheck[];
   node: WorkflowNode;
+  onSelect: () => void;
   showBranches: boolean;
   showConnector: boolean;
 }) {
   const Icon = node.icon;
   const StatusIcon = stageStatusMeta[node.status].icon;
   return (
-    <article className={`relative min-h-[13rem] rounded-lg border p-4 ${darkStageClass(node.status)}`}>
+    <button
+      className={`relative min-h-[13rem] rounded-lg border p-4 text-left transition hover:-translate-y-0.5 hover:border-white/30 ${darkStageClass(node.status)}`}
+      onClick={onSelect}
+      type="button"
+    >
       {showConnector ? (
         <ArrowRight className="absolute -right-3 top-1/2 z-10 hidden h-6 w-6 -translate-y-1/2 rounded-full border border-white/15 bg-zinc-950 p-1 text-zinc-300 lg:block" />
       ) : null}
@@ -1221,7 +1325,155 @@ function WorkflowNodeCard({
           </div>
         </div>
       ) : null}
-    </article>
+    </button>
+  );
+}
+
+function WorkflowNodeDrawer({
+  auditRows,
+  money,
+  node,
+  onClose,
+  state,
+}: {
+  auditRows: number;
+  money: MoneySnapshot;
+  node: WorkflowNode;
+  onClose: () => void;
+  state: DemoState | null;
+}) {
+  const Icon = node.icon;
+  return (
+    <div className="fixed inset-0 z-40 flex justify-end bg-zinc-950/55">
+      <aside className="h-full w-full max-w-2xl overflow-auto border-l border-zinc-200 bg-stone-100 p-4 text-zinc-950 shadow-2xl">
+        <div className="rounded-lg border border-zinc-200 bg-white p-4 shadow-sm">
+          <div className="flex items-start justify-between gap-3">
+            <div className="flex items-start gap-3">
+              <span className="flex h-11 w-11 flex-none items-center justify-center rounded-lg border border-zinc-200 bg-zinc-50 text-zinc-800">
+                <Icon className="h-5 w-5" aria-hidden="true" />
+              </span>
+              <div>
+                <p className="text-xs font-semibold uppercase text-zinc-500">Workflow node</p>
+                <h2 className="mt-1 text-xl font-semibold text-zinc-950">{node.name}</h2>
+                <p className="mt-2 text-sm leading-6 text-zinc-600">{node.proof}</p>
+              </div>
+            </div>
+            <button
+              className="inline-flex h-10 w-10 items-center justify-center rounded-md border border-zinc-200 bg-white text-zinc-700 transition hover:bg-zinc-50"
+              onClick={onClose}
+              type="button"
+            >
+              <X className="h-5 w-5" aria-hidden="true" />
+            </button>
+          </div>
+        </div>
+
+        <div className="mt-4 space-y-4">
+          {node.key === "intake" ? (
+            <WorkflowConfigPanel workflow={state?.workflow ?? null} job={state?.job ?? null} />
+          ) : null}
+          {node.key === "hermes" ? (
+            <HermesCommandPanel
+              busy={false}
+              calls={state?.orchestration_calls ?? []}
+              hermes={state?.hermes ?? null}
+              planningRun={state?.planning_run ?? null}
+            />
+          ) : null}
+          {node.key === "stripe" || node.key === "payment" ? (
+            <StripeProofPanel summary={state?.stripe ?? null} events={state?.stripe_events ?? []} />
+          ) : null}
+          {node.key === "policy" || node.key === "spend" ? (
+            <GuardrailDecisionsPanel
+              summary={state?.policy.summary ?? null}
+              checks={state?.policy_checks ?? []}
+            />
+          ) : null}
+          {node.key === "agents" ? (
+            <AgentOutputsPanel outputs={state?.agent_outputs ?? []} />
+          ) : null}
+          {node.key === "audit" ? (
+            <AuditLedgerPanel
+              auditRows={auditRows}
+              databasePath={state?.database.path ?? null}
+              entries={state?.ledger.entries ?? []}
+              totals={state?.ledger.totals ?? null}
+            />
+          ) : null}
+          {node.key === "report" ? (
+            <section className="rounded-lg border border-zinc-200 bg-white p-4 shadow-sm">
+              <div className="flex items-center gap-2">
+                <FileText className="h-5 w-5 text-teal-700" aria-hidden="true" />
+                <h3 className="text-base font-semibold text-zinc-950">Final Profit Report</h3>
+              </div>
+              <div className="mt-4">
+                <MoneyFlow money={money} />
+              </div>
+              {state?.report ? (
+                <MarkdownPreview markdown={state.report.report_markdown} />
+              ) : (
+                <div className="mt-4 rounded-lg border border-dashed border-zinc-300 p-4 text-sm text-zinc-600">
+                  Final report appears after a run completes.
+                </div>
+              )}
+            </section>
+          ) : null}
+        </div>
+      </aside>
+    </div>
+  );
+}
+
+function WorkflowConfigPanel({
+  job,
+  workflow,
+}: {
+  job: DemoJob | null;
+  workflow: WorkflowConfig | null;
+}) {
+  const source = workflow ?? job;
+  return (
+    <section className="rounded-lg border border-zinc-200 bg-white p-4 shadow-sm">
+      <div className="flex items-center gap-2">
+        <Target className="h-5 w-5 text-teal-700" aria-hidden="true" />
+        <h3 className="text-base font-semibold text-zinc-950">Customer / Workflow</h3>
+      </div>
+      {source ? (
+        <>
+          <div className="mt-4 grid gap-3 sm:grid-cols-2">
+            <Fact label="Customer" value={source.client_name} />
+            <Fact label="Business type" value={source.business_type} />
+            <Fact label="Job" value={source.job_name} />
+            <Fact label="Invoice" value={formatCurrency(source.invoice_amount_cents)} />
+            <Fact label="Spend cap" value={formatCurrency(source.spend_cap_cents)} />
+            <Fact label="Margin floor" value={formatPercent(source.margin_floor_percent)} />
+          </div>
+          <p className="mt-4 rounded-lg border border-zinc-200 bg-zinc-50 p-3 text-sm leading-6 text-zinc-700">
+            {source.job_goal}
+          </p>
+          {workflow ? (
+            <div className="mt-4 grid gap-3 sm:grid-cols-2">
+              <ProofChip
+                icon={ShieldCheck}
+                label="Approved vendors"
+                value={workflow.approved_vendors.join(", ") || "Default local allowlist"}
+                tone="emerald"
+              />
+              <ProofChip
+                icon={ShieldAlert}
+                label="Blocked vendors"
+                value={workflow.blocked_vendors.join(", ") || "Default local blocklist"}
+                tone="rose"
+              />
+            </div>
+          ) : null}
+        </>
+      ) : (
+        <div className="mt-4 rounded-lg border border-dashed border-zinc-300 p-4 text-sm text-zinc-600">
+          Create or select a workflow in Customers before starting a run.
+        </div>
+      )}
+    </section>
   );
 }
 
@@ -1230,22 +1482,53 @@ function ProductView({
   auditRows,
   health,
   money,
+  onDeleteWorkflow,
+  onDraftChange,
+  onInspectRun,
+  onSaveWorkflow,
+  onSelectWorkflow,
   onStartOnboarding,
+  onUseHarborSample,
+  onboardingBusy,
+  onboardingDraft,
+  onboardingError,
   state,
 }: {
   activeView: AppView;
   auditRows: number;
   health: HealthResponse | null;
   money: MoneySnapshot;
+  onDeleteWorkflow: (workflowId: string) => void;
+  onDraftChange: (draft: OnboardingDraft) => void;
+  onInspectRun: (runId: string) => void;
+  onSaveWorkflow: (event?: FormEvent<HTMLFormElement>) => void;
+  onSelectWorkflow: (workflowId: string) => void;
   onStartOnboarding: () => void;
+  onUseHarborSample: () => void;
+  onboardingBusy: boolean;
+  onboardingDraft: OnboardingDraft;
+  onboardingError: string | null;
   state: DemoState | null;
 }) {
   return (
     <div className="min-h-screen px-4 py-5 sm:px-6 lg:px-8">
       {activeView === "customers" ? (
-        <CustomersView onStartOnboarding={onStartOnboarding} state={state} />
+        <CustomersView
+          busy={onboardingBusy}
+          draft={onboardingDraft}
+          error={onboardingError}
+          onDeleteWorkflow={onDeleteWorkflow}
+          onDraftChange={onDraftChange}
+          onSelectWorkflow={onSelectWorkflow}
+          onStartOnboarding={onStartOnboarding}
+          onSubmit={onSaveWorkflow}
+          onUseHarborSample={onUseHarborSample}
+          state={state}
+        />
       ) : null}
-      {activeView === "runs" ? <RunsView money={money} state={state} /> : null}
+      {activeView === "runs" ? (
+        <RunsView money={money} onInspectRun={onInspectRun} state={state} />
+      ) : null}
       {activeView === "audit" ? (
         <div className="grid gap-4 xl:grid-cols-[1fr_1fr]">
           <AuditLedgerPanel
@@ -1255,6 +1538,14 @@ function ProductView({
             totals={state?.ledger.totals ?? null}
           />
           <TimelinePanel events={state?.timeline_events ?? state?.events ?? []} />
+          <section className="rounded-lg border border-zinc-200 bg-white p-5 shadow-sm xl:col-span-2">
+            <ExecutionFeed calls={state?.orchestration_calls ?? []} />
+          </section>
+          <StripeProofPanel summary={state?.stripe ?? null} events={state?.stripe_events ?? []} />
+          <GuardrailDecisionsPanel
+            summary={state?.policy.summary ?? null}
+            checks={state?.policy_checks ?? []}
+          />
         </div>
       ) : null}
       {activeView === "integrations" ? (
@@ -1265,66 +1556,247 @@ function ProductView({
 }
 
 function CustomersView({
+  busy,
+  draft,
+  error,
+  onDeleteWorkflow,
+  onDraftChange,
+  onSelectWorkflow,
   onStartOnboarding,
+  onSubmit,
+  onUseHarborSample,
   state,
 }: {
+  busy: boolean;
+  draft: OnboardingDraft;
+  error: string | null;
+  onDeleteWorkflow: (workflowId: string) => void;
+  onDraftChange: (draft: OnboardingDraft) => void;
+  onSelectWorkflow: (workflowId: string) => void;
   onStartOnboarding: () => void;
+  onSubmit: (event?: FormEvent<HTMLFormElement>) => void;
+  onUseHarborSample: () => void;
   state: DemoState | null;
 }) {
-  const job = state?.job ?? null;
+  const activeWorkflow = state?.workflow ?? null;
+  const workflows = state?.workflows ?? [];
   return (
-    <section className="rounded-lg border border-zinc-200 bg-white p-5 shadow-sm">
-      <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-        <div>
-          <div className="flex items-center gap-2">
-            <Users className="h-5 w-5 text-teal-700" aria-hidden="true" />
-            <h1 className="text-xl font-semibold text-zinc-950">Customers</h1>
+    <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_430px]">
+      <section className="rounded-lg border border-zinc-200 bg-white p-5 shadow-sm">
+        <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+          <div>
+            <div className="flex items-center gap-2">
+              <Users className="h-5 w-5 text-teal-700" aria-hidden="true" />
+              <h1 className="text-xl font-semibold text-zinc-950">Customers / Workflows</h1>
+            </div>
+            <p className="mt-1 text-sm text-zinc-600">
+              Saved local sample workflows in SQLite. Synthetic/sample customer data only.
+            </p>
           </div>
-          <p className="mt-1 text-sm text-zinc-600">
-            Local/sample workflow onboarding only; not full multi-tenant SaaS.
-          </p>
+          <button
+            className="inline-flex min-h-11 items-center justify-center gap-2 rounded-md bg-zinc-950 px-4 py-3 text-sm font-semibold text-white transition hover:bg-zinc-800 disabled:cursor-not-allowed disabled:bg-zinc-400"
+            disabled={busy}
+            onClick={onUseHarborSample}
+            type="button"
+          >
+            {busy ? (
+              <RefreshCw className="h-4 w-4 animate-spin" aria-hidden="true" />
+            ) : (
+              <Building2 className="h-4 w-4" aria-hidden="true" />
+            )}
+            Use Harbor sample
+          </button>
         </div>
-        <button
-          className="inline-flex min-h-11 items-center justify-center gap-2 rounded-md bg-zinc-950 px-4 py-3 text-sm font-semibold text-white transition hover:bg-zinc-800"
-          onClick={onStartOnboarding}
-          type="button"
-        >
-          <UserPlus className="h-4 w-4" aria-hidden="true" />
-          Onboard local workflow
-        </button>
-      </div>
 
-      {job ? (
-        <div className="mt-5 grid gap-4 lg:grid-cols-[0.9fr_1.1fr]">
-          <article className="rounded-lg border border-zinc-200 bg-zinc-50 p-4">
-            <p className="text-xs font-semibold uppercase text-zinc-500">Active customer</p>
-            <h2 className="mt-2 text-2xl font-semibold text-zinc-950">{job.client_name}</h2>
-            <p className="mt-2 text-sm text-zinc-600">{job.business_type}</p>
+        {activeWorkflow ? (
+          <article className="mt-5 rounded-lg border border-emerald-200 bg-emerald-50 p-4">
+            <p className="text-xs font-semibold uppercase text-emerald-700">Active workflow</p>
+            <h2 className="mt-2 text-2xl font-semibold text-zinc-950">{activeWorkflow.client_name}</h2>
+            <p className="mt-1 text-sm text-zinc-700">{activeWorkflow.business_type}</p>
+            <p className="mt-3 text-sm leading-6 text-zinc-700">{activeWorkflow.job_name}</p>
             <div className="mt-4 grid gap-2 sm:grid-cols-3">
-              <ProofChip icon={CircleDollarSign} label="Invoice" value={formatCurrency(job.invoice_amount_cents)} tone="emerald" />
-              <ProofChip icon={Gauge} label="Spend cap" value={formatCurrency(job.spend_cap_cents)} tone="sky" />
-              <ProofChip icon={TrendingUp} label="Margin floor" value={formatPercent(job.margin_floor_percent)} tone="teal" />
+              <ProofChip icon={CircleDollarSign} label="Invoice" value={formatCurrency(activeWorkflow.invoice_amount_cents)} tone="emerald" />
+              <ProofChip icon={Gauge} label="Spend cap" value={formatCurrency(activeWorkflow.spend_cap_cents)} tone="sky" />
+              <ProofChip icon={TrendingUp} label="Margin floor" value={formatPercent(activeWorkflow.margin_floor_percent)} tone="teal" />
             </div>
           </article>
-          <article className="rounded-lg border border-zinc-200 bg-white p-4">
-            <p className="text-xs font-semibold uppercase text-zinc-500">Prepared job</p>
-            <h2 className="mt-2 text-xl font-semibold text-zinc-950">{job.job_name}</h2>
-            <p className="mt-2 text-sm leading-6 text-zinc-600">{job.job_goal}</p>
-            <p className="mt-4 text-xs text-zinc-500">Updated {formatDateTime(job.updated_at)}</p>
-          </article>
+        ) : (
+          <div className="mt-5 rounded-lg border border-dashed border-zinc-300 p-5 text-sm text-zinc-600">
+            Create a workflow or load Harbor Fleet Services before starting a run.
+          </div>
+        )}
+
+        <div className="mt-5 grid gap-3">
+          <div className="flex items-center justify-between gap-3">
+            <h2 className="text-sm font-semibold uppercase text-zinc-500">Saved workflows</h2>
+            <span className="rounded-md border border-zinc-200 bg-zinc-50 px-2 py-1 text-xs font-semibold text-zinc-600">
+              {workflows.length} saved
+            </span>
+          </div>
+          {workflows.length === 0 ? (
+            <div className="rounded-lg border border-dashed border-zinc-300 p-4 text-sm text-zinc-600">
+              No saved local workflows yet.
+            </div>
+          ) : (
+            workflows.map((workflow) => (
+              <article
+                className={`rounded-lg border p-4 ${
+                  workflow.is_active ? "border-emerald-300 bg-emerald-50" : "border-zinc-200 bg-zinc-50"
+                }`}
+                key={workflow.id}
+              >
+                <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+                  <div className="min-w-0">
+                    <p className="text-base font-semibold text-zinc-950">{workflow.client_name}</p>
+                    <p className="mt-1 text-sm text-zinc-600">{workflow.job_name}</p>
+                    <div className="mt-3 flex flex-wrap gap-2 text-xs text-zinc-600">
+                      <span className="rounded-md border border-white bg-white px-2 py-1">
+                        {formatCurrency(workflow.invoice_amount_cents)} invoice
+                      </span>
+                      <span className="rounded-md border border-white bg-white px-2 py-1">
+                        {formatCurrency(workflow.spend_cap_cents)} cap
+                      </span>
+                      <span className="rounded-md border border-white bg-white px-2 py-1">
+                        {formatPercent(workflow.margin_floor_percent)} floor
+                      </span>
+                      <span className="rounded-md border border-white bg-white px-2 py-1">
+                        Updated {formatDateTime(workflow.updated_at)}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    <button
+                      className="inline-flex min-h-10 items-center justify-center gap-2 rounded-md border border-zinc-200 bg-white px-3 text-sm font-semibold text-zinc-800 transition hover:bg-zinc-50 disabled:cursor-not-allowed disabled:text-zinc-400"
+                      disabled={busy || workflow.is_active}
+                      onClick={() => onSelectWorkflow(workflow.id)}
+                      type="button"
+                    >
+                      <CheckCircle2 className="h-4 w-4" aria-hidden="true" />
+                      {workflow.is_active ? "Active" : "Select"}
+                    </button>
+                    <button
+                      className="inline-flex min-h-10 items-center justify-center gap-2 rounded-md border border-rose-200 bg-white px-3 text-sm font-semibold text-rose-700 transition hover:bg-rose-50 disabled:cursor-not-allowed disabled:text-zinc-400"
+                      disabled={busy}
+                      onClick={() => onDeleteWorkflow(workflow.id)}
+                      type="button"
+                    >
+                      <Ban className="h-4 w-4" aria-hidden="true" />
+                      Delete
+                    </button>
+                  </div>
+                </div>
+              </article>
+            ))
+          )}
         </div>
-      ) : (
-        <div className="mt-5 rounded-lg border border-dashed border-zinc-300 p-5 text-sm text-zinc-600">
-          No local workflow is currently onboarded.
+      </section>
+
+      <form className="rounded-lg border border-zinc-200 bg-white p-5 shadow-sm" onSubmit={onSubmit}>
+        <div className="flex items-center gap-3">
+          <span className="flex h-10 w-10 items-center justify-center rounded-lg border border-sky-200 bg-sky-50 text-sky-800">
+            <UserPlus className="h-5 w-5" aria-hidden="true" />
+          </span>
+          <div>
+            <h2 className="text-lg font-semibold text-zinc-950">Create workflow</h2>
+            <p className="text-sm text-zinc-600">Saved locally in SQLite.</p>
+          </div>
         </div>
-      )}
-    </section>
+
+        <div className="mt-5 grid gap-4 sm:grid-cols-2 xl:grid-cols-1">
+          <TextField
+            label="Customer/business name"
+            value={draft.clientName}
+            onChange={(value) => onDraftChange({ ...draft, clientName: value })}
+          />
+          <TextField
+            label="Business type"
+            value={draft.businessType}
+            onChange={(value) => onDraftChange({ ...draft, businessType: value })}
+          />
+          <TextField
+            label="Job/campaign name"
+            value={draft.jobName}
+            onChange={(value) => onDraftChange({ ...draft, jobName: value })}
+          />
+          <TextField
+            label="Invoice amount"
+            type="number"
+            value={draft.invoiceAmountUsd}
+            onChange={(value) => onDraftChange({ ...draft, invoiceAmountUsd: value })}
+          />
+          <TextField
+            label="Spend cap"
+            type="number"
+            value={draft.spendCapUsd}
+            onChange={(value) => onDraftChange({ ...draft, spendCapUsd: value })}
+          />
+          <TextField
+            label="Margin floor"
+            type="number"
+            value={draft.marginFloorPercent}
+            onChange={(value) => onDraftChange({ ...draft, marginFloorPercent: value })}
+          />
+        </div>
+
+        <label className="mt-4 block text-sm font-semibold text-zinc-700">
+          Job goal
+          <textarea
+            className="mt-2 min-h-28 w-full rounded-md border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-950 outline-none transition focus:border-emerald-500"
+            onChange={(event) => onDraftChange({ ...draft, jobGoal: event.target.value })}
+            value={draft.jobGoal}
+          />
+        </label>
+
+        <div className="mt-4 grid gap-4">
+          <TextField
+            label="Approved vendors"
+            value={draft.approvedVendors}
+            onChange={(value) => onDraftChange({ ...draft, approvedVendors: value })}
+          />
+          <TextField
+            label="Blocked vendors"
+            value={draft.blockedVendors}
+            onChange={(value) => onDraftChange({ ...draft, blockedVendors: value })}
+          />
+        </div>
+
+        {error ? (
+          <div className="mt-4 rounded-lg border border-rose-200 bg-rose-50 p-3 text-sm text-rose-800">
+            {error}
+          </div>
+        ) : null}
+
+        <button
+          className="mt-5 inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-md bg-emerald-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-emerald-500 disabled:cursor-not-allowed disabled:bg-zinc-400"
+          disabled={busy}
+          onClick={onStartOnboarding}
+          type="submit"
+        >
+          {busy ? (
+            <RefreshCw className="h-4 w-4 animate-spin" aria-hidden="true" />
+          ) : (
+            <CheckCircle2 className="h-4 w-4" aria-hidden="true" />
+          )}
+          Save and select workflow
+        </button>
+      </form>
+    </div>
   );
 }
 
-function RunsView({ money, state }: { money: MoneySnapshot; state: DemoState | null }) {
+function RunsView({
+  money,
+  onInspectRun,
+  state,
+}: {
+  money: MoneySnapshot;
+  onInspectRun: (runId: string) => void;
+  state: DemoState | null;
+}) {
   const calls = state?.orchestration_calls ?? [];
   const reports = state?.reports ?? [];
+  const runs = state?.runs ?? state?.jobs ?? [];
+  const selectedRunId = state?.selected_run_id ?? state?.job?.id ?? null;
   return (
     <div className="grid gap-4 xl:grid-cols-[0.85fr_1.15fr]">
       <section className="rounded-lg border border-zinc-200 bg-white p-5 shadow-sm">
@@ -1332,30 +1804,74 @@ function RunsView({ money, state }: { money: MoneySnapshot; state: DemoState | n
           <ClipboardList className="h-5 w-5 text-sky-700" aria-hidden="true" />
           <h1 className="text-xl font-semibold text-zinc-950">Run History</h1>
         </div>
-        <p className="mt-1 text-sm text-zinc-600">Latest compressed local workflow run.</p>
+        <p className="mt-1 text-sm text-zinc-600">
+          Persisted SQLite job runs. Click any run to inspect its proof records.
+        </p>
         <div className="mt-4">
           <MoneyFlow compact money={money} />
         </div>
         <div className="mt-4 space-y-3">
-          {reports.length === 0 ? (
+          {runs.length === 0 ? (
             <div className="rounded-lg border border-dashed border-zinc-300 p-4 text-sm text-zinc-600">
-              Run history appears after a demo run completes.
+              Run history appears after a workflow run starts.
             </div>
           ) : (
-            reports.map((report) => (
-              <article className="rounded-lg border border-emerald-200 bg-emerald-50 p-4" key={report.id}>
-                <p className="font-semibold text-zinc-950">{formatCurrency(report.gross_profit_cents)} gross profit</p>
-                <p className="mt-1 text-sm text-zinc-700">
-                  {formatPercent(report.actual_margin_percent)} margin, {report.policy_violations} policy violations.
-                </p>
-                <p className="mt-2 text-xs text-zinc-500">{formatDateTime(report.created_at)}</p>
-              </article>
+            runs.map((run) => (
+              <button
+                className={`block w-full rounded-lg border p-4 text-left transition ${
+                  run.id === selectedRunId
+                    ? "border-emerald-300 bg-emerald-50"
+                    : "border-zinc-200 bg-zinc-50 hover:bg-white"
+                }`}
+                key={run.id}
+                onClick={() => onInspectRun(run.id)}
+                type="button"
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="break-words font-semibold text-zinc-950">{run.client_name}</p>
+                    <p className="mt-1 text-sm text-zinc-600">{run.job_name}</p>
+                  </div>
+                  <span className={`rounded-md border px-2 py-1 text-xs font-semibold ${eventStatusClass(run.status)}`}>
+                    {humanize(run.status)}
+                  </span>
+                </div>
+                <div className="mt-3 flex flex-wrap gap-2 text-xs text-zinc-600">
+                  <span className="rounded-md border border-white bg-white px-2 py-1">
+                    Run ID {run.id}
+                  </span>
+                  <span className="rounded-md border border-white bg-white px-2 py-1">
+                    {formatCurrency(run.invoice_amount_cents)} invoice
+                  </span>
+                  <span className="rounded-md border border-white bg-white px-2 py-1">
+                    Started {formatDateTime(run.created_at)}
+                  </span>
+                </div>
+              </button>
             ))
           )}
         </div>
       </section>
       <section className="rounded-lg border border-zinc-200 bg-white p-5 shadow-sm">
+        {state?.job ? (
+          <div className="mb-4 rounded-lg border border-zinc-200 bg-zinc-50 p-4">
+            <p className="text-xs font-semibold uppercase text-zinc-500">Selected run</p>
+            <h2 className="mt-2 text-xl font-semibold text-zinc-950">{state.job.client_name}</h2>
+            <p className="mt-1 text-sm text-zinc-600">{state.job.job_name}</p>
+            <div className="mt-3 grid gap-2 sm:grid-cols-3">
+              <ProofChip icon={CircleDollarSign} label="Invoice" value={formatCurrency(state.job.invoice_amount_cents)} tone="emerald" />
+              <ProofChip icon={Gauge} label="Spend cap" value={formatCurrency(state.job.spend_cap_cents)} tone="sky" />
+              <ProofChip icon={TrendingUp} label="Margin" value={formatOptionalPercent(money.marginPercent)} tone="teal" />
+            </div>
+          </div>
+        ) : null}
         <ExecutionFeed calls={calls} />
+        {reports.length > 0 ? (
+          <div className="mt-5">
+            <h3 className="text-sm font-semibold text-zinc-950">Final report</h3>
+            <MarkdownPreview markdown={reports[reports.length - 1].report_markdown} />
+          </div>
+        ) : null}
       </section>
     </div>
   );
@@ -1402,6 +1918,13 @@ function IntegrationsView({
           tone={health?.database_exists ? "teal" : "slate"}
         />
         <ProofRow
+          detail={`${state?.workflows.length ?? 0} workflows; ${state?.runs.length ?? 0} persisted runs; selected run ${state?.selected_run_id ?? "none"}`}
+          icon={ClipboardList}
+          label="Product records"
+          status={state?.workflow ? "Workflow selected" : "Needs workflow"}
+          tone={state?.workflow ? "teal" : "amber"}
+        />
+        <ProofRow
           detail="Local policy engine enforces payment-before-spend, vendor lists, spend cap, and margin floor."
           icon={ShieldCheck}
           label="Policy engine"
@@ -1440,7 +1963,13 @@ function HeroClaim({
   );
 }
 
-function ProfitProtectedHero({ money }: { money: MoneySnapshot }) {
+function ProfitProtectedHero({
+  money,
+  workflow,
+}: {
+  money: MoneySnapshot;
+  workflow: WorkflowConfig | null;
+}) {
   return (
     <section className="rounded-lg border border-emerald-300/30 bg-emerald-300/10 p-5 shadow-2xl shadow-emerald-950/20">
       <div className="flex items-start justify-between gap-3">
@@ -1454,7 +1983,7 @@ function ProfitProtectedHero({ money }: { money: MoneySnapshot }) {
           </p>
         </div>
         <span className="rounded-md border border-white/15 bg-white/10 px-2 py-1 text-xs font-semibold text-zinc-200">
-          Harbor Fleet
+          {workflow?.client_name ?? "No workflow"}
         </span>
       </div>
 
@@ -1749,7 +2278,7 @@ function playbackProof(key: PlaybackKey, state: DemoState | null, money: MoneySn
     case "intake":
       return state?.job
         ? `${state.job.client_name}: ${formatCurrency(state.job.invoice_amount_cents)} invoice.`
-        : "Harbor Fleet Services job waiting for run state.";
+        : "Selected workflow waiting for run state.";
     case "hermes":
       return state?.hermes?.used_real_hermes
         ? `${state.hermes.provider ?? "provider"} / ${state.hermes.model ?? "model"} with ${state.hermes.skill_name ?? "skill"}.`
@@ -2179,7 +2708,7 @@ function MoneyFlow({ money, compact = false }: { money: MoneySnapshot; compact?:
       {compact ? (
         <div className="mb-3 flex items-center justify-between gap-3 text-sm">
           <span className="font-semibold text-white">
-            $1,200 invoice to guarded profit report
+            {formatOptionalCurrency(money.revenueCents)} invoice to guarded profit report
           </span>
           <span className="text-xs text-zinc-300">
             {money.actual ? "API proof loaded" : "Awaiting run proof"}
@@ -2448,7 +2977,7 @@ function AgentOutputsPanel({ outputs }: { outputs: AgentOutput[] }) {
             <h2 className="text-base font-semibold text-zinc-950">Agent Outputs</h2>
           </div>
           <p className="mt-1 text-sm leading-6 text-zinc-600">
-            Finance, Marketing, Research, and Ops deliverables for the Harbor Fleet workflow.
+            Finance, Marketing, Research, and Ops deliverables for the selected workflow.
           </p>
         </div>
         <span className="rounded-md border border-violet-200 bg-violet-50 px-2 py-1 text-xs font-semibold text-violet-800">
@@ -2809,6 +3338,7 @@ function buildWorkflowNodes(
 
   const settledNodes: WorkflowNode[] = [
     {
+      key: "intake",
       name: "Customer Intake",
       status: job ? "complete" : "pending",
       proof: job
@@ -2819,6 +3349,7 @@ function buildWorkflowNodes(
       icon: Target,
     },
     {
+      key: "hermes",
       name: "Hermes Brain",
       status: hermesFailed(hermes, planningRun)
         ? "error"
@@ -2835,6 +3366,7 @@ function buildWorkflowNodes(
       icon: BrainCircuit,
     },
     {
+      key: "stripe",
       name: "Stripe Test Invoice",
       status: stripe?.error ? "error" : stripe?.invoice_id ? "complete" : "pending",
       proof: stripe?.invoice_id
@@ -2845,6 +3377,7 @@ function buildWorkflowNodes(
       icon: CreditCard,
     },
     {
+      key: "payment",
       name: "Payment Status",
       status: stripe?.error
         ? "error"
@@ -2864,6 +3397,7 @@ function buildWorkflowNodes(
       icon: ReceiptText,
     },
     {
+      key: "policy",
       name: "Policy Guardrail",
       status: state?.policy.summary ? "complete" : "pending",
       proof: state?.policy.summary
@@ -2874,6 +3408,7 @@ function buildWorkflowNodes(
       icon: ShieldCheck,
     },
     {
+      key: "spend",
       name: "Spend Decision",
       status: blockedChecks.length > 0 ? "blocked" : approvedChecks.length > 0 ? "complete" : "pending",
       proof:
@@ -2885,6 +3420,7 @@ function buildWorkflowNodes(
       icon: WalletCards,
     },
     {
+      key: "agents",
       name: "Agent Work",
       status: outputs.length >= 4 ? "complete" : outputs.length > 0 ? "current" : "pending",
       proof: outputs.length > 0 ? `${outputs.length} agent deliverables recorded.` : "Agent work pending.",
@@ -2893,6 +3429,7 @@ function buildWorkflowNodes(
       icon: Layers3,
     },
     {
+      key: "audit",
       name: "SQLite Audit Ledger",
       status: auditRows > 0 ? "complete" : "pending",
       proof: `${auditRows} audit rows across events, ledger, policy, Stripe, calls, agents, and reports.`,
@@ -2906,6 +3443,7 @@ function buildWorkflowNodes(
       icon: Database,
     },
     {
+      key: "report",
       name: "Profit Report",
       status: report ? "complete" : "pending",
       proof: report
@@ -2958,7 +3496,7 @@ function buildPipeline(state: DemoState | null): PipelineStage[] {
       modeLabel: "sample workflow",
       proof: job
         ? `${job.client_name}: ${job.job_name}. Invoice ${formatCurrency(job.invoice_amount_cents)}.`
-        : "Harbor Fleet Services job appears after the demo starts.",
+        : "The selected workflow appears here after a run starts.",
       icon: Target,
     },
     {
@@ -3053,6 +3591,7 @@ function moneySnapshot(state: DemoState | null): MoneySnapshot {
   const totals = state?.ledger.totals ?? null;
   const placeholder = state?.report_placeholder ?? null;
   const job = state?.job ?? null;
+  const workflow = state?.workflow ?? null;
   const hasLedgerRevenue = Boolean(totals && totals.revenue_cents > 0);
   const hasPolicyChecks = Boolean(state && state.policy_checks.length > 0);
 
@@ -3075,8 +3614,12 @@ function moneySnapshot(state: DemoState | null): MoneySnapshot {
       report?.margin_percent ??
       (hasLedgerRevenue ? totals?.actual_margin_percent ?? null : placeholder?.expected_margin_percent ?? null),
     policyViolations: report?.policy_violations ?? null,
-    spendCapCents: job?.spend_cap_cents ?? null,
-    marginFloorPercent: job?.margin_floor_percent ?? state?.policy.summary.margin_floor_percent ?? null,
+    spendCapCents: job?.spend_cap_cents ?? workflow?.spend_cap_cents ?? null,
+    marginFloorPercent:
+      job?.margin_floor_percent ??
+      workflow?.margin_floor_percent ??
+      state?.policy.summary.margin_floor_percent ??
+      null,
   };
 }
 
@@ -3106,10 +3649,10 @@ function runStatusLabel(
     return "Loading backend state";
   }
   if (busyAction === "run") {
-    return "Running demo lifecycle";
+    return "Running selected workflow";
   }
   if (busyAction === "reset") {
-    return "Resetting demo state";
+    return "Updating local data";
   }
   if (busyAction === "refresh") {
     return "Refreshing proof";
@@ -3374,6 +3917,20 @@ function draftFromJob(job: DemoJob): OnboardingDraft {
     marginFloorPercent: String(job.margin_floor_percent),
     approvedVendors: HARBOR_ONBOARDING_DRAFT.approvedVendors,
     blockedVendors: HARBOR_ONBOARDING_DRAFT.blockedVendors,
+  };
+}
+
+function draftFromWorkflow(workflow: WorkflowConfig): OnboardingDraft {
+  return {
+    clientName: workflow.client_name,
+    businessType: workflow.business_type,
+    jobName: workflow.job_name,
+    jobGoal: workflow.job_goal,
+    invoiceAmountUsd: String(workflow.invoice_amount_cents / 100),
+    spendCapUsd: String(workflow.spend_cap_cents / 100),
+    marginFloorPercent: String(workflow.margin_floor_percent),
+    approvedVendors: workflow.approved_vendors.join(", "),
+    blockedVendors: workflow.blocked_vendors.join(", "),
   };
 }
 

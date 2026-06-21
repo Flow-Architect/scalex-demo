@@ -12,9 +12,16 @@ def load_seed_config(path: str | Path | None = None) -> dict[str, Any]:
     return json.loads(resolved_path.read_text(encoding="utf-8"))
 
 
-def seed_demo_database(connection: sqlite3.Connection, seed: dict[str, Any] | None = None) -> dict:
+def seed_demo_database(
+    connection: sqlite3.Connection,
+    seed: dict[str, Any] | None = None,
+    *,
+    job_id: str = DEMO_JOB_ID,
+    workflow_id: str | None = None,
+    deterministic_event_ids: bool = True,
+) -> dict:
     seed_config = seed or load_seed_config()
-    job = create_job(connection, seed_config, job_id=DEMO_JOB_ID)
+    job = create_job(connection, seed_config, job_id=job_id, workflow_id=workflow_id)
     create_event(
         connection,
         job_id=job["id"],
@@ -26,7 +33,7 @@ def seed_demo_database(connection: sqlite3.Connection, seed: dict[str, Any] | No
             f"{seed_config['marginFloorPercent']}% margin floor."
         ),
         status="seeded",
-        event_id="evt_harbor_job_seeded",
+        event_id="evt_harbor_job_seeded" if deterministic_event_ids else None,
     )
     connection.commit()
     return job

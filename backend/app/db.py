@@ -5,6 +5,7 @@ from .config import REPO_ROOT, get_settings, resolve_repo_path
 
 
 TABLE_NAMES = (
+    "workflows",
     "jobs",
     "onboarding_configs",
     "events",
@@ -49,6 +50,7 @@ def initialize_database(path: str | Path | None = None) -> Path:
     db_path.parent.mkdir(parents=True, exist_ok=True)
     with get_connection(db_path) as connection:
         connection.executescript(schema_path().read_text(encoding="utf-8"))
+        _apply_lightweight_migrations(connection)
     return db_path
 
 
@@ -80,3 +82,17 @@ def _is_safe_database_path(path: Path) -> bool:
         except ValueError:
             continue
     return False
+
+
+def _apply_lightweight_migrations(connection: sqlite3.Connection) -> None:
+    if not _column_exists(connection, "jobs", "workflow_id"):
+        connection.execute("ALTER TABLE jobs ADD COLUMN workflow_id TEXT;")
+    connection.execute(
+        "CREATE INDEX IF NOT EXISTS idx_jobs_workflow_created ON jobs(workflow_id, created_at);"
+    )
+    connection.commit()
+
+
+def _column_exists(connection: sqlite3.Connection, table: str, column: str) -> bool:
+    rows = connection.execute(f"PRAGMA table_info({table})").fetchall()
+    return any(row["name"] == column for row in rows)

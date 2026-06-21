@@ -18,9 +18,11 @@ The Harbor Fleet Services fleet brake inspection campaign is the sample run, not
 
 - Local FastAPI backend and Vite React product shell.
 - Local prototype auth gate for the operator console.
-- Local/sample customer and workflow onboarding with Harbor Fleet Services defaults.
+- SQLite-backed local/sample customer and workflow management with Harbor Fleet Services defaults.
 - Product navigation for Workflow, Customers, Runs, Audit, and Settings / Integrations.
-- Moving workflow graph for the autonomous run, with approved/proceed and blocked spend branches.
+- Clickable workflow graph for the autonomous run, with approved/proceed and blocked spend branches.
+- Selected workflow runs where customer, job, invoice amount, spend cap, margin floor, and vendor lists drive Stripe amount, policy math, ledger totals, and final report.
+- Persisted run history with historical proof inspection by run ID.
 - Real isolated Hermes Agent planning through a ScaleX `scalex-operator` skill.
 - Orchestration audit trail for the proposed and executed ScaleX tool sequence.
 - SQLite audit ledger for jobs, events, Stripe records, ledger entries, policy checks, agent outputs, and reports.
@@ -28,12 +30,12 @@ The Harbor Fleet Services fleet brake inspection campaign is the sample run, not
 - Real Stripe test-mode customer and finalized invoice records through orchestration for Goal 7, with `invoice_status` and `paid` displayed honestly.
 - Stripe test-double payment records for tests and diagnostics.
 - Deterministic Finance, Marketing, Research, and Ops outputs for reliability.
-- Goal 7.7 product-shell presentation with the first-viewport live workflow claim, Profit Protected outcome panel, Live Stack Proof, moving workflow map, and staged execution replay.
+- Goal 7.8 functional product workflow with first-viewport live workflow claim, Profit Protected outcome panel, Live Stack Proof, clickable workflow map, staged execution replay, Customers workflow manager, Runs history, Audit proof, and Settings / Integrations.
 
 The intended recording flow is product usage, not a static card walkthrough: open ScaleX,
-log in, onboard/select Harbor Fleet Services, review workflow and money rules, start the
-run, watch the graph move, inspect Hermes and Stripe proof, review blocked spend, and
-finish with the profit report plus audit trail.
+log in, create or select a local sample workflow, review workflow and money rules, start the
+selected workflow run, watch the graph move, click Hermes/Stripe/Policy/Report proof nodes,
+review blocked spend, inspect Audit, and return to Runs history.
 
 ## Target Integrations
 
@@ -44,6 +46,6 @@ finish with the profit report plus audit trail.
 
 Live-money payments, real client data, production Hermes, production Prometheus,
 homelab/OpenClaw, Recall memory, production auth, hosted secret exposure, and production
-SaaS features are out of scope. Local/sample onboarding demonstrates the product path;
+SaaS features are out of scope. Local/sample workflow management demonstrates the product path;
 production multi-client onboarding is future work. Future live-money payments require
 Verified Live Mode.

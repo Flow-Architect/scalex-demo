@@ -14,6 +14,7 @@ from app.main import (
     onboard_demo_customer,
     reset_demo,
     seed_demo,
+    select_demo_workflow,
 )
 from app.repository import get_demo_job, list_events
 from app.schemas import OnboardingRequest, SpendCheckRequest
@@ -120,7 +121,7 @@ def test_auth_enabled_requires_login_for_demo_endpoints(tmp_path, monkeypatch) -
     assert status["username"] == "operator"
 
 
-def test_onboarding_endpoint_prepares_local_job(tmp_path, monkeypatch) -> None:
+def test_onboarding_endpoint_saves_and_selects_local_workflow(tmp_path, monkeypatch) -> None:
     monkeypatch.setenv("DATABASE_PATH", str(tmp_path / "scalex.db"))
 
     response = onboard_demo_customer(
@@ -138,14 +139,92 @@ def test_onboarding_endpoint_prepares_local_job(tmp_path, monkeypatch) -> None:
     )
 
     assert response["status"] == "onboarded"
-    assert response["state"]["job"]["client_name"] == "Sample HVAC Co"
-    assert response["state"]["job"]["invoice_amount_cents"] == 160000
-    assert response["state"]["job"]["spend_cap_cents"] == 35000
-    assert response["state"]["job"]["margin_floor_percent"] == 55
+    assert response["state"]["job"] is None
+    assert response["state"]["workflow"]["client_name"] == "Sample HVAC Co"
+    assert response["state"]["workflow"]["invoice_amount_cents"] == 160000
+    assert response["state"]["workflow"]["spend_cap_cents"] == 35000
+    assert response["state"]["workflow"]["margin_floor_percent"] == 55
+    assert response["state"]["workflows"][0]["is_active"] is True
     assert response["state"]["onboarding"]["config_json"]["approvedVendors"] == [
         "SMS Campaign Tool",
         "Email Campaign Tool",
     ]
+
+
+def test_selected_workflow_drives_run_and_custom_invoice_amount(tmp_path, monkeypatch) -> None:
+    monkeypatch.setenv("DATABASE_PATH", str(tmp_path / "scalex.db"))
+
+    onboard_demo_customer(
+        OnboardingRequest(
+            client_name="Sample HVAC Co",
+            business_type="Commercial HVAC service provider",
+            job_name="30-day tune-up campaign",
+            job_goal="Prepare a local sample HVAC tune-up campaign.",
+            invoice_amount_usd=2000,
+            spend_cap_usd=400,
+            margin_floor_percent=55,
+            approved_vendors=["SMS Campaign Tool", "Email Campaign Tool"],
+            blocked_vendors=["Unknown SaaS Vendor"],
+        )
+    )
+    response = _call_post_demo_run_route()
+    state = response["state"]
+
+    assert response["status"] == "completed"
+    assert state["workflow"]["client_name"] == "Sample HVAC Co"
+    assert state["job"]["client_name"] == "Sample HVAC Co"
+    assert state["job"]["invoice_amount_cents"] == 200000
+    assert state["stripe_events"][1]["amount_cents"] == 200000
+    assert state["stripe_events"][-1]["amount_cents"] == 200000
+    assert state["ledger"]["totals"]["revenue_cents"] == 200000
+    assert state["ledger"]["totals"]["approved_spend_cents"] == 18700
+    assert state["ledger"]["totals"]["gross_profit_cents"] == 181300
+    assert state["ledger"]["totals"]["actual_margin_percent"] == 90.6
+    assert state["report"]["gross_profit_cents"] == 181300
+    assert state["report"]["actual_margin_percent"] == 90.6
+
+
+def test_saved_workflow_can_be_selected_for_next_run(tmp_path, monkeypatch) -> None:
+    monkeypatch.setenv("DATABASE_PATH", str(tmp_path / "scalex.db"))
+
+    harbor = onboard_demo_customer(
+        OnboardingRequest(
+            client_name="Harbor Fleet Services",
+            business_type="Regional fleet maintenance provider",
+            job_name="30-day fleet brake inspection campaign",
+            job_goal="Generate Harbor sample.",
+            invoice_amount_usd=1200,
+            spend_cap_usd=300,
+            margin_floor_percent=50,
+            approved_vendors=["Local Ads API", "Design Asset Pack"],
+            blocked_vendors=["Premium Automation Suite"],
+        )
+    )
+    onboard_demo_customer(
+        OnboardingRequest(
+            client_name="Sample HVAC Co",
+            business_type="Commercial HVAC service provider",
+            job_name="30-day tune-up campaign",
+            job_goal="Prepare a local sample HVAC tune-up campaign.",
+            invoice_amount_usd=2000,
+            spend_cap_usd=400,
+            margin_floor_percent=55,
+            approved_vendors=["SMS Campaign Tool", "Email Campaign Tool"],
+            blocked_vendors=["Unknown SaaS Vendor"],
+        )
+    )
+    harbor_id = next(
+        workflow["id"]
+        for workflow in harbor["state"]["workflows"]
+        if workflow["client_name"] == "Harbor Fleet Services"
+    )
+
+    selected = select_demo_workflow(harbor_id)
+    response = _call_post_demo_run_route()
+
+    assert selected["status"] == "workflow_selected"
+    assert response["state"]["job"]["client_name"] == "Harbor Fleet Services"
+    assert response["state"]["job"]["invoice_amount_cents"] == 120000
 
 
 def test_spend_check_endpoint_blocks_before_payment(tmp_path, monkeypatch) -> None:
@@ -265,7 +344,7 @@ def test_demo_run_endpoint_executes_complete_local_lifecycle(tmp_path, monkeypat
     assert response["state"]["hermes"]["used_real_hermes"] is False
 
 
-def test_demo_run_endpoint_resets_and_rebuilds_state_on_repeated_runs(tmp_path, monkeypatch) -> None:
+def test_demo_run_endpoint_persists_history_on_repeated_runs(tmp_path, monkeypatch) -> None:
     monkeypatch.setenv("DATABASE_PATH", str(tmp_path / "scalex.db"))
 
     first_response = _call_post_demo_run_route()
@@ -275,7 +354,9 @@ def test_demo_run_endpoint_resets_and_rebuilds_state_on_repeated_runs(tmp_path, 
     second_state = second_response["state"]
     _assert_complete_demo_state(first_state)
     _assert_complete_demo_state(second_state)
-    assert len(second_state["jobs"]) == 1
+    assert len(second_state["jobs"]) == 2
+    assert len({job["id"] for job in second_state["jobs"]}) == 2
+    assert second_state["selected_run_id"] == second_state["job"]["id"]
     assert len(second_state["ledger"]["entries"]) == 3
     assert len(second_state["policy_checks"]) == 3
     assert len(second_state["stripe_events"]) == 4
@@ -283,6 +364,58 @@ def test_demo_run_endpoint_resets_and_rebuilds_state_on_repeated_runs(tmp_path, 
     assert len(second_state["reports"]) == 1
     assert len(second_state["planning_runs"]) == 1
     assert len(second_state["orchestration_calls"]) == 17
+
+
+def test_state_endpoint_can_inspect_previous_run(tmp_path, monkeypatch) -> None:
+    monkeypatch.setenv("DATABASE_PATH", str(tmp_path / "scalex.db"))
+
+    first_response = _call_post_demo_run_route()
+    second_response = _call_post_demo_run_route()
+    first_run_id = first_response["state"]["job"]["id"]
+
+    inspected = demo_state(run_id=first_run_id)
+
+    assert second_response["state"]["job"]["id"] != first_run_id
+    assert inspected["selected_run_id"] == first_run_id
+    assert inspected["job"]["id"] == first_run_id
+    assert len(inspected["jobs"]) == 2
+    assert inspected["report"]["gross_profit_cents"] == 101300
+
+
+def test_protected_http_endpoints_require_auth_when_enabled(tmp_path, monkeypatch) -> None:
+    monkeypatch.setenv("DATABASE_PATH", str(tmp_path / "scalex.db"))
+    monkeypatch.setenv("SCALEX_AUTH_ENABLED", "true")
+    monkeypatch.setenv("SCALEX_DEMO_USERNAME", "operator")
+    monkeypatch.setenv("SCALEX_DEMO_PASSWORD", "local-password")
+    monkeypatch.setenv("SCALEX_SESSION_SECRET", "test-session-secret")
+
+    missing_cookie_request = SimpleNamespace(cookies={})
+    valid_cookie_request = SimpleNamespace(
+        cookies={"scalex_session": sign_session_token(username="operator")}
+    )
+    protected_routes = {
+        ("POST", "/api/demo/reset"),
+        ("POST", "/api/demo/seed"),
+        ("POST", "/api/demo/onboarding"),
+        ("POST", "/api/demo/workflows"),
+        ("POST", "/api/demo/workflows/{workflow_id}/select"),
+        ("POST", "/api/demo/workflows/{workflow_id}/delete"),
+        ("POST", "/api/demo/run"),
+        ("POST", "/api/demo/mark-paid"),
+        ("POST", "/api/demo/spend-check"),
+        ("GET", "/api/demo/state"),
+    }
+
+    with pytest.raises(HTTPException) as exc:
+        require_local_session(missing_cookie_request)
+
+    require_local_session(valid_cookie_request)
+    assert exc.value.status_code == 401
+
+    for method, path in protected_routes:
+        route = _api_route(path, method)
+        dependency_calls = {dependency.call for dependency in route.dependant.dependencies}
+        assert require_local_session in dependency_calls
 
 
 def test_demo_run_records_planning_and_orchestration_calls(tmp_path, monkeypatch) -> None:
@@ -364,7 +497,7 @@ def _assert_complete_demo_state(state: dict) -> None:
     assert state["job"]["client_name"] == "Harbor Fleet Services"
     assert state["job"]["job_name"] == "30-day fleet brake inspection campaign"
     assert state["job"]["status"] == "complete"
-    assert len(state["jobs"]) == 1
+    assert state["job"]["id"] in {job["id"] for job in state["jobs"]}
 
     assert state["timeline_events"] == state["events"]
     event_types = [event["type"] for event in state["events"]]
@@ -468,3 +601,10 @@ def _call_post_demo_run_route() -> dict:
         if getattr(route, "path", None) == "/api/demo/run" and "POST" in getattr(route, "methods", set()):
             return route.endpoint()
     raise AssertionError("POST /api/demo/run route is not registered")
+
+
+def _api_route(path: str, method: str):
+    for route in app.routes:
+        if getattr(route, "path", None) == path and method in getattr(route, "methods", set()):
+            return route
+    raise AssertionError(f"{method} {path} route is not registered")

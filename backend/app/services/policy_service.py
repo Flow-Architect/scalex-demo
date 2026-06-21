@@ -43,6 +43,26 @@ def policy_summary(policy_config: dict[str, Any] | None = None) -> dict[str, Any
     }
 
 
+def policy_config_for_seed(seed_config: dict[str, Any], base_config: dict[str, Any] | None = None) -> dict[str, Any]:
+    policy_config = dict(base_config or load_policy_config())
+    rules = dict(policy_config["rules"])
+    approved_vendors = list(
+        dict.fromkeys(rules["approved_vendors"] + seed_config.get("approvedVendors", []))
+    )
+    blocked_vendors = list(
+        dict.fromkeys(rules["blocked_vendors"] + seed_config.get("blockedVendors", []))
+    )
+    rules["approved_vendors"] = approved_vendors
+    rules["blocked_vendors"] = blocked_vendors
+    rules["max_job_spend_usd"] = seed_config.get("spendCapUsd", rules["max_job_spend_usd"])
+    rules["margin_floor_percent"] = seed_config.get(
+        "marginFloorPercent",
+        rules["margin_floor_percent"],
+    )
+    policy_config["rules"] = rules
+    return policy_config
+
+
 def evaluate_spend_request(
     *,
     job: dict[str, Any],

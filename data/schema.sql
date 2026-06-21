@@ -2,6 +2,7 @@ PRAGMA foreign_keys = ON;
 
 CREATE TABLE IF NOT EXISTS jobs (
   id TEXT PRIMARY KEY,
+  workflow_id TEXT,
   client_name TEXT NOT NULL,
   business_type TEXT NOT NULL,
   job_name TEXT NOT NULL,
@@ -11,6 +12,24 @@ CREATE TABLE IF NOT EXISTS jobs (
   margin_floor_percent REAL NOT NULL,
   status TEXT NOT NULL,
   created_at TEXT NOT NULL,
+  updated_at TEXT NOT NULL,
+  FOREIGN KEY(workflow_id) REFERENCES workflows(id) ON DELETE SET NULL
+);
+
+CREATE TABLE IF NOT EXISTS workflows (
+  id TEXT PRIMARY KEY,
+  client_name TEXT NOT NULL,
+  business_type TEXT NOT NULL,
+  job_name TEXT NOT NULL,
+  job_goal TEXT NOT NULL,
+  invoice_amount_cents INTEGER NOT NULL,
+  spend_cap_cents INTEGER NOT NULL,
+  margin_floor_percent REAL NOT NULL,
+  approved_vendors_json TEXT NOT NULL,
+  blocked_vendors_json TEXT NOT NULL,
+  seed_config_json TEXT NOT NULL,
+  is_active INTEGER NOT NULL DEFAULT 0,
+  created_at TEXT NOT NULL,
   updated_at TEXT NOT NULL
 );
 
@@ -19,6 +38,9 @@ CREATE TABLE IF NOT EXISTS onboarding_configs (
   config_json TEXT NOT NULL,
   created_at TEXT NOT NULL
 );
+
+CREATE INDEX IF NOT EXISTS idx_workflows_active_updated
+  ON workflows(is_active, updated_at);
 
 CREATE TABLE IF NOT EXISTS events (
   id TEXT PRIMARY KEY,

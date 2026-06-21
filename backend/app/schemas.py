@@ -54,8 +54,12 @@ class OnboardingRequest(BaseModel):
 class DemoStateResponse(BaseModel):
     mode: str
     database: dict[str, Any]
+    workflow: dict[str, Any] | None
+    workflows: list[dict[str, Any]]
+    selected_run_id: str | None
     job: dict[str, Any] | None
     jobs: list[dict[str, Any]]
+    runs: list[dict[str, Any]]
     onboarding: dict[str, Any] | None
     ledger: dict[str, Any]
     policy: dict[str, Any]

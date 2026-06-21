@@ -24,8 +24,9 @@ export function getHealth(): Promise<HealthResponse> {
   return request<HealthResponse>("/api/health");
 }
 
-export function getDemoState(): Promise<DemoState> {
-  return request<DemoState>("/api/demo/state");
+export function getDemoState(runId?: string): Promise<DemoState> {
+  const query = runId ? `?run_id=${encodeURIComponent(runId)}` : "";
+  return request<DemoState>(`/api/demo/state${query}`);
 }
 
 export function getAuthStatus(): Promise<AuthStatus> {
@@ -47,6 +48,25 @@ export function saveOnboarding(requestBody: OnboardingRequest): Promise<DemoActi
   return request<DemoActionResponse>("/api/demo/onboarding", {
     method: "POST",
     body: JSON.stringify(requestBody),
+  });
+}
+
+export function createWorkflow(requestBody: OnboardingRequest): Promise<DemoActionResponse> {
+  return request<DemoActionResponse>("/api/demo/workflows", {
+    method: "POST",
+    body: JSON.stringify(requestBody),
+  });
+}
+
+export function selectWorkflow(workflowId: string): Promise<DemoActionResponse> {
+  return request<DemoActionResponse>(`/api/demo/workflows/${encodeURIComponent(workflowId)}/select`, {
+    method: "POST",
+  });
+}
+
+export function deleteWorkflow(workflowId: string): Promise<DemoActionResponse> {
+  return request<DemoActionResponse>(`/api/demo/workflows/${encodeURIComponent(workflowId)}/delete`, {
+    method: "POST",
   });
 }
 

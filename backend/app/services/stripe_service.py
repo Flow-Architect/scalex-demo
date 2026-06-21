@@ -41,7 +41,7 @@ def create_stripe_customer(
     try:
         customer = stripe_api.Customer.create(
             name=job["client_name"],
-            email="billing+harbor-fleet@example.com",
+            email="billing+scalex-sample@example.com",
             metadata={
                 "scalex_job_id": job["id"],
                 "scalex_client": job["client_name"],
@@ -68,7 +68,7 @@ def create_stripe_customer(
         currency=settings.stripe_currency,
         customer_id=customer_id,
         idempotency_key=idempotency_key,
-        event_id="str_harbor_stripe_test_customer",
+        event_id=_job_scoped_event_id("str", job["id"], "stripe_test_customer"),
     )
     connection.commit()
     return created_event
@@ -92,13 +92,13 @@ def create_stripe_invoice(
         return {
             "invoice_item_event": invoice_item_event,
             "invoice": {
-                "id": "in_test_double_harbor_brake_1200",
+                "id": _test_double_invoice_id(job),
                 "customer": customer_event["customer_id"],
                 "status": "draft",
                 "paid": False,
                 "livemode": False,
             },
-            "invoice_id": "in_test_double_harbor_brake_1200",
+            "invoice_id": _test_double_invoice_id(job),
             "customer_id": customer_event["customer_id"],
             "idempotency_key": _idempotency_key(settings, job, "invoice"),
         }
@@ -111,7 +111,7 @@ def create_stripe_invoice(
             customer=customer_id,
             amount=int(job["invoice_amount_cents"]),
             currency=settings.stripe_currency,
-            description="ScaleX Harbor Fleet Services brake inspection campaign",
+            description=f"ScaleX {job['client_name']} {job['job_name']}",
             metadata={
                 "scalex_job_id": job["id"],
                 "scalex_client": job["client_name"],
@@ -136,7 +136,7 @@ def create_stripe_invoice(
         currency=settings.stripe_currency,
         customer_id=customer_id,
         idempotency_key=invoice_item_key,
-        event_id="str_harbor_stripe_test_invoice_item",
+        event_id=_job_scoped_event_id("str", job["id"], "stripe_test_invoice_item"),
     )
 
     invoice_key = _idempotency_key(settings, job, "invoice")
@@ -215,7 +215,7 @@ def prepare_stripe_payment_url(
         idempotency_key=finalize_key,
         invoice_status=invoice_status,
         paid=paid,
-        event_id="str_harbor_stripe_test_invoice",
+        event_id=_job_scoped_event_id("str", job["id"], "stripe_test_invoice"),
     )
     connection.commit()
     return created_event
@@ -271,7 +271,7 @@ def confirm_stripe_payment_status(
         diagnostic_reason=diagnostic_reason,
         invoice_status=invoice_status,
         paid=paid,
-        event_id="str_harbor_stripe_test_payment_status",
+        event_id=_job_scoped_event_id("str", job["id"], "stripe_test_payment_status"),
     )
     connection.commit()
     return created_event
@@ -292,7 +292,7 @@ def record_stripe_lifecycle_note(
             "No Stripe SDK call was performed."
         )
         status = "test_double"
-        event_id = "evt_harbor_test_double_stripe_lifecycle"
+        event_id = _job_scoped_event_id("evt", job["id"], "test_double_stripe_lifecycle")
         event_type = "stripe_test_double"
     else:
         paid = bool(payment_status_event.get("paid"))
@@ -307,7 +307,7 @@ def record_stripe_lifecycle_note(
                 "not as a Stripe-paid invoice."
             )
         status = "stripe_test"
-        event_id = "evt_harbor_stripe_test_lifecycle"
+        event_id = _job_scoped_event_id("evt", job["id"], "stripe_test_lifecycle")
         event_type = "stripe_test"
 
     event = repository.create_event(
@@ -323,14 +323,15 @@ def record_stripe_lifecycle_note(
     return event
 
 
-def payment_ledger_metadata(payment_status_event: dict[str, Any]) -> dict[str, str]:
+def payment_ledger_metadata(payment_status_event: dict[str, Any], job: dict[str, Any]) -> dict[str, str]:
     if bool(payment_status_event.get("paid")):
         return {
             "ledger_source": "stripe_test_invoice_paid",
-            "ledger_label": "Harbor Fleet Services Stripe test invoice paid",
+            "ledger_label": f"{job['client_name']} Stripe test invoice paid",
             "event_title": "Stripe test invoice paid",
             "event_detail": (
-                "Recorded revenue from a Stripe test-mode invoice that Stripe reported as paid. "
+                f"Recorded revenue for {job['client_name']} from a Stripe test-mode invoice "
+                "that Stripe reported as paid. "
                 "No live-money payment was processed."
             ),
             "event_status": "paid",
@@ -338,12 +339,12 @@ def payment_ledger_metadata(payment_status_event: dict[str, Any]) -> dict[str, s
 
     return {
         "ledger_source": "local_test_confirmation_after_stripe_invoice",
-        "ledger_label": "Harbor Fleet Services local test confirmation",
+        "ledger_label": f"{job['client_name']} local test confirmation",
         "event_title": "Local test revenue confirmation recorded",
         "event_detail": (
-            "Recorded revenue for the compressed ScaleX run after creating a real Stripe test-mode "
-            "invoice. Stripe reported the invoice as not paid, so this is explicitly a local test "
-            "confirmation and not a Stripe-paid invoice."
+            f"Recorded revenue for the compressed ScaleX run for {job['client_name']} after "
+            "creating a real Stripe test-mode invoice. Stripe reported the invoice as not paid, "
+            "so this is explicitly a local test confirmation and not a Stripe-paid invoice."
         ),
         "event_status": "local_test_confirmed",
     }
@@ -427,11 +428,11 @@ def _test_double_step(
     invoice_event: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     amount_cents = int(job["invoice_amount_cents"])
-    customer_id = (customer_event or {}).get("customer_id") or "cus_test_double_harbor_fleet_services"
-    invoice_id = (invoice_event or {}).get("invoice_id") or "in_test_double_harbor_brake_1200"
+    customer_id = (customer_event or {}).get("customer_id") or _test_double_customer_id(job)
+    invoice_id = (invoice_event or {}).get("invoice_id") or _test_double_invoice_id(job)
     hosted_invoice_url = (
         (invoice_event or {}).get("hosted_invoice_url")
-        or "https://invoice.stripe.test/test_double_harbor_brake_1200"
+        or f"https://invoice.stripe.test/{invoice_id}"
     )
     common = {
         "currency": settings.stripe_currency,
@@ -440,7 +441,7 @@ def _test_double_step(
     events = {
         "customer": {
             **common,
-            "event_id": "str_harbor_test_double_customer",
+            "event_id": _job_scoped_event_id("str", job["id"], "test_double_customer"),
             "stripe_object_type": "customer",
             "stripe_object_id": customer_id,
             "status": "test_double_customer_created",
@@ -451,15 +452,15 @@ def _test_double_step(
         },
         "invoice_item": {
             **common,
-            "event_id": "str_harbor_test_double_invoice_item",
+            "event_id": _job_scoped_event_id("str", job["id"], "test_double_invoice_item"),
             "stripe_object_type": "invoice_item",
-            "stripe_object_id": "ii_test_double_harbor_brake_1200",
+            "stripe_object_id": _test_double_invoice_item_id(job),
             "status": "test_double_invoice_item_created",
             "amount_cents": amount_cents,
             "customer_id": customer_id,
             "idempotency_key": _idempotency_key(settings, job, "invoice-item"),
             "raw_object_json": {
-                "id": "ii_test_double_harbor_brake_1200",
+                "id": _test_double_invoice_item_id(job),
                 "object": "invoiceitem",
                 "livemode": False,
                 "amount": amount_cents,
@@ -467,7 +468,7 @@ def _test_double_step(
         },
         "invoice": {
             **common,
-            "event_id": "str_harbor_test_double_invoice",
+            "event_id": _job_scoped_event_id("str", job["id"], "test_double_invoice"),
             "stripe_object_type": "invoice",
             "stripe_object_id": invoice_id,
             "status": "test_double_invoice_open",
@@ -489,7 +490,7 @@ def _test_double_step(
         },
         "payment_status": {
             **common,
-            "event_id": "str_harbor_test_double_payment_status",
+            "event_id": _job_scoped_event_id("str", job["id"], "test_double_payment_status"),
             "stripe_object_type": "payment_status",
             "stripe_object_id": f"payment_status_{invoice_id}",
             "status": "test_double_local_test_confirmation",
@@ -511,7 +512,33 @@ def _test_double_step(
     if invoice_result is not None and stripe_object_type == "invoice":
         events["invoice"]["invoice_id"] = invoice_result.get("invoice_id", invoice_id)
         events["invoice"]["stripe_object_id"] = invoice_result.get("invoice_id", invoice_id)
+        events["invoice"]["hosted_invoice_url"] = (
+            f"https://invoice.stripe.test/{events['invoice']['invoice_id']}"
+        )
+        events["invoice"]["raw_object_json"]["hosted_invoice_url"] = events["invoice"]["hosted_invoice_url"]
     return events[stripe_object_type]
+
+
+def _test_double_customer_id(job: dict[str, Any]) -> str:
+    return f"cus_test_double_{_safe_id(job['id'])}"
+
+
+def _test_double_invoice_item_id(job: dict[str, Any]) -> str:
+    return f"ii_test_double_{_safe_id(job['id'])}"
+
+
+def _test_double_invoice_id(job: dict[str, Any]) -> str:
+    if job["client_name"] == "Harbor Fleet Services" and int(job["invoice_amount_cents"]) == 120000:
+        return "in_test_double_harbor_brake_1200"
+    return f"in_test_double_{_safe_id(job['id'])}"
+
+
+def _job_scoped_event_id(prefix: str, job_id: str, suffix: str) -> str:
+    return f"{prefix}_{_safe_id(job_id)}_{suffix}"
+
+
+def _safe_id(value: object) -> str:
+    return "".join(char if char.isalnum() else "_" for char in str(value).lower())
 
 
 def _assert_test_object(stripe_object: Any, label: str) -> None:

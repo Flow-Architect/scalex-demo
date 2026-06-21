@@ -11,6 +11,7 @@ from .services.ledger_service import usd_to_cents
 
 
 DEMO_JOB_ID = "job_harbor_brake_campaign"
+HARBOR_WORKFLOW_ID = "wf_harbor_fleet_services"
 
 
 def utc_now() -> str:
@@ -27,19 +28,25 @@ def rows_to_dicts(rows: list[sqlite3.Row]) -> list[dict]:
     return [dict(row) for row in rows]
 
 
-def create_job(connection: sqlite3.Connection, seed: dict, job_id: str = DEMO_JOB_ID) -> dict:
+def create_job(
+    connection: sqlite3.Connection,
+    seed: dict,
+    job_id: str = DEMO_JOB_ID,
+    workflow_id: str | None = None,
+) -> dict:
     now = utc_now()
     invoice_amount_cents = usd_to_cents(seed["invoiceAmountUsd"])
     spend_cap_cents = usd_to_cents(seed["spendCapUsd"])
     connection.execute(
         """
         INSERT INTO jobs (
-          id, client_name, business_type, job_name, job_goal,
+          id, workflow_id, client_name, business_type, job_name, job_goal,
           invoice_amount_cents, spend_cap_cents, margin_floor_percent,
           status, created_at, updated_at
         )
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ON CONFLICT(id) DO UPDATE SET
+          workflow_id = excluded.workflow_id,
           client_name = excluded.client_name,
           business_type = excluded.business_type,
           job_name = excluded.job_name,
@@ -52,6 +59,7 @@ def create_job(connection: sqlite3.Connection, seed: dict, job_id: str = DEMO_JO
         """,
         (
             job_id,
+            workflow_id,
             seed["clientName"],
             seed["businessType"],
             seed["jobName"],
@@ -76,13 +84,160 @@ def get_job(connection: sqlite3.Connection, job_id: str) -> dict:
 
 
 def get_demo_job(connection: sqlite3.Connection) -> dict | None:
-    row = connection.execute("SELECT * FROM jobs ORDER BY created_at, id LIMIT 1").fetchone()
+    row = connection.execute("SELECT * FROM jobs ORDER BY created_at DESC, rowid DESC LIMIT 1").fetchone()
+    return row_to_dict(row)
+
+
+def get_latest_job_for_workflow(connection: sqlite3.Connection, workflow_id: str) -> dict | None:
+    row = connection.execute(
+        """
+        SELECT * FROM jobs
+        WHERE workflow_id = ?
+        ORDER BY created_at DESC, rowid DESC
+        LIMIT 1
+        """,
+        (workflow_id,),
+    ).fetchone()
     return row_to_dict(row)
 
 
 def list_jobs(connection: sqlite3.Connection) -> list[dict]:
-    rows = connection.execute("SELECT * FROM jobs ORDER BY created_at, id").fetchall()
+    rows = connection.execute("SELECT * FROM jobs ORDER BY created_at DESC, rowid DESC").fetchall()
     return rows_to_dicts(rows)
+
+
+def create_workflow(
+    connection: sqlite3.Connection,
+    seed_config: dict,
+    *,
+    workflow_id: str | None = None,
+    activate: bool = True,
+) -> dict:
+    workflow_id = workflow_id or f"wf_{uuid4().hex}"
+    now = utc_now()
+    invoice_amount_cents = usd_to_cents(seed_config["invoiceAmountUsd"])
+    spend_cap_cents = usd_to_cents(seed_config["spendCapUsd"])
+    approved_vendors = seed_config.get("approvedVendors", [])
+    blocked_vendors = seed_config.get("blockedVendors", [])
+
+    if activate:
+        connection.execute("UPDATE workflows SET is_active = 0")
+
+    connection.execute(
+        """
+        INSERT INTO workflows (
+          id, client_name, business_type, job_name, job_goal,
+          invoice_amount_cents, spend_cap_cents, margin_floor_percent,
+          approved_vendors_json, blocked_vendors_json, seed_config_json,
+          is_active, created_at, updated_at
+        )
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ON CONFLICT(id) DO UPDATE SET
+          client_name = excluded.client_name,
+          business_type = excluded.business_type,
+          job_name = excluded.job_name,
+          job_goal = excluded.job_goal,
+          invoice_amount_cents = excluded.invoice_amount_cents,
+          spend_cap_cents = excluded.spend_cap_cents,
+          margin_floor_percent = excluded.margin_floor_percent,
+          approved_vendors_json = excluded.approved_vendors_json,
+          blocked_vendors_json = excluded.blocked_vendors_json,
+          seed_config_json = excluded.seed_config_json,
+          is_active = excluded.is_active,
+          updated_at = excluded.updated_at
+        """,
+        (
+            workflow_id,
+            seed_config["clientName"],
+            seed_config["businessType"],
+            seed_config["jobName"],
+            seed_config["jobGoal"],
+            invoice_amount_cents,
+            spend_cap_cents,
+            seed_config["marginFloorPercent"],
+            _json_text(approved_vendors),
+            _json_text(blocked_vendors),
+            _json_text(seed_config),
+            1 if activate else 0,
+            now,
+            now,
+        ),
+    )
+    return get_workflow(connection, workflow_id)
+
+
+def select_workflow(connection: sqlite3.Connection, workflow_id: str) -> dict:
+    workflow = get_workflow(connection, workflow_id)
+    now = utc_now()
+    connection.execute("UPDATE workflows SET is_active = 0")
+    connection.execute(
+        "UPDATE workflows SET is_active = 1, updated_at = ? WHERE id = ?",
+        (now, workflow_id),
+    )
+    selected = get_workflow(connection, workflow_id)
+    upsert_onboarding_config(connection, workflow_seed_config(selected))
+    return selected
+
+
+def delete_workflow(connection: sqlite3.Connection, workflow_id: str) -> None:
+    workflow = get_workflow(connection, workflow_id)
+    connection.execute("DELETE FROM workflows WHERE id = ?", (workflow_id,))
+    if int(workflow.get("is_active") or 0) == 1:
+        replacement = connection.execute(
+            "SELECT id FROM workflows ORDER BY updated_at DESC, rowid DESC LIMIT 1"
+        ).fetchone()
+        if replacement is not None:
+            select_workflow(connection, replacement["id"])
+
+
+def get_workflow(connection: sqlite3.Connection, workflow_id: str) -> dict:
+    row = connection.execute("SELECT * FROM workflows WHERE id = ?", (workflow_id,)).fetchone()
+    workflow = _decode_workflow(row_to_dict(row))
+    if workflow is None:
+        raise LookupError(f"Workflow not found: {workflow_id}")
+    return workflow
+
+
+def get_active_workflow(connection: sqlite3.Connection) -> dict | None:
+    row = connection.execute(
+        """
+        SELECT * FROM workflows
+        WHERE is_active = 1
+        ORDER BY updated_at DESC, rowid DESC
+        LIMIT 1
+        """
+    ).fetchone()
+    return _decode_workflow(row_to_dict(row))
+
+
+def list_workflows(connection: sqlite3.Connection) -> list[dict]:
+    rows = connection.execute(
+        "SELECT * FROM workflows ORDER BY is_active DESC, updated_at DESC, rowid DESC"
+    ).fetchall()
+    return [_decode_workflow(dict(row)) for row in rows]
+
+
+def workflow_seed_config(workflow: dict) -> dict:
+    seed_config = workflow.get("seed_config_json")
+    if isinstance(seed_config, dict):
+        return seed_config
+    return {
+        "clientName": workflow["client_name"],
+        "businessType": workflow["business_type"],
+        "jobName": workflow["job_name"],
+        "jobGoal": workflow["job_goal"],
+        "invoiceAmountUsd": int(workflow["invoice_amount_cents"]) / 100,
+        "spendCapUsd": int(workflow["spend_cap_cents"]) / 100,
+        "marginFloorPercent": float(workflow["margin_floor_percent"]),
+        "approvedVendors": workflow.get("approved_vendors", []),
+        "blockedVendors": workflow.get("blocked_vendors", []),
+        "approvedSpendRequests": seed_config.get("approvedSpendRequests", []) if isinstance(seed_config, dict) else [],
+        "blockedSpendRequests": seed_config.get("blockedSpendRequests", []) if isinstance(seed_config, dict) else [],
+    }
+
+
+def new_run_job_id() -> str:
+    return f"job_{uuid4().hex}"
 
 
 def upsert_onboarding_config(
@@ -641,3 +796,23 @@ def _json_text(value: dict | list | str | int | float | bool | None) -> str | No
     if value is None:
         return None
     return json.dumps(value, sort_keys=True)
+
+
+def _decode_workflow(workflow: dict | None) -> dict | None:
+    if workflow is None:
+        return None
+    decoded = dict(workflow)
+    decoded["approved_vendors"] = _json_value(decoded.get("approved_vendors_json"), [])
+    decoded["blocked_vendors"] = _json_value(decoded.get("blocked_vendors_json"), [])
+    decoded["seed_config_json"] = _json_value(decoded.get("seed_config_json"), {})
+    decoded["is_active"] = bool(decoded.get("is_active"))
+    return decoded
+
+
+def _json_value(value: object, fallback: object) -> object:
+    if not isinstance(value, str):
+        return fallback if value is None else value
+    try:
+        return json.loads(value)
+    except json.JSONDecodeError:
+        return fallback

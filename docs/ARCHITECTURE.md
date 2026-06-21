@@ -5,7 +5,7 @@ Target architecture:
 ```text
 ScaleX UI
   -> local prototype auth gate
-  -> local/sample workflow onboarding
+  -> SQLite-backed local/sample workflow management
   -> FastAPI backend
   -> isolated Hermes brain/orchestration
   -> real Stripe test mode / policy layer / agents
@@ -16,25 +16,27 @@ ScaleX UI
 ## Implemented Today
 
 - Vite React TypeScript frontend.
-- Product shell with login, onboarding, workflow, customers, runs, audit, and integrations views.
+- Product shell with login, Workflow, Customers, Runs, Audit, and Settings / Integrations views.
 - FastAPI backend.
 - SQLite audit ledger at `data/scalex.db`.
 - Local prototype auth using an environment-configured username/password and signed HTTP-only session cookie.
-- Local/sample onboarding state persisted through SQLite `jobs` and `onboarding_configs`.
+- Local/sample workflow configs persisted through SQLite `workflows` and `onboarding_configs`.
+- Unique run history persisted through SQLite `jobs` plus run-scoped audit/proof tables.
+- Historical run inspection through `GET /api/demo/state?run_id=...`.
 - Real isolated Hermes Agent planning through the repo-owned `scalex-operator` skill.
 - Hermes CLI invocation with `--skills scalex-operator`, `--toolsets skills`, provider `openai-codex`, and model `gpt-5.5`.
 - SQLite `planning_runs` and `orchestration_calls` audit tables.
 - Real Stripe test-mode customer and finalized invoice records through orchestration for Goal 7.
 - Local policy engine for spend governance until Goal 8 wires a real safety adapter if safely available.
 - Deterministic agent outputs.
-- Harbor Fleet Services sample workflow with Goal 7.7 product-shell proof, Profit Protected outcome, Live Stack Proof, moving workflow map, and staged execution replay.
+- Harbor Fleet Services sample workflow with Goal 7.8 product workflow proof, Profit Protected outcome, Live Stack Proof, clickable workflow map, staged execution replay, and persisted run history.
 
 ## Auth and Onboarding
 
-Goal 7.7 adds local prototype auth and local/sample workflow onboarding. Auth is not
-production enterprise identity. Onboarding is not full SaaS multi-tenancy. The product
-walkthrough uses these surfaces to behave like a real operator console while keeping the
-scope to one local workflow and synthetic/sample data.
+Goal 7.8 keeps local prototype auth and adds SQLite-backed local/sample workflow management.
+Auth is not production enterprise identity. Workflow management is not full SaaS
+multi-tenancy. The product walkthrough uses these surfaces to behave like a real operator
+console while keeping data synthetic/sample-only and live-money actions out of scope.
 
 ## Hermes Integration
 

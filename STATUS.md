@@ -5,10 +5,10 @@ Last updated: 2026-06-21
 ## Verified current state
 
 - Project folder exists at /home/ascabrya/dev/scalex-demo.
-- Latest committed baseline before this goal: `12e7705 Polish ScaleX command center and align docs`.
-- Last completed implementation goal: Goal 7.7 - product shell, local auth gate, onboarding flow, and live workflow visualization before Goal 8.
-- Last completed documentation/audit goal in this working tree: final Goal 7.7 functional verification and product-doc alignment.
-- ScaleX is a live working product-style prototype for profit-aware agent operations in service workflows.
+- Latest committed baseline before this goal: `3b045dd Add ScaleX product shell auth and onboarding`.
+- Last completed implementation goal in this working tree: Goal 7.8 - usable browser product workflow with real customer/workflow management, selected-workflow runs, persisted run history, and clickable workflow graph proof.
+- Last completed documentation/audit goal in this working tree: Goal 7.8 product workflow closeout.
+- ScaleX is now a functional browser-usable product prototype for profit-aware agent operations in service workflows, not just a visual dashboard.
 - Product mode is real-integration-first:
   - real isolated Hermes Agent for planning/orchestration proposals
   - real Stripe test-mode API calls for Goal 7 payment/invoice records
@@ -16,7 +16,7 @@ Last updated: 2026-06-21
   - local policy engine until Goal 8 wires a real NemoClaw/NemoClaw-style safety adapter if safely available
 - Mock/fallback/test-double paths are for automated tests, CI, offline development, or explicitly labeled diagnostics only.
 - Product-mode real integration failures surface visible error states instead of silently falling back.
-- The frontend now opens as a product shell with local prototype auth, local/sample onboarding, navigation, workflow visualization, run history, audit, and integrations views.
+- The frontend now opens as a product shell with local prototype auth, Customers workflow management, selected-workflow run controls, clickable workflow visualization, run history, audit, and integrations views.
 
 ## Goal 6 state
 
@@ -229,6 +229,48 @@ Last updated: 2026-06-21
   - final economics
 - NemoClaw remains labeled as Goal 8 next and not claimed as real.
 - No live-money Stripe support was added.
+
+## Goal 7.8 state
+
+- Goal 7.8 is complete in this working tree for making ScaleX usable from the browser as a product workflow.
+- Customer/workflow management is now functional:
+  - users can create local synthetic/sample workflows from Customers
+  - users can load the Harbor Fleet Services sample
+  - users can select saved workflows
+  - users can delete saved local workflows
+  - workflows persist in SQLite in the `workflows` table
+  - active workflow state remains visible after browser refresh through `GET /api/demo/state`
+- The active workflow drives runs:
+  - `POST /api/demo/run` uses the selected workflow config
+  - custom customer name, job name, invoice amount, spend cap, margin floor, approved vendors, and blocked vendors flow into the run seed config
+  - Stripe test/test-double invoice amount is created from the selected workflow invoice amount
+  - local policy and profit math use the selected workflow economics
+  - Harbor Fleet Services still produces the locked sample economics: $1,200 revenue, $187 approved spend, $750 blocked unsafe spend, $1,013 gross profit, and 84.4% margin
+- Run history is now persistent:
+  - each run creates a unique `jobs` row
+  - run-scoped events, planning runs, orchestration calls, Stripe events, ledger entries, policy checks, agent outputs, and reports persist without overwriting previous runs
+  - `GET /api/demo/state?run_id=...` returns proof details for a selected historical run
+  - Runs tab lists persisted runs and can load prior run details
+- Workflow graph nodes are clickable:
+  - Hermes node opens provider/model/skill/plan/orchestration proof
+  - Stripe and Payment nodes open customer ID, invoice ID, hosted invoice URL, `livemode`, invoice status, paid state, and diagnostic proof
+  - Policy and Spend nodes show rules, reasons, approved spend branch, and blocked unsafe spend branch
+  - Agent node shows deterministic deliverables
+  - SQLite Audit node shows ledger proof
+  - Report node shows final profit report and economics
+- Product tabs are functional enough for recording:
+  - Workflow: graph, run controls, active workflow, proof panels
+  - Customers: create/select/delete workflows and load Harbor sample
+  - Runs: persisted run list and selected run summary/proof
+  - Audit: ledger, timeline, orchestration feed, Stripe proof, policy decisions
+  - Settings / Integrations: auth, Hermes, Stripe mode, SQLite path/counts, local policy engine, and NemoClaw next/not real yet
+- Integration honesty is preserved:
+  - real Hermes proof remains `used_real_hermes=true` when configured
+  - real Stripe test-mode proof remains `used_real_stripe=true`, `stripe_test`, `livemode=false`, customer ID, invoice ID, hosted invoice URL, `invoice_status=open`, and `paid=false` when configured
+  - Stripe test-double remains for tests/CI/explicit diagnostics only
+  - the UI does not claim Stripe invoices are paid unless Stripe reports `paid=true`
+  - NemoClaw is still not real yet
+  - no live-money support was added
 
 ## Final Goal 7.7 verification pass
 
@@ -463,11 +505,62 @@ The locked sample workflow remains unchanged:
   - `gross_profit_cents=101300`
   - `actual_margin_percent=84.4`
 
+## Verified on 2026-06-21 for Goal 7.8
+
+- `./scripts/test.sh` passed with 48 backend tests and a successful Vite production build.
+- Tests now cover selected-workflow-driven runs, custom workflow invoice amount propagation, run history persistence, historical run inspection, protected HTTP endpoints with auth enabled, and unchanged Harbor sample economics.
+- Backend compile check passed with `backend/.venv/bin/python -m compileall backend/app`.
+- `git diff --check` passed.
+- Value-shaped tracked-file secret scan returned no matches.
+- No `CODEX_GOALS.md` or `GOAL_LOG.md` file exists.
+- No `.env` file is staged.
+- Custom Sample HVAC Co workflow verification in tests produced:
+  - `client_name=Sample HVAC Co`
+  - `invoice_amount_cents=200000`
+  - Stripe test-double invoice/payment events at `amount_cents=200000`
+  - `revenue_cents=200000`
+  - `approved_spend_cents=18700`
+  - `gross_profit_cents=181300`
+  - `actual_margin_percent=90.6`
+- Repeated Harbor runs now persist as two unique `jobs` rows while each selected run still exposes its own ledger, policy, Stripe, Hermes, agent, and report details.
+- `GET /api/demo/state?run_id=...` was verified in tests for historical run inspection.
+- `./scripts/dev.sh` started successfully:
+  - backend: `http://127.0.0.1:8787`
+  - frontend: `http://127.0.0.1:5174`
+- Local browser-facing API verification with prototype auth confirmed:
+  - unauthenticated demo state returned 401
+  - login returned 200
+  - custom Summit Pool Services workflow save returned 200 and persisted as active workflow
+  - selected workflow run completed with a unique run record
+  - selected custom invoice amount drove the job and Stripe invoice amount at `invoice_amount_cents=180000`
+  - historical run inspection by `run_id` returned 200
+  - the frontend loaded at `http://127.0.0.1:5174`
+  - logout returned 200
+  - protected demo state returned 401 after logout
+- Product-mode Summit Pool Services run completed with real Hermes and real Stripe test mode:
+  - `used_real_hermes=true`
+  - `provider=openai-codex`
+  - `model=gpt-5.5`
+  - `used_real_stripe=true`
+  - `stripe_mode=stripe_test`
+  - `livemode=false`
+  - real Stripe invoice ID prefix `in_`
+  - `invoice_status=open`
+  - `paid=false`
+  - custom economics: $1,800 revenue, $187 approved spend, $1,613 gross profit, and 89.6% margin
+- Product-mode Harbor Fleet Services run completed with real Hermes and real Stripe test mode:
+  - `used_real_stripe=true`
+  - `stripe_mode=stripe_test`
+  - `livemode=false`
+  - `invoice_status=open`
+  - `paid=false`
+  - blocked `Premium Automation Suite` at $750
+  - Harbor economics unchanged at $1,200 revenue, $187 approved spend, $750 blocked spend, $1,013 gross profit, and 84.4% margin
+
 ## Not yet verified
 
 - Fresh-clone setup on a clean machine.
 - Manual recorded browser walkthrough.
-- Normal-browser post-login walkthrough after the final docs pass; headless Chrome rerender is blocked locally by crashpad sandbox permissions.
 - Screenshot/video capture quality for final submission.
 
 ## Not yet built

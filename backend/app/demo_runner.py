@@ -12,13 +12,13 @@ import time
 from typing import Any
 
 from . import repository
-from .db import database_path, get_connection, initialize_database, reset_database
+from .db import database_path, get_connection, initialize_database
 from .services.agent_service import create_demo_agent_output, record_demo_agent_work_complete
 from .services.hermes_adapter import sanitize_text
 from .services.ledger_service import ledger_totals, usd_to_cents
 from .services.payment_service import mark_job_paid
 from .services.planning_service import generate_operating_plan
-from .services.policy_service import apply_spend_request, load_policy_config
+from .services.policy_service import apply_spend_request, policy_config_for_seed
 from .services.seed_service import load_seed_config, seed_demo_database
 from .services.state_service import build_demo_state
 from .services.stripe_service import (
@@ -33,19 +33,21 @@ from .services.stripe_service import (
 
 
 FINAL_RECOMMENDATION = "Renew campaign for another 30 days"
-REPORT_ID = "rep_harbor_final_profit_report"
-JOB_COMPLETE_EVENT_ID = "evt_harbor_job_complete"
-
-
 def run_demo() -> dict[str, Any]:
-    seed_config = _active_seed_config()
-    reset_database()
+    initialize_database()
 
     with closing(get_connection()) as connection:
         sequence = 0
 
         job_started_at = time.monotonic()
-        job = seed_demo_database(connection, seed_config)
+        seed_config, workflow = _active_workflow_seed(connection)
+        job = seed_demo_database(
+            connection,
+            seed_config,
+            job_id=repository.new_run_job_id(),
+            workflow_id=workflow["id"],
+            deterministic_event_ids=False,
+        )
         repository.upsert_onboarding_config(connection, seed_config)
         sequence = _record_orchestration_call(
             connection,
@@ -146,7 +148,7 @@ def run_demo() -> dict[str, Any]:
             operation=lambda: mark_job_paid(
                 connection,
                 job,
-                **payment_ledger_metadata(payment_status),
+                **payment_ledger_metadata(payment_status, job),
             ),
         )
         sequence = _run_policy_spend_sequence(connection, job, sequence, planning_run_id, seed_config)
@@ -177,13 +179,12 @@ def run_demo() -> dict[str, Any]:
             connection,
             job_id=job["id"],
             type="job_complete",
-            title="Harbor Fleet Services campaign package completed",
+            title=f"{job['client_name']} workflow run completed",
             detail=(
                 "Completed the compressed local demo lifecycle from intake through final profit report. "
                 "Stripe/payment records are labeled with their actual execution mode."
             ),
             status="complete",
-            event_id=JOB_COMPLETE_EVENT_ID,
         )
         connection.commit()
         state = build_demo_state(connection)
@@ -265,7 +266,6 @@ def _record_margin_plan(connection, job: dict[str, Any]) -> None:
             f"{job['margin_floor_percent']}% floor."
         ),
         status="planned",
-        event_id="evt_harbor_margin_plan",
     )
     connection.commit()
 
@@ -282,7 +282,6 @@ def _record_payment_gate_note(connection, job: dict[str, Any]) -> None:
             "so prerequisite blocks do not inflate final blocked spend."
         ),
         status="guarded",
-        event_id="evt_harbor_policy_payment_gate",
     )
     connection.commit()
 
@@ -295,7 +294,6 @@ def _record_stripe_error(connection, job: dict[str, Any], exc: StripeIntegration
         title="Stripe test-mode integration failed",
         detail=sanitize_text(str(exc)),
         status="failed",
-        event_id="evt_harbor_stripe_integration_error",
     )
     connection.commit()
     return event
@@ -374,7 +372,6 @@ def _create_final_report(connection, job: dict[str, Any]) -> dict[str, Any]:
         policy_violations=0,
         recommendation=FINAL_RECOMMENDATION,
         report_markdown=_final_report_markdown(job, totals),
-        report_id=REPORT_ID,
     )
     repository.create_event(
         connection,
@@ -389,7 +386,6 @@ def _create_final_report(connection, job: dict[str, Any]) -> dict[str, Any]:
             f"{totals['actual_margin_percent']}% final margin."
         ),
         status="complete",
-        event_id="evt_harbor_profit_report",
     )
     connection.commit()
     return report
@@ -505,7 +501,6 @@ def _record_planning_event(
                 f"Planning run {planning_run['id']} used_real_hermes={str(used_real).lower()}."
             ),
             status="complete",
-            event_id="evt_harbor_hermes_planning",
         )
 
     return repository.create_event(
@@ -515,7 +510,6 @@ def _record_planning_event(
         title="Hermes planning failed",
         detail=planning_result["error"] or "Hermes failed before returning a usable plan.",
         status="failed",
-        event_id="evt_harbor_hermes_error",
     )
 
 
@@ -523,47 +517,21 @@ def _duration_ms(started_at: float) -> int:
     return round((time.monotonic() - started_at) * 1000)
 
 
-def _active_seed_config() -> dict[str, Any]:
+def _active_workflow_seed(connection) -> tuple[dict[str, Any], dict[str, Any]]:
     default_seed = load_seed_config()
-    if not database_path().exists():
-        return default_seed
-
-    initialize_database()
-    with closing(get_connection()) as connection:
-        onboarding_config = repository.get_onboarding_config(connection)
-        if onboarding_config and isinstance(onboarding_config.get("config_json"), dict):
-            return onboarding_config["config_json"]
-        job = repository.get_demo_job(connection)
-    if job is None:
-        return default_seed
-
-    return _seed_config_from_job(job, default_seed)
-
-
-def _seed_config_from_job(job: dict[str, Any], default_seed: dict[str, Any]) -> dict[str, Any]:
-    seed_config = dict(default_seed)
-    seed_config.update(
-        {
-            "clientName": job["client_name"],
-            "businessType": job["business_type"],
-            "jobName": job["job_name"],
-            "jobGoal": job["job_goal"],
-            "invoiceAmountUsd": int(job["invoice_amount_cents"]) / 100,
-            "spendCapUsd": int(job["spend_cap_cents"]) / 100,
-            "marginFloorPercent": float(job["margin_floor_percent"]),
-        }
-    )
-    return seed_config
+    workflow = repository.get_active_workflow(connection)
+    if workflow is None:
+        workflow = repository.create_workflow(
+            connection,
+            default_seed,
+            workflow_id=repository.HARBOR_WORKFLOW_ID,
+            activate=True,
+        )
+        repository.upsert_onboarding_config(connection, default_seed)
+        connection.commit()
+    seed_config = repository.workflow_seed_config(workflow)
+    return seed_config, workflow
 
 
 def _policy_config_for_seed(seed_config: dict[str, Any]) -> dict[str, Any]:
-    policy_config = load_policy_config()
-    rules = dict(policy_config["rules"])
-    approved_vendors = list(dict.fromkeys(rules["approved_vendors"] + seed_config.get("approvedVendors", [])))
-    blocked_vendors = list(dict.fromkeys(rules["blocked_vendors"] + seed_config.get("blockedVendors", [])))
-    rules["approved_vendors"] = approved_vendors
-    rules["blocked_vendors"] = blocked_vendors
-    rules["margin_floor_percent"] = seed_config.get("marginFloorPercent", rules["margin_floor_percent"])
-    policy_config = dict(policy_config)
-    policy_config["rules"] = rules
-    return policy_config
+    return policy_config_for_seed(seed_config)

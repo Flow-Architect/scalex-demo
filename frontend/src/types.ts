@@ -31,6 +31,7 @@ export interface OnboardingRequest {
 
 export interface DemoJob {
   id: string;
+  workflow_id: string | null;
   client_name: string;
   business_type: string;
   job_name: string;
@@ -39,6 +40,35 @@ export interface DemoJob {
   spend_cap_cents: number;
   margin_floor_percent: number;
   status: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface WorkflowConfig {
+  id: string;
+  client_name: string;
+  business_type: string;
+  job_name: string;
+  job_goal: string;
+  invoice_amount_cents: number;
+  spend_cap_cents: number;
+  margin_floor_percent: number;
+  approved_vendors: string[];
+  blocked_vendors: string[];
+  seed_config_json: {
+    clientName?: string;
+    businessType?: string;
+    jobName?: string;
+    jobGoal?: string;
+    invoiceAmountUsd?: number;
+    spendCapUsd?: number;
+    marginFloorPercent?: number;
+    approvedVendors?: string[];
+    blockedVendors?: string[];
+    approvedSpendRequests?: Array<{ vendor: string; amountUsd: number; purpose?: string }>;
+    blockedSpendRequests?: Array<{ vendor: string; amountUsd: number; purpose?: string }>;
+  };
+  is_active: boolean;
   created_at: string;
   updated_at: string;
 }
@@ -250,9 +280,14 @@ export interface DemoState {
     initialized: boolean;
     path?: string;
     exists?: boolean;
+    table_counts?: Record<string, number>;
   };
+  workflow: WorkflowConfig | null;
+  workflows: WorkflowConfig[];
+  selected_run_id: string | null;
   job: DemoJob | null;
   jobs: DemoJob[];
+  runs: DemoJob[];
   onboarding: OnboardingConfig | null;
   ledger: {
     entries: LedgerEntry[];

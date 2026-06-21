@@ -26,6 +26,8 @@ Goal 7.7 is complete for product shell UX before Goal 8. ScaleX now has a local 
 
 The final Goal 7.7 verification and product-doc alignment pass is complete in the working tree. Auth, protected endpoints, onboarding persistence, selected-run behavior, Harbor full-proof output, source-level product shell views, and workflow-map truthfulness were rechecked. The final automated Chrome rerender is blocked locally by crashpad sandbox permissions, so final recording should still be confirmed in a normal browser.
 
+Goal 7.8 is complete in this working tree for functional product workflow usage. ScaleX can now be used from the browser to create/select/delete saved local workflows, load the Harbor sample, start a run for the selected workflow, inspect clickable workflow graph nodes, view persisted run history, load historical run proof by run ID, and review Audit and Settings tabs without terminal output. Workflow configs persist in SQLite, each run appends a unique job/run record, and selected workflow economics drive Stripe amount, policy checks, ledger totals, agent output context, and final report math.
+
 The next product proof gap is safety-governance realism. The local policy engine is deterministic and useful, but Goal 8 should either wire a real safe policy adapter or label the local safety layer honestly while improving the presentation.
 
 ## Required outputs for Goal 8
@@ -57,7 +59,13 @@ The next product proof gap is safety-governance realism. The local policy engine
 - Preserve the Goal 7.5 command-center UI and keep NemoClaw status honest until a real safety adapter is wired.
 - Preserve the Goal 7.6 judge-ready first viewport, Profit Protected hero, Live Stack Proof strip, staged execution replay, and Stripe open/unpaid honesty.
 - Preserve the Goal 7.7 product shell, local prototype auth boundary, onboarding flow, moving workflow map, run history, audit view, and integrations view.
-- Preserve the post-Goal 7.7 documentation boundary: working product prototype, local prototype auth, local/sample onboarding, real Hermes, real Stripe test mode, SQLite audit ledger, active local policy, NemoClaw next/not yet real, and Verified Live Mode as future live-money hardening.
+- Preserve the Goal 7.8 functional product workflow:
+  - Customers creates/selects/deletes saved local workflows.
+  - Active workflow drives `/api/demo/run`.
+  - Runs persist as unique SQLite job records.
+  - `GET /api/demo/state?run_id=...` inspects historical run proof.
+  - Workflow graph nodes remain clickable and show real proof details.
+- Preserve the post-Goal 7.8 documentation boundary: functional product prototype, local prototype auth, SQLite-backed local/sample workflow management, selected-workflow runs, persisted run history, real Hermes, real Stripe test mode, SQLite audit ledger, active local policy, NemoClaw next/not yet real, and Verified Live Mode as future live-money hardening.
 - Add tests that do not require external policy network calls.
 - Run `./scripts/test.sh`.
 - Run `git diff --check`.
@@ -71,7 +79,7 @@ The next product proof gap is safety-governance realism. The local policy engine
 - Mock/fallback/test-double paths are for tests, CI, offline development, or explicitly labeled diagnostics only.
 - Harbor Fleet Services remains the sample workflow, not the whole product.
 - Auth remains local prototype auth unless a future explicit production auth milestone is defined.
-- Onboarding remains local/sample workflow onboarding and not full multi-tenant SaaS.
+- Workflow/customer management remains local/sample workflow management and not full multi-tenant SaaS.
 - Invoice remains $1,200.
 - Approved spend remains $89 Local Ads API and $98 Design Asset Pack.
 - Blocked spend remains $750 Premium Automation Suite.

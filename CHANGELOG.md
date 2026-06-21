@@ -10,6 +10,45 @@ Use:
 
 ---
 
+## 2026-06-21 - Goal 7.8: Functional product workflow, saved workflows, and run history
+
+Completed:
+- Added persisted SQLite workflow configs for local/sample customers and service workflows.
+- Added active workflow selection so the browser can create/select/delete saved workflows and load Harbor Fleet Services as the sample.
+- Changed `POST /api/demo/run` to use the selected workflow instead of resetting to a single Harbor-only state.
+- Changed runs to append unique `jobs` records and run-scoped events, planning runs, orchestration calls, Stripe events, ledger entries, policy checks, agent outputs, and reports.
+- Added historical run inspection through `GET /api/demo/state?run_id=...`.
+- Hardened Hermes adapter error detection so CLI stdout API failures such as HTTP 429 usage limits are surfaced as Hermes integration errors instead of JSON parse failures.
+- Made custom workflow economics drive invoice amount, spend cap, margin floor, policy configuration, Stripe/test-double amount, ledger totals, agent output context, and final report math.
+- Preserved Harbor Fleet Services locked proof: $1,200 revenue, $187 approved spend, $750 blocked unsafe spend, $1,013 gross profit, and 84.4% margin.
+- Reworked Customers into a functional workflow manager with Harbor sample load, create, select, and delete actions.
+- Reworked Runs into persisted run history with click-to-inspect behavior.
+- Expanded Audit with ledger, timeline, orchestration feed, Stripe proof, and policy decisions.
+- Made workflow graph nodes clickable and added a proof drawer for Hermes, Stripe, payment status, policy, spend branches, agents, SQLite ledger, and final report.
+- Kept local prototype auth, real Hermes proof, real Stripe test-mode proof, SQLite audit records, local policy guardrails, and Stripe open/unpaid honesty intact.
+- Kept NemoClaw as Goal 8 next/not real yet and did not add live-money Stripe support.
+
+Verified:
+- `backend/.venv/bin/python -m compileall backend/app` passed.
+- `./scripts/test.sh` passed with 48 backend tests and a successful Vite production build.
+- Tests cover selected workflow driving runs, custom invoice amount propagation, persistent run history, historical run inspection, protected HTTP endpoints with auth enabled, and unchanged Harbor economics.
+- `git diff --check` passed.
+- Value-shaped tracked-file secret scan returned no matches.
+- No `CODEX_GOALS.md` or `GOAL_LOG.md` file exists.
+- No `.env` file is staged.
+- `./scripts/dev.sh` started the backend at `http://127.0.0.1:8787` and frontend at `http://127.0.0.1:5174`.
+- Local browser-facing API verification confirmed auth protection before login, local login, custom workflow save, selected-workflow run completion, historical run inspection, frontend load, logout, and protected state after logout.
+- Product-mode Summit Pool Services verification completed with real Hermes (`used_real_hermes=true`, `openai-codex`, `gpt-5.5`), real Stripe test mode (`used_real_stripe=true`, `stripe_test`, `livemode=false`, real `in_` invoice ID prefix, `invoice_status=open`, `paid=false`), custom $1,800 invoice amount, $187 approved spend, $1,613 gross profit, and 89.6% margin.
+- Product-mode Harbor Fleet Services verification completed with real Hermes and real Stripe test mode, kept Stripe open/unpaid honesty, blocked $750 Premium Automation Suite spend, and preserved the locked economics: $1,200 revenue, $187 approved spend, $750 blocked spend, $1,013 gross profit, and 84.4% margin.
+
+Suggested commit message:
+Make ScaleX workflows and run history browser-usable
+
+Next:
+- Goal 8 - NemoClaw / policy safety integration and presentation.
+
+---
+
 ## 2026-06-21 - Final Goal 7.7 verification and product-doc alignment
 
 Completed:

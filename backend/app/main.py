@@ -19,7 +19,7 @@ from .services.auth_service import auth_status, login, logout, require_local_ses
 from .services.ledger_service import usd_to_cents
 from .services.payment_service import mark_job_paid
 from .services.policy_service import apply_spend_request
-from .services.seed_service import seed_demo_database
+from .services.seed_service import load_seed_config, seed_demo_database
 from .services.state_service import build_demo_state
 
 app = FastAPI(
@@ -90,7 +90,15 @@ def reset_demo() -> dict:
 def seed_demo() -> dict:
     initialize_database()
     with closing(get_connection()) as connection:
-        seed_demo_database(connection)
+        seed_config = _harbor_seed_config()
+        workflow = repository.create_workflow(
+            connection,
+            seed_config,
+            workflow_id=repository.HARBOR_WORKFLOW_ID,
+            activate=True,
+        )
+        repository.upsert_onboarding_config(connection, seed_config)
+        seed_demo_database(connection, seed_config, workflow_id=workflow["id"])
     return {"status": "seeded", "state": _current_state()}
 
 
@@ -100,30 +108,48 @@ def seed_demo() -> dict:
     dependencies=[Depends(require_local_session)],
 )
 def onboard_demo_customer(request: OnboardingRequest) -> dict:
-    try:
-        seed_config = _onboarding_seed_config(request)
-        reset_database()
-    except ValueError as exc:
-        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    return _save_workflow_from_request(request, status="onboarded")
 
+
+@app.post(
+    "/api/demo/workflows",
+    response_model=DemoActionResponse,
+    dependencies=[Depends(require_local_session)],
+)
+def create_demo_workflow(request: OnboardingRequest) -> dict:
+    return _save_workflow_from_request(request, status="workflow_saved")
+
+
+@app.post(
+    "/api/demo/workflows/{workflow_id}/select",
+    response_model=DemoActionResponse,
+    dependencies=[Depends(require_local_session)],
+)
+def select_demo_workflow(workflow_id: str) -> dict:
+    initialize_database()
     with closing(get_connection()) as connection:
-        job = seed_demo_database(connection, seed_config)
-        repository.upsert_onboarding_config(connection, seed_config)
-        repository.create_event(
-            connection,
-            job_id=job["id"],
-            type="customer_onboarding",
-            title="Local workflow onboarding saved",
-            detail=(
-                f"{job['client_name']} prepared for {job['job_name']} with "
-                f"${job['invoice_amount_cents'] / 100:,.0f} invoice, "
-                f"${job['spend_cap_cents'] / 100:,.0f} spend cap, and "
-                f"{job['margin_floor_percent']}% margin floor."
-            ),
-            status="seeded",
-        )
+        try:
+            repository.select_workflow(connection, workflow_id)
+        except LookupError as exc:
+            raise HTTPException(status_code=404, detail=str(exc)) from exc
         connection.commit()
-    return {"status": "onboarded", "state": _current_state()}
+    return {"status": "workflow_selected", "state": _current_state()}
+
+
+@app.post(
+    "/api/demo/workflows/{workflow_id}/delete",
+    response_model=DemoActionResponse,
+    dependencies=[Depends(require_local_session)],
+)
+def delete_demo_workflow(workflow_id: str) -> dict:
+    initialize_database()
+    with closing(get_connection()) as connection:
+        try:
+            repository.delete_workflow(connection, workflow_id)
+        except LookupError as exc:
+            raise HTTPException(status_code=404, detail=str(exc)) from exc
+        connection.commit()
+    return {"status": "workflow_deleted", "state": _current_state()}
 
 
 @app.post(
@@ -182,17 +208,46 @@ def demo_spend_check(request: SpendCheckRequest) -> dict:
     response_model=DemoStateResponse,
     dependencies=[Depends(require_local_session)],
 )
-def demo_state() -> dict:
+def demo_state(run_id: str | None = None) -> dict:
     initialize_database()
-    return _current_state()
+    return _current_state(run_id=run_id)
 
 
-def _current_state() -> dict:
+def _current_state(run_id: str | None = None) -> dict:
     with closing(get_connection()) as connection:
-        state = build_demo_state(connection)
+        state = build_demo_state(connection, run_id=run_id)
     state["database"]["path"] = str(database_path())
     state["database"]["exists"] = database_path().exists()
     return state
+
+
+def _save_workflow_from_request(request: OnboardingRequest, *, status: str) -> dict:
+    try:
+        seed_config = _onboarding_seed_config(request)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+    initialize_database()
+    with closing(get_connection()) as connection:
+        workflow_id = (
+            repository.HARBOR_WORKFLOW_ID
+            if seed_config["clientName"] == "Harbor Fleet Services"
+            and seed_config["jobName"] == "30-day fleet brake inspection campaign"
+            else None
+        )
+        repository.create_workflow(
+            connection,
+            seed_config,
+            workflow_id=workflow_id,
+            activate=True,
+        )
+        repository.upsert_onboarding_config(connection, seed_config)
+        connection.commit()
+    return {"status": status, "state": _current_state()}
+
+
+def _harbor_seed_config() -> dict:
+    return load_seed_config()
 
 
 def _onboarding_seed_config(request: OnboardingRequest) -> dict:

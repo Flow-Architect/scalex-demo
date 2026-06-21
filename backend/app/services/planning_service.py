@@ -208,8 +208,26 @@ def build_repair_prompt(raw_output: str, parse_error: str) -> str:
 
 
 def parse_planning_json(raw_output: str) -> tuple[dict[str, Any] | None, str | None]:
+    cleaned_output = _strip_code_fence(raw_output.strip())
+    parse_errors: list[str] = []
+    candidates = [cleaned_output]
+    extracted = _extract_json_object(cleaned_output)
+    if extracted and extracted != cleaned_output:
+        candidates.append(extracted)
+
+    for candidate in candidates:
+        parsed, error = _parse_planning_json_candidate(candidate)
+        if parsed is not None:
+            return parsed, None
+        if error:
+            parse_errors.append(error)
+
+    return None, parse_errors[-1] if parse_errors else "Planning output did not contain JSON."
+
+
+def _parse_planning_json_candidate(raw_output: str) -> tuple[dict[str, Any] | None, str | None]:
     try:
-        parsed = json.loads(_strip_code_fence(raw_output.strip()))
+        parsed = json.loads(raw_output)
     except json.JSONDecodeError as exc:
         return None, f"JSON decode error at line {exc.lineno} column {exc.colno}: {exc.msg}"
 
@@ -232,16 +250,52 @@ def parse_planning_json(raw_output: str) -> tuple[dict[str, Any] | None, str | N
     return parsed, None
 
 
+def _extract_json_object(raw_output: str) -> str | None:
+    start = raw_output.find("{")
+    if start < 0:
+        return None
+
+    depth = 0
+    in_string = False
+    escaped = False
+    for index in range(start, len(raw_output)):
+        char = raw_output[index]
+        if escaped:
+            escaped = False
+            continue
+        if char == "\\" and in_string:
+            escaped = True
+            continue
+        if char == '"':
+            in_string = not in_string
+            continue
+        if in_string:
+            continue
+        if char == "{":
+            depth += 1
+        elif char == "}":
+            depth -= 1
+            if depth == 0:
+                return raw_output[start : index + 1]
+    return None
+
+
 def deterministic_test_plan(job: dict[str, Any], seed_config: dict[str, Any] | None = None) -> dict[str, Any]:
     seed_config = seed_config or load_seed_config()
+    invoice_amount = int(job["invoice_amount_cents"]) / 100
+    spend_cap = int(job["spend_cap_cents"]) / 100
+    margin_floor = float(job["margin_floor_percent"])
+    approved_total = sum(usd_to_cents(item["amountUsd"]) for item in seed_config["approvedSpendRequests"])
+    projected_profit = int(job["invoice_amount_cents"]) - approved_total
+    projected_margin = round((projected_profit / int(job["invoice_amount_cents"])) * 100, 1)
     return {
         "operating_plan": {
             "objective": (
-                "Run the Harbor Fleet Services brake inspection campaign from intake "
-                "through profit report while preserving the 50% margin floor."
+                f"Run {job['client_name']} {job['job_name']} from intake through "
+                f"profit report while preserving the {margin_floor}% margin floor."
             ),
             "phases": [
-                "Confirm the $1,200 job and create Stripe test-mode invoice records.",
+                f"Confirm the ${invoice_amount:,.0f} job and create Stripe test-mode invoice records.",
                 "Record revenue before any vendor spend is evaluated.",
                 "Submit vendor spend requests to ScaleX policy code.",
                 "Coordinate Finance, Marketing, Research, and Ops deliverables.",
@@ -276,9 +330,10 @@ def deterministic_test_plan(job: dict[str, Any], seed_config: dict[str, Any] | N
             "blocked_spend_candidates": seed_config["blockedSpendRequests"],
         },
         "executive_summary": (
-            "Plan the Harbor Fleet Services campaign as a revenue-backed service workflow: "
+            f"Plan the {job['client_name']} workflow as a revenue-backed service workflow: "
             "confirm sandbox payment, let ScaleX policy code govern spend, coordinate the "
-            "four local agents, and report the final $1,013 gross profit target."
+            f"four local agents, and report the final ${projected_profit / 100:,.0f} "
+            f"gross profit target at about {projected_margin}% margin."
         ),
         "proposed_tool_sequence": expected_tool_sequence(),
     }

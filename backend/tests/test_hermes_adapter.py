@@ -120,3 +120,57 @@ def test_hermes_test_mode_does_not_invoke_subprocess(tmp_path, monkeypatch) -> N
 
     assert result.ok is True
     assert result.used_real_hermes is False
+
+
+def test_real_hermes_stdout_api_failure_marks_result_failed(tmp_path, monkeypatch) -> None:
+    hermes_cli = tmp_path / "hermes"
+    hermes_cli.write_text("#!/usr/bin/env bash\n", encoding="utf-8")
+    hermes_home = tmp_path / "home"
+    hermes_home.mkdir()
+    skill_source = tmp_path / "skill-source"
+    skill_source.mkdir()
+    (skill_source / "SKILL.md").write_text(
+        "---\nname: scalex-operator\ndescription: test skill\n---\n# ScaleX\n",
+        encoding="utf-8",
+    )
+
+    def fake_run(command, **kwargs):
+        if command == [str(hermes_cli), "--help"]:
+            return FakeCompleted(
+                stdout=(
+                    "usage: hermes [-z PROMPT] [-m MODEL] [--provider PROVIDER] "
+                    "[-t TOOLSETS] [--skills SKILLS] [--ignore-rules]"
+                )
+            )
+        return FakeCompleted(
+            stdout="API call failed after 3 retries: HTTP 429: The usage limit has been reached\n",
+            returncode=0,
+        )
+
+    monkeypatch.setenv("HERMES_TEST_MODE", "false")
+    monkeypatch.setattr("app.services.hermes_adapter.subprocess.run", fake_run)
+
+    settings = Settings(
+        app_env="test",
+        database_path=str(tmp_path / "scalex.db"),
+        stripe_live_mode=False,
+        policy_engine="local",
+        hermes_mode="isolated_cli",
+        hermes_cli_path=str(hermes_cli),
+        hermes_home=str(hermes_home),
+        hermes_model="gpt-5.5",
+        hermes_provider="openai-codex",
+        hermes_timeout_seconds=60,
+        hermes_require_real=True,
+        hermes_test_mode=False,
+        hermes_max_output_chars=12000,
+        hermes_skill_name="scalex-operator",
+        hermes_skill_source_path=str(skill_source),
+        hermes_toolsets="skills",
+    )
+
+    result = run_hermes_oneshot("Return JSON.", settings)
+
+    assert result.ok is False
+    assert result.used_real_hermes is True
+    assert "usage limit" in result.failure_reason
