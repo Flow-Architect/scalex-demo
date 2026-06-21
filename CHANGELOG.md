@@ -10,6 +10,43 @@ Use:
 
 ---
 
+## 2026-06-21 - Goal 7.5: Product demo control room UI
+
+Completed:
+- Replaced the narrow centered frontend dashboard with a full-width ScaleX Command Center.
+- Added top-level Live AI Business Operator positioning, active client, run status, and integration badges.
+- Added a live run pipeline for Intake, Hermes Plan, Stripe Test Invoice, Payment Status, Policy Gate, Spend Approval, Agent Outputs, and Profit Report.
+- Added frontend staged playback while `POST /api/demo/run` is in flight.
+- Upgraded Hermes presentation with real-Hermes status, provider/model, skill/toolsets, operating plan phases, agent task list, proposed tool sequence, and a live orchestration execution feed.
+- Upgraded Stripe presentation with real/test-double/error mode labels, `livemode`, customer ID, invoice ID, hosted invoice URL, invoice status, paid state, and the honest open/unpaid invoice label.
+- Added money/profit proof showing invoice, approved spend, blocked unsafe spend, gross profit, final margin, approved spend under cap, and policy violations.
+- Added visual policy guardrail decisions for spend cap, payment-before-spend, margin floor, vendor allow/block list, approved vendors, and blocked vendor spend.
+- Added Judge Proof stack section for Hermes Agent, Stripe, SQLite, Policy engine, and future NemoClaw Goal 8.
+- Kept changes frontend-only; backend business logic and final economics were not changed.
+- Updated STATUS.md and TASKS.md for Goal 7.5 closeout.
+
+Verified:
+- `npm run build` passed for the frontend.
+- `./scripts/test.sh` passed with 39 backend tests and a successful Vite production build.
+- `git diff --check` passed.
+- Tracked-file secret scan for live Stripe keys, long webhook secrets, and inline OpenAI API keys returned no matches.
+- `./scripts/dev.sh` started the local backend and frontend after local socket approval.
+- Running the dev server with the ignored repo-local `.env` loaded completed the full real product path after one transient Hermes JSON-format failure on the first attempt.
+- Full product-path verification returned `status=completed`, `used_real_hermes=true`, `provider=openai-codex`, `model=gpt-5.5`, `skill=scalex-operator`, `used_real_stripe=true`, `stripe_mode=stripe_test`, `livemode=false`, hosted invoice URL on `invoice.stripe.com`, `invoice_status=open`, `paid=false`, `gross_profit_cents=101300`, and `actual_margin_percent=84.4`.
+- Headless Chrome rendered `http://127.0.0.1:5174` after the full run and showed the new command-center UI, real Hermes proof, real Stripe test proof, hosted invoice link, open/unpaid invoice honesty, local policy guardrails, blocked `Premium Automation Suite` spend, final economics, and Judge Proof.
+- A separate product-mode run without `STRIPE_SECRET_KEY` showed the visible Stripe integration error state instead of silently falling back.
+
+Noted:
+- Browser verification used local POSTs plus headless Chrome render checks; no GUI recording was captured in this session.
+
+Suggested commit message:
+Upgrade ScaleX control room demo UI
+
+Next:
+- Goal 8 - NemoClaw / policy safety integration and presentation.
+
+---
+
 ## 2026-06-18 - Goal 0: Roadmap and handoff docs
 
 Commit:

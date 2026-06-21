@@ -16,6 +16,8 @@ Goal 7 is complete for real Stripe test-mode invoice creation/finalization. Prod
 
 The Stripe test invoice payment remains honestly labeled open/unpaid unless Stripe actually reports `paid=True`. The revenue/profit display remains the compressed-run business result, and final economics stayed at `gross_profit_cents=101300` and `actual_margin_percent=84.4`.
 
+Goal 7.5 is complete for product demo UX/presentation polish. The frontend is now a full-width ScaleX Command Center with a live run pipeline, Hermes brain/orchestration feed, Stripe proof panel, money/profit proof, policy guardrail decisions, and Judge Proof stack section. No backend business logic changed.
+
 The next product proof gap is safety-governance realism. The local policy engine is deterministic and useful, but Goal 8 should either wire a real safe policy adapter or label the local safety layer honestly while improving the presentation.
 
 ## Required outputs for Goal 8
@@ -44,6 +46,7 @@ The next product proof gap is safety-governance realism. The local policy engine
   - vendor allowlist/blocklist
   - why $89 and $98 were approved
   - why $750 was blocked
+- Preserve the Goal 7.5 command-center UI and keep NemoClaw status honest until a real safety adapter is wired.
 - Add tests that do not require external policy network calls.
 - Run `./scripts/test.sh`.
 - Run `git diff --check`.

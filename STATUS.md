@@ -1,12 +1,12 @@
 # STATUS - ScaleX
 
-Last updated: 2026-06-20
+Last updated: 2026-06-21
 
 ## Verified current state
 
 - Project folder exists at /home/ascabrya/dev/scalex-demo.
-- Latest committed baseline before this goal: `76bb8e5 Wire isolated Hermes skill orchestration`.
-- Last completed uncommitted implementation goal: Goal 7 - real Stripe test-mode invoice/payment flow through orchestration.
+- Latest committed baseline before this goal: `62b248f Add Stripe test-mode invoice orchestration`.
+- Last completed uncommitted implementation goal: Goal 7.5 - product demo command-center UX/presentation polish before Goal 8.
 - ScaleX is a live working product-style prototype for profit-aware agent operations in service workflows.
 - Product mode is real-integration-first:
   - real isolated Hermes Agent for planning/orchestration proposals
@@ -89,6 +89,49 @@ Last updated: 2026-06-20
 - API state now includes a `stripe` summary with mode, `used_real_stripe`, `livemode`, customer ID, invoice ID, hosted invoice URL, invoice status, paid state, and visible error/diagnostic reason.
 - Frontend Stripe panel now shows real Stripe test mode vs test-double mode, object IDs, hosted invoice URL, `livemode=false`, invoice status, paid state, and error state.
 
+## Goal 7.5 state
+
+- Goal 7.5 is complete for frontend product-demo presentation polish.
+- Replaced the narrow centered card layout with a full-width ScaleX Command Center control room.
+- First viewport now emphasizes:
+  - Live AI Business Operator positioning
+  - active client and run status
+  - Hermes, Stripe, SQLite ledger, and policy badges
+  - $1,200 invoice to $187 approved spend, $750 blocked unsafe spend, $1,013 gross profit, and 84.4% margin
+  - live run pipeline from intake to profit report
+- Added a visual pipeline with actual state-backed stages for:
+  - Intake
+  - Hermes Plan
+  - Stripe Test Invoice
+  - Payment Status
+  - Policy Gate
+  - Spend Approval
+  - Agent Outputs
+  - Profit Report
+- Added staged frontend playback while `POST /api/demo/run` is in flight. The animation is presentation only; proof sections are populated from API state after the request returns.
+- Upgraded Hermes presentation to show:
+  - `used_real_hermes`
+  - provider/model
+  - skill/toolsets
+  - operating plan summary and phases
+  - agent task list
+  - proposed tool sequence
+  - orchestration calls as a live execution feed
+- Upgraded Stripe presentation to show:
+  - `used_real_stripe`
+  - `stripe_mode`
+  - `livemode`
+  - customer ID
+  - invoice ID
+  - hosted invoice URL
+  - invoice status
+  - paid state
+  - visible Stripe integration error state
+- The UI labels open/unpaid Stripe invoices honestly as "Stripe test invoice finalized and open - not marked paid."
+- Added guardrail decisions showing Local Policy active, spend cap, payment-before-spend, margin floor, approved vendors, blocked vendors, and per-vendor spend decisions.
+- Added Judge Proof section for Hermes Agent, Stripe, SQLite, Policy engine, and future NemoClaw Goal 8.
+- No backend business logic was changed.
+
 ## Locked economics
 
 The locked sample workflow remains unchanged:
@@ -141,6 +184,44 @@ The locked sample workflow remains unchanged:
 - Final economics stayed unchanged:
   - `gross_profit_cents=101300`
   - `actual_margin_percent=84.4`
+
+## Verified on 2026-06-21
+
+- `npm run build` passed for the frontend after the command-center UI change.
+- `./scripts/test.sh` passed with 39 backend tests and a successful Vite production build.
+- `git diff --check` passed.
+- Tracked-file secret scan for live Stripe keys, long webhook secrets, and inline OpenAI API keys returned no matches.
+- `./scripts/dev.sh` started FastAPI at `http://127.0.0.1:8787` and Vite at `http://127.0.0.1:5174` after local socket approval.
+- Running the dev server with the ignored repo-local `.env` loaded exercised the real product path after one transient Hermes JSON-format failure on the first attempt.
+- Real full product-path verification after Goal 7.5 UI changes passed with:
+  - `status=completed`
+  - `used_real_hermes=true`
+  - `provider=openai-codex`
+  - `model=gpt-5.5`
+  - `skill=scalex-operator`
+  - `toolsets_used=["skills"]`
+  - `used_real_stripe=true`
+  - `stripe_mode=stripe_test`
+  - `livemode=false`
+  - real Stripe customer ID returned with `cus_` prefix
+  - real Stripe invoice ID returned with `in_` prefix
+  - hosted invoice URL on `invoice.stripe.com`
+  - `invoice_status=open`
+  - `paid=false`
+  - `gross_profit_cents=101300`
+  - `actual_margin_percent=84.4`
+- Headless Chrome loaded `http://127.0.0.1:5174` after the full run and rendered the new command-center UI.
+- Browser-rendered UI showed:
+  - ScaleX Command Center / Live AI Business Operator hero
+  - live run pipeline
+  - real Hermes proof from API state: `used_real_hermes=true`, `openai-codex`, `gpt-5.5`, `scalex-operator`
+  - real Stripe test proof: `stripe_test`, `livemode=false`, customer ID, invoice ID, hosted invoice URL, `invoice_status=open`, `paid=false`
+  - honest open/unpaid label for the Stripe invoice
+  - local policy guardrails
+  - blocked `Premium Automation Suite` spend
+  - final economics: $1,200 revenue, $187 approved spend, $750 blocked unsafe spend, $1,013 gross profit, 84.4% margin, and 0 policy violations
+  - Judge Proof stack section
+- A separate product-mode run without `STRIPE_SECRET_KEY` also rendered a visible Stripe integration error state, preserving the no-silent-fallback behavior.
 
 ## Not yet verified
 
