@@ -6,7 +6,7 @@ Submission title: **ScaleX: Profit-Aware Agent Operations for Service Workflows*
 
 ScaleX is a profit-aware agent operations framework for service workflows. It lets an operator confirm revenue, plan work, spend only inside policy, coordinate agent outputs, and produce an auditable profit report.
 
-The product thesis is simple: a service team should be able to give an AI operator a paid job, a budget, and a margin floor, then see the operator invoice, control spend, coordinate work, and report profit with real integrations in the appropriate environment.
+The product thesis is simple: a service team should be able to give an AI operator a revenue-backed service job, a budget, and a margin floor, then see the operator invoice, control spend, coordinate work, and report profit with real integrations in the appropriate environment.
 
 ## Sample Workflow
 
@@ -35,6 +35,7 @@ integration must run in the appropriate environment.
 - Product-mode integration failures must surface visible errors.
 - Policy enforcement currently runs through a local policy engine until Goal 8 wires a real safety adapter if safely available.
 - Hermes planning uses the ScaleX-isolated laptop install, not production Hermes.
+- Stripe test invoices are labeled honestly as open/unpaid unless Stripe reports `paid=true`.
 
 ## Current Prototype State
 
@@ -50,6 +51,7 @@ Implemented today:
 - Stripe test-double records are available for automated tests, CI, offline development, and diagnostics.
 - Deterministic Finance, Marketing, Research, and Ops outputs.
 - Vite React dashboard.
+- Goal 7.6 command-center first viewport with the live workflow claim, Profit Protected outcome, Live Stack Proof, and staged execution replay.
 - One-click Harbor Fleet Services sample run with the locked final report numbers.
 
 Next target:

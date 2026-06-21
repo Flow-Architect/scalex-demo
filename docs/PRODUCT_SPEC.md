@@ -4,7 +4,7 @@ ScaleX is a live working product-style prototype for profit-aware agent operatio
 
 ## Product Standard
 
-ScaleX proves a real business operating loop: intake a paid service workflow, plan the work,
+ScaleX proves a real business operating loop: intake a revenue-backed service workflow, plan the work,
 confirm payment through the appropriate real integration mode, approve only margin-safe spend,
 coordinate agent work, and produce an audit-backed profit report.
 
@@ -21,9 +21,10 @@ The Harbor Fleet Services fleet brake inspection campaign is the sample run, not
 - Orchestration audit trail for the proposed and executed ScaleX tool sequence.
 - SQLite audit ledger for jobs, events, Stripe records, ledger entries, policy checks, agent outputs, and reports.
 - Local policy engine that blocks unsafe spend before it reaches the ledger.
-- Real Stripe test-mode customer and invoice records through orchestration for Goal 7.
+- Real Stripe test-mode customer and finalized invoice records through orchestration for Goal 7, with `invoice_status` and `paid` displayed honestly.
 - Stripe test-double payment records for tests and diagnostics.
 - Deterministic Finance, Marketing, Research, and Ops outputs for reliability.
+- Goal 7.6 command-center presentation with the first-viewport live workflow claim, Profit Protected outcome panel, Live Stack Proof, and staged execution replay.
 
 ## Target Integrations
 
@@ -32,6 +33,6 @@ The Harbor Fleet Services fleet brake inspection campaign is the sample run, not
 
 ## Boundaries
 
-Goal 7 live-money payments, real client data, production Hermes, production Prometheus,
+Live-money payments, real client data, production Hermes, production Prometheus,
 homelab/OpenClaw, Recall memory, and production SaaS features are out of scope. Future
 live-money payments require Verified Live Mode.

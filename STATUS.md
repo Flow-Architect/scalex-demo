@@ -5,8 +5,9 @@ Last updated: 2026-06-21
 ## Verified current state
 
 - Project folder exists at /home/ascabrya/dev/scalex-demo.
-- Latest committed baseline before this goal: `62b248f Add Stripe test-mode invoice orchestration`.
-- Last completed uncommitted implementation goal: Goal 7.5 - product demo command-center UX/presentation polish before Goal 8.
+- Latest committed baseline before this goal: `ad88ac1 Upgrade ScaleX control room demo UI`.
+- Last completed implementation goal: Goal 7.6 - judge-ready command-center first viewport, replay, and live product proof polish before Goal 8.
+- Last completed documentation/audit goal in this working tree: post-Goal 7.6 markdown alignment before commit.
 - ScaleX is a live working product-style prototype for profit-aware agent operations in service workflows.
 - Product mode is real-integration-first:
   - real isolated Hermes Agent for planning/orchestration proposals
@@ -132,6 +133,67 @@ Last updated: 2026-06-21
 - Added Judge Proof section for Hermes Agent, Stripe, SQLite, Policy engine, and future NemoClaw Goal 8.
 - No backend business logic was changed.
 
+## Goal 7.6 state
+
+- Goal 7.6 is complete for judge-ready command-center first viewport polish.
+- Reworked the first viewport so the top of the app now states: "ScaleX ran a live AI business workflow."
+- Added a larger Profit Protected hero section showing:
+  - $1,200 Stripe test invoice outcome
+  - $187 approved spend
+  - $750 blocked unsafe spend
+  - $1,013 protected gross profit
+  - 84.4% protected margin
+- Added a first-screen Live Stack Proof strip for:
+  - Real Hermes when `used_real_hermes=true`
+  - real Stripe test mode when `used_real_stripe=true`
+  - Stripe `livemode=false`, `invoice_status=open`, and `paid=false`
+  - SQLite audit ledger row count
+  - active local Policy Guardrails
+  - NemoClaw as Goal 8 next, not claimed as wired yet
+- Replaced the small in-flight playback strip with staged execution replay cards for:
+  - Intake received
+  - Hermes planned
+  - Stripe invoice created
+  - Policy checked spend
+  - Unsafe spend blocked
+  - Agents produced work
+  - Profit report generated
+- Replay animation remains frontend-only presentation while `POST /api/demo/run` is in flight, then settles onto API-backed state after the response.
+- Added a visible run-completed moment after successful demo completion.
+- Preserved existing lower proof sections for Hermes proof, Stripe proof, hosted invoice URL, invoice status, paid state, policy decisions, orchestration feed, agent outputs, SQLite ledger, and profit report.
+- No backend business logic was changed.
+
+## Post-Goal 7.6 documentation audit state
+
+- Documentation alignment after Goal 7.6 is complete in the working tree.
+- Audited:
+  - `AGENTS.md`
+  - `ROADMAP.md`
+  - `DECISIONS.md`
+  - `STATUS.md`
+  - `TASKS.md`
+  - `CHANGELOG.md`
+  - `START_HERE.md`
+  - `README.md`
+  - `docs/*.md`
+  - `hermes/skills/scalex-operator/SKILL.md`
+  - `agents/*.md`
+  - `.env.example` comments
+  - `frontend/src/App.tsx` copy/proof language for claim validation only
+- Updated README, ROADMAP, docs, and `.env.example` comments so current docs agree that:
+  - Goal 6, Goal 7, Goal 7.5, and Goal 7.6 are complete
+  - Goal 8 is next
+  - Goal 9 remains final submission prep
+  - Goal 7B remains future Verified Live Mode hardening
+  - Hermes is real isolated Hermes with the `scalex-operator` skill in product mode
+  - Stripe is real test-mode invoice creation/finalization, honestly open/unpaid when `invoice_status=open` and `paid=false`
+  - SQLite is the real audit ledger
+  - local policy guardrails are currently active
+  - NemoClaw is not claimed as real yet
+- Historical changelog entries from earlier goals were left as history when they describe the state of that older goal.
+- `DECISIONS.md` was reviewed and did not need a locked-decision change.
+- No backend logic, data files, secrets, Stripe calls, Hermes model calls, or frontend layout/code changes were made for the audit.
+
 ## Locked economics
 
 The locked sample workflow remains unchanged:
@@ -222,6 +284,41 @@ The locked sample workflow remains unchanged:
   - final economics: $1,200 revenue, $187 approved spend, $750 blocked unsafe spend, $1,013 gross profit, 84.4% margin, and 0 policy violations
   - Judge Proof stack section
 - A separate product-mode run without `STRIPE_SECRET_KEY` also rendered a visible Stripe integration error state, preserving the no-silent-fallback behavior.
+
+## Verified on 2026-06-21 for Goal 7.6
+
+- `npm run build` passed for the frontend after the Goal 7.6 UI changes.
+- `./scripts/test.sh` passed with 39 backend tests and a successful Vite production build.
+- `git diff --check` passed.
+- Tracked-file secret scan for live Stripe keys, long webhook secrets, and inline OpenAI project keys returned no matches.
+- No `.env` file was staged, and no `CODEX_GOALS.md` or `GOAL_LOG.md` file exists.
+- `./scripts/dev.sh` started FastAPI at `http://127.0.0.1:8787` and Vite at `http://127.0.0.1:5174`.
+- A product-mode run without loading the ignored local `.env` showed the visible Stripe integration error state for missing `STRIPE_SECRET_KEY`.
+- Running the dev server with the ignored local `.env` loaded completed the real product path with:
+  - `status=completed`
+  - `used_real_hermes=true`
+  - `provider=openai-codex`
+  - `model=gpt-5.5`
+  - `skill=scalex-operator`
+  - `used_real_stripe=true`
+  - `stripe_mode=stripe_test`
+  - `livemode=false`
+  - real Stripe customer ID returned with `cus_` prefix
+  - real Stripe invoice ID returned with `in_` prefix
+  - hosted invoice URL on `invoice.stripe.com`
+  - `invoice_status=open`
+  - `paid=false`
+  - `gross_profit_cents=101300`
+  - `actual_margin_percent=84.4`
+- Headless Chrome loaded `http://127.0.0.1:5174` after the full run and rendered the upgraded first viewport, Profit Protected hero, Live Stack Proof strip, run-completed replay cards, real Hermes proof, real Stripe test proof, open/unpaid Stripe honesty, blocked unsafe spend, final economics, and NemoClaw Goal 8 next label.
+- Chrome screenshot capture was not completed because screenshot mode hit a local crashpad sandbox error, but the headless DOM render succeeded.
+
+## Verified on 2026-06-21 for post-Goal 7.6 docs audit
+
+- `git diff --check` passed.
+- Tracked-file secret scan for live Stripe keys, long Stripe test keys, and Stripe webhook secrets returned no matches.
+- `git status --short` showed intended working-tree edits only.
+- No network calls, Stripe API calls, Hermes model calls, backend logic changes, or database writes were performed for this audit.
 
 ## Not yet verified
 

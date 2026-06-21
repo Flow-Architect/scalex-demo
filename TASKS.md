@@ -18,6 +18,10 @@ The Stripe test invoice payment remains honestly labeled open/unpaid unless Stri
 
 Goal 7.5 is complete for product demo UX/presentation polish. The frontend is now a full-width ScaleX Command Center with a live run pipeline, Hermes brain/orchestration feed, Stripe proof panel, money/profit proof, policy guardrail decisions, and Judge Proof stack section. No backend business logic changed.
 
+Goal 7.6 is complete for judge-ready first-viewport polish. The top of the app now states that ScaleX ran a live AI business workflow, highlights $1,013 protected profit, 84.4% margin, and $750 blocked unsafe spend, shows a first-screen live stack proof strip, and adds staged execution replay cards that animate while `POST /api/demo/run` is in flight and settle on API-backed state after completion. Stripe open/unpaid honesty and NemoClaw Goal 8 labeling are preserved.
+
+The post-Goal 7.6 docs audit is complete in the working tree. README, ROADMAP, docs, `.env.example` comments, STATUS, TASKS, and CHANGELOG now align on Goal 8 next, Goal 9 final submission prep, Goal 7B future Verified Live Mode, real/test/future integration boundaries, Stripe open/unpaid honesty, and NemoClaw not yet real.
+
 The next product proof gap is safety-governance realism. The local policy engine is deterministic and useful, but Goal 8 should either wire a real safe policy adapter or label the local safety layer honestly while improving the presentation.
 
 ## Required outputs for Goal 8
@@ -47,6 +51,8 @@ The next product proof gap is safety-governance realism. The local policy engine
   - why $89 and $98 were approved
   - why $750 was blocked
 - Preserve the Goal 7.5 command-center UI and keep NemoClaw status honest until a real safety adapter is wired.
+- Preserve the Goal 7.6 judge-ready first viewport, Profit Protected hero, Live Stack Proof strip, staged execution replay, and Stripe open/unpaid honesty.
+- Preserve the post-Goal 7.6 documentation boundary: real Hermes, real Stripe test mode, SQLite audit ledger, active local policy, NemoClaw next/not yet real, and Verified Live Mode as future live-money hardening.
 - Add tests that do not require external policy network calls.
 - Run `./scripts/test.sh`.
 - Run `git diff --check`.

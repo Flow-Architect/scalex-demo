@@ -73,17 +73,31 @@ interface MoneySnapshot {
   marginFloorPercent: number | null;
 }
 
+type PlaybackKey =
+  | "intake"
+  | "hermes"
+  | "stripe"
+  | "policy"
+  | "blocked"
+  | "agents"
+  | "report";
+
+interface PlaybackStep {
+  key: PlaybackKey;
+  label: string;
+  icon: LucideIcon;
+}
+
 const LOCKED_DEMO_BLOCKED_SPEND_CENTS = 75_000;
 
-const PLAYBACK_STEPS = [
-  "Intake",
-  "Hermes plan",
-  "Stripe test invoice",
-  "Payment status",
-  "Policy gate",
-  "Spend decisions",
-  "Agent outputs",
-  "Profit report",
+const PLAYBACK_STEPS: PlaybackStep[] = [
+  { key: "intake", label: "Intake received", icon: Target },
+  { key: "hermes", label: "Hermes planned", icon: BrainCircuit },
+  { key: "stripe", label: "Stripe invoice created", icon: CreditCard },
+  { key: "policy", label: "Policy checked spend", icon: ShieldCheck },
+  { key: "blocked", label: "Unsafe spend blocked", icon: Ban },
+  { key: "agents", label: "Agents produced work", icon: Layers3 },
+  { key: "report", label: "Profit report generated", icon: FileText },
 ];
 
 const stageStatusMeta: Record<
@@ -129,12 +143,15 @@ export default function App() {
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const [playbackIndex, setPlaybackIndex] = useState(0);
+  const [runCompletedMoment, setRunCompletedMoment] = useState(false);
 
   const isBusy = busyAction !== null;
   const pipeline = useMemo(() => buildPipeline(state), [state]);
   const money = useMemo(() => moneySnapshot(state), [state]);
   const auditRows = useMemo(() => auditRowCount(state), [state]);
   const runStatus = runStatusLabel(state, busyAction, error);
+  const showExecutionReplay =
+    busyAction === "run" || runCompletedMoment || Boolean(state?.report);
 
   useEffect(() => {
     void loadDashboard();
@@ -154,6 +171,18 @@ export default function App() {
 
     return () => window.clearInterval(timer);
   }, [busyAction]);
+
+  useEffect(() => {
+    if (!runCompletedMoment) {
+      return undefined;
+    }
+
+    const timer = window.setTimeout(() => {
+      setRunCompletedMoment(false);
+    }, 9000);
+
+    return () => window.clearTimeout(timer);
+  }, [runCompletedMoment]);
 
   async function loadDashboard() {
     setBusyAction("initial");
@@ -175,6 +204,7 @@ export default function App() {
   async function refreshState() {
     setBusyAction("refresh");
     setError(null);
+    setRunCompletedMoment(false);
     try {
       const [healthResponse, stateResponse] = await Promise.all([
         getHealth(),
@@ -194,11 +224,14 @@ export default function App() {
     setBusyAction("run");
     setError(null);
     setNotice(null);
+    setRunCompletedMoment(false);
     try {
       const response = await runDemo();
       setState(response.state);
       setHealth(await getHealth());
       if (response.status === "completed") {
+        setPlaybackIndex(PLAYBACK_STEPS.length - 1);
+        setRunCompletedMoment(true);
         setNotice("Demo lifecycle completed with API proof loaded.");
       } else {
         setError(String(response.decision?.error ?? `Run ended with status ${response.status}.`));
@@ -214,6 +247,7 @@ export default function App() {
     setBusyAction("reset");
     setError(null);
     setNotice(null);
+    setRunCompletedMoment(false);
     try {
       const response = await resetDemo();
       setState(response.state);
@@ -229,9 +263,9 @@ export default function App() {
   return (
     <main className="min-h-screen bg-stone-100 text-zinc-950">
       <section className="border-b border-zinc-900 bg-zinc-950 text-white">
-        <div className="w-full px-4 py-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
-            <div className="min-w-0">
+        <div className="w-full px-4 py-5 sm:px-6 lg:px-8">
+          <div className="flex flex-col gap-5">
+            <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
               <div className="flex flex-wrap items-center gap-2">
                 <span className="inline-flex items-center gap-2 rounded-md border border-emerald-400/30 bg-emerald-400/10 px-3 py-1.5 text-sm font-semibold text-emerald-100">
                   <ShieldCheck className="h-4 w-4" aria-hidden="true" />
@@ -242,109 +276,114 @@ export default function App() {
                   {runStatus}
                 </span>
               </div>
-              <p className="mt-3 text-sm font-semibold uppercase text-emerald-200">
-                Live AI Business Operator
-              </p>
-              <h1 className="mt-2 max-w-5xl text-3xl font-semibold text-white lg:text-5xl">
-                ScaleX turns one client invoice into a guarded AI execution loop.
-              </h1>
-              <p className="mt-3 max-w-4xl text-base leading-7 text-zinc-300">
-                Hermes plans. Stripe invoices. Policy blocks risky spend. SQLite audits
-                every step. No spend executes unless margin and payment rules pass.
-              </p>
-            </div>
 
-            <div className="flex flex-col gap-2 sm:flex-row xl:flex-col">
-              <button
-                className="inline-flex min-h-11 items-center justify-center gap-2 rounded-md bg-emerald-400 px-4 py-3 text-sm font-semibold text-zinc-950 transition hover:bg-emerald-300 disabled:cursor-not-allowed disabled:bg-zinc-600 disabled:text-zinc-300"
-                disabled={isBusy}
-                onClick={handleRunDemo}
-                type="button"
-              >
-                {busyAction === "run" ? (
-                  <RefreshCw className="h-4 w-4 animate-spin" aria-hidden="true" />
-                ) : (
-                  <Play className="h-4 w-4" aria-hidden="true" />
-                )}
-                Run Demo Job
-              </button>
-              <button
-                className="inline-flex min-h-11 items-center justify-center gap-2 rounded-md border border-white/20 bg-white/10 px-4 py-3 text-sm font-semibold text-white transition hover:bg-white/15 disabled:cursor-not-allowed disabled:text-zinc-500"
-                disabled={isBusy}
-                onClick={handleResetDemo}
-                type="button"
-              >
-                {busyAction === "reset" ? (
-                  <RefreshCw className="h-4 w-4 animate-spin" aria-hidden="true" />
-                ) : (
-                  <RotateCcw className="h-4 w-4" aria-hidden="true" />
-                )}
-                Reset Demo
-              </button>
-              <button
-                className="inline-flex min-h-11 items-center justify-center gap-2 rounded-md border border-white/20 bg-white/10 px-4 py-3 text-sm font-semibold text-white transition hover:bg-white/15 disabled:cursor-not-allowed disabled:text-zinc-500"
-                disabled={isBusy}
-                onClick={refreshState}
-                type="button"
-              >
-                <RefreshCw
-                  className={`h-4 w-4 ${busyAction === "refresh" ? "animate-spin" : ""}`}
-                  aria-hidden="true"
-                />
-                Refresh
-              </button>
-            </div>
-          </div>
-
-          <div className="mt-5 grid gap-3 lg:grid-cols-[1.1fr_1.4fr]">
-            <div className="grid gap-3 sm:grid-cols-2">
-              <StatusBadge
-                icon={Target}
-                label="Active client"
-                value={state?.job?.client_name ?? "Harbor Fleet Services"}
-                tone="sky"
-              />
-              <StatusBadge
-                icon={BrainCircuit}
-                label="Hermes"
-                value={state?.hermes?.used_real_hermes ? "Real Hermes" : "Test or pending"}
-                tone={state?.hermes?.used_real_hermes ? "emerald" : "amber"}
-              />
-              <StatusBadge
-                icon={CreditCard}
-                label="Stripe"
-                value={stripeBadgeValue(state?.stripe ?? null)}
-                tone={state?.stripe?.used_real_stripe ? "emerald" : "amber"}
-              />
-              <StatusBadge
-                icon={Database}
-                label="SQLite audit ledger"
-                value={health?.database_exists ? "Active" : "Not initialized"}
-                tone={health?.database_exists ? "teal" : "slate"}
-              />
-            </div>
-
-            <MoneyFlow money={money} compact />
-          </div>
-
-          {busyAction === "run" ? (
-            <ExecutionPlayback playbackIndex={playbackIndex} />
-          ) : null}
-
-          {notice ? (
-            <div className="mt-4 rounded-lg border border-emerald-300/30 bg-emerald-400/10 p-3 text-sm text-emerald-100">
-              {notice}
-            </div>
-          ) : null}
-          {error ? (
-            <div className="mt-4 flex items-start gap-3 rounded-lg border border-rose-300/40 bg-rose-400/10 p-4 text-sm text-rose-100">
-              <AlertTriangle className="mt-0.5 h-4 w-4 flex-none" aria-hidden="true" />
-              <div>
-                <p className="font-semibold">API request failed</p>
-                <p className="mt-1">{error}</p>
+              <div className="flex flex-col gap-2 sm:flex-row">
+                <button
+                  className="inline-flex min-h-11 items-center justify-center gap-2 rounded-md bg-emerald-400 px-4 py-3 text-sm font-semibold text-zinc-950 transition hover:bg-emerald-300 disabled:cursor-not-allowed disabled:bg-zinc-600 disabled:text-zinc-300"
+                  disabled={isBusy}
+                  onClick={handleRunDemo}
+                  type="button"
+                >
+                  {busyAction === "run" ? (
+                    <RefreshCw className="h-4 w-4 animate-spin" aria-hidden="true" />
+                  ) : (
+                    <Play className="h-4 w-4" aria-hidden="true" />
+                  )}
+                  Run Demo Job
+                </button>
+                <button
+                  className="inline-flex min-h-11 items-center justify-center gap-2 rounded-md border border-white/20 bg-white/10 px-4 py-3 text-sm font-semibold text-white transition hover:bg-white/15 disabled:cursor-not-allowed disabled:text-zinc-500"
+                  disabled={isBusy}
+                  onClick={handleResetDemo}
+                  type="button"
+                >
+                  {busyAction === "reset" ? (
+                    <RefreshCw className="h-4 w-4 animate-spin" aria-hidden="true" />
+                  ) : (
+                    <RotateCcw className="h-4 w-4" aria-hidden="true" />
+                  )}
+                  Reset
+                </button>
+                <button
+                  className="inline-flex min-h-11 items-center justify-center gap-2 rounded-md border border-white/20 bg-white/10 px-4 py-3 text-sm font-semibold text-white transition hover:bg-white/15 disabled:cursor-not-allowed disabled:text-zinc-500"
+                  disabled={isBusy}
+                  onClick={refreshState}
+                  type="button"
+                >
+                  <RefreshCw
+                    className={`h-4 w-4 ${busyAction === "refresh" ? "animate-spin" : ""}`}
+                    aria-hidden="true"
+                  />
+                  Refresh
+                </button>
               </div>
             </div>
-          ) : null}
+
+            <div className="grid gap-5 xl:grid-cols-[minmax(0,1.08fr)_minmax(360px,0.92fr)] xl:items-stretch">
+              <div className="flex min-h-[19rem] flex-col justify-between rounded-lg border border-white/15 bg-white/5 p-5">
+                <div>
+                  <p className="text-sm font-semibold uppercase text-emerald-200">
+                    Profit-aware agent operations
+                  </p>
+                  <h1 className="mt-3 max-w-5xl text-4xl font-semibold leading-tight text-white lg:text-6xl">
+                    ScaleX ran a live AI business workflow.
+                  </h1>
+                  <p className="mt-4 max-w-4xl text-base leading-7 text-zinc-300 lg:text-lg">
+                    One Harbor Fleet Services job went from intake to Hermes planning,
+                    Stripe test invoicing, policy-gated spend, agent work, and an
+                    audited profit report.
+                  </p>
+                </div>
+
+                <div className="mt-6 grid gap-2 sm:grid-cols-3">
+                  <HeroClaim
+                    icon={Workflow}
+                    label="What it does"
+                    value="Runs a paid service workflow end to end"
+                  />
+                  <HeroClaim
+                    icon={ShieldCheck}
+                    label="Why it matters"
+                    value="Blocks spend that would violate margin policy"
+                  />
+                  <HeroClaim
+                    icon={BookOpenCheck}
+                    label="What judges see"
+                    value="Proof records from integrations and SQLite"
+                  />
+                </div>
+              </div>
+
+              <ProfitProtectedHero money={money} />
+            </div>
+
+            <HeroStackProof state={state} health={health} auditRows={auditRows} />
+
+            {showExecutionReplay ? (
+              <ExecutionPlayback
+                busy={busyAction === "run"}
+                error={error}
+                money={money}
+                playbackIndex={playbackIndex}
+                state={state}
+              />
+            ) : null}
+
+            {notice ? (
+              <div className="rounded-lg border border-emerald-300/30 bg-emerald-400/10 p-3 text-sm text-emerald-100">
+                {notice}
+              </div>
+            ) : null}
+            {error ? (
+              <div className="flex items-start gap-3 rounded-lg border border-rose-300/40 bg-rose-400/10 p-4 text-sm text-rose-100">
+                <AlertTriangle className="mt-0.5 h-4 w-4 flex-none" aria-hidden="true" />
+                <div>
+                  <p className="font-semibold">API request failed</p>
+                  <p className="mt-1">{error}</p>
+                </div>
+              </div>
+            ) : null}
+          </div>
         </div>
       </section>
 
@@ -391,66 +430,393 @@ export default function App() {
   );
 }
 
-function StatusBadge({
+function HeroClaim({
   icon: Icon,
+  label,
+  value,
+}: {
+  icon: LucideIcon;
+  label: string;
+  value: string;
+}) {
+  return (
+    <div className="rounded-lg border border-white/15 bg-white/10 p-3">
+      <div className="flex items-center gap-2">
+        <Icon className="h-4 w-4 flex-none text-emerald-200" aria-hidden="true" />
+        <p className="text-xs font-semibold uppercase text-zinc-300">{label}</p>
+      </div>
+      <p className="mt-2 text-sm font-semibold leading-5 text-white">{value}</p>
+    </div>
+  );
+}
+
+function ProfitProtectedHero({ money }: { money: MoneySnapshot }) {
+  return (
+    <section className="rounded-lg border border-emerald-300/30 bg-emerald-300/10 p-5 shadow-2xl shadow-emerald-950/20">
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <div className="flex items-center gap-2">
+            <CircleDollarSign className="h-5 w-5 text-emerald-200" aria-hidden="true" />
+            <h2 className="text-base font-semibold text-white">Profit Protected</h2>
+          </div>
+          <p className="mt-1 text-sm text-emerald-100">
+            {money.actual ? "API-backed result loaded" : "Locked demo target until the run completes"}
+          </p>
+        </div>
+        <span className="rounded-md border border-white/15 bg-white/10 px-2 py-1 text-xs font-semibold text-zinc-200">
+          Harbor Fleet
+        </span>
+      </div>
+
+      <div className="mt-5">
+        <p className="text-6xl font-semibold leading-none text-white lg:text-7xl">
+          {formatOptionalCurrency(money.grossProfitCents)}
+        </p>
+        <p className="mt-3 text-base leading-6 text-emerald-100">
+          protected gross profit after ScaleX approved only policy-safe spend.
+        </p>
+      </div>
+
+      <div className="mt-5 grid gap-3 sm:grid-cols-2">
+        <OutcomeMetric
+          label="Protected margin"
+          value={formatOptionalPercent(money.marginPercent)}
+          tone="teal"
+        />
+        <OutcomeMetric
+          label="Blocked unsafe spend"
+          value={formatOptionalCurrency(money.blockedSpendCents)}
+          tone="rose"
+        />
+      </div>
+
+      <div className="mt-3 grid gap-3 sm:grid-cols-2">
+        <OutcomeMetric
+          label="Stripe test invoice"
+          value={formatOptionalCurrency(money.revenueCents)}
+          tone="sky"
+        />
+        <OutcomeMetric
+          label="Approved spend"
+          value={formatOptionalCurrency(money.approvedSpendCents)}
+          tone="amber"
+        />
+      </div>
+    </section>
+  );
+}
+
+function OutcomeMetric({
   label,
   value,
   tone,
 }: {
-  icon: LucideIcon;
   label: string;
   value: string;
   tone: Tone;
 }) {
   return (
-    <div className={`rounded-lg border p-3 ${softToneClass(tone)}`}>
-      <div className="flex items-center gap-2">
-        <Icon className="h-4 w-4 flex-none" aria-hidden="true" />
-        <p className="truncate text-xs font-semibold uppercase">{label}</p>
-      </div>
-      <p className="mt-1 truncate text-sm font-semibold">{value}</p>
+    <div className={`rounded-lg border p-3 ${darkToneClass(tone)}`}>
+      <p className="text-xs font-semibold uppercase">{label}</p>
+      <p className="mt-2 text-2xl font-semibold">{value}</p>
     </div>
   );
 }
 
-function ExecutionPlayback({ playbackIndex }: { playbackIndex: number }) {
+function HeroStackProof({
+  state,
+  health,
+  auditRows,
+}: {
+  state: DemoState | null;
+  health: HealthResponse | null;
+  auditRows: number;
+}) {
+  const hermes = state?.hermes ?? null;
+  const stripe = state?.stripe ?? null;
+  const policy = state?.policy.summary ?? null;
+  const stripePaidState =
+    stripe?.paid === null || stripe?.paid === undefined ? "pending" : String(stripe.paid);
+  const stripeLiveMode =
+    stripe?.livemode === null || stripe?.livemode === undefined ? "pending" : String(stripe.livemode);
+
   return (
-    <div className="mt-4 rounded-lg border border-white/15 bg-white/10 p-3">
+    <section className="rounded-lg border border-white/15 bg-white/5 p-3">
+      <div className="grid gap-2 md:grid-cols-2 xl:grid-cols-5">
+        <StackProofCard
+          icon={BrainCircuit}
+          label="Real Hermes"
+          status={hermes?.used_real_hermes ? "Real Hermes" : "Test or pending"}
+          detail={`${hermes?.provider ?? "Pending"} / ${hermes?.model ?? "Pending"} / ${hermes?.skill_name ?? "Pending"}`}
+          tone={hermes?.used_real_hermes ? "emerald" : "amber"}
+        />
+        <StackProofCard
+          icon={CreditCard}
+          label="Real Stripe Test Mode"
+          status={stripe?.used_real_stripe ? "stripe_test" : stripeBadgeValue(stripe)}
+          detail={`livemode=${stripeLiveMode}; invoice_status=${stripe?.invoice_status ?? "pending"}; paid=${stripePaidState}`}
+          tone={stripe?.used_real_stripe ? "sky" : stripe?.error ? "rose" : "amber"}
+        />
+        <StackProofCard
+          icon={Database}
+          label="SQLite Audit Ledger"
+          status={health?.database_exists ? "Active" : "Pending"}
+          detail={`${auditRows} audit rows recorded`}
+          tone={health?.database_exists ? "teal" : "slate"}
+        />
+        <StackProofCard
+          icon={ShieldCheck}
+          label="Policy Guardrails"
+          status={policy ? "Active local policy" : "Pending"}
+          detail={policy ? `${policy.engine}: cap, payment, margin, vendors` : "Local policy loading"}
+          tone={policy ? "emerald" : "amber"}
+        />
+        <StackProofCard
+          icon={ShieldAlert}
+          label="NemoClaw"
+          status="Goal 8 next"
+          detail="Not claimed as real yet"
+          tone="violet"
+        />
+      </div>
+    </section>
+  );
+}
+
+function StackProofCard({
+  icon: Icon,
+  label,
+  status,
+  detail,
+  tone,
+}: {
+  icon: LucideIcon;
+  label: string;
+  status: string;
+  detail: string;
+  tone: Tone;
+}) {
+  return (
+    <article className={`rounded-lg border p-3 ${darkToneClass(tone)}`}>
+      <div className="flex items-center gap-2">
+        <Icon className="h-4 w-4 flex-none" aria-hidden="true" />
+        <p className="text-xs font-semibold uppercase">{label}</p>
+      </div>
+      <p className="mt-2 text-sm font-semibold text-white">{status}</p>
+      <p className="mt-1 break-words text-xs leading-5">{detail}</p>
+    </article>
+  );
+}
+
+function ExecutionPlayback({
+  busy,
+  error,
+  money,
+  playbackIndex,
+  state,
+}: {
+  busy: boolean;
+  error: string | null;
+  money: MoneySnapshot;
+  playbackIndex: number;
+  state: DemoState | null;
+}) {
+  const completed = Boolean(state?.report) && !busy && !error;
+
+  return (
+    <div className="rounded-lg border border-white/15 bg-white/10 p-4">
       <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
         <div>
-          <p className="text-sm font-semibold text-white">POST /api/demo/run in progress</p>
-          <p className="mt-1 text-xs text-zinc-300">
-            Frontend playback is active while the API returns the audited run state.
+          <p className="text-base font-semibold text-white">
+            {busy
+              ? "Live execution replay running"
+              : completed
+                ? "Run completed: profit report generated"
+                : "Execution replay"}
+          </p>
+          <p className="mt-1 text-sm text-zinc-300">
+            {busy
+              ? "Frontend stages pulse while POST /api/demo/run returns the audited state."
+              : "Replay cards now reflect the latest API-backed workflow state."}
           </p>
         </div>
-        <div className="grid gap-2 sm:grid-cols-4 lg:min-w-[680px] lg:grid-cols-8">
-          {PLAYBACK_STEPS.map((step, index) => {
-            const active = index === playbackIndex;
-            const complete = index < playbackIndex;
-            return (
-              <div
-                className={`rounded-md border px-2 py-2 text-xs ${
-                  active
-                    ? "border-emerald-300 bg-emerald-300/20 text-emerald-100"
-                    : complete
-                      ? "border-white/20 bg-white/10 text-zinc-200"
-                      : "border-white/10 bg-zinc-950/20 text-zinc-400"
-                }`}
-                key={step}
-              >
-                <span
-                  className={`mb-1 block h-1.5 w-full rounded-full ${
-                    active ? "animate-pulse bg-emerald-300" : complete ? "bg-zinc-300" : "bg-zinc-700"
-                  }`}
-                />
-                {step}
+        <span
+          className={`inline-flex w-fit items-center gap-2 rounded-md border px-3 py-2 text-xs font-semibold ${
+            completed
+              ? "border-emerald-300/40 bg-emerald-300/10 text-emerald-100"
+              : error
+                ? "border-rose-300/40 bg-rose-300/10 text-rose-100"
+                : "border-amber-300/40 bg-amber-300/10 text-amber-100"
+          }`}
+        >
+          {completed ? (
+            <CheckCircle2 className="h-4 w-4" aria-hidden="true" />
+          ) : error ? (
+            <AlertTriangle className="h-4 w-4" aria-hidden="true" />
+          ) : (
+            <RefreshCw className="h-4 w-4 animate-spin" aria-hidden="true" />
+          )}
+          {completed ? "Completed" : error ? "Needs attention" : "In flight"}
+        </span>
+      </div>
+
+      <div className="mt-4 grid gap-2 md:grid-cols-2 xl:grid-cols-7">
+        {PLAYBACK_STEPS.map((step, index) => {
+          const status = playbackStepStatus(step, index, playbackIndex, busy, state, error);
+          const Icon = step.icon;
+          const StatusIcon = stageStatusMeta[status].icon;
+          return (
+            <article
+              className={`min-h-[9rem] rounded-lg border p-3 ${darkStageClass(status)}`}
+              key={step.key}
+            >
+              <div className="flex items-start justify-between gap-2">
+                <span className="flex h-9 w-9 items-center justify-center rounded-md border border-white/15 bg-white/10">
+                  <Icon className="h-4 w-4" aria-hidden="true" />
+                </span>
+                <span className="flex items-center gap-1 text-xs font-semibold">
+                  <StatusIcon className="h-3.5 w-3.5" aria-hidden="true" />
+                  {stageStatusMeta[status].label}
+                </span>
               </div>
-            );
-          })}
-        </div>
+              <span
+                className={`mt-3 block h-1.5 rounded-full ${
+                  status === "current" ? "animate-pulse bg-amber-300" : darkStageBarClass(status)
+                }`}
+              />
+              <p className="mt-3 text-sm font-semibold text-white">{step.label}</p>
+              <p className="mt-2 text-xs leading-5 text-zinc-200">
+                {playbackProof(step.key, state, money)}
+              </p>
+            </article>
+          );
+        })}
       </div>
     </div>
   );
+}
+
+function playbackStepStatus(
+  step: PlaybackStep,
+  index: number,
+  playbackIndex: number,
+  busy: boolean,
+  state: DemoState | null,
+  error: string | null,
+): StageStatus {
+  if (busy) {
+    if (index === playbackIndex) {
+      return "current";
+    }
+    if (index < playbackIndex) {
+      return step.key === "blocked" ? "blocked" : "complete";
+    }
+    return "pending";
+  }
+
+  if (error && index >= playbackIndex) {
+    return "error";
+  }
+
+  if (state?.report) {
+    return step.key === "blocked" ? "blocked" : "complete";
+  }
+
+  const checks = state?.policy_checks ?? [];
+  const blockedChecks = checks.filter((check) => !isApproved(check));
+  switch (step.key) {
+    case "intake":
+      return state?.job ? "complete" : "pending";
+    case "hermes":
+      return hermesFailed(state?.hermes ?? null, state?.planning_run ?? null)
+        ? "error"
+        : state?.planning_run?.status === "completed"
+          ? "complete"
+          : state?.planning_run
+            ? "current"
+            : "pending";
+    case "stripe":
+      return state?.stripe?.error ? "error" : state?.stripe?.invoice_id ? "complete" : "pending";
+    case "policy":
+      return checks.length > 0 ? "complete" : state?.policy.summary ? "current" : "pending";
+    case "blocked":
+      return blockedChecks.length > 0 ? "blocked" : checks.length > 0 ? "complete" : "pending";
+    case "agents":
+      return (state?.agent_outputs.length ?? 0) >= 4 ? "complete" : "pending";
+    case "report":
+      return state?.report ? "complete" : "pending";
+    default:
+      return "pending";
+  }
+}
+
+function playbackProof(key: PlaybackKey, state: DemoState | null, money: MoneySnapshot): string {
+  const checks = state?.policy_checks ?? [];
+  const approvedChecks = checks.filter(isApproved);
+  const blockedCheck = checks.find((check) => !isApproved(check));
+
+  switch (key) {
+    case "intake":
+      return state?.job
+        ? `${state.job.client_name}: ${formatCurrency(state.job.invoice_amount_cents)} invoice.`
+        : "Harbor Fleet Services job waiting for run state.";
+    case "hermes":
+      return state?.hermes?.used_real_hermes
+        ? `${state.hermes.provider ?? "provider"} / ${state.hermes.model ?? "model"} with ${state.hermes.skill_name ?? "skill"}.`
+        : "Hermes proof loads from the planning response.";
+    case "stripe":
+      return state?.stripe?.invoice_id
+        ? `${state.stripe.stripe_mode}; livemode=${String(state.stripe.livemode)}; invoice_status=${state.stripe.invoice_status ?? "pending"}.`
+        : state?.stripe?.error ?? "Stripe test invoice proof pending.";
+    case "policy":
+      return checks.length > 0
+        ? `${approvedChecks.length} spend requests approved under cap and margin rules.`
+        : "Spend checks run after invoice and policy state are available.";
+    case "blocked":
+      return blockedCheck
+        ? `${formatCurrency(blockedCheck.requested_amount_cents)} ${blockedCheck.vendor} blocked.`
+        : `${formatOptionalCurrency(money.blockedSpendCents)} unsafe spend target guarded by policy.`;
+    case "agents":
+      return state?.agent_outputs.length
+        ? `${state.agent_outputs.length} agent deliverables recorded.`
+        : "Finance, Marketing, Research, and Ops outputs pending.";
+    case "report":
+      return state?.report
+        ? `${formatCurrency(state.report.gross_profit_cents)} profit, ${formatPercent(state.report.actual_margin_percent)} margin.`
+        : `${formatOptionalCurrency(money.grossProfitCents)} protected profit target pending report.`;
+    default:
+      return "Proof pending.";
+  }
+}
+
+function darkStageClass(status: StageStatus): string {
+  switch (status) {
+    case "complete":
+      return "border-emerald-300/40 bg-emerald-300/10 text-emerald-100";
+    case "current":
+      return "border-amber-300/50 bg-amber-300/15 text-amber-100 shadow-lg shadow-amber-950/20";
+    case "blocked":
+      return "border-rose-300/50 bg-rose-300/15 text-rose-100";
+    case "error":
+      return "border-rose-300/50 bg-rose-300/20 text-rose-100";
+    case "pending":
+    default:
+      return "border-white/10 bg-zinc-950/30 text-zinc-400";
+  }
+}
+
+function darkStageBarClass(status: StageStatus): string {
+  switch (status) {
+    case "complete":
+      return "bg-emerald-300";
+    case "blocked":
+      return "bg-rose-300";
+    case "error":
+      return "bg-rose-400";
+    case "pending":
+    default:
+      return "bg-zinc-700";
+  }
 }
 
 function LivePipeline({ stages }: { stages: PipelineStage[] }) {

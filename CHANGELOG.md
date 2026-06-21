@@ -10,6 +10,75 @@ Use:
 
 ---
 
+## 2026-06-21 - Documentation audit after Goal 7.6
+
+Completed:
+- Audited the ScaleX markdown/docs/notes set after Goal 7.6 before commit.
+- Aligned README, ROADMAP, docs, and `.env.example` comments with the current working-tree proof:
+  - Goal 6, Goal 7, Goal 7.5, and Goal 7.6 complete
+  - Goal 8 next
+  - Goal 9 final submission prep
+  - Goal 7B future Verified Live Mode hardening
+  - real isolated Hermes with `scalex-operator`
+  - real Stripe test-mode invoice creation/finalization
+  - `invoice_status=open` and `paid=false` labeled honestly
+  - SQLite audit ledger
+  - active local policy guardrails
+  - NemoClaw not yet real
+- Updated ROADMAP so Goal 7.6 is presentation polish pulled forward before Goal 8, not a new permanent branch.
+- Updated the demo script and submission writeup to match the current first viewport, Profit Protected panel, Live Stack Proof, staged replay, and open/unpaid Stripe proof.
+- Left historical changelog entries intact when they described earlier goal state rather than current product claims.
+- Reviewed DECISIONS.md, AGENTS.md, START_HERE.md, Hermes skill docs, and agent notes without requiring locked-decision changes.
+- Did not change backend logic, frontend layout/code, data files, secrets, Stripe behavior, or Hermes behavior.
+
+Verified:
+- `git diff --check` passed.
+- Tracked-file secret scan for live Stripe keys, long Stripe test keys, and Stripe webhook secrets returned no matches.
+- `git status --short` showed intended working-tree edits only.
+- No network calls, Stripe API calls, Hermes model calls, or database writes were performed.
+
+Suggested commit message:
+Align ScaleX docs after Goal 7.6
+
+Next:
+- Goal 8 - NemoClaw / policy safety integration and presentation.
+
+---
+
+## 2026-06-21 - Goal 7.6: Judge-ready command center first viewport
+
+Completed:
+- Reworked the first viewport around the direct hero statement: "ScaleX ran a live AI business workflow."
+- Added a larger Profit Protected hero showing $1,200 invoice, $187 approved spend, $750 blocked unsafe spend, $1,013 gross profit, and 84.4% margin.
+- Added a first-screen Live Stack Proof strip for Hermes, Stripe test mode, SQLite, local Policy Guardrails, and NemoClaw Goal 8 next.
+- Upgraded replay from a small in-flight strip into staged execution cards for intake, Hermes planning, Stripe invoice creation, policy checks, unsafe spend blocking, agent outputs, and profit reporting.
+- Added a short run-completed moment after `POST /api/demo/run` returns successfully.
+- Kept the replay frontend-only and presentation-only while using API-backed state for completed proof.
+- Preserved all existing proof sections: Hermes proof, Stripe proof, hosted invoice URL, `invoice_status=open`, `paid=false`, policy decisions, orchestration feed, agent outputs, SQLite ledger, and profit report.
+- Kept NemoClaw honest as Goal 8 next and did not claim a real NemoClaw integration.
+- Kept changes frontend-only; backend business logic and final economics were not changed.
+- Updated STATUS.md and TASKS.md for Goal 7.6 closeout.
+
+Verified:
+- `npm run build` passed for the frontend.
+- `./scripts/test.sh` passed with 39 backend tests and a successful Vite production build.
+- `git diff --check` passed.
+- Tracked-file secret scan for live Stripe keys, long webhook secrets, and inline OpenAI project keys returned no matches.
+- No `.env` file was staged, and no `CODEX_GOALS.md` or `GOAL_LOG.md` file exists.
+- `./scripts/dev.sh` started the local backend and frontend.
+- Product-mode run without loading the ignored local `.env` showed the visible Stripe missing-key error state.
+- Product-mode run with the ignored local `.env` loaded completed with `status=completed`, `used_real_hermes=true`, `provider=openai-codex`, `model=gpt-5.5`, `skill=scalex-operator`, `used_real_stripe=true`, `stripe_mode=stripe_test`, `livemode=false`, hosted invoice URL on `invoice.stripe.com`, `invoice_status=open`, `paid=false`, `gross_profit_cents=101300`, and `actual_margin_percent=84.4`.
+- Headless Chrome rendered `http://127.0.0.1:5174` after the full run and showed the upgraded hero, Profit Protected outcome, Live Stack Proof, completed replay, real Hermes proof, real Stripe test proof, open/unpaid Stripe honesty, blocked unsafe spend, final economics, and NemoClaw Goal 8 next label.
+- Chrome screenshot capture was not completed because screenshot mode hit a local crashpad sandbox error; the DOM render succeeded.
+
+Suggested commit message:
+Polish ScaleX judge-ready command center
+
+Next:
+- Goal 8 - NemoClaw / policy safety integration and presentation.
+
+---
+
 ## 2026-06-21 - Goal 7.5: Product demo control room UI
 
 Completed:

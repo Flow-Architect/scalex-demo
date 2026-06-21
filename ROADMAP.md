@@ -61,7 +61,7 @@ Most autonomous agent demos focus on whether an agent can spend money. ScaleX fo
 ### Differentiation
 
 - SOLVENT-style agents protect an agent treasury.
-- **ScaleX protects profitability on paid service jobs.**
+- **ScaleX protects profitability on revenue-backed service jobs.**
 - Core object is not a treasury; core object is a **customer job ledger**.
 
 ---
@@ -189,18 +189,26 @@ BACKEND_PORT=8787
 FRONTEND_PORT=5174
 DATABASE_PATH=./data/scalex.db
 
-# Reasoning brain compatibility
+# Legacy direct-reasoning compatibility.
+# Product-mode planning uses the isolated Hermes settings below.
 MODEL_PROVIDER=openai
 SCALEX_REASONING_MODEL=
 OPENAI_API_KEY=
 AI_FALLBACK_MODE=true
 
 # Hermes brain/orchestration layer
-HERMES_MODE=isolated
-HERMES_HOME=
-HERMES_BIN=
-HERMES_BASE_URL=
-HERMES_API_KEY=
+HERMES_MODE=isolated_cli
+HERMES_CLI_PATH=/home/ascabrya/.scalex-hermes/hermes-agent/venv/bin/hermes
+HERMES_HOME=/home/ascabrya/.scalex-hermes/home
+HERMES_MODEL=gpt-5.5
+HERMES_PROVIDER=openai-codex
+HERMES_TIMEOUT_SECONDS=60
+HERMES_REQUIRE_REAL=true
+HERMES_TEST_MODE=false
+HERMES_MAX_OUTPUT_CHARS=12000
+HERMES_SKILL_NAME=scalex-operator
+HERMES_SKILL_SOURCE_PATH=./hermes/skills/scalex-operator
+HERMES_TOOLSETS=skills
 
 # Stripe product path for Goal 7: real Stripe test-mode API calls
 STRIPE_MODE=test
@@ -214,19 +222,19 @@ STRIPE_SUCCESS_URL=
 STRIPE_CANCEL_URL=
 STRIPE_WEBHOOK_SECRET=
 
-# Future Verified Live Mode placeholders only; Goal 7 does not execute live-money charges
+# Future Verified Live Mode placeholders only; current product mode does not execute live-money charges
 STRIPE_LIVE_MONEY_ENABLED=false
 STRIPE_LIVE_REQUIRE_VERIFIED=true
 SCALEX_LIVE_MAX_AMOUNT_CENTS=0
 SCALEX_LIVE_ALLOWED_CUSTOMER_EMAILS=
 SCALEX_LIVE_CONFIRMATION_PHRASE=LIVE_MONEY_APPROVED
 
-# Policy / NemoClaw
+# Policy / NemoClaw; current product path uses local policy until Goal 8 safely wires a real adapter
 POLICY_ENGINE=local
 NEMOCLAW_BASE_URL=
 NEMOCLAW_API_KEY=
 
-# Prototype guardrails
+# Product prototype guardrails
 DEFAULT_INVOICE_AMOUNT_USD=1200
 DEFAULT_SPEND_CAP_USD=300
 DEFAULT_MARGIN_FLOOR_PERCENT=50
@@ -428,7 +436,7 @@ Sequence:
 2. Create Harbor Fleet Services job
 3. Generate operating plan
 4. Create Stripe test customer and invoice through the orchestration layer
-5. Record $1,200 revenue ledger entry
+5. Record the $1,200 compressed-run revenue/profit result without claiming Stripe-paid status unless Stripe reports `paid=true`
 6. Request $89 spend and approve it
 7. Request $98 spend and approve it
 8. Request $750 spend and block it
@@ -566,7 +574,7 @@ Run Demo Job Button
 The page should make this obvious within 5 seconds:
 
 ```text
-ScaleX accepted a paid job.
+ScaleX accepted a revenue-backed service job.
 ScaleX created a Stripe test invoice and recorded payment status honestly.
 ScaleX approved safe spend.
 ScaleX blocked unsafe spend.
@@ -635,7 +643,7 @@ Policy code is the authority, not the model.
 
 ## 12. Stripe Test Mode
 
-Goal 7 makes real Stripe test-mode API calls the product payment path. Test doubles are
+Goal 7 is complete and makes real Stripe test-mode API calls the product payment path. Test doubles are
 allowed only for automated tests, CI, local offline development, or explicitly labeled
 diagnostics.
 
@@ -679,9 +687,9 @@ records. Hermes may propose a payment step but must never directly execute live-
 
 ## 13. Hermes Brain / Orchestration Layer
 
-Create `backend/app/services/hermes_adapter.py`.
+Goal 6 created `backend/app/services/hermes_adapter.py`.
 
-The target adapter should call the ScaleX-isolated Hermes install for planning and orchestration. The current verified laptop command is:
+The adapter calls the ScaleX-isolated Hermes install for planning and orchestration. The verified laptop command was:
 
 ```bash
 HERMES_HOME="$HOME/.scalex-hermes/home" \
@@ -690,7 +698,7 @@ HERMES_HOME="$HOME/.scalex-hermes/home" \
 -z 'Reply with exactly: SCALEX_HERMES_READY'
 ```
 
-That command returned `SCALEX_HERMES_READY` on the Fedora laptop, so Goal 6 should wire ScaleX to this isolated Hermes environment without touching production Hermes or Windows Hermes config.
+That command returned `SCALEX_HERMES_READY` on the Fedora laptop, and Goal 6 wired ScaleX to this isolated Hermes environment without touching production Hermes or Windows Hermes config.
 
 The adapter should produce visible skill-call events like:
 
@@ -1010,7 +1018,7 @@ Verified in the current implementation:
 - `./scripts/test.sh` passes with backend Stripe service tests and frontend production build.
 - Product-mode Stripe setup without `STRIPE_SECRET_KEY` returns a visible `stripe_failed` state.
 - Automated tests use `STRIPE_TEST_DOUBLE_MODE=true` and do not make network calls.
-- Real Stripe API manual verification still requires a local `sk_test_...` key.
+- Real Stripe API verification has been performed with an ignored local `sk_test_...` key; future reruns still require a local test key.
 
 Suggested commit:
 
@@ -1467,8 +1475,8 @@ Show Stripe test invoice:
 ```text
 Customer created
 Invoice created
-Invoice paid or open status shown honestly
-Revenue booked: $1,200
+Current proof: invoice_status=open, paid=false
+Revenue/profit shown as the compressed-run business result, not a Stripe-paid claim
 ```
 
 ### 1:05–1:25
@@ -1535,12 +1543,12 @@ Frontend starts locally.
 SQLite DB initializes and resets.
 Run Demo Job works from UI.
 Timeline shows full job lifecycle.
-Stripe test invoice appears in product mode, or an explicit test-double invoice appears only in test/diagnostic mode.
+Stripe test invoice appears in product mode, including hosted invoice URL, `livemode=false`, invoice status, and paid state; an explicit test-double invoice appears only in test/diagnostic mode.
 Policy approves safe spend.
 Policy blocks unsafe spend.
 Agents produce client-ready deliverables.
 Final report shows correct revenue/spend/profit/margin.
-No live Stripe keys are used in Goal 7; no real client data is used.
+No live Stripe keys are used in current product mode; no real client data is used.
 Sample Harbor Fleet Services run can be recorded in under 3 minutes.
 Repo is clean enough to publish on GitHub.
 ```
@@ -1549,7 +1557,9 @@ Repo is clean enough to publish on GitHub.
 
 ## 21. Remaining Product Roadmap
 
-The remaining roadmap after Goal 7 is:
+Goal 7.6 was a presentation polish pass pulled forward before Goal 8; it does not replace Goal 8 or Goal 9.
+
+The remaining core roadmap after Goal 7.6 is:
 
 ```text
 Goal 8 - NemoClaw / policy safety integration and presentation
@@ -1561,7 +1571,7 @@ Additional optional work after the product prototype is stable:
 
 ```text
 Report export button
-Animated event replay
+Deeper recorded replay polish; Goal 7.6 already added staged frontend execution replay cards
 Public deployment
 ```
 
