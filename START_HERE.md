@@ -28,9 +28,11 @@ Then inspect:
 
 ## Current product goal
 
-Build a functional local product loop showing:
+Maintain a functional local product shell showing:
 
-Job Intake
+Secure Operator Console
+→ Local/sample workflow onboarding
+→ Job Intake
 → Hermes/GPT-5.5 Planning
 → Stripe Test Invoice / Payment Flow
 → Policy/NemoClaw-Style Spend Approval
@@ -54,6 +56,9 @@ Job Intake
 - Do not say product mode must work when an integration is unavailable unless that means a visible
   integration error or an explicitly configured test/diagnostic path.
 - Product acceptance criteria should prove real integration usage.
+- Goal 7.7 local auth is prototype auth, not production enterprise identity.
+- Goal 7.7 onboarding is local/sample workflow onboarding, not production multi-client SaaS.
+- Hosted judge demo mode must not expose secrets; local full-proof mode can use ignored `.env`.
 - Use the ScaleX-isolated Hermes install for the next integration target:
   - code: /home/ascabrya/.scalex-hermes/hermes-agent
   - home/config/auth: /home/ascabrya/.scalex-hermes/home

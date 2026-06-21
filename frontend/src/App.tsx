@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import type { FormEvent } from "react";
 import {
   Activity,
   AlertTriangle,
@@ -6,7 +7,9 @@ import {
   Ban,
   BookOpenCheck,
   BrainCircuit,
+  Building2,
   CheckCircle2,
+  ClipboardList,
   CircleDashed,
   CircleDollarSign,
   Clock3,
@@ -15,31 +18,48 @@ import {
   ExternalLink,
   FileText,
   Gauge,
+  KeyRound,
   Layers3,
   LockKeyhole,
+  LogOut,
   Play,
   ReceiptText,
   RefreshCw,
   RotateCcw,
+  Settings,
   ShieldAlert,
   ShieldCheck,
   Target,
   TrendingUp,
+  UserPlus,
+  Users,
   WalletCards,
   Workflow,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
-import { getDemoState, getHealth, resetDemo, runDemo } from "./api";
+import {
+  getAuthStatus,
+  getDemoState,
+  getHealth,
+  login as loginApi,
+  logout as logoutApi,
+  resetDemo,
+  runDemo,
+  saveOnboarding,
+} from "./api";
 import { formatCurrency, formatDateTime, formatPercent, humanize } from "./format";
 import type {
   AgentOutput,
+  AuthStatus,
   DemoEvent,
+  DemoJob,
   DemoState,
   HealthResponse,
   HermesMetadata,
   LedgerEntry,
   LedgerTotals,
+  OnboardingRequest,
   OrchestrationCall,
   PlanningRun,
   PolicyCheck,
@@ -51,6 +71,28 @@ import type {
 type BusyAction = "initial" | "refresh" | "run" | "reset" | null;
 type StageStatus = "pending" | "current" | "complete" | "blocked" | "error";
 type Tone = "emerald" | "sky" | "amber" | "rose" | "teal" | "violet" | "slate";
+type AppView = "workflow" | "customers" | "runs" | "audit" | "integrations";
+
+interface OnboardingDraft {
+  clientName: string;
+  businessType: string;
+  jobName: string;
+  jobGoal: string;
+  invoiceAmountUsd: string;
+  spendCapUsd: string;
+  marginFloorPercent: string;
+  approvedVendors: string;
+  blockedVendors: string;
+}
+
+interface WorkflowNode {
+  name: string;
+  status: StageStatus;
+  proof: string;
+  timestamp: string | null;
+  badge: string;
+  icon: LucideIcon;
+}
 
 interface PipelineStage {
   name: string;
@@ -89,6 +131,20 @@ interface PlaybackStep {
 }
 
 const LOCKED_DEMO_BLOCKED_SPEND_CENTS = 75_000;
+const ONBOARDING_STORAGE_KEY = "scalex:onboarding-complete";
+
+const HARBOR_ONBOARDING_DRAFT: OnboardingDraft = {
+  clientName: "Harbor Fleet Services",
+  businessType: "Regional fleet maintenance provider",
+  jobName: "30-day fleet brake inspection campaign",
+  jobGoal:
+    "Generate a client-ready fleet brake inspection package, including campaign copy, operations handoff notes, landing page copy, follow-up messages, and a final profitability report.",
+  invoiceAmountUsd: "1200",
+  spendCapUsd: "300",
+  marginFloorPercent: "50",
+  approvedVendors: "Local Ads API, Design Asset Pack",
+  blockedVendors: "Premium Automation Suite",
+};
 
 const PLAYBACK_STEPS: PlaybackStep[] = [
   { key: "intake", label: "Intake received", icon: Target },
@@ -137,6 +193,13 @@ const stageStatusMeta: Record<
 };
 
 export default function App() {
+  const [auth, setAuth] = useState<AuthStatus | null>(null);
+  const [authError, setAuthError] = useState<string | null>(null);
+  const [loginForm, setLoginForm] = useState({ username: "", password: "" });
+  const [activeView, setActiveView] = useState<AppView>("workflow");
+  const [onboardingComplete, setOnboardingComplete] = useState(readOnboardingComplete);
+  const [onboardingDraft, setOnboardingDraft] = useState<OnboardingDraft>(HARBOR_ONBOARDING_DRAFT);
+  const [onboardingError, setOnboardingError] = useState<string | null>(null);
   const [health, setHealth] = useState<HealthResponse | null>(null);
   const [state, setState] = useState<DemoState | null>(null);
   const [busyAction, setBusyAction] = useState<BusyAction>("initial");
@@ -154,8 +217,16 @@ export default function App() {
     busyAction === "run" || runCompletedMoment || Boolean(state?.report);
 
   useEffect(() => {
-    void loadDashboard();
+    void loadSession();
   }, []);
+
+  useEffect(() => {
+    if (!state?.job || onboardingComplete) {
+      return;
+    }
+
+    setOnboardingDraft(draftFromJob(state.job));
+  }, [onboardingComplete, state?.job]);
 
   useEffect(() => {
     if (busyAction !== "run") {
@@ -196,6 +267,59 @@ export default function App() {
       setState(stateResponse);
     } catch (caught) {
       setError(errorMessage(caught));
+    } finally {
+      setBusyAction(null);
+    }
+  }
+
+  async function loadSession() {
+    setBusyAction("initial");
+    setAuthError(null);
+    setError(null);
+    try {
+      const authResponse = await getAuthStatus();
+      setAuth(authResponse);
+      if (authResponse.authenticated) {
+        await loadDashboard();
+      } else {
+        setBusyAction(null);
+      }
+    } catch (caught) {
+      setAuthError(errorMessage(caught));
+      setBusyAction(null);
+    }
+  }
+
+  async function handleLogin(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setBusyAction("initial");
+    setAuthError(null);
+    try {
+      const authResponse = await loginApi(loginForm);
+      setAuth(authResponse);
+      setLoginForm({ username: "", password: "" });
+      if (authResponse.authenticated) {
+        await loadDashboard();
+      }
+    } catch (caught) {
+      setAuthError(errorMessage(caught));
+      setBusyAction(null);
+    }
+  }
+
+  async function handleLogout() {
+    setBusyAction("initial");
+    setAuthError(null);
+    try {
+      const authResponse = await logoutApi();
+      setAuth(authResponse);
+      setState(null);
+      setHealth(null);
+      setOnboardingComplete(false);
+      writeOnboardingComplete(false);
+      setActiveView("workflow");
+    } catch (caught) {
+      setAuthError(errorMessage(caught));
     } finally {
       setBusyAction(null);
     }
@@ -260,8 +384,106 @@ export default function App() {
     }
   }
 
+  async function handleSaveOnboarding(event?: FormEvent<HTMLFormElement>) {
+    event?.preventDefault();
+    setBusyAction("reset");
+    setOnboardingError(null);
+    setError(null);
+    try {
+      const response = await saveOnboarding(onboardingRequestFromDraft(onboardingDraft));
+      setState(response.state);
+      setHealth(await getHealth());
+      setOnboardingComplete(true);
+      writeOnboardingComplete(true);
+      setActiveView("workflow");
+      setNotice("Local onboarding saved. The workflow is ready to run.");
+    } catch (caught) {
+      setOnboardingError(errorMessage(caught));
+    } finally {
+      setBusyAction(null);
+    }
+  }
+
+  async function handleUseHarborSample() {
+    setOnboardingDraft(HARBOR_ONBOARDING_DRAFT);
+    setBusyAction("reset");
+    setOnboardingError(null);
+    setError(null);
+    try {
+      const response = await saveOnboarding(onboardingRequestFromDraft(HARBOR_ONBOARDING_DRAFT));
+      setState(response.state);
+      setHealth(await getHealth());
+      setOnboardingComplete(true);
+      writeOnboardingComplete(true);
+      setActiveView("workflow");
+      setNotice("Harbor Fleet Services sample loaded.");
+    } catch (caught) {
+      setOnboardingError(errorMessage(caught));
+    } finally {
+      setBusyAction(null);
+    }
+  }
+
+  if (busyAction === "initial" && auth === null && !authError) {
+    return <LoadingScreen />;
+  }
+
+  if (auth === null && authError) {
+    return (
+      <LoginScreen
+        busy={busyAction === "initial"}
+        error={authError}
+        form={loginForm}
+        onChange={setLoginForm}
+        onSubmit={handleLogin}
+      />
+    );
+  }
+
+  if (!auth?.authenticated && auth?.auth_enabled) {
+    return (
+      <LoginScreen
+        busy={busyAction === "initial"}
+        error={authError}
+        form={loginForm}
+        onChange={setLoginForm}
+        onSubmit={handleLogin}
+      />
+    );
+  }
+
+  if (!onboardingComplete) {
+    return (
+      <OnboardingScreen
+        auth={auth}
+        busy={busyAction === "reset"}
+        draft={onboardingDraft}
+        error={onboardingError ?? authError}
+        onDraftChange={setOnboardingDraft}
+        onLogout={handleLogout}
+        onSubmit={handleSaveOnboarding}
+        onUseHarborSample={handleUseHarborSample}
+      />
+    );
+  }
+
   return (
     <main className="min-h-screen bg-stone-100 text-zinc-950">
+      <div className="min-h-screen lg:grid lg:grid-cols-[17rem_minmax(0,1fr)]">
+        <AppSidebar
+          activeView={activeView}
+          auth={auth}
+          busy={isBusy}
+          onLogout={handleLogout}
+          onNavigate={setActiveView}
+          onStartOnboarding={() => {
+            setOnboardingComplete(false);
+            writeOnboardingComplete(false);
+          }}
+        />
+        <div className="min-w-0">
+          {activeView === "workflow" ? (
+            <>
       <section className="border-b border-zinc-900 bg-zinc-950 text-white">
         <div className="w-full px-4 py-5 sm:px-6 lg:px-8">
           <div className="flex flex-col gap-5">
@@ -359,6 +581,14 @@ export default function App() {
 
             <HeroStackProof state={state} health={health} auditRows={auditRows} />
 
+            <WorkflowCanvas
+              auditRows={auditRows}
+              busy={busyAction === "run"}
+              money={money}
+              playbackIndex={playbackIndex}
+              state={state}
+            />
+
             {showExecutionReplay ? (
               <ExecutionPlayback
                 busy={busyAction === "run"}
@@ -426,7 +656,767 @@ export default function App() {
           <TimelinePanel events={state?.timeline_events ?? state?.events ?? []} />
         </section>
       </div>
+            </>
+          ) : (
+            <ProductView
+              activeView={activeView}
+              auditRows={auditRows}
+              health={health}
+              money={money}
+              onStartOnboarding={() => {
+                setOnboardingComplete(false);
+                writeOnboardingComplete(false);
+              }}
+              state={state}
+            />
+          )}
+        </div>
+      </div>
     </main>
+  );
+}
+
+function LoadingScreen() {
+  return (
+    <main className="flex min-h-screen items-center justify-center bg-zinc-950 px-4 text-white">
+      <div className="w-full max-w-md rounded-lg border border-white/15 bg-white/10 p-6">
+        <div className="flex items-center gap-3">
+          <span className="flex h-11 w-11 items-center justify-center rounded-lg border border-emerald-300/30 bg-emerald-300/10 text-emerald-100">
+            <Workflow className="h-5 w-5 animate-pulse" aria-hidden="true" />
+          </span>
+          <div>
+            <p className="text-lg font-semibold">ScaleX</p>
+            <p className="text-sm text-zinc-300">Loading local operator console</p>
+          </div>
+        </div>
+      </div>
+    </main>
+  );
+}
+
+function LoginScreen({
+  busy,
+  error,
+  form,
+  onChange,
+  onSubmit,
+}: {
+  busy: boolean;
+  error: string | null;
+  form: { username: string; password: string };
+  onChange: (form: { username: string; password: string }) => void;
+  onSubmit: (event: FormEvent<HTMLFormElement>) => void;
+}) {
+  return (
+    <main className="min-h-screen bg-zinc-950 text-white">
+      <div className="grid min-h-screen lg:grid-cols-[minmax(0,0.95fr)_minmax(420px,0.7fr)]">
+        <section className="flex min-h-[22rem] flex-col justify-between border-b border-white/10 p-6 lg:border-b-0 lg:border-r lg:p-10">
+          <div className="flex items-center gap-3">
+            <span className="flex h-11 w-11 items-center justify-center rounded-lg border border-emerald-300/30 bg-emerald-300/10 text-emerald-100">
+              <ShieldCheck className="h-5 w-5" aria-hidden="true" />
+            </span>
+            <div>
+              <p className="text-xl font-semibold">ScaleX</p>
+              <p className="text-sm text-zinc-400">Profit-aware agent operations</p>
+            </div>
+          </div>
+
+          <div className="max-w-3xl">
+            <p className="text-sm font-semibold uppercase text-emerald-200">
+              Secure Operator Console
+            </p>
+            <h1 className="mt-3 text-4xl font-semibold leading-tight lg:text-6xl">
+              Access the autonomous workflow control room.
+            </h1>
+            <p className="mt-5 max-w-2xl text-base leading-7 text-zinc-300">
+              Local prototype auth gates the demo API and product shell with a signed
+              session cookie. It is not production enterprise identity.
+            </p>
+          </div>
+
+          <div className="grid gap-3 text-sm text-zinc-300 sm:grid-cols-3">
+            <LoginProof icon={LockKeyhole} label="Local session" />
+            <LoginProof icon={BrainCircuit} label="Hermes proof preserved" />
+            <LoginProof icon={CreditCard} label="Stripe test only" />
+          </div>
+        </section>
+
+        <section className="flex items-center justify-center p-6 lg:p-10">
+          <form
+            className="w-full max-w-md rounded-lg border border-white/15 bg-white/10 p-5 shadow-2xl shadow-black/30"
+            onSubmit={onSubmit}
+          >
+            <div className="flex items-center gap-3">
+              <span className="flex h-10 w-10 items-center justify-center rounded-lg border border-sky-300/30 bg-sky-300/10 text-sky-100">
+                <KeyRound className="h-5 w-5" aria-hidden="true" />
+              </span>
+              <div>
+                <h2 className="text-lg font-semibold">Operator login</h2>
+                <p className="text-sm text-zinc-300">Prototype local auth</p>
+              </div>
+            </div>
+
+            <label className="mt-5 block text-sm font-semibold text-zinc-200">
+              Username
+              <input
+                autoComplete="username"
+                className="mt-2 min-h-11 w-full rounded-md border border-white/15 bg-zinc-950 px-3 text-white outline-none transition focus:border-emerald-300"
+                onChange={(event) => onChange({ ...form, username: event.target.value })}
+                type="text"
+                value={form.username}
+              />
+            </label>
+            <label className="mt-4 block text-sm font-semibold text-zinc-200">
+              Password
+              <input
+                autoComplete="current-password"
+                className="mt-2 min-h-11 w-full rounded-md border border-white/15 bg-zinc-950 px-3 text-white outline-none transition focus:border-emerald-300"
+                onChange={(event) => onChange({ ...form, password: event.target.value })}
+                type="password"
+                value={form.password}
+              />
+            </label>
+
+            {error ? (
+              <div className="mt-4 rounded-lg border border-rose-300/40 bg-rose-300/10 p-3 text-sm text-rose-100">
+                {error}
+              </div>
+            ) : null}
+
+            <button
+              className="mt-5 inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-md bg-emerald-400 px-4 py-3 text-sm font-semibold text-zinc-950 transition hover:bg-emerald-300 disabled:cursor-not-allowed disabled:bg-zinc-600 disabled:text-zinc-300"
+              disabled={busy}
+              type="submit"
+            >
+              {busy ? (
+                <RefreshCw className="h-4 w-4 animate-spin" aria-hidden="true" />
+              ) : (
+                <LockKeyhole className="h-4 w-4" aria-hidden="true" />
+              )}
+              Enter console
+            </button>
+          </form>
+        </section>
+      </div>
+    </main>
+  );
+}
+
+function LoginProof({ icon: Icon, label }: { icon: LucideIcon; label: string }) {
+  return (
+    <div className="flex items-center gap-2 rounded-lg border border-white/15 bg-white/10 p-3">
+      <Icon className="h-4 w-4 text-emerald-200" aria-hidden="true" />
+      <span>{label}</span>
+    </div>
+  );
+}
+
+function OnboardingScreen({
+  auth,
+  busy,
+  draft,
+  error,
+  onDraftChange,
+  onLogout,
+  onSubmit,
+  onUseHarborSample,
+}: {
+  auth: AuthStatus | null;
+  busy: boolean;
+  draft: OnboardingDraft;
+  error: string | null;
+  onDraftChange: (draft: OnboardingDraft) => void;
+  onLogout: () => void;
+  onSubmit: (event: FormEvent<HTMLFormElement>) => void;
+  onUseHarborSample: () => void;
+}) {
+  return (
+    <main className="min-h-screen bg-stone-100 text-zinc-950">
+      <header className="border-b border-zinc-200 bg-white">
+        <div className="flex flex-col gap-3 px-4 py-4 sm:px-6 lg:flex-row lg:items-center lg:justify-between lg:px-8">
+          <div className="flex items-center gap-3">
+            <span className="flex h-10 w-10 items-center justify-center rounded-lg border border-emerald-200 bg-emerald-50 text-emerald-800">
+              <Workflow className="h-5 w-5" aria-hidden="true" />
+            </span>
+            <div>
+              <p className="text-lg font-semibold">ScaleX onboarding</p>
+              <p className="text-sm text-zinc-600">
+                Local sample workflow setup before the operator console.
+              </p>
+            </div>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <span className="rounded-md border border-zinc-200 bg-zinc-50 px-3 py-2 text-xs font-semibold text-zinc-700">
+              {auth?.auth_enabled ? `Signed in as ${auth.username ?? "operator"}` : "Prototype auth disabled"}
+            </span>
+            {auth?.auth_enabled ? (
+              <button
+                className="inline-flex min-h-10 items-center gap-2 rounded-md border border-zinc-200 bg-white px-3 text-sm font-semibold text-zinc-700 transition hover:bg-zinc-50"
+                onClick={onLogout}
+                type="button"
+              >
+                <LogOut className="h-4 w-4" aria-hidden="true" />
+                Logout
+              </button>
+            ) : null}
+          </div>
+        </div>
+      </header>
+
+      <div className="grid gap-5 px-4 py-5 sm:px-6 lg:grid-cols-[minmax(0,0.85fr)_minmax(420px,1fr)] lg:px-8">
+        <section className="rounded-lg border border-zinc-200 bg-white p-5 shadow-sm">
+          <p className="text-sm font-semibold uppercase text-emerald-700">Customer onboarding</p>
+          <h1 className="mt-3 text-3xl font-semibold leading-tight text-zinc-950 lg:text-5xl">
+            Prepare one local revenue-backed workflow.
+          </h1>
+          <p className="mt-4 text-base leading-7 text-zinc-600">
+            Use Harbor Fleet Services or enter a synthetic local sample. ScaleX keeps this
+            narrow: one customer, one campaign, one invoice, local policy, SQLite audit.
+          </p>
+
+          <div className="mt-6 grid gap-3 sm:grid-cols-2">
+            <OnboardingMetric label="Invoice" value={`$${draft.invoiceAmountUsd || "0"}`} />
+            <OnboardingMetric label="Spend cap" value={`$${draft.spendCapUsd || "0"}`} />
+            <OnboardingMetric label="Margin floor" value={`${draft.marginFloorPercent || "0"}%`} />
+            <OnboardingMetric label="Mode" value="Local sample" />
+          </div>
+
+          <button
+            className="mt-6 inline-flex min-h-11 items-center justify-center gap-2 rounded-md bg-zinc-950 px-4 py-3 text-sm font-semibold text-white transition hover:bg-zinc-800 disabled:cursor-not-allowed disabled:bg-zinc-400"
+            disabled={busy}
+            onClick={onUseHarborSample}
+            type="button"
+          >
+            {busy ? (
+              <RefreshCw className="h-4 w-4 animate-spin" aria-hidden="true" />
+            ) : (
+              <Building2 className="h-4 w-4" aria-hidden="true" />
+            )}
+            Use Harbor sample
+          </button>
+        </section>
+
+        <form
+          className="rounded-lg border border-zinc-200 bg-white p-5 shadow-sm"
+          onSubmit={onSubmit}
+        >
+          <div className="flex items-center gap-3">
+            <span className="flex h-10 w-10 items-center justify-center rounded-lg border border-sky-200 bg-sky-50 text-sky-800">
+              <UserPlus className="h-5 w-5" aria-hidden="true" />
+            </span>
+            <div>
+              <h2 className="text-lg font-semibold text-zinc-950">Workflow intake</h2>
+              <p className="text-sm text-zinc-600">Synthetic/sample customer data only.</p>
+            </div>
+          </div>
+
+          <div className="mt-5 grid gap-4 sm:grid-cols-2">
+            <TextField
+              label="Customer/business name"
+              value={draft.clientName}
+              onChange={(value) => onDraftChange({ ...draft, clientName: value })}
+            />
+            <TextField
+              label="Business type"
+              value={draft.businessType}
+              onChange={(value) => onDraftChange({ ...draft, businessType: value })}
+            />
+            <TextField
+              label="Job/campaign name"
+              value={draft.jobName}
+              onChange={(value) => onDraftChange({ ...draft, jobName: value })}
+            />
+            <TextField
+              label="Invoice amount"
+              type="number"
+              value={draft.invoiceAmountUsd}
+              onChange={(value) => onDraftChange({ ...draft, invoiceAmountUsd: value })}
+            />
+            <TextField
+              label="Spend cap"
+              type="number"
+              value={draft.spendCapUsd}
+              onChange={(value) => onDraftChange({ ...draft, spendCapUsd: value })}
+            />
+            <TextField
+              label="Margin floor"
+              type="number"
+              value={draft.marginFloorPercent}
+              onChange={(value) => onDraftChange({ ...draft, marginFloorPercent: value })}
+            />
+          </div>
+
+          <label className="mt-4 block text-sm font-semibold text-zinc-700">
+            Job goal
+            <textarea
+              className="mt-2 min-h-28 w-full rounded-md border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-950 outline-none transition focus:border-emerald-500"
+              onChange={(event) => onDraftChange({ ...draft, jobGoal: event.target.value })}
+              value={draft.jobGoal}
+            />
+          </label>
+
+          <div className="mt-4 grid gap-4 sm:grid-cols-2">
+            <TextField
+              label="Optional approved vendors"
+              value={draft.approvedVendors}
+              onChange={(value) => onDraftChange({ ...draft, approvedVendors: value })}
+            />
+            <TextField
+              label="Optional blocked vendors"
+              value={draft.blockedVendors}
+              onChange={(value) => onDraftChange({ ...draft, blockedVendors: value })}
+            />
+          </div>
+
+          {error ? (
+            <div className="mt-4 rounded-lg border border-rose-200 bg-rose-50 p-3 text-sm text-rose-800">
+              {error}
+            </div>
+          ) : null}
+
+          <button
+            className="mt-5 inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-md bg-emerald-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-emerald-500 disabled:cursor-not-allowed disabled:bg-zinc-400"
+            disabled={busy}
+            type="submit"
+          >
+            {busy ? (
+              <RefreshCw className="h-4 w-4 animate-spin" aria-hidden="true" />
+            ) : (
+              <CheckCircle2 className="h-4 w-4" aria-hidden="true" />
+            )}
+            Save local workflow
+          </button>
+        </form>
+      </div>
+    </main>
+  );
+}
+
+function TextField({
+  label,
+  onChange,
+  type = "text",
+  value,
+}: {
+  label: string;
+  onChange: (value: string) => void;
+  type?: string;
+  value: string;
+}) {
+  return (
+    <label className="block text-sm font-semibold text-zinc-700">
+      {label}
+      <input
+        className="mt-2 min-h-11 w-full rounded-md border border-zinc-200 bg-white px-3 text-sm text-zinc-950 outline-none transition focus:border-emerald-500"
+        onChange={(event) => onChange(event.target.value)}
+        type={type}
+        value={value}
+      />
+    </label>
+  );
+}
+
+function OnboardingMetric({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-lg border border-zinc-200 bg-zinc-50 p-4">
+      <p className="text-xs font-semibold uppercase text-zinc-500">{label}</p>
+      <p className="mt-2 text-xl font-semibold text-zinc-950">{value}</p>
+    </div>
+  );
+}
+
+function AppSidebar({
+  activeView,
+  auth,
+  busy,
+  onLogout,
+  onNavigate,
+  onStartOnboarding,
+}: {
+  activeView: AppView;
+  auth: AuthStatus | null;
+  busy: boolean;
+  onLogout: () => void;
+  onNavigate: (view: AppView) => void;
+  onStartOnboarding: () => void;
+}) {
+  const navItems: Array<{ view: AppView; label: string; icon: LucideIcon }> = [
+    { view: "workflow", label: "Dashboard / Workflow", icon: Workflow },
+    { view: "customers", label: "Customers", icon: Users },
+    { view: "runs", label: "Runs", icon: ClipboardList },
+    { view: "audit", label: "Audit", icon: BookOpenCheck },
+    { view: "integrations", label: "Settings / Integrations", icon: Settings },
+  ];
+
+  return (
+    <aside className="border-b border-zinc-800 bg-zinc-950 text-white lg:min-h-screen lg:border-b-0 lg:border-r">
+      <div className="flex h-full flex-col gap-5 p-4">
+        <div className="flex items-center gap-3">
+          <span className="flex h-10 w-10 items-center justify-center rounded-lg border border-emerald-300/30 bg-emerald-300/10 text-emerald-100">
+            <ShieldCheck className="h-5 w-5" aria-hidden="true" />
+          </span>
+          <div>
+            <p className="text-lg font-semibold">ScaleX</p>
+            <p className="text-xs text-zinc-400">Operator console</p>
+          </div>
+        </div>
+
+        <nav className="grid gap-2">
+          {navItems.map((item) => {
+            const Icon = item.icon;
+            const active = activeView === item.view;
+            return (
+              <button
+                className={`flex min-h-11 items-center gap-3 rounded-md border px-3 text-left text-sm font-semibold transition ${
+                  active
+                    ? "border-emerald-300/40 bg-emerald-300/10 text-emerald-100"
+                    : "border-white/10 bg-white/5 text-zinc-300 hover:bg-white/10"
+                }`}
+                key={item.view}
+                onClick={() => onNavigate(item.view)}
+                type="button"
+              >
+                <Icon className="h-4 w-4 flex-none" aria-hidden="true" />
+                <span>{item.label}</span>
+              </button>
+            );
+          })}
+        </nav>
+
+        <div className="rounded-lg border border-white/10 bg-white/5 p-3 text-sm text-zinc-300">
+          <p className="font-semibold text-white">Prototype local auth</p>
+          <p className="mt-1 text-xs leading-5">
+            {auth?.auth_enabled ? `Signed in as ${auth.username ?? "operator"}` : "Disabled for this local run"}
+          </p>
+        </div>
+
+        <div className="mt-auto grid gap-2">
+          <button
+            className="inline-flex min-h-10 items-center justify-center gap-2 rounded-md border border-white/10 bg-white/5 px-3 text-sm font-semibold text-zinc-200 transition hover:bg-white/10"
+            onClick={onStartOnboarding}
+            type="button"
+          >
+            <UserPlus className="h-4 w-4" aria-hidden="true" />
+            Onboard customer
+          </button>
+          {auth?.auth_enabled ? (
+            <button
+              className="inline-flex min-h-10 items-center justify-center gap-2 rounded-md border border-white/10 bg-white/5 px-3 text-sm font-semibold text-zinc-200 transition hover:bg-white/10 disabled:cursor-not-allowed disabled:text-zinc-500"
+              disabled={busy}
+              onClick={onLogout}
+              type="button"
+            >
+              <LogOut className="h-4 w-4" aria-hidden="true" />
+              Logout
+            </button>
+          ) : null}
+        </div>
+      </div>
+    </aside>
+  );
+}
+
+function WorkflowCanvas({
+  auditRows,
+  busy,
+  money,
+  playbackIndex,
+  state,
+}: {
+  auditRows: number;
+  busy: boolean;
+  money: MoneySnapshot;
+  playbackIndex: number;
+  state: DemoState | null;
+}) {
+  const nodes = buildWorkflowNodes(state, money, auditRows, busy, playbackIndex);
+  const approvedChecks = state?.policy_checks.filter(isApproved) ?? [];
+  const blockedChecks = state?.policy_checks.filter((check) => !isApproved(check)) ?? [];
+
+  return (
+    <section className="rounded-lg border border-white/15 bg-zinc-900/80 p-4">
+      <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+        <div>
+          <div className="flex items-center gap-2">
+            <Workflow className="h-5 w-5 text-emerald-200" aria-hidden="true" />
+            <h2 className="text-base font-semibold text-white">Autonomous Workflow Map</h2>
+          </div>
+          <p className="mt-1 text-sm leading-6 text-zinc-300">
+            Animated presentation while the run is in flight; completed proof is loaded from the API state.
+          </p>
+        </div>
+        <span className="rounded-md border border-white/15 bg-white/10 px-3 py-2 text-xs font-semibold text-zinc-200">
+          {nodes.filter((node) => node.status !== "pending").length}/{nodes.length} nodes active
+        </span>
+      </div>
+
+      <div className="mt-4 grid gap-3 lg:grid-cols-3">
+        {nodes.map((node, index) => (
+          <WorkflowNodeCard
+            approvedChecks={approvedChecks}
+            blockedChecks={blockedChecks}
+            key={node.name}
+            node={node}
+            showBranches={node.name === "Spend Decision"}
+            showConnector={index < nodes.length - 1}
+          />
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function WorkflowNodeCard({
+  approvedChecks,
+  blockedChecks,
+  node,
+  showBranches,
+  showConnector,
+}: {
+  approvedChecks: PolicyCheck[];
+  blockedChecks: PolicyCheck[];
+  node: WorkflowNode;
+  showBranches: boolean;
+  showConnector: boolean;
+}) {
+  const Icon = node.icon;
+  const StatusIcon = stageStatusMeta[node.status].icon;
+  return (
+    <article className={`relative min-h-[13rem] rounded-lg border p-4 ${darkStageClass(node.status)}`}>
+      {showConnector ? (
+        <ArrowRight className="absolute -right-3 top-1/2 z-10 hidden h-6 w-6 -translate-y-1/2 rounded-full border border-white/15 bg-zinc-950 p-1 text-zinc-300 lg:block" />
+      ) : null}
+      <div className="flex items-start justify-between gap-3">
+        <span className="flex h-10 w-10 items-center justify-center rounded-md border border-white/15 bg-white/10">
+          <Icon className={`h-5 w-5 ${node.status === "current" ? "animate-pulse" : ""}`} aria-hidden="true" />
+        </span>
+        <span className="inline-flex items-center gap-1 rounded-md border border-white/15 bg-white/10 px-2 py-1 text-xs font-semibold">
+          <StatusIcon className="h-3.5 w-3.5" aria-hidden="true" />
+          {stageStatusMeta[node.status].label}
+        </span>
+      </div>
+      <p className="mt-3 text-base font-semibold text-white">{node.name}</p>
+      <p className="mt-2 text-sm leading-5 text-zinc-200">{node.proof}</p>
+      <div className="mt-3 flex flex-wrap gap-2 text-xs">
+        <span className="rounded-md border border-white/15 bg-white/10 px-2 py-1 font-semibold">
+          {node.badge}
+        </span>
+        <span className="rounded-md border border-white/15 bg-white/10 px-2 py-1">
+          {formatDateTime(node.timestamp)}
+        </span>
+      </div>
+      {showBranches ? (
+        <div className="mt-3 grid gap-2 sm:grid-cols-2">
+          <div className="rounded-md border border-emerald-300/30 bg-emerald-300/10 p-2 text-xs text-emerald-100">
+            <p className="font-semibold">Proceed branch</p>
+            <p className="mt-1">{approvedChecks.length} approved spend checks</p>
+          </div>
+          <div className="rounded-md border border-rose-300/40 bg-rose-300/10 p-2 text-xs text-rose-100">
+            <p className="font-semibold">Blocked branch</p>
+            <p className="mt-1">
+              {blockedChecks[0]
+                ? `${formatCurrency(blockedChecks[0].requested_amount_cents)} ${blockedChecks[0].vendor}`
+                : "$750 unsafe spend pending"}
+            </p>
+          </div>
+        </div>
+      ) : null}
+    </article>
+  );
+}
+
+function ProductView({
+  activeView,
+  auditRows,
+  health,
+  money,
+  onStartOnboarding,
+  state,
+}: {
+  activeView: AppView;
+  auditRows: number;
+  health: HealthResponse | null;
+  money: MoneySnapshot;
+  onStartOnboarding: () => void;
+  state: DemoState | null;
+}) {
+  return (
+    <div className="min-h-screen px-4 py-5 sm:px-6 lg:px-8">
+      {activeView === "customers" ? (
+        <CustomersView onStartOnboarding={onStartOnboarding} state={state} />
+      ) : null}
+      {activeView === "runs" ? <RunsView money={money} state={state} /> : null}
+      {activeView === "audit" ? (
+        <div className="grid gap-4 xl:grid-cols-[1fr_1fr]">
+          <AuditLedgerPanel
+            auditRows={auditRows}
+            databasePath={state?.database.path ?? health?.database_path ?? null}
+            entries={state?.ledger.entries ?? []}
+            totals={state?.ledger.totals ?? null}
+          />
+          <TimelinePanel events={state?.timeline_events ?? state?.events ?? []} />
+        </div>
+      ) : null}
+      {activeView === "integrations" ? (
+        <IntegrationsView auditRows={auditRows} health={health} state={state} />
+      ) : null}
+    </div>
+  );
+}
+
+function CustomersView({
+  onStartOnboarding,
+  state,
+}: {
+  onStartOnboarding: () => void;
+  state: DemoState | null;
+}) {
+  const job = state?.job ?? null;
+  return (
+    <section className="rounded-lg border border-zinc-200 bg-white p-5 shadow-sm">
+      <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+        <div>
+          <div className="flex items-center gap-2">
+            <Users className="h-5 w-5 text-teal-700" aria-hidden="true" />
+            <h1 className="text-xl font-semibold text-zinc-950">Customers</h1>
+          </div>
+          <p className="mt-1 text-sm text-zinc-600">
+            Local/sample workflow onboarding only; not full multi-tenant SaaS.
+          </p>
+        </div>
+        <button
+          className="inline-flex min-h-11 items-center justify-center gap-2 rounded-md bg-zinc-950 px-4 py-3 text-sm font-semibold text-white transition hover:bg-zinc-800"
+          onClick={onStartOnboarding}
+          type="button"
+        >
+          <UserPlus className="h-4 w-4" aria-hidden="true" />
+          Onboard local workflow
+        </button>
+      </div>
+
+      {job ? (
+        <div className="mt-5 grid gap-4 lg:grid-cols-[0.9fr_1.1fr]">
+          <article className="rounded-lg border border-zinc-200 bg-zinc-50 p-4">
+            <p className="text-xs font-semibold uppercase text-zinc-500">Active customer</p>
+            <h2 className="mt-2 text-2xl font-semibold text-zinc-950">{job.client_name}</h2>
+            <p className="mt-2 text-sm text-zinc-600">{job.business_type}</p>
+            <div className="mt-4 grid gap-2 sm:grid-cols-3">
+              <ProofChip icon={CircleDollarSign} label="Invoice" value={formatCurrency(job.invoice_amount_cents)} tone="emerald" />
+              <ProofChip icon={Gauge} label="Spend cap" value={formatCurrency(job.spend_cap_cents)} tone="sky" />
+              <ProofChip icon={TrendingUp} label="Margin floor" value={formatPercent(job.margin_floor_percent)} tone="teal" />
+            </div>
+          </article>
+          <article className="rounded-lg border border-zinc-200 bg-white p-4">
+            <p className="text-xs font-semibold uppercase text-zinc-500">Prepared job</p>
+            <h2 className="mt-2 text-xl font-semibold text-zinc-950">{job.job_name}</h2>
+            <p className="mt-2 text-sm leading-6 text-zinc-600">{job.job_goal}</p>
+            <p className="mt-4 text-xs text-zinc-500">Updated {formatDateTime(job.updated_at)}</p>
+          </article>
+        </div>
+      ) : (
+        <div className="mt-5 rounded-lg border border-dashed border-zinc-300 p-5 text-sm text-zinc-600">
+          No local workflow is currently onboarded.
+        </div>
+      )}
+    </section>
+  );
+}
+
+function RunsView({ money, state }: { money: MoneySnapshot; state: DemoState | null }) {
+  const calls = state?.orchestration_calls ?? [];
+  const reports = state?.reports ?? [];
+  return (
+    <div className="grid gap-4 xl:grid-cols-[0.85fr_1.15fr]">
+      <section className="rounded-lg border border-zinc-200 bg-white p-5 shadow-sm">
+        <div className="flex items-center gap-2">
+          <ClipboardList className="h-5 w-5 text-sky-700" aria-hidden="true" />
+          <h1 className="text-xl font-semibold text-zinc-950">Run History</h1>
+        </div>
+        <p className="mt-1 text-sm text-zinc-600">Latest compressed local workflow run.</p>
+        <div className="mt-4">
+          <MoneyFlow compact money={money} />
+        </div>
+        <div className="mt-4 space-y-3">
+          {reports.length === 0 ? (
+            <div className="rounded-lg border border-dashed border-zinc-300 p-4 text-sm text-zinc-600">
+              Run history appears after a demo run completes.
+            </div>
+          ) : (
+            reports.map((report) => (
+              <article className="rounded-lg border border-emerald-200 bg-emerald-50 p-4" key={report.id}>
+                <p className="font-semibold text-zinc-950">{formatCurrency(report.gross_profit_cents)} gross profit</p>
+                <p className="mt-1 text-sm text-zinc-700">
+                  {formatPercent(report.actual_margin_percent)} margin, {report.policy_violations} policy violations.
+                </p>
+                <p className="mt-2 text-xs text-zinc-500">{formatDateTime(report.created_at)}</p>
+              </article>
+            ))
+          )}
+        </div>
+      </section>
+      <section className="rounded-lg border border-zinc-200 bg-white p-5 shadow-sm">
+        <ExecutionFeed calls={calls} />
+      </section>
+    </div>
+  );
+}
+
+function IntegrationsView({
+  auditRows,
+  health,
+  state,
+}: {
+  auditRows: number;
+  health: HealthResponse | null;
+  state: DemoState | null;
+}) {
+  return (
+    <section className="rounded-lg border border-zinc-200 bg-white p-5 shadow-sm">
+      <div className="flex items-center gap-2">
+        <Settings className="h-5 w-5 text-zinc-700" aria-hidden="true" />
+        <h1 className="text-xl font-semibold text-zinc-950">Settings / Integrations</h1>
+      </div>
+      <p className="mt-1 text-sm text-zinc-600">
+        Current integration proof and honest boundaries for this local product prototype.
+      </p>
+      <div className="mt-5 grid gap-3 lg:grid-cols-2">
+        <ProofRow
+          detail={`${state?.hermes.provider ?? "Pending"} / ${state?.hermes.model ?? "Pending"} / ${state?.hermes.skill_name ?? "Pending"}`}
+          icon={BrainCircuit}
+          label="Hermes"
+          status={state?.hermes.used_real_hermes ? "Real isolated Hermes" : "Test or pending"}
+          tone={state?.hermes.used_real_hermes ? "emerald" : "amber"}
+        />
+        <ProofRow
+          detail={`livemode=${state?.stripe.livemode === null || state?.stripe.livemode === undefined ? "pending" : String(state?.stripe.livemode)}; paid=${state?.stripe.paid === null || state?.stripe.paid === undefined ? "pending" : String(state?.stripe.paid)}`}
+          icon={CreditCard}
+          label="Stripe"
+          status={state?.stripe.used_real_stripe ? "Real Stripe test mode" : humanize(state?.stripe.stripe_mode ?? "pending")}
+          tone={state?.stripe.used_real_stripe ? "emerald" : state?.stripe.error ? "rose" : "amber"}
+        />
+        <ProofRow
+          detail={`${auditRows} audit rows; ${state?.database.path ?? health?.database_path ?? "path pending"}`}
+          icon={Database}
+          label="SQLite ledger"
+          status={health?.database_exists ? "Active" : "Pending"}
+          tone={health?.database_exists ? "teal" : "slate"}
+        />
+        <ProofRow
+          detail="Local policy engine enforces payment-before-spend, vendor lists, spend cap, and margin floor."
+          icon={ShieldCheck}
+          label="Policy engine"
+          status="Local guardrails"
+          tone="emerald"
+        />
+        <ProofRow
+          detail="Goal 8 remains next. This UI does not claim a real NemoClaw integration."
+          icon={ShieldAlert}
+          label="NemoClaw"
+          status="Not real yet"
+          tone="violet"
+        />
+      </div>
+    </section>
   );
 }
 
@@ -1799,6 +2789,151 @@ function MarkdownPreview({ markdown }: { markdown: string }) {
   );
 }
 
+function buildWorkflowNodes(
+  state: DemoState | null,
+  money: MoneySnapshot,
+  auditRows: number,
+  busy: boolean,
+  playbackIndex: number,
+): WorkflowNode[] {
+  const job = state?.job ?? null;
+  const planningRun = state?.planning_run ?? null;
+  const hermes = state?.hermes ?? null;
+  const stripe = state?.stripe ?? null;
+  const checks = state?.policy_checks ?? [];
+  const outputs = state?.agent_outputs ?? [];
+  const report = state?.report ?? null;
+  const approvedChecks = checks.filter(isApproved);
+  const blockedChecks = checks.filter((check) => !isApproved(check));
+  const events = state?.events ?? [];
+
+  const settledNodes: WorkflowNode[] = [
+    {
+      name: "Customer Intake",
+      status: job ? "complete" : "pending",
+      proof: job
+        ? `${job.client_name}: ${formatCurrency(job.invoice_amount_cents)} invoice.`
+        : "Local onboarding prepares the customer and job.",
+      timestamp: job?.created_at ?? eventByType(events, "job_intake")?.created_at ?? null,
+      badge: "SQLite job",
+      icon: Target,
+    },
+    {
+      name: "Hermes Brain",
+      status: hermesFailed(hermes, planningRun)
+        ? "error"
+        : planningRun?.status === "completed"
+          ? "complete"
+          : planningRun
+            ? "current"
+            : "pending",
+      proof: planningRun
+        ? `${hermes?.provider ?? planningRun.provider} / ${hermes?.model ?? planningRun.model}; Hermes plans only.`
+        : "Planning proof appears after the run.",
+      timestamp: planningRun?.completed_at ?? planningRun?.created_at ?? null,
+      badge: hermes?.used_real_hermes ? "real Hermes" : "test or pending",
+      icon: BrainCircuit,
+    },
+    {
+      name: "Stripe Test Invoice",
+      status: stripe?.error ? "error" : stripe?.invoice_id ? "complete" : "pending",
+      proof: stripe?.invoice_id
+        ? `${stripe.customer_id ?? "customer pending"} / ${stripe.invoice_id}`
+        : stripe?.error ?? "Stripe test invoice proof pending.",
+      timestamp: latestWhere(state?.stripe_events ?? [], (event) => Boolean(event.invoice_id))?.created_at ?? null,
+      badge: stripeModeLabel(stripe),
+      icon: CreditCard,
+    },
+    {
+      name: "Payment Status",
+      status: stripe?.error
+        ? "error"
+        : stripe?.paid === true
+          ? "complete"
+          : stripe?.paid === false
+            ? "current"
+            : "pending",
+      proof:
+        stripe?.paid === true
+          ? "Stripe reports paid=true."
+          : stripe?.paid === false
+            ? "Stripe test invoice is open/unpaid; compressed run records local confirmation."
+            : "Payment status pending.",
+      timestamp: latestWhere(state?.stripe_events ?? [], (event) => event.paid !== null)?.created_at ?? null,
+      badge: stripe?.paid === false ? "open/unpaid" : stripe?.paid === true ? "paid" : "pending",
+      icon: ReceiptText,
+    },
+    {
+      name: "Policy Guardrail",
+      status: state?.policy.summary ? "complete" : "pending",
+      proof: state?.policy.summary
+        ? `Cap ${formatCurrency((state.policy.summary.max_job_spend_usd ?? 0) * 100)}, margin floor ${formatPercent(job?.margin_floor_percent ?? state.policy.summary.margin_floor_percent)}.`
+        : "Policy state pending.",
+      timestamp: eventByType(events, "policy_gate")?.created_at ?? null,
+      badge: "local policy",
+      icon: ShieldCheck,
+    },
+    {
+      name: "Spend Decision",
+      status: blockedChecks.length > 0 ? "blocked" : approvedChecks.length > 0 ? "complete" : "pending",
+      proof:
+        checks.length > 0
+          ? `${approvedChecks.length} approved; ${formatOptionalCurrency(money.blockedSpendCents)} blocked unsafe spend.`
+          : "Approved and blocked branches appear after policy checks.",
+      timestamp: checks[checks.length - 1]?.created_at ?? null,
+      badge: "branching",
+      icon: WalletCards,
+    },
+    {
+      name: "Agent Work",
+      status: outputs.length >= 4 ? "complete" : outputs.length > 0 ? "current" : "pending",
+      proof: outputs.length > 0 ? `${outputs.length} agent deliverables recorded.` : "Agent work pending.",
+      timestamp: outputs[outputs.length - 1]?.created_at ?? null,
+      badge: "Finance / Marketing / Research / Ops",
+      icon: Layers3,
+    },
+    {
+      name: "SQLite Audit Ledger",
+      status: auditRows > 0 ? "complete" : "pending",
+      proof: `${auditRows} audit rows across events, ledger, policy, Stripe, calls, agents, and reports.`,
+      timestamp: latestTimestamp([
+        ...(state?.events ?? []),
+        ...(state?.ledger.entries ?? []),
+        ...(state?.policy_checks ?? []),
+        ...(state?.orchestration_calls ?? []),
+      ]),
+      badge: "auditable",
+      icon: Database,
+    },
+    {
+      name: "Profit Report",
+      status: report ? "complete" : "pending",
+      proof: report
+        ? `${formatCurrency(report.gross_profit_cents)} gross profit, ${formatPercent(report.actual_margin_percent)} margin.`
+        : "Profit report pending.",
+      timestamp: report?.created_at ?? null,
+      badge: "final output",
+      icon: FileText,
+    },
+  ];
+
+  if (!busy) {
+    return settledNodes;
+  }
+
+  return settledNodes.map((node, index) => ({
+    ...node,
+    status:
+      index === playbackIndex
+        ? "current"
+        : index < playbackIndex
+          ? node.name === "Spend Decision"
+            ? "blocked"
+            : "complete"
+          : "pending",
+  }));
+}
+
 function buildPipeline(state: DemoState | null): PipelineStage[] {
   const job = state?.job ?? null;
   const planningRun = state?.planning_run ?? null;
@@ -2044,6 +3179,11 @@ function latestWhere<T>(items: T[], predicate: (item: T) => boolean): T | null {
   return null;
 }
 
+function latestTimestamp(items: Array<{ created_at?: string | null }>): string | null {
+  const timestamps = items.map((item) => item.created_at).filter(Boolean) as string[];
+  return timestamps.length > 0 ? timestamps[timestamps.length - 1] : null;
+}
+
 function operatingPlanPhases(plan: PlanningRun["result_json"]): string[] {
   if (!plan || !isRecord(plan.operating_plan)) {
     return [];
@@ -2201,6 +3341,61 @@ function eventStatusClass(status: string): string {
     return "border-sky-200 bg-sky-50 text-sky-800";
   }
   return "border-zinc-200 bg-zinc-50 text-zinc-700";
+}
+
+function readOnboardingComplete(): boolean {
+  try {
+    return window.localStorage.getItem(ONBOARDING_STORAGE_KEY) === "true";
+  } catch {
+    return false;
+  }
+}
+
+function writeOnboardingComplete(value: boolean) {
+  try {
+    if (value) {
+      window.localStorage.setItem(ONBOARDING_STORAGE_KEY, "true");
+    } else {
+      window.localStorage.removeItem(ONBOARDING_STORAGE_KEY);
+    }
+  } catch {
+    // Local storage is optional; SQLite remains the backend source for workflow data.
+  }
+}
+
+function draftFromJob(job: DemoJob): OnboardingDraft {
+  return {
+    clientName: job.client_name,
+    businessType: job.business_type,
+    jobName: job.job_name,
+    jobGoal: job.job_goal,
+    invoiceAmountUsd: String(job.invoice_amount_cents / 100),
+    spendCapUsd: String(job.spend_cap_cents / 100),
+    marginFloorPercent: String(job.margin_floor_percent),
+    approvedVendors: HARBOR_ONBOARDING_DRAFT.approvedVendors,
+    blockedVendors: HARBOR_ONBOARDING_DRAFT.blockedVendors,
+  };
+}
+
+function onboardingRequestFromDraft(draft: OnboardingDraft): OnboardingRequest {
+  return {
+    client_name: draft.clientName,
+    business_type: draft.businessType,
+    job_name: draft.jobName,
+    job_goal: draft.jobGoal,
+    invoice_amount_usd: Number(draft.invoiceAmountUsd),
+    spend_cap_usd: Number(draft.spendCapUsd),
+    margin_floor_percent: Number(draft.marginFloorPercent),
+    approved_vendors: splitVendors(draft.approvedVendors),
+    blocked_vendors: splitVendors(draft.blockedVendors),
+  };
+}
+
+function splitVendors(value: string): string[] {
+  return value
+    .split(",")
+    .map((item) => item.trim())
+    .filter(Boolean);
 }
 
 function errorMessage(caught: unknown): string {

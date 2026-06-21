@@ -16,7 +16,11 @@ The Harbor Fleet Services fleet brake inspection campaign is the sample run, not
 
 ## Implemented Today
 
-- Local FastAPI backend and Vite React dashboard.
+- Local FastAPI backend and Vite React product shell.
+- Local prototype auth gate for the operator console.
+- Local/sample customer and workflow onboarding with Harbor Fleet Services defaults.
+- Product navigation for Workflow, Customers, Runs, Audit, and Settings / Integrations.
+- Moving workflow graph for the autonomous run, with approved/proceed and blocked spend branches.
 - Real isolated Hermes Agent planning through a ScaleX `scalex-operator` skill.
 - Orchestration audit trail for the proposed and executed ScaleX tool sequence.
 - SQLite audit ledger for jobs, events, Stripe records, ledger entries, policy checks, agent outputs, and reports.
@@ -24,7 +28,12 @@ The Harbor Fleet Services fleet brake inspection campaign is the sample run, not
 - Real Stripe test-mode customer and finalized invoice records through orchestration for Goal 7, with `invoice_status` and `paid` displayed honestly.
 - Stripe test-double payment records for tests and diagnostics.
 - Deterministic Finance, Marketing, Research, and Ops outputs for reliability.
-- Goal 7.6 command-center presentation with the first-viewport live workflow claim, Profit Protected outcome panel, Live Stack Proof, and staged execution replay.
+- Goal 7.7 product-shell presentation with the first-viewport live workflow claim, Profit Protected outcome panel, Live Stack Proof, moving workflow map, and staged execution replay.
+
+The intended recording flow is product usage, not a static card walkthrough: open ScaleX,
+log in, onboard/select Harbor Fleet Services, review workflow and money rules, start the
+run, watch the graph move, inspect Hermes and Stripe proof, review blocked spend, and
+finish with the profit report plus audit trail.
 
 ## Target Integrations
 
@@ -34,5 +43,7 @@ The Harbor Fleet Services fleet brake inspection campaign is the sample run, not
 ## Boundaries
 
 Live-money payments, real client data, production Hermes, production Prometheus,
-homelab/OpenClaw, Recall memory, and production SaaS features are out of scope. Future
-live-money payments require Verified Live Mode.
+homelab/OpenClaw, Recall memory, production auth, hosted secret exposure, and production
+SaaS features are out of scope. Local/sample onboarding demonstrates the product path;
+production multi-client onboarding is future work. Future live-money payments require
+Verified Live Mode.

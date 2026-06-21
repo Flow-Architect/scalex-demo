@@ -4,6 +4,8 @@ Target architecture:
 
 ```text
 ScaleX UI
+  -> local prototype auth gate
+  -> local/sample workflow onboarding
   -> FastAPI backend
   -> isolated Hermes brain/orchestration
   -> real Stripe test mode / policy layer / agents
@@ -14,15 +16,25 @@ ScaleX UI
 ## Implemented Today
 
 - Vite React TypeScript frontend.
+- Product shell with login, onboarding, workflow, customers, runs, audit, and integrations views.
 - FastAPI backend.
 - SQLite audit ledger at `data/scalex.db`.
+- Local prototype auth using an environment-configured username/password and signed HTTP-only session cookie.
+- Local/sample onboarding state persisted through SQLite `jobs` and `onboarding_configs`.
 - Real isolated Hermes Agent planning through the repo-owned `scalex-operator` skill.
 - Hermes CLI invocation with `--skills scalex-operator`, `--toolsets skills`, provider `openai-codex`, and model `gpt-5.5`.
 - SQLite `planning_runs` and `orchestration_calls` audit tables.
 - Real Stripe test-mode customer and finalized invoice records through orchestration for Goal 7.
 - Local policy engine for spend governance until Goal 8 wires a real safety adapter if safely available.
 - Deterministic agent outputs.
-- One-click Harbor Fleet Services sample workflow with Goal 7.6 command-center proof, Profit Protected outcome, Live Stack Proof, and staged execution replay.
+- Harbor Fleet Services sample workflow with Goal 7.7 product-shell proof, Profit Protected outcome, Live Stack Proof, moving workflow map, and staged execution replay.
+
+## Auth and Onboarding
+
+Goal 7.7 adds local prototype auth and local/sample workflow onboarding. Auth is not
+production enterprise identity. Onboarding is not full SaaS multi-tenancy. The product
+walkthrough uses these surfaces to behave like a real operator console while keeping the
+scope to one local workflow and synthetic/sample data.
 
 ## Hermes Integration
 

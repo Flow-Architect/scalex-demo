@@ -38,6 +38,10 @@ class Settings:
     scalex_live_max_amount_cents: int = 0
     scalex_live_allowed_customer_emails: str = ""
     scalex_live_confirmation_phrase: str = "LIVE_MONEY_APPROVED"
+    scalex_auth_enabled: bool = False
+    scalex_demo_username: str = ""
+    scalex_demo_password: str = ""
+    scalex_session_secret: str = ""
 
 
 def get_settings() -> Settings:
@@ -81,6 +85,10 @@ def get_settings() -> Settings:
             "SCALEX_LIVE_CONFIRMATION_PHRASE",
             "LIVE_MONEY_APPROVED",
         ),
+        scalex_auth_enabled=_bool_env("SCALEX_AUTH_ENABLED", False),
+        scalex_demo_username=os.getenv("SCALEX_DEMO_USERNAME", ""),
+        scalex_demo_password=os.getenv("SCALEX_DEMO_PASSWORD", ""),
+        scalex_session_secret=os.getenv("SCALEX_SESSION_SECRET", ""),
     )
 
 

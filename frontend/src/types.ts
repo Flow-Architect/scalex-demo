@@ -5,6 +5,30 @@ export interface HealthResponse {
   database_exists: boolean;
 }
 
+export interface AuthStatus {
+  auth_enabled: boolean;
+  authenticated: boolean;
+  username: string | null;
+  prototype_auth: string;
+}
+
+export interface LoginRequest {
+  username: string;
+  password: string;
+}
+
+export interface OnboardingRequest {
+  client_name: string;
+  business_type: string;
+  job_name: string;
+  job_goal: string;
+  invoice_amount_usd: number;
+  spend_cap_usd: number;
+  margin_floor_percent: number;
+  approved_vendors: string[];
+  blocked_vendors: string[];
+}
+
 export interface DemoJob {
   id: string;
   client_name: string;
@@ -204,6 +228,22 @@ export interface ReportPlaceholder {
   recommendation: string;
 }
 
+export interface OnboardingConfig {
+  id: string;
+  config_json: {
+    clientName?: string;
+    businessType?: string;
+    jobName?: string;
+    jobGoal?: string;
+    invoiceAmountUsd?: number;
+    spendCapUsd?: number;
+    marginFloorPercent?: number;
+    approvedVendors?: string[];
+    blockedVendors?: string[];
+  };
+  created_at: string;
+}
+
 export interface DemoState {
   mode: string;
   database: {
@@ -213,6 +253,7 @@ export interface DemoState {
   };
   job: DemoJob | null;
   jobs: DemoJob[];
+  onboarding: OnboardingConfig | null;
   ledger: {
     entries: LedgerEntry[];
     totals: LedgerTotals;

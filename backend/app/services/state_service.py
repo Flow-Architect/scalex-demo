@@ -21,6 +21,7 @@ def build_demo_state(connection: sqlite3.Connection) -> dict[str, Any]:
     ]
     latest_report = _enrich_report(repository.get_latest_report(connection, job_id), totals)
     seed_config = load_seed_config()
+    onboarding_config = repository.get_onboarding_config(connection)
     events = repository.list_events(connection, job_id)
     planning_runs = [
         _decode_planning_run(run)
@@ -46,6 +47,7 @@ def build_demo_state(connection: sqlite3.Connection) -> dict[str, Any]:
         },
         "job": job,
         "jobs": jobs,
+        "onboarding": onboarding_config,
         "ledger": {
             "entries": ledger_entries,
             "totals": totals,

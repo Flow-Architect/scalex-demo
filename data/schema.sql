@@ -14,6 +14,12 @@ CREATE TABLE IF NOT EXISTS jobs (
   updated_at TEXT NOT NULL
 );
 
+CREATE TABLE IF NOT EXISTS onboarding_configs (
+  id TEXT PRIMARY KEY,
+  config_json TEXT NOT NULL,
+  created_at TEXT NOT NULL
+);
+
 CREATE TABLE IF NOT EXISTS events (
   id TEXT PRIMARY KEY,
   job_id TEXT NOT NULL,

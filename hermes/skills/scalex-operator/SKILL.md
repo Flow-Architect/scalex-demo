@@ -1,6 +1,6 @@
 ---
 name: scalex-operator
-description: ScaleX operator skill for planning the Harbor Fleet Services sandbox workflow with strict JSON output and ScaleX-owned execution boundaries.
+description: ScaleX operator skill for planning the Harbor Fleet Services local sample workflow with strict JSON output and ScaleX-owned execution boundaries.
 version: 1.0.0
 author: ScaleX
 license: MIT
@@ -14,7 +14,7 @@ metadata:
 
 ## When to Use
 
-Use this skill when ScaleX asks Hermes to plan or coordinate the Harbor Fleet Services sandbox product run.
+Use this skill when ScaleX asks Hermes to plan or coordinate the Harbor Fleet Services local sample product run.
 
 ## Operating Boundary
 

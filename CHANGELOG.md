@@ -10,6 +10,97 @@ Use:
 
 ---
 
+## 2026-06-21 - Final Goal 7.7 verification and product-doc alignment
+
+Completed:
+- Rechecked the implemented Goal 7.7 product shell before commit.
+- Audited and aligned AGENTS, ROADMAP, DECISIONS, STATUS, TASKS, CHANGELOG, START_HERE, README, architecture, product spec, demo script, submission writeup, `.env.example`, Hermes skill docs, and agent notes for product-stage language.
+- Framed ScaleX as a working product prototype whose recording flow is browser product usage: login, onboard/select Harbor, review rules, start the autonomous run, watch the workflow map, inspect Hermes and Stripe proof, show the blocked spend branch, and review profit/audit output.
+- Preserved the hosted judge demo vs local full-proof run distinction: hosted mode must not expose secrets, while local full-proof mode can use ignored `.env` values for real isolated Hermes and Stripe test mode.
+- Kept local prototype auth and local/sample onboarding boundaries clear; did not claim production auth or full multi-tenant SaaS.
+- Kept NemoClaw as Goal 8 next and did not claim a real NemoClaw integration.
+- Did not add live-money Stripe support, real client data, secrets, or commits.
+- Cleaned stale historical wording from the first scaffold entry so it refers to synthetic sample seed data.
+
+Verified:
+- `./scripts/test.sh` passed with 42 backend tests and a successful Vite production build.
+- `git diff --check` passed.
+- Value-shaped tracked-file secret scan returned no matches.
+- No `CODEX_GOALS.md` or `GOAL_LOG.md` file exists.
+- No `.env` file is staged.
+- With `SCALEX_AUTH_ENABLED=true`, unauthenticated protected demo endpoints returned 401, wrong login returned 401, configured local login returned 200, authenticated state survived normal API navigation, logout returned 200, and protected state returned 401 after logout.
+- Demo credentials are environment-backed in backend auth/config code, not exposed as hardcoded frontend values.
+- `data/schema.sql` has no password storage table or column.
+- Harbor Fleet Services onboarding works.
+- Synthetic local onboarding persisted into SQLite and drove the next run with the selected customer/job/economic inputs.
+- Harbor Fleet Services was restored and the protected full run preserved real Hermes proof, real Stripe test proof, open/unpaid Stripe honesty, policy proof, SQLite audit rows, and locked sample economics.
+- Product shell source contains real Dashboard / Workflow, Customers, Runs, Audit, and Settings / Integrations views rather than placeholder-only tabs.
+- Workflow map source contains the requested nodes, real-state settled statuses, approved and blocked branches, Stripe open/unpaid copy, Hermes planner/orchestrator copy, and policy enforcement copy.
+- Final isolated headless Chrome rerender was blocked by a local crashpad sandbox error before page load; final recording should still be checked in a normal browser.
+
+Suggested commit message:
+Finalize Goal 7.7 product shell verification
+
+Next:
+- Goal 8 - NemoClaw / policy safety integration and presentation.
+
+---
+
+## 2026-06-21 - Goal 7.7: Product shell, auth, onboarding, and workflow map
+
+Completed:
+- Added local prototype auth with `POST /api/auth/login`, `GET /api/auth/me`, `POST /api/auth/logout`, and an HMAC-signed HTTP-only local session cookie.
+- Protected `/api/demo/*` endpoints when `SCALEX_AUTH_ENABLED=true`.
+- Added `.env.example` placeholders for `SCALEX_AUTH_ENABLED`, `SCALEX_DEMO_USERNAME`, `SCALEX_DEMO_PASSWORD`, and `SCALEX_SESSION_SECRET`; no real credentials were added.
+- Added local/sample workflow onboarding with Harbor Fleet Services defaults and synthetic local customer/job support.
+- Added `POST /api/demo/onboarding` and SQLite `onboarding_configs` persistence so the active local seed config survives the demo runner reset.
+- Added app shell navigation for Dashboard / Workflow, Customers, Runs, Audit, and Settings / Integrations.
+- Added a moving Autonomous Workflow Map with Customer Intake, Hermes Brain, Stripe Test Invoice, Payment Status, Policy Guardrail, Spend Decision, Agent Work, SQLite Audit Ledger, and Profit Report nodes.
+- Added visible approved/proceed and blocked spend branches in the workflow map.
+- Preserved real Hermes proof, real Stripe test proof, Stripe open/unpaid honesty, local policy proof, SQLite audit proof, and locked sample economics.
+- Kept NemoClaw labeled as Goal 8 next and did not claim a real NemoClaw integration.
+- Did not add live-money Stripe support, production auth, real client data, or full multi-tenant SaaS.
+- Updated README, demo script, submission writeup, STATUS, and TASKS for the Goal 7.7 flow and boundaries.
+
+Verified:
+- `./scripts/test.sh` passed with 42 backend tests and a successful Vite production build.
+- `git diff --check` passed.
+- Value-shaped secret scan for live Stripe keys, Stripe webhook secrets, and inline OpenAI project keys returned no matches.
+- No `CODEX_GOALS.md` or `GOAL_LOG.md` file exists.
+- No `.env` file is staged.
+- `./scripts/dev.sh` started FastAPI at `http://127.0.0.1:8787` and Vite at `http://127.0.0.1:5174` with test-only auth overrides.
+- Unauthenticated `GET /api/demo/state` returned 401 with "Login required for the local ScaleX console."
+- `POST /api/auth/login` returned authenticated local-cookie status with test-only local credentials.
+- `POST /api/demo/onboarding` returned 200 and persisted the Harbor Fleet Services local workflow in SQLite.
+- Headless Chrome rendered the unauthenticated first screen as the Secure Operator Console login gate.
+- Running the protected demo endpoint with the ignored local `.env` loaded completed the real product path with:
+  - `status=completed`
+  - `used_real_hermes=true`
+  - `provider=openai-codex`
+  - `model=gpt-5.5`
+  - `skill=scalex-operator`
+  - `toolsets_used=["skills"]`
+  - `used_real_stripe=true`
+  - `stripe_mode=stripe_test`
+  - `livemode=false`
+  - real Stripe customer ID returned with `cus_` prefix
+  - real Stripe invoice ID returned with `in_` prefix
+  - hosted invoice URL on `invoice.stripe.com`
+  - `invoice_status=open`
+  - `paid=false`
+  - 17 orchestration calls
+  - 45 audit rows
+  - `gross_profit_cents=101300`
+  - `actual_margin_percent=84.4`
+
+Suggested commit message:
+Add ScaleX product shell auth and onboarding
+
+Next:
+- Goal 8 - NemoClaw / policy safety integration and presentation.
+
+---
+
 ## 2026-06-21 - Documentation audit after Goal 7.6
 
 Completed:
@@ -153,7 +244,7 @@ Completed:
 - Added backend FastAPI scaffold.
 - Added frontend Vite React TypeScript scaffold.
 - Added data/schema.sql.
-- Added fake Harbor Auto Care seed data.
+- Added synthetic Harbor Auto Care sample seed data.
 - Added policies/scalex-policy.json.
 - Added agent role placeholders.
 - Added docs placeholders.

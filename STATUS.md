@@ -5,9 +5,9 @@ Last updated: 2026-06-21
 ## Verified current state
 
 - Project folder exists at /home/ascabrya/dev/scalex-demo.
-- Latest committed baseline before this goal: `ad88ac1 Upgrade ScaleX control room demo UI`.
-- Last completed implementation goal: Goal 7.6 - judge-ready command-center first viewport, replay, and live product proof polish before Goal 8.
-- Last completed documentation/audit goal in this working tree: post-Goal 7.6 markdown alignment before commit.
+- Latest committed baseline before this goal: `12e7705 Polish ScaleX command center and align docs`.
+- Last completed implementation goal: Goal 7.7 - product shell, local auth gate, onboarding flow, and live workflow visualization before Goal 8.
+- Last completed documentation/audit goal in this working tree: final Goal 7.7 functional verification and product-doc alignment.
 - ScaleX is a live working product-style prototype for profit-aware agent operations in service workflows.
 - Product mode is real-integration-first:
   - real isolated Hermes Agent for planning/orchestration proposals
@@ -16,6 +16,7 @@ Last updated: 2026-06-21
   - local policy engine until Goal 8 wires a real NemoClaw/NemoClaw-style safety adapter if safely available
 - Mock/fallback/test-double paths are for automated tests, CI, offline development, or explicitly labeled diagnostics only.
 - Product-mode real integration failures surface visible error states instead of silently falling back.
+- The frontend now opens as a product shell with local prototype auth, local/sample onboarding, navigation, workflow visualization, run history, audit, and integrations views.
 
 ## Goal 6 state
 
@@ -162,6 +163,116 @@ Last updated: 2026-06-21
 - Added a visible run-completed moment after successful demo completion.
 - Preserved existing lower proof sections for Hermes proof, Stripe proof, hosted invoice URL, invoice status, paid state, policy decisions, orchestration feed, agent outputs, SQLite ledger, and profit report.
 - No backend business logic was changed.
+
+## Goal 7.7 state
+
+- Goal 7.7 is complete for product-shell UX before Goal 8.
+- Added local prototype auth:
+  - `POST /api/auth/login`
+  - `GET /api/auth/me`
+  - `POST /api/auth/logout`
+  - HMAC-signed HTTP-only local session cookie
+  - `/api/demo/*` endpoints protected when `SCALEX_AUTH_ENABLED=true`
+  - tests keep auth disabled or test-configured and do not require real credentials
+- `.env.example` now includes placeholders only:
+  - `SCALEX_AUTH_ENABLED=true`
+  - `SCALEX_DEMO_USERNAME=`
+  - `SCALEX_DEMO_PASSWORD=`
+  - `SCALEX_SESSION_SECRET=`
+- The login gate is local prototype auth, not production enterprise auth.
+- Added local/sample workflow onboarding:
+  - customer/business name
+  - business type
+  - job/campaign name
+  - job goal
+  - invoice amount
+  - spend cap
+  - margin floor
+  - optional approved vendors
+  - optional blocked vendors
+- Onboarding can load the Harbor Fleet Services sample or prepare a synthetic local sample workflow.
+- Onboarding state is persisted in SQLite through `onboarding_configs` and the active job row; it is not full multi-tenant SaaS.
+- `POST /api/demo/onboarding` seeds the active local job without running Stripe or Hermes.
+- `POST /api/demo/run` preserves the active onboarded seed config across the reset that starts a compressed run.
+- Added a product app shell with left navigation:
+  - Dashboard / Workflow
+  - Customers
+  - Runs
+  - Audit
+  - Settings / Integrations
+- Added a moving Autonomous Workflow Map for:
+  - Customer Intake
+  - Hermes Brain
+  - Stripe Test Invoice
+  - Payment Status
+  - Policy Guardrail
+  - Spend Decision
+  - Agent Work
+  - SQLite Audit Ledger
+  - Profit Report
+- The workflow map animates while `POST /api/demo/run` is in flight and settles on API-backed state after completion.
+- Approved spend is shown as a proceed branch; blocked unsafe spend is shown as a blocked branch.
+- Existing proof remains visible:
+  - `used_real_hermes`
+  - provider/model
+  - `scalex-operator` skill and `skills` toolset
+  - `used_real_stripe`
+  - `stripe_mode`
+  - `livemode=false`
+  - customer ID
+  - invoice ID
+  - hosted invoice URL
+  - `invoice_status=open`
+  - `paid=false`
+  - SQLite audit rows
+  - local policy decisions
+  - final economics
+- NemoClaw remains labeled as Goal 8 next and not claimed as real.
+- No live-money Stripe support was added.
+
+## Final Goal 7.7 verification pass
+
+- `./scripts/test.sh` passed with 42 backend tests and a successful Vite production build.
+- `git diff --check` passed.
+- Value-shaped tracked-file secret scan returned no matches.
+- No `CODEX_GOALS.md` or `GOAL_LOG.md` file exists.
+- No `.env` file is staged.
+- Auth was rechecked with `SCALEX_AUTH_ENABLED=true`:
+  - unauthenticated protected demo endpoints returned 401
+  - wrong login returned 401
+  - configured local login returned 200
+  - `/api/auth/me` and protected demo state stayed authenticated while the signed local session cookie was valid
+  - logout returned 200 and protected demo state returned 401 afterward
+- Demo credential values are read from environment variables by backend auth/config code.
+- No demo password value is hardcoded in frontend source.
+- No password storage table or column exists in `data/schema.sql`; passwords are not stored in SQLite.
+- Protected local prototype endpoints include demo state, run, reset, seed, onboarding, mark-paid, spend-check, and state-changing job endpoints.
+- Onboarding was rechecked with both:
+  - Harbor Fleet Services sample workflow
+  - a synthetic local Sample HVAC Co workflow
+- The synthetic onboarding flow persisted into SQLite, and the next protected run used that selected synthetic customer/job, invoice amount, spend cap, and margin floor.
+- Harbor Fleet Services was restored afterward and completed with the locked sample economics.
+- Product shell source was audited for real tabs/views: Dashboard / Workflow, Customers, Runs, Audit, and Settings / Integrations.
+- The Autonomous Workflow Map source was audited for connected requested nodes, approved/proceed branch, blocked branch, real-state settled statuses, Stripe open/unpaid honesty, Hermes-as-planner copy, and policy-as-enforcement copy.
+- Final isolated headless Chrome rerender was blocked by a local crashpad sandbox error before page load; normal browser recording still needs a human browser check before final submission capture.
+- The final API-backed Harbor run preserved:
+  - `used_real_hermes=true`
+  - `provider=openai-codex`
+  - `model=gpt-5.5`
+  - `skill=scalex-operator`
+  - `used_real_stripe=true`
+  - `stripe_mode=stripe_test`
+  - `livemode=false`
+  - real Stripe customer ID with `cus_` prefix
+  - real Stripe invoice ID with `in_` prefix
+  - hosted invoice URL present
+  - `invoice_status=open`
+  - `paid=false`
+  - $1,200 revenue
+  - $187 approved spend
+  - $750 blocked unsafe spend
+  - $1,013 gross profit
+  - 84.4% margin
 
 ## Post-Goal 7.6 documentation audit state
 
@@ -320,10 +431,43 @@ The locked sample workflow remains unchanged:
 - `git status --short` showed intended working-tree edits only.
 - No network calls, Stripe API calls, Hermes model calls, backend logic changes, or database writes were performed for this audit.
 
+## Verified on 2026-06-21 for Goal 7.7
+
+- `./scripts/test.sh` passed with 42 backend tests and a successful Vite production build.
+- `git diff --check` passed.
+- Value-shaped secret scan for live Stripe keys, Stripe webhook secrets, and inline OpenAI project keys returned no matches.
+- No `CODEX_GOALS.md` or `GOAL_LOG.md` file exists.
+- No `.env` file is staged.
+- `./scripts/dev.sh` started FastAPI at `http://127.0.0.1:8787` and Vite at `http://127.0.0.1:5174` with test-only auth overrides.
+- Unauthenticated `GET /api/demo/state` returned 401 with "Login required for the local ScaleX console."
+- `POST /api/auth/login` returned authenticated local-cookie status with test-only local credentials.
+- `POST /api/demo/onboarding` returned 200 and persisted the Harbor Fleet Services local workflow in SQLite.
+- Headless Chrome rendered the unauthenticated first screen as the Secure Operator Console login gate.
+- Running the protected demo endpoint with the ignored local `.env` loaded completed the real product path with:
+  - `status=completed`
+  - `used_real_hermes=true`
+  - `provider=openai-codex`
+  - `model=gpt-5.5`
+  - `skill=scalex-operator`
+  - `toolsets_used=["skills"]`
+  - `used_real_stripe=true`
+  - `stripe_mode=stripe_test`
+  - `livemode=false`
+  - real Stripe customer ID returned with `cus_` prefix
+  - real Stripe invoice ID returned with `in_` prefix
+  - hosted invoice URL on `invoice.stripe.com`
+  - `invoice_status=open`
+  - `paid=false`
+  - 17 orchestration calls
+  - 45 audit rows
+  - `gross_profit_cents=101300`
+  - `actual_margin_percent=84.4`
+
 ## Not yet verified
 
 - Fresh-clone setup on a clean machine.
 - Manual recorded browser walkthrough.
+- Normal-browser post-login walkthrough after the final docs pass; headless Chrome rerender is blocked locally by crashpad sandbox permissions.
 - Screenshot/video capture quality for final submission.
 
 ## Not yet built

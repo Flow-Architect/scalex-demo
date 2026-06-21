@@ -1,12 +1,21 @@
 from contextlib import closing
 
-from fastapi import FastAPI, HTTPException
+from fastapi import Depends, FastAPI, HTTPException, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
 
 from .demo_runner import run_demo
 from .db import database_path, get_connection, initialize_database, reset_database
 from . import repository
-from .schemas import DemoActionResponse, DemoStateResponse, HealthResponse, SpendCheckRequest
+from .schemas import (
+    AuthLoginRequest,
+    AuthStatusResponse,
+    DemoActionResponse,
+    DemoStateResponse,
+    HealthResponse,
+    OnboardingRequest,
+    SpendCheckRequest,
+)
+from .services.auth_service import auth_status, login, logout, require_local_session
 from .services.ledger_service import usd_to_cents
 from .services.payment_service import mark_job_paid
 from .services.policy_service import apply_spend_request
@@ -27,7 +36,7 @@ app.add_middleware(
         "http://localhost:5174",
         "http://127.0.0.1:5174",
     ],
-    allow_credentials=False,
+    allow_credentials=True,
     allow_methods=["GET", "POST", "OPTIONS"],
     allow_headers=["*"],
 )
@@ -45,7 +54,26 @@ def health() -> dict[str, str | bool]:
     }
 
 
-@app.post("/api/demo/reset", response_model=DemoActionResponse)
+@app.get("/api/auth/me", response_model=AuthStatusResponse)
+def auth_me(request: Request) -> dict:
+    return auth_status(request)
+
+
+@app.post("/api/auth/login", response_model=AuthStatusResponse)
+def auth_login(request: AuthLoginRequest, response: Response) -> dict:
+    return login(response=response, username=request.username, password=request.password)
+
+
+@app.post("/api/auth/logout", response_model=AuthStatusResponse)
+def auth_logout(response: Response) -> dict:
+    return logout(response)
+
+
+@app.post(
+    "/api/demo/reset",
+    response_model=DemoActionResponse,
+    dependencies=[Depends(require_local_session)],
+)
 def reset_demo() -> dict:
     try:
         reset_database()
@@ -54,7 +82,11 @@ def reset_demo() -> dict:
     return {"status": "reset", "state": _current_state()}
 
 
-@app.post("/api/demo/seed", response_model=DemoActionResponse)
+@app.post(
+    "/api/demo/seed",
+    response_model=DemoActionResponse,
+    dependencies=[Depends(require_local_session)],
+)
 def seed_demo() -> dict:
     initialize_database()
     with closing(get_connection()) as connection:
@@ -62,7 +94,43 @@ def seed_demo() -> dict:
     return {"status": "seeded", "state": _current_state()}
 
 
-@app.post("/api/demo/run", response_model=DemoActionResponse)
+@app.post(
+    "/api/demo/onboarding",
+    response_model=DemoActionResponse,
+    dependencies=[Depends(require_local_session)],
+)
+def onboard_demo_customer(request: OnboardingRequest) -> dict:
+    try:
+        seed_config = _onboarding_seed_config(request)
+        reset_database()
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+    with closing(get_connection()) as connection:
+        job = seed_demo_database(connection, seed_config)
+        repository.upsert_onboarding_config(connection, seed_config)
+        repository.create_event(
+            connection,
+            job_id=job["id"],
+            type="customer_onboarding",
+            title="Local workflow onboarding saved",
+            detail=(
+                f"{job['client_name']} prepared for {job['job_name']} with "
+                f"${job['invoice_amount_cents'] / 100:,.0f} invoice, "
+                f"${job['spend_cap_cents'] / 100:,.0f} spend cap, and "
+                f"{job['margin_floor_percent']}% margin floor."
+            ),
+            status="seeded",
+        )
+        connection.commit()
+    return {"status": "onboarded", "state": _current_state()}
+
+
+@app.post(
+    "/api/demo/run",
+    response_model=DemoActionResponse,
+    dependencies=[Depends(require_local_session)],
+)
 def run_demo_endpoint() -> dict:
     try:
         return run_demo()
@@ -70,7 +138,11 @@ def run_demo_endpoint() -> dict:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
 
 
-@app.post("/api/demo/mark-paid", response_model=DemoActionResponse)
+@app.post(
+    "/api/demo/mark-paid",
+    response_model=DemoActionResponse,
+    dependencies=[Depends(require_local_session)],
+)
 def mark_demo_paid() -> dict:
     initialize_database()
     with closing(get_connection()) as connection:
@@ -81,7 +153,11 @@ def mark_demo_paid() -> dict:
     return {"status": "paid", "state": _current_state()}
 
 
-@app.post("/api/demo/spend-check", response_model=DemoActionResponse)
+@app.post(
+    "/api/demo/spend-check",
+    response_model=DemoActionResponse,
+    dependencies=[Depends(require_local_session)],
+)
 def demo_spend_check(request: SpendCheckRequest) -> dict:
     requested_amount_cents = _spend_request_amount_cents(request)
 
@@ -101,7 +177,11 @@ def demo_spend_check(request: SpendCheckRequest) -> dict:
     return {"status": status, "decision": result["decision"], "state": _current_state()}
 
 
-@app.get("/api/demo/state", response_model=DemoStateResponse)
+@app.get(
+    "/api/demo/state",
+    response_model=DemoStateResponse,
+    dependencies=[Depends(require_local_session)],
+)
 def demo_state() -> dict:
     initialize_database()
     return _current_state()
@@ -113,6 +193,71 @@ def _current_state() -> dict:
     state["database"]["path"] = str(database_path())
     state["database"]["exists"] = database_path().exists()
     return state
+
+
+def _onboarding_seed_config(request: OnboardingRequest) -> dict:
+    client_name = _clean_text(request.client_name, "customer/business name", max_length=120)
+    business_type = _clean_text(request.business_type, "business type", max_length=120)
+    job_name = _clean_text(request.job_name, "job/campaign name", max_length=160)
+    job_goal = _clean_text(request.job_goal, "job goal", max_length=1200)
+    if request.invoice_amount_usd <= 0:
+        raise ValueError("Invoice amount must be greater than zero.")
+    if request.spend_cap_usd <= 0:
+        raise ValueError("Spend cap must be greater than zero.")
+    if request.margin_floor_percent < 0 or request.margin_floor_percent > 95:
+        raise ValueError("Margin floor must be between 0 and 95.")
+
+    approved_vendors = _vendor_list(request.approved_vendors)
+    blocked_vendors = _vendor_list(request.blocked_vendors)
+    approved_spend_vendors = approved_vendors[:2] or ["Local Ads API", "Design Asset Pack"]
+    blocked_spend_vendor = blocked_vendors[0] if blocked_vendors else "Premium Automation Suite"
+
+    return {
+        "clientName": client_name,
+        "businessType": business_type,
+        "jobName": job_name,
+        "jobGoal": job_goal,
+        "invoiceAmountUsd": request.invoice_amount_usd,
+        "spendCapUsd": request.spend_cap_usd,
+        "marginFloorPercent": request.margin_floor_percent,
+        "approvedVendors": approved_vendors,
+        "blockedVendors": blocked_vendors,
+        "approvedSpendRequests": [
+            {
+                "vendor": approved_spend_vendors[0],
+                "amountUsd": 89,
+                "purpose": "Local sample approved vendor spend.",
+            },
+            {
+                "vendor": approved_spend_vendors[1] if len(approved_spend_vendors) > 1 else "Design Asset Pack",
+                "amountUsd": 98,
+                "purpose": "Local sample approved creative spend.",
+            },
+        ],
+        "blockedSpendRequests": [
+            {
+                "vendor": blocked_spend_vendor,
+                "amountUsd": 750,
+                "purpose": "Local sample unsafe spend request.",
+            }
+        ],
+    }
+
+
+def _clean_text(value: str, field_name: str, *, max_length: int) -> str:
+    cleaned = " ".join(value.strip().split())
+    if not cleaned:
+        raise ValueError(f"{field_name} is required.")
+    return cleaned[:max_length]
+
+
+def _vendor_list(values: list[str]) -> list[str]:
+    cleaned: list[str] = []
+    for value in values:
+        vendor = " ".join(value.strip().split())
+        if vendor and vendor not in cleaned:
+            cleaned.append(vendor[:120])
+    return cleaned[:12]
 
 
 def _spend_request_amount_cents(request: SpendCheckRequest) -> int:

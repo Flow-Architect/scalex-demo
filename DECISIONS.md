@@ -17,6 +17,10 @@
 - Main goal: live working product-style prototype with real integrations in the appropriate mode.
 - Product mode uses real integrations first: isolated Hermes Agent, Stripe test mode for Goal 7,
   real policy safety integration when safe, and SQLite audit records.
+- Goal 7.7 product shell is the current walkthrough surface: local prototype auth, local/sample
+  onboarding, workflow map, product navigation, proof panels, run history, audit, and integrations views.
+- Goal 7.7 auth is local prototype auth, not production enterprise identity.
+- Goal 7.7 onboarding is local/sample workflow onboarding, not production multi-client SaaS.
 - Mock/fallback/test-double paths are for automated tests, CI, local offline development, or
   explicitly labeled diagnostics only.
 - Real integration failures surface visible error states; product mode must not silently fall back
@@ -57,3 +61,5 @@
 - NemoClaw or a NemoClaw-style policy safety adapter is the Goal 8 spend-governance target.
 - The local policy engine remains deterministic safety/test support until Goal 8, but is not the final product target if a real safety adapter is safely available.
 - No secrets are committed.
+- Hosted judge demo mode must not expose secrets to the browser.
+- Local full-proof mode may use ignored `.env` values for real isolated Hermes and Stripe test mode.

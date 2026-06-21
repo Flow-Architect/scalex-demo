@@ -27,11 +27,36 @@ class SpendCheckRequest(BaseModel):
     human_approved: bool = False
 
 
+class AuthLoginRequest(BaseModel):
+    username: str
+    password: str
+
+
+class AuthStatusResponse(BaseModel):
+    auth_enabled: bool
+    authenticated: bool
+    username: str | None = None
+    prototype_auth: str
+
+
+class OnboardingRequest(BaseModel):
+    client_name: str
+    business_type: str
+    job_name: str
+    job_goal: str
+    invoice_amount_usd: float
+    spend_cap_usd: float
+    margin_floor_percent: float
+    approved_vendors: list[str] = []
+    blocked_vendors: list[str] = []
+
+
 class DemoStateResponse(BaseModel):
     mode: str
     database: dict[str, Any]
     job: dict[str, Any] | None
     jobs: list[dict[str, Any]]
+    onboarding: dict[str, Any] | None
     ledger: dict[str, Any]
     policy: dict[str, Any]
     events: list[dict[str, Any]]

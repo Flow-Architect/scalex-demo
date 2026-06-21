@@ -85,6 +85,43 @@ def list_jobs(connection: sqlite3.Connection) -> list[dict]:
     return rows_to_dicts(rows)
 
 
+def upsert_onboarding_config(
+    connection: sqlite3.Connection,
+    seed_config: dict,
+    config_id: str = "onboarding_active",
+) -> dict:
+    created_at = utc_now()
+    connection.execute(
+        """
+        INSERT INTO onboarding_configs (id, config_json, created_at)
+        VALUES (?, ?, ?)
+        ON CONFLICT(id) DO UPDATE SET
+          config_json = excluded.config_json,
+          created_at = excluded.created_at
+        """,
+        (config_id, _json_text(seed_config), created_at),
+    )
+    return get_onboarding_config(connection, config_id)
+
+
+def get_onboarding_config(
+    connection: sqlite3.Connection,
+    config_id: str = "onboarding_active",
+) -> dict | None:
+    row = connection.execute(
+        "SELECT * FROM onboarding_configs WHERE id = ?",
+        (config_id,),
+    ).fetchone()
+    config = row_to_dict(row)
+    if config is None:
+        return None
+    try:
+        config["config_json"] = json.loads(config["config_json"])
+    except (TypeError, json.JSONDecodeError):
+        config["config_json"] = {}
+    return config
+
+
 def create_event(
     connection: sqlite3.Connection,
     *,

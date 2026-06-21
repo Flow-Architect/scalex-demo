@@ -12,13 +12,13 @@ import time
 from typing import Any
 
 from . import repository
-from .db import database_path, get_connection, reset_database
+from .db import database_path, get_connection, initialize_database, reset_database
 from .services.agent_service import create_demo_agent_output, record_demo_agent_work_complete
 from .services.hermes_adapter import sanitize_text
 from .services.ledger_service import ledger_totals, usd_to_cents
 from .services.payment_service import mark_job_paid
 from .services.planning_service import generate_operating_plan
-from .services.policy_service import apply_spend_request
+from .services.policy_service import apply_spend_request, load_policy_config
 from .services.seed_service import load_seed_config, seed_demo_database
 from .services.state_service import build_demo_state
 from .services.stripe_service import (
@@ -38,14 +38,15 @@ JOB_COMPLETE_EVENT_ID = "evt_harbor_job_complete"
 
 
 def run_demo() -> dict[str, Any]:
+    seed_config = _active_seed_config()
     reset_database()
 
     with closing(get_connection()) as connection:
-        seed_config = load_seed_config()
         sequence = 0
 
         job_started_at = time.monotonic()
         job = seed_demo_database(connection, seed_config)
+        repository.upsert_onboarding_config(connection, seed_config)
         sequence = _record_orchestration_call(
             connection,
             job_id=job["id"],
@@ -148,7 +149,7 @@ def run_demo() -> dict[str, Any]:
                 **payment_ledger_metadata(payment_status),
             ),
         )
-        sequence = _run_policy_spend_sequence(connection, job, sequence, planning_run_id)
+        sequence = _run_policy_spend_sequence(connection, job, sequence, planning_run_id, seed_config)
 
         for agent_name in ("Finance", "Marketing", "Research", "Ops"):
             sequence, _agent_output = _execute_tool(
@@ -305,12 +306,17 @@ def _run_policy_spend_sequence(
     job: dict[str, Any],
     sequence: int,
     planning_run_id: str,
+    seed_config: dict[str, Any],
 ) -> int:
+    policy_config = _policy_config_for_seed(seed_config)
     spend_requests = [
-        ("Local Ads API", usd_to_cents(89)),
-        ("Design Asset Pack", usd_to_cents(98)),
-        ("Premium Automation Suite", usd_to_cents(750)),
+        (item["vendor"], usd_to_cents(item["amountUsd"]))
+        for item in seed_config.get("approvedSpendRequests", [])
     ]
+    spend_requests.extend(
+        (item["vendor"], usd_to_cents(item["amountUsd"]))
+        for item in seed_config.get("blockedSpendRequests", [])
+    )
     for vendor, amount_cents in spend_requests:
         sequence, result = _execute_tool(
             connection,
@@ -328,6 +334,7 @@ def _run_policy_spend_sequence(
                 job=job,
                 vendor=vendor,
                 requested_amount_cents=amount_cents,
+                policy_config=policy_config,
             ),
         )
         ledger_entry = result.get("ledger_entry")
@@ -366,7 +373,7 @@ def _create_final_report(connection, job: dict[str, Any]) -> dict[str, Any]:
         margin_percent=float(totals["actual_margin_percent"]),
         policy_violations=0,
         recommendation=FINAL_RECOMMENDATION,
-        report_markdown=_final_report_markdown(totals),
+        report_markdown=_final_report_markdown(job, totals),
         report_id=REPORT_ID,
     )
     repository.create_event(
@@ -375,8 +382,11 @@ def _create_final_report(connection, job: dict[str, Any]) -> dict[str, Any]:
         type="profit_report",
         title="Final profit report created",
         detail=(
-            "$1,200 revenue, $187 approved spend, $750 blocked unsafe spend, "
-            "$1,013 gross profit, and 84.4% final margin."
+            f"${totals['revenue_cents'] / 100:,.0f} revenue, "
+            f"${totals['approved_spend_cents'] / 100:,.0f} approved spend, "
+            f"${totals['blocked_spend_cents'] / 100:,.0f} blocked unsafe spend, "
+            f"${totals['gross_profit_cents'] / 100:,.0f} gross profit, and "
+            f"{totals['actual_margin_percent']}% final margin."
         ),
         status="complete",
         event_id="evt_harbor_profit_report",
@@ -385,8 +395,8 @@ def _create_final_report(connection, job: dict[str, Any]) -> dict[str, Any]:
     return report
 
 
-def _final_report_markdown(totals: dict[str, Any]) -> str:
-    return f"""# Harbor Fleet Services Final Profit Report
+def _final_report_markdown(job: dict[str, Any], totals: dict[str, Any]) -> str:
+    return f"""# {job['client_name']} Final Profit Report
 
 Revenue: ${totals['revenue_cents'] / 100:,.0f}
 
@@ -511,3 +521,49 @@ def _record_planning_event(
 
 def _duration_ms(started_at: float) -> int:
     return round((time.monotonic() - started_at) * 1000)
+
+
+def _active_seed_config() -> dict[str, Any]:
+    default_seed = load_seed_config()
+    if not database_path().exists():
+        return default_seed
+
+    initialize_database()
+    with closing(get_connection()) as connection:
+        onboarding_config = repository.get_onboarding_config(connection)
+        if onboarding_config and isinstance(onboarding_config.get("config_json"), dict):
+            return onboarding_config["config_json"]
+        job = repository.get_demo_job(connection)
+    if job is None:
+        return default_seed
+
+    return _seed_config_from_job(job, default_seed)
+
+
+def _seed_config_from_job(job: dict[str, Any], default_seed: dict[str, Any]) -> dict[str, Any]:
+    seed_config = dict(default_seed)
+    seed_config.update(
+        {
+            "clientName": job["client_name"],
+            "businessType": job["business_type"],
+            "jobName": job["job_name"],
+            "jobGoal": job["job_goal"],
+            "invoiceAmountUsd": int(job["invoice_amount_cents"]) / 100,
+            "spendCapUsd": int(job["spend_cap_cents"]) / 100,
+            "marginFloorPercent": float(job["margin_floor_percent"]),
+        }
+    )
+    return seed_config
+
+
+def _policy_config_for_seed(seed_config: dict[str, Any]) -> dict[str, Any]:
+    policy_config = load_policy_config()
+    rules = dict(policy_config["rules"])
+    approved_vendors = list(dict.fromkeys(rules["approved_vendors"] + seed_config.get("approvedVendors", [])))
+    blocked_vendors = list(dict.fromkeys(rules["blocked_vendors"] + seed_config.get("blockedVendors", [])))
+    rules["approved_vendors"] = approved_vendors
+    rules["blocked_vendors"] = blocked_vendors
+    rules["margin_floor_percent"] = seed_config.get("marginFloorPercent", rules["margin_floor_percent"])
+    policy_config = dict(policy_config)
+    policy_config["rules"] = rules
+    return policy_config

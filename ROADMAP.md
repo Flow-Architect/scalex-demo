@@ -551,22 +551,29 @@ Output:
 
 ## 10. UI Requirements
 
-The frontend should be a single polished dashboard page.
+The frontend should feel like a usable product shell that can be recorded as a
+commercial-style browser walkthrough. Goal 7.7 adds local prototype auth, local/sample
+workflow onboarding, product navigation, and a moving workflow map around the original
+proof panels.
 
 ### Required Components
 
 ```text
-Header
-Job Intake Card
-Metrics Cards
-Economic Loop Timeline
-Stripe Panel
-Policy Panel
-Agent Workboard
-Deliverables Preview
-Profit Report
-Reset Demo Button
-Run Demo Job Button
+Secure Operator Console login
+Local/sample workflow onboarding
+Product navigation
+Dashboard / Workflow view
+Customers view
+Runs view
+Audit view
+Settings / Integrations view
+Autonomous Workflow Map
+Stripe test proof panel
+Policy proof panel
+Agent workboard
+Profit report
+Reset Demo button
+Run Demo Job button
 ```
 
 ### Visual Story
@@ -576,6 +583,7 @@ The page should make this obvious within 5 seconds:
 ```text
 ScaleX accepted a revenue-backed service job.
 ScaleX created a Stripe test invoice and recorded payment status honestly.
+ScaleX moved through a workflow graph while the run executed.
 ScaleX approved safe spend.
 ScaleX blocked unsafe spend.
 ScaleX coordinated agents.
@@ -704,10 +712,10 @@ The adapter should produce visible skill-call events like:
 
 ```json
 {
-  "skill": "stripe.create_invoice",
-  "status": "success",
-  "input": { "amountUsd": 1200, "client": "Harbor Fleet Services" },
-  "output": { "invoiceId": "in_test_scalex_001" }
+  "tool_name": "stripe.create_invoice",
+  "status": "complete",
+  "tool_input_json": { "amount_cents": 120000, "client_name": "Harbor Fleet Services" },
+  "tool_output_json": { "invoice_id": "in_..." }
 }
 ```
 
@@ -730,7 +738,9 @@ agent.run_ops
 report.generate
 ```
 
-UI should show these as `Hermes Orchestrator` events.
+UI should show these as ScaleX-owned orchestration events. Hermes is the planner and
+orchestration proposer; ScaleX code remains the execution authority for payment, policy,
+ledger, agent work, and reports.
 
 ---
 
@@ -930,9 +940,10 @@ git commit -m "Add one-click ScaleX demo runner"
 
 ---
 
-### Milestone 5 — Frontend Dashboard
+### Milestone 5 — Frontend Dashboard — Historical Baseline
 
-Goal: polished single-page demo dashboard.
+Goal: polished single-page demo dashboard. This was the historical frontend baseline before
+Goal 7.7 upgraded the experience into a product shell.
 
 Tasks:
 
@@ -956,6 +967,30 @@ Suggested commit:
 git add .
 git commit -m "Build ScaleX demo dashboard"
 ```
+
+---
+
+### Milestone 7.7 — Product Shell, Auth, Onboarding, and Workflow Map — Complete
+
+Goal: make ScaleX usable as a product-style operator console that can be recorded
+browser-only.
+
+Completed:
+
+- Local prototype login gate.
+- Local/sample workflow onboarding.
+- Product navigation for Workflow, Customers, Runs, Audit, and Settings / Integrations.
+- Moving Autonomous Workflow Map with API-backed settled states.
+- Approved/proceed and blocked spend branches.
+- Real Hermes and Stripe test proof preserved.
+- NemoClaw labeled as Goal 8 next, not claimed as wired.
+
+Boundaries:
+
+- Local auth is prototype auth, not production enterprise identity.
+- Local/sample onboarding demonstrates the product path; production multi-client onboarding is future work.
+- Hosted judge demo mode must not expose secrets.
+- Local full-proof mode can use ignored `.env` values for real isolated Hermes and Stripe test mode.
 
 ---
 
@@ -1246,7 +1281,7 @@ Acceptance criteria:
 - Tests pass.
 ```
 
-### `/goal` 5 — Frontend Dashboard
+### `/goal` 5 — Frontend Dashboard — Historical Baseline
 
 ```text
 /goal
@@ -1254,11 +1289,12 @@ Repo: /home/ascabrya/dev/scalex-demo
 
 Objective:
 Build the ScaleX single-page dashboard for the product prototype sample run.
+This is now historical context; Goal 7.7 added the current product shell.
 
 Constraints:
 - Clean, polished, product-like UI.
 - Must work locally against FastAPI backend.
-- Must not require auth or deployment.
+- Historical baseline did not require auth or deployment; current Goal 7.7 product shell can enable local prototype auth.
 
 Deliverables:
 - Vite React TypeScript frontend
@@ -1557,9 +1593,11 @@ Repo is clean enough to publish on GitHub.
 
 ## 21. Remaining Product Roadmap
 
-Goal 7.6 was a presentation polish pass pulled forward before Goal 8; it does not replace Goal 8 or Goal 9.
+Goal 7.6 was a presentation polish pass pulled forward before Goal 8; Goal 7.7 then added
+the product shell, local prototype auth, local/sample onboarding, and live workflow map.
+Neither replaces Goal 8 or Goal 9.
 
-The remaining core roadmap after Goal 7.6 is:
+The remaining core roadmap after Goal 7.7 is:
 
 ```text
 Goal 8 - NemoClaw / policy safety integration and presentation
@@ -1571,7 +1609,7 @@ Additional optional work after the product prototype is stable:
 
 ```text
 Report export button
-Deeper recorded replay polish; Goal 7.6 already added staged frontend execution replay cards
+Deeper recorded replay polish; Goal 7.7 already added the moving workflow map and staged replay cards
 Public deployment
 ```
 
@@ -1579,7 +1617,7 @@ Do not do these for the hackathon submission:
 
 ```text
 Ad hoc live $1 proof outside Verified Live Mode
-Real customer onboarding
+Production multi-client onboarding
 Real 30-day campaign
 Multi-client accounts
 Subscription billing

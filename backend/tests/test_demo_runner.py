@@ -1,12 +1,23 @@
 from contextlib import closing
+from types import SimpleNamespace
 
 import pytest
 from fastapi import HTTPException
 
 from app.db import TABLE_NAMES, get_connection, initialize_database, table_counts
-from app.main import app, demo_spend_check, demo_state, health, mark_demo_paid, reset_demo, seed_demo
+from app.main import (
+    app,
+    demo_spend_check,
+    demo_state,
+    health,
+    mark_demo_paid,
+    onboard_demo_customer,
+    reset_demo,
+    seed_demo,
+)
 from app.repository import get_demo_job, list_events
-from app.schemas import SpendCheckRequest
+from app.schemas import OnboardingRequest, SpendCheckRequest
+from app.services.auth_service import auth_status, require_local_session, sign_session_token
 from app.services.seed_service import seed_demo_database
 
 
@@ -70,6 +81,71 @@ def test_demo_reset_seed_and_state_endpoints(tmp_path, monkeypatch) -> None:
     state = demo_state()
     assert state["job"]["job_name"] == "30-day fleet brake inspection campaign"
     assert state["database"]["exists"] is True
+
+
+def test_auth_disabled_does_not_require_credentials_for_tests(tmp_path, monkeypatch) -> None:
+    monkeypatch.setenv("DATABASE_PATH", str(tmp_path / "scalex.db"))
+    monkeypatch.setenv("SCALEX_AUTH_ENABLED", "false")
+
+    request = SimpleNamespace(cookies={})
+    status = auth_status(request)
+    require_local_session(request)
+    state_response = demo_state()
+
+    assert status["auth_enabled"] is False
+    assert status["authenticated"] is True
+    assert state_response["database"]["initialized"] is True
+
+
+def test_auth_enabled_requires_login_for_demo_endpoints(tmp_path, monkeypatch) -> None:
+    monkeypatch.setenv("DATABASE_PATH", str(tmp_path / "scalex.db"))
+    monkeypatch.setenv("SCALEX_AUTH_ENABLED", "true")
+    monkeypatch.setenv("SCALEX_DEMO_USERNAME", "operator")
+    monkeypatch.setenv("SCALEX_DEMO_PASSWORD", "local-password")
+    monkeypatch.setenv("SCALEX_SESSION_SECRET", "test-session-secret")
+
+    missing_cookie_request = SimpleNamespace(cookies={})
+    token = sign_session_token(username="operator")
+    valid_cookie_request = SimpleNamespace(cookies={"scalex_session": token})
+
+    with pytest.raises(HTTPException) as exc:
+        require_local_session(missing_cookie_request)
+
+    require_local_session(valid_cookie_request)
+    status = auth_status(valid_cookie_request)
+
+    assert exc.value.status_code == 401
+    assert status["auth_enabled"] is True
+    assert status["authenticated"] is True
+    assert status["username"] == "operator"
+
+
+def test_onboarding_endpoint_prepares_local_job(tmp_path, monkeypatch) -> None:
+    monkeypatch.setenv("DATABASE_PATH", str(tmp_path / "scalex.db"))
+
+    response = onboard_demo_customer(
+        OnboardingRequest(
+            client_name="Sample HVAC Co",
+            business_type="Commercial HVAC service provider",
+            job_name="30-day tune-up campaign",
+            job_goal="Prepare a local sample HVAC tune-up campaign.",
+            invoice_amount_usd=1600,
+            spend_cap_usd=350,
+            margin_floor_percent=55,
+            approved_vendors=["SMS Campaign Tool", "Email Campaign Tool"],
+            blocked_vendors=["Unknown SaaS Vendor"],
+        )
+    )
+
+    assert response["status"] == "onboarded"
+    assert response["state"]["job"]["client_name"] == "Sample HVAC Co"
+    assert response["state"]["job"]["invoice_amount_cents"] == 160000
+    assert response["state"]["job"]["spend_cap_cents"] == 35000
+    assert response["state"]["job"]["margin_floor_percent"] == 55
+    assert response["state"]["onboarding"]["config_json"]["approvedVendors"] == [
+        "SMS Campaign Tool",
+        "Email Campaign Tool",
+    ]
 
 
 def test_spend_check_endpoint_blocks_before_payment(tmp_path, monkeypatch) -> None:

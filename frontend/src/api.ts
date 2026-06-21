@@ -1,4 +1,11 @@
-import type { DemoActionResponse, DemoState, HealthResponse } from "./types";
+import type {
+  AuthStatus,
+  DemoActionResponse,
+  DemoState,
+  HealthResponse,
+  LoginRequest,
+  OnboardingRequest,
+} from "./types";
 
 export const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL ?? "http://127.0.0.1:8787";
@@ -21,6 +28,28 @@ export function getDemoState(): Promise<DemoState> {
   return request<DemoState>("/api/demo/state");
 }
 
+export function getAuthStatus(): Promise<AuthStatus> {
+  return request<AuthStatus>("/api/auth/me");
+}
+
+export function login(requestBody: LoginRequest): Promise<AuthStatus> {
+  return request<AuthStatus>("/api/auth/login", {
+    method: "POST",
+    body: JSON.stringify(requestBody),
+  });
+}
+
+export function logout(): Promise<AuthStatus> {
+  return request<AuthStatus>("/api/auth/logout", { method: "POST" });
+}
+
+export function saveOnboarding(requestBody: OnboardingRequest): Promise<DemoActionResponse> {
+  return request<DemoActionResponse>("/api/demo/onboarding", {
+    method: "POST",
+    body: JSON.stringify(requestBody),
+  });
+}
+
 export function runDemo(): Promise<DemoActionResponse> {
   return request<DemoActionResponse>("/api/demo/run", { method: "POST" });
 }
@@ -32,6 +61,7 @@ export function resetDemo(): Promise<DemoActionResponse> {
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const response = await fetch(`${API_BASE_URL}${path}`, {
     ...init,
+    credentials: "include",
     headers: {
       "Content-Type": "application/json",
       ...init?.headers,

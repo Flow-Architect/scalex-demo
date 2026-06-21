@@ -50,8 +50,8 @@ Implemented today:
 - Real Stripe test-mode invoice flow through the orchestration layer.
 - Stripe test-double records are available for automated tests, CI, offline development, and diagnostics.
 - Deterministic Finance, Marketing, Research, and Ops outputs.
-- Vite React dashboard.
-- Goal 7.6 command-center first viewport with the live workflow claim, Profit Protected outcome, Live Stack Proof, and staged execution replay.
+- Vite React product shell with a local prototype auth gate, local/sample workflow onboarding, app navigation, workflow visualization, run history, audit, and integrations views.
+- Goal 7.7 command-center experience with the live workflow claim, Profit Protected outcome, Live Stack Proof, moving workflow map, and staged execution replay.
 - One-click Harbor Fleet Services sample run with the locked final report numbers.
 
 Next target:
@@ -59,7 +59,26 @@ Next target:
 - Add NemoClaw or a NemoClaw-style policy safety adapter if it can be done safely.
 - Add future Verified Live Mode before any live-money Stripe capability.
 
-The dashboard calls the local backend to run the complete compressed lifecycle and display job intake, Hermes planning, orchestration/tool calls, payment state, policy decisions, agent work, ledger entries, and the final profit report.
+The product shell calls the local backend to run the complete compressed lifecycle and display job intake, Hermes planning, orchestration/tool calls, payment state, policy decisions, agent work, ledger entries, and the final profit report. The walkthrough is intended to be recorded as browser-only product usage: login, onboard/select Harbor Fleet Services, run the autonomous workflow, watch the workflow map move, inspect proof, and review the audit trail.
+
+Goal 7.7 adds local prototype auth and local/sample workflow onboarding. It is not
+production enterprise auth and not full multi-tenant SaaS. No live-money Stripe
+support was added.
+
+## Demo Modes
+
+### Hosted Judge Demo Mode
+
+A hosted judge demo can show the browser product experience without exposing local
+secrets. Hosted mode must use safe environment configuration, must not expose
+`STRIPE_SECRET_KEY`, Hermes auth, or session secrets to the browser, and must keep
+Stripe in test mode with `livemode=false`.
+
+### Local Full-Proof Run Mode
+
+Local full-proof mode is the strongest proof path. It can use an ignored local `.env`
+with real isolated Hermes configuration and a Stripe `sk_test_...` key to create real
+Stripe test invoices. `.env` must never be committed.
 
 ## Local Browser Demo
 
@@ -82,7 +101,21 @@ Open:
 http://127.0.0.1:5174
 ```
 
-Click `Run Demo Job` to call `POST /api/demo/run` and rebuild the sample workflow.
+When `SCALEX_AUTH_ENABLED=true`, configure local-only demo credentials in ignored
+`.env` before opening the UI:
+
+```text
+SCALEX_DEMO_USERNAME=
+SCALEX_DEMO_PASSWORD=
+SCALEX_SESSION_SECRET=
+```
+
+The login gate uses a signed local session cookie. Leave auth disabled in tests or
+set test-only credentials; never commit real credentials.
+
+After login, complete the local onboarding step with the Harbor Fleet Services
+sample or another synthetic/sample customer. Click `Run Demo Job` to call
+`POST /api/demo/run` and rebuild the workflow.
 In product mode, Stripe requires a local `.env` `sk_test_...` key and returns
 a visible Stripe integration error if test mode is not configured. Automated tests
 and CI use `STRIPE_TEST_DOUBLE_MODE=true`.
@@ -105,6 +138,10 @@ GET  http://127.0.0.1:8787/api/health
 GET  http://127.0.0.1:8787/api/demo/state
 POST http://127.0.0.1:8787/api/demo/run
 POST http://127.0.0.1:8787/api/demo/reset
+POST http://127.0.0.1:8787/api/demo/onboarding
+POST http://127.0.0.1:8787/api/auth/login
+GET  http://127.0.0.1:8787/api/auth/me
+POST http://127.0.0.1:8787/api/auth/logout
 ```
 
 To run only the backend:
@@ -128,6 +165,12 @@ Reset the demo state with:
 ```
 
 These commands must not use live Stripe mode or production service credentials for Goal 7.
+
+## What Is Real, Test, and Future
+
+- Real now: isolated Hermes planning through `scalex-operator`, real Stripe test-mode invoice creation/finalization, SQLite audit ledger, local policy enforcement, local prototype auth, local/sample onboarding, and the product shell workflow experience.
+- Test/diagnostic only: deterministic Hermes planning and Stripe test doubles in automated tests, CI, offline development, or explicitly labeled diagnostics.
+- Future: NemoClaw-compatible safety integration in Goal 8 and Verified Live Mode before any live-money Stripe actions.
 
 ## Core Product Loop
 
