@@ -27,9 +27,16 @@ nodes while preserving the Profit Protected outcome panel, Live Stack Proof, sta
 execution replay, and backend proof. Stripe payment status is labeled honestly: the
 verified invoice is `invoice_status=open` and `paid=false` unless Stripe reports otherwise.
 
+Goal 7.9 is the planned product UX consolidation before NemoClaw work. It keeps the same
+working backend proof but reshapes the app into a workflow automation canvas with left
+navigation, a top command bar, a central graph, a right selected-node inspector, and clean
+Customers, Runs, Audit, Integrations, and Settings views. The intent is a commercial-style
+browser recording where the demo is the operator using ScaleX, not a tour through static
+proof panels.
+
 The login gate is local prototype auth, not production enterprise auth. Workflow management is
 local/sample workflow management, not full multi-tenant SaaS. The active spend authority is
-the local policy engine. Goal 8 remains next for NemoClaw or NemoClaw-style safety
+the local policy engine. Goal 8 remains next after Goal 7.9 for NemoClaw or NemoClaw-style safety
 governance if it can be wired safely; ScaleX does not yet claim real NemoClaw integration.
 Test doubles must stay clearly labeled and must not be described as product-mode
 integrations. Future live-money payments require Verified Live Mode. No live-money support

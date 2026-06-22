@@ -552,9 +552,25 @@ Output:
 ## 10. UI Requirements
 
 The frontend should feel like a usable product shell that can be recorded as a
-commercial-style browser walkthrough. Goal 7.7 adds local prototype auth, local/sample
-workflow onboarding, product navigation, and a moving workflow map around the original
-proof panels.
+commercial-style browser walkthrough. Goal 7.7 added local prototype auth, local/sample
+workflow onboarding, product navigation, and a moving workflow map; Goal 7.8 made
+Customers, selected-workflow runs, run history, and clickable proof nodes functional.
+
+Goal 7.9 is the planned product UX consolidation before Goal 8. It should make ScaleX
+feel like a workflow automation canvas and inspection tool for business operations, not
+a stacked proof layout. The target product model is:
+
+```text
+Left navigation
+Top command bar
+Central workflow canvas
+Right selected-node inspector
+Separate Customers, Runs, Audit, Integrations, and Settings views
+```
+
+The current proof panels are useful but visually scattered. Goal 7.9 should preserve
+real Hermes, Stripe test-mode, SQLite, and local policy proof while moving the main
+experience toward a focused canvas plus inspector.
 
 ### Required Components
 
@@ -1064,9 +1080,172 @@ git commit -m "Add Stripe test-mode invoice flow"
 
 ---
 
+### Milestone 7.9 — Workflow Canvas Product UX Redesign — Planned
+
+Goal: consolidate the existing functional product shell into a focused workflow
+automation/control-room UX before Goal 8 policy safety work.
+
+This is a planning and implementation sequence for product UX only. It must not replace
+Goal 8, Goal 9, or Goal 7B. It must preserve the working product loop, real isolated
+Hermes proof, real Stripe test-mode proof, SQLite audit records, selected-workflow runs,
+run history, local policy guardrails, and honest labels for NemoClaw and Verified Live Mode.
+
+#### Goal 7.9A — UX Blueprint / Product IA Audit
+
+No code.
+
+Tasks:
+
+- Inspect the current UI and define the exact target layout.
+- Identify duplicate proof panels, clutter, weak hierarchy, and unclear recording flow.
+- Lock the product model:
+  - left navigation
+  - top command bar
+  - central workflow canvas
+  - right selected-node inspector
+  - separate Customers, Runs, Audit, Integrations, and Settings views
+- Treat the current UI as functional but not final.
+- Output exact implementation prompts for Goals 7.9B, 7.9C, 7.9D, and 7.9E.
+
+Done when:
+
+- The docs contain a concrete screen model, component targets, and UX acceptance criteria.
+- The next implementation goals can be started without rediscovering the product IA.
+- No code is changed.
+
+#### Goal 7.9B — Design System + App Shell Foundation
+
+Goal: clean the visual foundation before moving workflow nodes around.
+
+Tasks:
+
+- Establish a consistent dark command-center theme.
+- Make sidebar, top command bar, cards, node surfaces, and inspector styles consistent.
+- Create reusable layout primitives only where they reduce `App.tsx` complexity or match
+  an existing local pattern.
+- Reduce `App.tsx` complexity only if safe and tightly scoped.
+- Preserve all current functionality.
+
+Done when:
+
+- The app shell feels coherent and product-like across Workflow, Customers, Runs, Audit,
+  Integrations, and Settings.
+- Existing auth, workflow selection, run controls, run history, proof surfaces, and API
+  behavior still work.
+
+#### Goal 7.9C — Workflow Canvas + Selected-Node Inspector
+
+Goal: make the main Workflow page the product center.
+
+Tasks:
+
+- Replace stacked proof panels on the main Workflow page with a connected workflow canvas.
+- Use these nodes:
+  - Customer Intake
+  - Hermes Brain
+  - Stripe Test Invoice
+  - Payment Status
+  - Policy Gate
+  - Approved Spend
+  - Blocked Spend
+  - Agent Work
+  - SQLite Audit
+  - Profit Report
+- Make clicking a node update the right selected-node inspector instead of opening
+  scattered or modal proof panels.
+- Show real proof for the selected node in the inspector.
+- Make approved and blocked spend branches visually obvious.
+- Preserve real Hermes, Stripe test-mode, SQLite, and local policy proof.
+
+Done when:
+
+- The Workflow page can be recorded as a canvas-driven product flow.
+- The inspector shows the exact proof behind the selected node.
+- Stripe open/unpaid status remains honest unless Stripe reports `paid=true`.
+
+#### Goal 7.9D — Customers / Runs / Audit / Integrations Cleanup
+
+Goal: make secondary product views useful and specific without placeholder-only tabs.
+
+Tasks:
+
+- Customers view:
+  - create, select, and delete local workflows
+  - make the Harbor sample prominent
+  - make the selected workflow obvious
+- Runs view:
+  - list prior runs
+  - show selected run details
+  - summarize run proof
+- Audit view:
+  - timeline
+  - orchestration calls
+  - ledger
+  - Stripe events
+  - policy checks
+- Integrations / Settings:
+  - Hermes status
+  - Stripe test-mode status
+  - SQLite ledger
+  - local policy
+  - NemoClaw Goal 8 next
+  - prototype auth
+- Remove or replace any placeholder-only tabs.
+
+Done when:
+
+- Every navigation item has a real product purpose and visible state.
+- Customers, Runs, Audit, Integrations, and Settings support the browser-only recording.
+
+#### Goal 7.9E — Recording Readiness / Browser-Only Demo QA
+
+Goal: make ScaleX ready for a commercial-style recording where the demo is product usage.
+
+Recording path:
+
+1. Login.
+2. Select or create workflow.
+3. Start run.
+4. Watch graph nodes progress.
+5. Click Hermes node.
+6. Click Stripe node.
+7. Click blocked spend node.
+8. Click Profit Report node.
+9. Open Runs.
+10. Open Audit.
+11. Open Integrations.
+12. Logout.
+
+Tasks:
+
+- Ensure no terminal output is needed in the video.
+- Ensure every visible claim is real, test-mode, or honestly labeled future work.
+- Update demo script and submission docs.
+- Verify the hosted judge demo boundary: safe browser experience without exposed secrets.
+- Verify local full-proof mode can use ignored `.env` values for real Hermes and Stripe
+  test mode.
+
+Done when:
+
+- The recording can be completed browser-only.
+- No UI copy implies production auth, live-money support, real NemoClaw, real client data,
+  or Stripe-paid invoices unless those facts are true.
+
+Suggested commit after Goal 7.9 implementation:
+
+```bash
+git add .
+git commit -m "Redesign ScaleX workflow canvas UX"
+```
+
+---
+
 ### Milestone 7B — Production Hardening / Verified Live Mode
 
 Goal: add the only allowed future path for live-money Stripe payments.
+
+Sequence note: Goal 7B remains future hardening. It is not the next active milestone and
+does not replace Goal 7.9, Goal 8, or Goal 9.
 
 Tasks:
 
@@ -1097,7 +1276,8 @@ git commit -m "Add Verified Live Mode payment safeguards"
 
 ### Milestone 8 — NemoClaw / Policy Safety Integration and Presentation
 
-Goal: make spend governance legible and wire a real NemoClaw-compatible policy safety layer if it is safe and available.
+Goal: after Goal 7.9, make spend governance legible and wire a real NemoClaw-compatible
+policy safety layer if it is safe and available.
 
 Tasks:
 
@@ -1374,6 +1554,124 @@ Acceptance criteria:
 - Tests pass.
 ```
 
+### `/goal` 7.9A — Workflow Canvas Product UX Redesign Blueprint
+
+```text
+/goal
+Repo: /home/ascabrya/dev/scalex-demo
+
+Objective:
+Create the no-code UX blueprint and product IA audit for Goal 7.9 - Workflow Canvas Product UX Redesign.
+
+Constraints:
+- Do not implement code.
+- Do not commit.
+- Preserve real isolated Hermes, real Stripe test mode, SQLite ledger, local policy, selected-workflow runs, and run history.
+- Do not claim real NemoClaw.
+- Do not claim live-money support.
+- Do not claim Stripe invoices are paid unless paid=true.
+
+Deliverables:
+- Exact target layout:
+  - left navigation
+  - top command bar
+  - central workflow canvas
+  - right selected-node inspector
+  - separate Customers, Runs, Audit, Integrations, and Settings views
+- Current UI audit covering duplicate panels, clutter, weak hierarchy, and recording-flow gaps.
+- Implementation prompts for Goal 7.9B, Goal 7.9C, Goal 7.9D, and Goal 7.9E.
+- Acceptance criteria for each 7.9 sub-goal.
+
+Acceptance criteria:
+- Docs clearly state that the current UI is functional but not final.
+- Goal 7.9 remains before Goal 8.
+- Goal 8, Goal 9, and Goal 7B remain intact.
+- No code implementation is done.
+```
+
+### `/goal` 7.9B — Design System + App Shell Foundation
+
+```text
+/goal
+Repo: /home/ascabrya/dev/scalex-demo
+
+Objective:
+Clean ScaleX's visual foundation and app shell before moving workflow nodes around.
+
+Constraints:
+- Preserve current functionality.
+- Keep auth, selected workflows, run history, audit proof, Hermes proof, Stripe test-mode proof, and local policy proof working.
+- Reduce App.tsx complexity only if safe.
+
+Deliverables:
+- Consistent dark command-center theme.
+- Consistent sidebar, top bar, card, node, and inspector styling.
+- Reusable layout primitives if they reduce real duplication.
+- Focused verification that existing product flows still work.
+```
+
+### `/goal` 7.9C — Workflow Canvas + Selected-Node Inspector
+
+```text
+/goal
+Repo: /home/ascabrya/dev/scalex-demo
+
+Objective:
+Make the Workflow page the product center with a connected canvas and right selected-node inspector.
+
+Constraints:
+- Preserve real proof for Hermes, Stripe test mode, SQLite, and local policy.
+- Keep Stripe open/unpaid honesty.
+- Do not add fabricated proof.
+
+Deliverables:
+- Connected workflow canvas with Customer Intake, Hermes Brain, Stripe Test Invoice, Payment Status, Policy Gate, Approved Spend, Blocked Spend, Agent Work, SQLite Audit, and Profit Report nodes.
+- Right inspector that changes when a node is clicked.
+- Visually obvious approved and blocked spend branches.
+```
+
+### `/goal` 7.9D — Customers / Runs / Audit / Integrations Cleanup
+
+```text
+/goal
+Repo: /home/ascabrya/dev/scalex-demo
+
+Objective:
+Clean the secondary product views so every navigation item supports real product usage and recording.
+
+Constraints:
+- No placeholder-only tabs.
+- Keep local/sample workflow boundaries honest.
+- Keep production auth, real NemoClaw, and live-money support out of scope.
+
+Deliverables:
+- Customers: create/select/delete local workflow, prominent Harbor sample, obvious selected workflow.
+- Runs: prior runs list, selected run details, run proof summary.
+- Audit: timeline, orchestration calls, ledger, Stripe events, policy checks.
+- Integrations/Settings: Hermes status, Stripe test mode, SQLite ledger, local policy, NemoClaw Goal 8 next, prototype auth.
+```
+
+### `/goal` 7.9E — Recording Readiness / Browser-Only Demo QA
+
+```text
+/goal
+Repo: /home/ascabrya/dev/scalex-demo
+
+Objective:
+Prepare ScaleX for a commercial-style browser-only product recording.
+
+Constraints:
+- No terminal output should be needed in the recording.
+- Every visible claim must be real, test-mode, or honestly labeled future work.
+- Hosted judge demo must not expose secrets.
+- Local full-proof mode can use ignored .env values for real Hermes and Stripe test mode.
+
+Acceptance criteria:
+- Recording path works: login, select/create workflow, start run, watch graph progress, click Hermes, Stripe, blocked spend, and Profit Report nodes, open Runs, Audit, Integrations, and logout.
+- Demo script and submission docs are updated.
+- Goal 8 remains next after Goal 7.9.
+```
+
 ### `/goal` 8 — NemoClaw / Policy Safety Integration and Presentation
 
 ```text
@@ -1593,13 +1891,20 @@ Repo is clean enough to publish on GitHub.
 
 ## 21. Remaining Product Roadmap
 
-Goal 7.6 was a presentation polish pass pulled forward before Goal 8; Goal 7.7 then added
+Goal 7.6 was a presentation polish pass pulled forward before Goal 8. Goal 7.7 added
 the product shell, local prototype auth, local/sample onboarding, and live workflow map.
-Neither replaces Goal 8 or Goal 9.
+Goal 7.8 made saved workflows, selected-workflow runs, persisted run history, and
+clickable proof nodes functional. Goal 7.9 is the UX/product consolidation milestone
+before Goal 8. None of these replaces Goal 8 or Goal 9.
 
-The remaining core roadmap after Goal 7.7 is:
+The remaining core roadmap is:
 
 ```text
+Goal 7.9A - UX Blueprint / Product IA Audit
+Goal 7.9B - Design System + App Shell Foundation
+Goal 7.9C - Workflow Canvas + Selected-Node Inspector
+Goal 7.9D - Customers / Runs / Audit / Integrations Cleanup
+Goal 7.9E - Recording Readiness / Browser-Only Demo QA
 Goal 8 - NemoClaw / policy safety integration and presentation
 Goal 9 - Final polish and submission assets
 Goal 7B / Production Hardening - Verified Live Mode for future live-money payments
@@ -1609,7 +1914,6 @@ Additional optional work after the product prototype is stable:
 
 ```text
 Report export button
-Deeper recorded replay polish; Goal 7.7 already added the moving workflow map and staged replay cards
 Public deployment
 ```
 

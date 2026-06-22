@@ -10,6 +10,41 @@ Use:
 
 ---
 
+## 2026-06-22 - Planned Goal 7.9: Workflow Canvas Product UX Redesign roadmap alignment
+
+Planned:
+- Added Goal 7.9 as a UX/product consolidation milestone before Goal 8.
+- Broke Goal 7.9 into:
+  - Goal 7.9A - UX Blueprint / Product IA Audit
+  - Goal 7.9B - Design System + App Shell Foundation
+  - Goal 7.9C - Workflow Canvas + Selected-Node Inspector
+  - Goal 7.9D - Customers / Runs / Audit / Integrations Cleanup
+  - Goal 7.9E - Recording Readiness / Browser-Only Demo QA
+- Set Goal 7.9A as the next active handoff.
+- Preserved Goal 8 as NemoClaw / policy safety integration and presentation after Goal 7.9.
+- Preserved Goal 9 as final polish and submission prep.
+- Preserved Goal 7B as future Verified Live Mode hardening.
+- Clarified that the current UI is functional but not final, and that the target product model is a workflow canvas plus selected-node inspector.
+
+Not completed:
+- No Goal 7.9 implementation work has been done yet.
+- No frontend or backend code was changed for this planning update.
+
+Verified:
+- `git diff --check` passed.
+- Value-shaped tracked-file secret scan returned no matches.
+- No `CODEX_GOALS.md` or `GOAL_LOG.md` file exists.
+- `git status --short` showed documentation-only edits.
+- No code, `.env`, SQLite `.db`, Stripe API, or Hermes model changes were made.
+
+Suggested commit message:
+Plan Goal 7.9 workflow canvas UX redesign
+
+Next:
+- Goal 7.9A - UX Blueprint / Product IA Audit.
+
+---
+
 ## 2026-06-21 - Goal 7.8: Functional product workflow, saved workflows, and run history
 
 Completed:

@@ -17,8 +17,12 @@
 - Main goal: live working product-style prototype with real integrations in the appropriate mode.
 - Product mode uses real integrations first: isolated Hermes Agent, Stripe test mode for Goal 7,
   real policy safety integration when safe, and SQLite audit records.
-- Goal 7.7 product shell is the current walkthrough surface: local prototype auth, local/sample
-  onboarding, workflow map, product navigation, proof panels, run history, audit, and integrations views.
+- Goal 7.8 product shell is the current functional walkthrough surface: local prototype auth,
+  local/sample workflow management, selected-workflow runs, clickable workflow graph proof,
+  persisted run history, audit, and integrations views.
+- Goal 7.9 product UX target is a workflow automation canvas with left navigation, top command
+  bar, central workflow canvas, right selected-node inspector, and separate Customers, Runs,
+  Audit, Integrations, and Settings views before Goal 8.
 - Goal 7.7 auth is local prototype auth, not production enterprise identity.
 - Goal 7.7 onboarding is local/sample workflow onboarding, not production multi-client SaaS.
 - Mock/fallback/test-double paths are for automated tests, CI, local offline development, or

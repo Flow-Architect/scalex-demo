@@ -54,14 +54,16 @@ Implemented today:
 - Goal 7.8 browser product workflow: create/select/delete saved local workflows, load Harbor Fleet Services as the sample, start a run for the active workflow, inspect proof nodes, and return later to run history.
 - Harbor Fleet Services sample run with the locked final report numbers, plus custom synthetic/sample workflows whose invoice amount and economics drive the run.
 
-Next target:
+Next targets:
 
-- Add NemoClaw or a NemoClaw-style policy safety adapter if it can be done safely.
+- Goal 7.9A: no-code UX blueprint for the workflow canvas product redesign.
+- Goal 7.9B-E: redesign the product shell around a central workflow canvas and selected-node inspector while preserving current proof.
+- Goal 8: add NemoClaw or a NemoClaw-style policy safety adapter if it can be done safely.
 - Add future Verified Live Mode before any live-money Stripe capability.
 
 The product shell calls the local backend to run the complete compressed lifecycle and display job intake, Hermes planning, orchestration/tool calls, payment state, policy decisions, agent work, ledger entries, and the final profit report. The walkthrough is intended to be recorded as browser-only product usage: log in, open Customers, use Harbor or create a synthetic workflow, start the selected workflow run, watch the workflow map move, click proof nodes, review Audit, open Runs, and log out.
 
-Goal 7.8 makes ScaleX a functional product prototype rather than just a dashboard. Local workflow/customer management is real SQLite-backed prototype behavior, but it is not production enterprise auth or full multi-tenant SaaS. No live-money Stripe support was added.
+Goal 7.8 makes ScaleX a functional product prototype with browser-usable workflow operations. The current UI is not the final product UX; Goal 7.9 plans and implements a workflow automation canvas with a selected-node inspector so the product feels like a control-room app instead of stacked proof cards. Local workflow/customer management is real SQLite-backed prototype behavior, but it is not production enterprise auth or full multi-tenant SaaS. No live-money Stripe support was added.
 
 ## Demo Modes
 
@@ -173,7 +175,7 @@ These commands must not use live Stripe mode or production service credentials f
 
 - Real now: isolated Hermes planning through `scalex-operator`, real Stripe test-mode invoice creation/finalization, SQLite audit ledger, local policy enforcement, local prototype auth, SQLite-backed local/sample workflows, selected-workflow runs, persisted run history, clickable proof nodes, and the product shell workflow experience.
 - Test/diagnostic only: deterministic Hermes planning and Stripe test doubles in automated tests, CI, offline development, or explicitly labeled diagnostics.
-- Future: NemoClaw-compatible safety integration in Goal 8 and Verified Live Mode before any live-money Stripe actions.
+- Future: Goal 7.9 workflow canvas UX redesign, NemoClaw-compatible safety integration in Goal 8, and Verified Live Mode before any live-money Stripe actions.
 
 ## Core Product Loop
 

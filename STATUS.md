@@ -1,14 +1,17 @@
 # STATUS - ScaleX
 
-Last updated: 2026-06-21
+Last updated: 2026-06-22
 
 ## Verified current state
 
 - Project folder exists at /home/ascabrya/dev/scalex-demo.
 - Latest committed baseline before this goal: `3b045dd Add ScaleX product shell auth and onboarding`.
 - Last completed implementation goal in this working tree: Goal 7.8 - usable browser product workflow with real customer/workflow management, selected-workflow runs, persisted run history, and clickable workflow graph proof.
-- Last completed documentation/audit goal in this working tree: Goal 7.8 product workflow closeout.
-- ScaleX is now a functional browser-usable product prototype for profit-aware agent operations in service workflows, not just a visual dashboard.
+- Last completed documentation/audit goal in this working tree: Goal 7.9 roadmap/tracking plan update.
+- Current planned goal: Goal 7.9 - Workflow Canvas Product UX Redesign.
+- Current next task: Goal 7.9A - UX Blueprint / Product IA Audit.
+- ScaleX is now a functional browser-usable product prototype for profit-aware agent operations in service workflows.
+- The current UI is functional but visually scattered; Goal 7.9 is planned to consolidate it into a workflow automation canvas with a selected-node inspector before Goal 8.
 - Product mode is real-integration-first:
   - real isolated Hermes Agent for planning/orchestration proposals
   - real Stripe test-mode API calls for Goal 7 payment/invoice records
@@ -17,6 +20,7 @@ Last updated: 2026-06-21
 - Mock/fallback/test-double paths are for automated tests, CI, offline development, or explicitly labeled diagnostics only.
 - Product-mode real integration failures surface visible error states instead of silently falling back.
 - The frontend now opens as a product shell with local prototype auth, Customers workflow management, selected-workflow run controls, clickable workflow visualization, run history, audit, and integrations views.
+- The target Goal 7.9 product model is left navigation, top command bar, central workflow canvas, right selected-node inspector, and separate Customers, Runs, Audit, Integrations, and Settings views.
 
 ## Goal 6 state
 
@@ -271,6 +275,32 @@ Last updated: 2026-06-21
   - the UI does not claim Stripe invoices are paid unless Stripe reports `paid=true`
   - NemoClaw is still not real yet
   - no live-money support was added
+
+## Goal 7.9 planned state
+
+- Goal 7.9 is planned before Goal 8 because the product loop is functional but the visual hierarchy still feels like stacked proof panels instead of a focused control-room workflow product.
+- Goal 7.9 is named: Workflow Canvas Product UX Redesign.
+- Goal 7.9A is the next active task and is no-code only.
+- Goal 7.9A must audit the current UI and define the exact target layout.
+- Goal 7.9A must identify duplicate panels, clutter, weak hierarchy, and unclear recording flow.
+- Goal 7.9A must output implementation prompts for:
+  - Goal 7.9B - Design System + App Shell Foundation
+  - Goal 7.9C - Workflow Canvas + Selected-Node Inspector
+  - Goal 7.9D - Customers / Runs / Audit / Integrations Cleanup
+  - Goal 7.9E - Recording Readiness / Browser-Only Demo QA
+- Goal 7.9B should clean the dark command-center visual foundation before moving nodes around.
+- Goal 7.9C should make the Workflow page the product center with a connected canvas and right inspector.
+- Goal 7.9D should make Customers, Runs, Audit, Integrations, and Settings real product views with no placeholder-only tabs.
+- Goal 7.9E should verify a browser-only recording path: login, select/create workflow, start run, watch graph progress, inspect Hermes, Stripe, blocked spend, and Profit Report nodes, open Runs, Audit, Integrations, and logout.
+- Goal 7.9 must preserve all current proof boundaries:
+  - real isolated Hermes is wired
+  - real Stripe test mode is wired
+  - SQLite is the audit ledger
+  - local policy is active now
+  - NemoClaw is not real yet
+  - Verified Live Mode is future live-money hardening
+  - auth is local prototype auth
+  - Stripe invoices are not paid unless Stripe returns `paid=true`
 
 ## Final Goal 7.7 verification pass
 
@@ -557,6 +587,19 @@ The locked sample workflow remains unchanged:
   - blocked `Premium Automation Suite` at $750
   - Harbor economics unchanged at $1,200 revenue, $187 approved spend, $750 blocked spend, $1,013 gross profit, and 84.4% margin
 
+## Verified on 2026-06-22 for Goal 7.9 planning docs
+
+- Goal 7.9A through Goal 7.9E were added to roadmap/tracking docs as planned UX work.
+- Goal 7.9A is the next active task.
+- Goal 8 remains after Goal 7.9.
+- Goal 9 remains final polish and submission prep.
+- Goal 7B remains future Verified Live Mode hardening.
+- `git diff --check` passed.
+- Value-shaped tracked-file secret scan returned no matches.
+- No `CODEX_GOALS.md` or `GOAL_LOG.md` file exists.
+- `git status --short` showed documentation-only edits.
+- No code, `.env`, SQLite `.db`, Stripe API, or Hermes model changes were made.
+
 ## Not yet verified
 
 - Fresh-clone setup on a clean machine.
@@ -565,6 +608,7 @@ The locked sample workflow remains unchanged:
 
 ## Not yet built
 
+- Goal 7.9 workflow canvas product UX redesign.
 - NemoClaw or external policy safety adapter.
 - Verified Live Mode live-money execution.
 - Demo recording and final submission assets.
@@ -580,4 +624,4 @@ The locked sample workflow remains unchanged:
 
 ## Current priority
 
-Goal 8 - NemoClaw / policy safety integration and presentation.
+Goal 7.9A - UX Blueprint / Product IA Audit.

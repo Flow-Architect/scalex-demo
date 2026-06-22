@@ -73,7 +73,13 @@ At the start of a new Codex session:
 4. Recommend the next /goal.
 5. Wait for approval before editing.
 
-Current next recommended /goal: Goal 8 - NemoClaw / policy safety integration and presentation.
+Current next recommended /goal: Goal 7.9A - UX Blueprint / Product IA Audit.
+
+Goal 7.9 is a workflow canvas product UX redesign milestone before Goal 8. Goal 7.9A
+is no-code planning: audit the current UI, define the target left-nav/top-command-bar/
+central-canvas/right-inspector product model, and output implementation prompts for
+Goal 7.9B through Goal 7.9E. Goal 8 remains NemoClaw / policy safety integration and
+presentation after Goal 7.9.
 
 ## Session closeout requirement
 

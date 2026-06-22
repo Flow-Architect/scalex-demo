@@ -32,14 +32,32 @@ The Harbor Fleet Services fleet brake inspection campaign is the sample run, not
 - Deterministic Finance, Marketing, Research, and Ops outputs for reliability.
 - Goal 7.8 functional product workflow with first-viewport live workflow claim, Profit Protected outcome panel, Live Stack Proof, clickable workflow map, staged execution replay, Customers workflow manager, Runs history, Audit proof, and Settings / Integrations.
 
-The intended recording flow is product usage, not a static card walkthrough: open ScaleX,
+The intended recording flow is product usage rather than a passive proof-panel tour: open ScaleX,
 log in, create or select a local sample workflow, review workflow and money rules, start the
 selected workflow run, watch the graph move, click Hermes/Stripe/Policy/Report proof nodes,
 review blocked spend, inspect Audit, and return to Runs history.
 
+## Goal 7.9 UX Target
+
+Goal 7.9 is the planned Workflow Canvas Product UX Redesign before Goal 8. The current UI
+is functional but not final; it still presents too much proof as stacked panels. The target
+product model is:
+
+- left navigation
+- top command bar
+- central workflow canvas
+- right selected-node inspector
+- separate Customers, Runs, Audit, Integrations, and Settings views
+
+The Workflow page should feel like the product center for a business operations workflow
+automation tool. The canvas should show Customer Intake, Hermes Brain, Stripe Test Invoice,
+Payment Status, Policy Gate, Approved Spend, Blocked Spend, Agent Work, SQLite Audit, and
+Profit Report. The inspector should show real proof for the selected node without requiring
+terminal output or hidden context.
+
 ## Target Integrations
 
-- NemoClaw or a NemoClaw-style policy safety adapter for spend governance, with the current local policy engine as deterministic test/diagnostic support.
+- NemoClaw or a NemoClaw-style policy safety adapter for spend governance in Goal 8, after Goal 7.9, with the current local policy engine as deterministic test/diagnostic support.
 - Future Verified Live Mode for live-money Stripe capability.
 
 ## Boundaries

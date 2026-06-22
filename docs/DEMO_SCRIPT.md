@@ -1,25 +1,32 @@
 # ScaleX Demo Script
 
-Target walkthrough flow:
+Target recording after Goal 7.9:
 
 1. Open ScaleX.
 2. Log in through the Secure Operator Console.
 3. Open Customers.
-4. Use Harbor Fleet Services or create a synthetic/sample customer workflow.
-5. Review the selected workflow config: customer, job goal, invoice amount, spend cap, margin floor, approved vendors, and blocked vendors.
-6. Start the selected workflow from Workflow with `Start Run`.
-7. Watch the workflow graph move through Customer Intake, Hermes Brain, Stripe Test Invoice, Payment Status, Policy Guardrail, Spend Decision, Agent Work, SQLite Audit Ledger, and Profit Report.
-8. Click Hermes node and show `used_real_hermes=true` when configured, `openai-codex / gpt-5.5`, `scalex-operator / skills`, planning output, and ordered tool calls.
-9. Click Stripe node and show `used_real_stripe=true` when configured, `stripe_mode=stripe_test`, `livemode=false`, customer ID, invoice ID, hosted invoice URL, `invoice_status=open`, and `paid=false` unless Stripe reports a paid invoice.
-10. Click Policy / Spend Decision and show approved spend branch plus the blocked unsafe spend branch. For Harbor, show why the $750 Premium Automation Suite request was blocked.
-11. Click Report node and show the final profit report. For Harbor, show $1,200 revenue, $187 approved spend, $750 blocked unsafe spend, $1,013 gross profit, and about 84.4% margin.
-12. Open Audit and show SQLite events, ledger rows, policy checks, Stripe records, and orchestration calls.
-13. Open Runs and show persisted run history. Click a previous run if available.
-14. Open Settings / Integrations and show auth status, Hermes status, Stripe test mode/open-unpaid honesty, SQLite path/counts, local policy engine, and NemoClaw as next/not real yet.
+4. Select Harbor Fleet Services or create a synthetic/sample customer workflow.
+5. Confirm the selected workflow: customer, job goal, invoice amount, spend cap, margin floor, approved vendors, and blocked vendors.
+6. Open Workflow and click `Start Run`.
+7. Watch the workflow canvas progress through Customer Intake, Hermes Brain, Stripe Test Invoice, Payment Status, Policy Gate, Approved Spend, Blocked Spend, Agent Work, SQLite Audit, and Profit Report.
+8. Click Hermes Brain and show the selected-node inspector with `used_real_hermes=true` when configured, `openai-codex / gpt-5.5`, `scalex-operator / skills`, planning output, and ordered tool calls.
+9. Click Stripe Test Invoice and show the inspector with `used_real_stripe=true` when configured, `stripe_mode=stripe_test`, `livemode=false`, customer ID, invoice ID, hosted invoice URL, `invoice_status=open`, and `paid=false` unless Stripe reports a paid invoice.
+10. Click Blocked Spend and show why the $750 Premium Automation Suite request was blocked.
+11. Click Profit Report and show the final economics. For Harbor, show $1,200 revenue, $187 approved spend, $750 blocked unsafe spend, $1,013 gross profit, and about 84.4% margin.
+12. Open Runs and show persisted run history with selected run proof.
+13. Open Audit and show SQLite events, orchestration calls, ledger rows, Stripe records, and policy checks.
+14. Open Integrations and show Hermes status, Stripe test mode/open-unpaid honesty, SQLite ledger, local policy engine, prototype auth, and NemoClaw as Goal 8 next/not real yet.
 15. Log out.
 
-Goal 7.8 makes the recording product usage, not a static dashboard walkthrough. Goal 8 remains next for NemoClaw / policy safety integration and presentation. No live-money support was added.
+Goal 7.9 should make the recording feel like product usage in a workflow automation
+control room rather than a passive proof-panel tour. No terminal output should be needed
+in the video.
 
-The recording should show browser product usage, not static cards. Hosted judge demo mode
-must not expose secrets. Local full-proof mode can use ignored `.env` values for real
-isolated Hermes and real Stripe test-mode invoice proof.
+Hosted judge demo mode must not expose secrets. Local full-proof mode can use ignored
+`.env` values for real isolated Hermes and real Stripe test-mode invoice proof.
+
+Current pre-7.9 state: Goal 7.8 already supports local prototype auth, saved local
+workflows, selected-workflow runs, clickable workflow graph proof, persisted run history,
+Audit, and Settings/Integrations. Goal 7.9 is planned because the working UI is still
+visually scattered and needs a central canvas plus right selected-node inspector before
+Goal 8.
