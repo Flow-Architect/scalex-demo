@@ -19,8 +19,9 @@ The Harbor Fleet Services fleet brake inspection campaign is the sample run, not
 - Local FastAPI backend and Vite React product shell.
 - Local prototype auth gate for the operator console.
 - SQLite-backed local/sample customer and workflow management with Harbor Fleet Services defaults.
-- Product navigation for Workflow, Customers, Runs, Audit, and Settings / Integrations.
-- Clickable workflow graph for the autonomous run, with approved/proceed and blocked spend branches.
+- Product navigation for Workflow, Customers, Runs, Audit, Integrations, and Settings.
+- Connected Workflow canvas for the autonomous run, with approved/proceed and blocked spend branches.
+- Right selected-node inspector for Run Summary, Customer Intake, Hermes, Stripe, Payment Status, Policy, Spend, Agent Work, SQLite Audit, and Profit Report proof.
 - Selected workflow runs where customer, job, invoice amount, spend cap, margin floor, and vendor lists drive Stripe amount, policy math, ledger totals, and final report.
 - Persisted run history with historical proof inspection by run ID.
 - Real isolated Hermes Agent planning through a ScaleX `scalex-operator` skill.
@@ -30,18 +31,18 @@ The Harbor Fleet Services fleet brake inspection campaign is the sample run, not
 - Real Stripe test-mode customer and finalized invoice records through orchestration for Goal 7, with `invoice_status` and `paid` displayed honestly.
 - Stripe test-double payment records for tests and diagnostics.
 - Deterministic Finance, Marketing, Research, and Ops outputs for reliability.
-- Goal 7.8 functional product workflow with first-viewport live workflow claim, Profit Protected outcome panel, Live Stack Proof, clickable workflow map, staged execution replay, Customers workflow manager, Runs history, Audit proof, and Settings / Integrations.
+- Goal 7.9C Workflow page with connected canvas, selected-node inspector, compact proof access, Stripe open/unpaid honesty, and NemoClaw Goal 8 next/not real yet labeling.
 
 The intended recording flow is product usage rather than a passive proof-panel tour: open ScaleX,
 log in, create or select a local sample workflow, review workflow and money rules, start the
-selected workflow run, watch the graph move, click Hermes/Stripe/Policy/Report proof nodes,
+selected workflow run, watch the connected canvas move, click Hermes/Stripe/Policy/Report proof nodes,
 review blocked spend, inspect Audit, and return to Runs history.
 
-## Goal 7.9 UX Target
+## Goal 7.9 UX State
 
-Goal 7.9 is the planned Workflow Canvas Product UX Redesign before Goal 8. The current UI
-is functional but not final; it still presents too much proof as stacked panels. The target
-product model is:
+Goal 7.9 is the Workflow Canvas Product UX Redesign before Goal 8. Goal 7.9A completed
+the UX blueprint, Goal 7.9B completed the app shell foundation, and Goal 7.9C replaced the
+main Workflow page with the target canvas and inspector. The product model is:
 
 - left navigation
 - top command bar
@@ -49,11 +50,12 @@ product model is:
 - right selected-node inspector
 - separate Customers, Runs, Audit, Integrations, and Settings views
 
-The Workflow page should feel like the product center for a business operations workflow
-automation tool. The canvas should show Customer Intake, Hermes Brain, Stripe Test Invoice,
+The Workflow page now serves as the product center for a business operations workflow
+automation tool. The canvas shows Customer Intake, Hermes Brain, Stripe Test Invoice,
 Payment Status, Policy Gate, Approved Spend, Blocked Spend, Agent Work, SQLite Audit, and
-Profit Report. The inspector should show real proof for the selected node without requiring
-terminal output or hidden context.
+Profit Report. The inspector shows real proof for the selected node without requiring
+terminal output or hidden context. Goal 7.9D remains for Customers, Runs, Audit,
+Integrations, and Settings cleanup, and Goal 7.9E remains for browser-only recording QA.
 
 ## Target Integrations
 

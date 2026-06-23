@@ -17,7 +17,8 @@ ScaleX UI
 ## Implemented Today
 
 - Vite React TypeScript frontend.
-- Product shell with login, Workflow, Customers, Runs, Audit, and Settings / Integrations views.
+- Product shell with login, Workflow, Customers, Runs, Audit, Integrations, and Settings views.
+- Workflow route with connected canvas and right selected-node inspector.
 - FastAPI backend.
 - SQLite audit ledger at `data/scalex.db`.
 - Local prototype auth using an environment-configured username/password and signed HTTP-only session cookie.
@@ -30,12 +31,13 @@ ScaleX UI
 - Real Stripe test-mode customer and finalized invoice records through orchestration for Goal 7.
 - Local policy engine for spend governance until Goal 8 wires a real safety adapter if safely available.
 - Deterministic agent outputs.
-- Harbor Fleet Services sample workflow with Goal 7.8 product workflow proof, Profit Protected outcome, Live Stack Proof, clickable workflow map, staged execution replay, and persisted run history.
+- Harbor Fleet Services sample workflow with Goal 7.9C connected Workflow canvas, selected-node inspector, compact proof access, staged execution progress, and persisted run history.
 
 ## Goal 7.9 Product UX Model
 
-Goal 7.9 is planned before Goal 8 to reshape the existing functional UI into a product
-control-room experience:
+Goal 7.9 is the product UX redesign before Goal 8. Goal 7.9A completed the UX blueprint,
+Goal 7.9B completed the app shell foundation, and Goal 7.9C reshaped the main Workflow
+page into a product control-room experience:
 
 ```text
 Left navigation
@@ -49,11 +51,12 @@ Integrations view
 Settings view
 ```
 
-The main Workflow view should center on the workflow canvas. Nodes should represent
+The main Workflow view centers on the workflow canvas. Nodes represent
 Customer Intake, Hermes Brain, Stripe Test Invoice, Payment Status, Policy Gate, Approved
-Spend, Blocked Spend, Agent Work, SQLite Audit, and Profit Report. Clicking a node should
-populate the right inspector with the real proof for that node. The redesign must preserve
-the implemented backend proof and avoid placeholder-only tabs.
+Spend, Blocked Spend, Agent Work, SQLite Audit, and Profit Report. Clicking a node
+populates the right inspector with the real proof for that node. Goal 7.9D remains for
+Customers, Runs, Audit, Integrations, and Settings cleanup while preserving implemented
+backend proof and avoiding placeholder-only tabs.
 
 ## Auth and Onboarding
 

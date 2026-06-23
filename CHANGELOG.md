@@ -10,6 +10,69 @@ Use:
 
 ---
 
+## 2026-06-23 - Goal 7.9C: Workflow canvas and selected-node inspector
+
+Completed:
+- Replaced the old stacked Workflow page with a connected enterprise workflow canvas and right selected-node inspector.
+- Added Workflow feature files under `frontend/src/features/workflow/`:
+  - `WorkflowPage.tsx`
+  - `workflowModel.ts`
+  - `WorkflowCanvas.tsx`
+  - `WorkflowNode.tsx`
+  - `NodeInspector.tsx`
+  - inspector components for Run Summary, Customer Intake, Hermes, Stripe, Payment Status, Policy, Spend, Agent Work, SQLite Audit, and Profit Report
+- Changed `frontend/src/App.tsx` so the Workflow route delegates to `WorkflowPage` and passes active workflow state, selected inspector node, run progress, run status, notices/errors, loading state, and run/reset/refresh/customer navigation handlers.
+- Built the canvas node set:
+  - Customer Intake
+  - Hermes Brain
+  - Stripe Test Invoice
+  - Payment Status
+  - Policy Gate
+  - Approved Spend
+  - Blocked Spend
+  - Agent Work
+  - SQLite Audit
+  - Profit Report
+- Added SVG connectors with visible green approved branch, red blocked branch, yellow open/pending state, purple Hermes/future accent, and blue Stripe proof accent.
+- Added API-state-backed node status logic for workflow/job presence, Hermes metadata and planning runs, Stripe invoice/payment state, policy checks, spend checks, agent outputs, SQLite counts, and report presence.
+- Kept frontend run progress as presentation-only while `POST /api/demo/run` is in flight, then settled statuses from API state.
+- Added a right inspector that defaults to Run Summary and switches on node click.
+- Preserved proof access for real Hermes, real Stripe test mode, Stripe hosted invoice URL, Stripe `livemode=false`, `invoice_status=open`, `paid=false`, local policy, approved/blocked spend, SQLite counts, agent outputs, and final profit report.
+- Preserved Stripe open/unpaid honesty and labels local compressed-run confirmation separately from Stripe-paid revenue.
+- Preserved NemoClaw truthfulness: Goal 8 next/not real yet, with local policy active now.
+- Removed/collapsed duplicate Workflow page sections now covered by the canvas/inspector:
+  - giant replay row
+  - duplicate Stripe proof panel
+  - duplicate Hermes proof panel
+  - full audit feed
+  - full ledger table
+  - long agent output wall
+  - full report markdown outside the Report inspector
+  - Judge Proof block on the main Workflow surface
+- Left Customers, Runs, Audit, Integrations, and Settings reachable for Goal 7.9D cleanup.
+- Did not change backend business logic.
+- Did not implement Goal 8, live-money payments, or real NemoClaw integration.
+
+Verified:
+- `npm run build` passed for the frontend.
+- `./scripts/test.sh` passed with 48 backend tests and a successful Vite production build.
+- Sanitized dev-server verification used `/tmp/scalex-goal79c-manual.db`, `HERMES_TEST_MODE=true`, `HERMES_REQUIRE_REAL=false`, `STRIPE_TEST_DOUBLE_MODE=true`, and an unset `STRIPE_SECRET_KEY`.
+- Headless Chrome desktop verification completed login, Harbor sample selection, Workflow run, connected canvas checks, Hermes inspector, Stripe inspector, Blocked Spend inspector, Profit Report inspector, Customers/Runs/Audit/Integrations/Settings navigation, and logout.
+- Manual browser verification confirmed the inspector sits to the right of the canvas at a 1600px desktop viewport and that all ten required nodes and approved/blocked branch labels render.
+- Manual browser verification used diagnostic test-double modes, so no Stripe APIs or Hermes models were called.
+- `git diff --check` passed.
+- The tracked-file secret scan returned no matches.
+- No `.env`, SQLite `.db`, `CODEX_GOALS.md`, or `GOAL_LOG.md` file is staged or present as a new tracked artifact.
+- No Stripe API calls or Hermes model calls were intentionally run for this goal.
+
+Suggested commit message:
+Redesign Workflow as connected canvas inspector
+
+Next:
+- Goal 7.9D - Customers / Runs / Audit / Integrations cleanup.
+
+---
+
 ## 2026-06-23 - Goal 7.9B: Design system and app shell foundation
 
 Completed:

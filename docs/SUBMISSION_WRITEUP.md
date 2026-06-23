@@ -22,17 +22,18 @@ The current proof is integration-backed: isolated Hermes/GPT-5.5 planning is wir
 added real Stripe test-mode customer and finalized invoice records through orchestration
 when a local `sk_test_...` key is configured; Goal 7.8 adds saved local workflows, active
 workflow selection, selected-workflow-driven runs, persisted run history, historical run
-inspection, functional Customers/Runs/Audit/Settings views, and clickable workflow graph
-nodes while preserving the Profit Protected outcome panel, Live Stack Proof, staged
-execution replay, and backend proof. Stripe payment status is labeled honestly: the
+inspection, functional Customers/Runs/Audit/Integrations/Settings views, and clickable
+workflow proof nodes. Goal 7.9C replaces the main Workflow surface with a connected
+enterprise canvas, visible approved/blocked branches, and a right selected-node inspector
+while preserving backend proof. Stripe payment status is labeled honestly: the
 verified invoice is `invoice_status=open` and `paid=false` unless Stripe reports otherwise.
 
-Goal 7.9 is the planned product UX consolidation before NemoClaw work. It keeps the same
-working backend proof but reshapes the app into a workflow automation canvas with left
-navigation, a top command bar, a central graph, a right selected-node inspector, and clean
-Customers, Runs, Audit, Integrations, and Settings views. The intent is a commercial-style
-browser recording where the demo is the operator using ScaleX, not a tour through static
-proof panels.
+Goal 7.9 is the product UX consolidation before NemoClaw work. Goal 7.9C keeps the same
+working backend proof but reshapes the main Workflow page into a workflow automation canvas
+with left navigation, a top command bar, a central graph, and a right selected-node
+inspector. Goal 7.9D remains for Customers, Runs, Audit, Integrations, and Settings cleanup.
+The intent is a commercial-style browser recording where the demo is the operator using
+ScaleX, not a tour through static proof panels.
 
 The login gate is local prototype auth, not production enterprise auth. Workflow management is
 local/sample workflow management, not full multi-tenant SaaS. The active spend authority is

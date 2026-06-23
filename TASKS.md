@@ -2,18 +2,19 @@
 
 ## Current priority
 
-Goal 7.9C - Workflow Canvas + Selected-Node Inspector.
+Goal 7.9D - Customers / Runs / Audit / Integrations cleanup.
 
 ## Next recommended goal
 
-Run Codex `/goal` 7.9C to make the Workflow page the product center with:
+Run Codex `/goal` 7.9D to clean up the secondary product views after the Workflow page redesign:
 
-- connected workflow canvas
-- right selected-node inspector
-- separate Approved Spend and Blocked Spend branches
-- node-level proof for Hermes, Stripe test invoice, payment status, policy, spend, agents, SQLite audit, and Profit Report
+- Customers: active workflow clarity, Harbor sample ergonomics, and saved workflow management polish
+- Runs: persisted run history and selected-run proof summary cleanup
+- Audit: timeline, orchestration calls, ledger, Stripe events, and policy checks organization
+- Integrations: Hermes, Stripe test mode, SQLite, local policy, and NemoClaw Goal 8 next/not real yet
+- Settings: prototype auth, local API/database status, active workflow/run records, and safety boundaries
 
-Goal 7.9B completed the app shell/design foundation. Do not implement Goal 8 during 7.9C.
+Goal 7.9C completed the main Workflow canvas and selected-node inspector. Do not implement Goal 8 during 7.9D.
 
 ## Why this is next
 
@@ -34,10 +35,9 @@ Audit, Integrations, and Settings without terminal output.
 
 Goal 7.9A is complete as a read-only UX blueprint. Goal 7.9B is complete for app shell
 extraction, navigation cleanup, shared selectors, and distinct Integrations and Settings
-views. The remaining gap before Goal 8 is the main Workflow experience: it still uses the
-current grid-based workflow map and stacked proof panels. Goal 7.9C should make the app
-feel like a workflow automation/control-room product: canvas first and selected-node
-inspector second.
+views. Goal 7.9C is complete for the main Workflow page: it now uses a connected
+workflow canvas with a right selected-node inspector. The remaining UI gap before Goal 8
+is the secondary product views.
 
 ## Goal 7.9 sequence
 
@@ -72,15 +72,16 @@ inspector second.
 
 ### Goal 7.9C - Workflow Canvas + Selected-Node Inspector
 
-- Next.
-- Make the Workflow page the product center.
-- Replace stacked proof panels with a connected workflow canvas.
+- Complete.
+- Made the Workflow page the product center.
+- Replaced stacked proof panels with a connected workflow canvas.
 - Use nodes for Customer Intake, Hermes Brain, Stripe Test Invoice, Payment Status,
   Policy Gate, Approved Spend, Blocked Spend, Agent Work, SQLite Audit, and Profit Report.
 - Clicking nodes changes the right inspector.
 - The inspector shows real proof for the selected node.
 - Approved and blocked branches are visually obvious.
-- Preserve real Hermes, Stripe test-mode, SQLite, and local policy proof.
+- Preserved real Hermes, Stripe test-mode, SQLite, and local policy proof.
+- Preserved Stripe open/unpaid honesty and NemoClaw Goal 8 next/not real yet labeling.
 
 ### Goal 7.9D - Customers / Runs / Audit / Integrations Cleanup
 
@@ -110,14 +111,25 @@ inspector second.
 - Ensure every visible claim is real, test-mode, or honestly labeled future work.
 - Update demo script and submission docs.
 
-## Required outputs for Goal 7.9C
+## Completed outputs for Goal 7.9C
 
 - Connected workflow canvas with the exact Goal 7.9 node set.
 - Right selected-node inspector.
 - Approved Spend and Blocked Spend shown as separate branches.
-- Current proof panels collapsed or moved only where the inspector safely replaces them.
+- Current proof panels removed from Workflow where the inspector safely replaces them.
 - Existing behavior preserved for auth, onboarding, workflow selection, selected-workflow runs, run history, Audit, Integrations, and Settings.
-- Updates to STATUS.md, TASKS.md, and CHANGELOG.md at closeout.
+- Workflow feature files created under `frontend/src/features/workflow/`.
+- `App.tsx` delegates the Workflow route to `WorkflowPage`.
+- `./scripts/test.sh` passed.
+
+## Required outputs for Goal 7.9D
+
+- Customers, Runs, Audit, Integrations, and Settings should feel consistent with the new Workflow canvas product shell.
+- Do not change backend business logic unless absolutely required for display.
+- Preserve real Hermes, Stripe test-mode, SQLite, local policy, profit proof, Stripe open/unpaid honesty, and NemoClaw not-real-yet labeling.
+- Update STATUS.md, TASKS.md, and CHANGELOG.md at closeout.
+- `./scripts/test.sh`.
+- Vite build if not already covered by the test script.
 - `git diff --check`.
 - Tracked-file secret scan.
 - `git status --short`.

@@ -50,20 +50,21 @@ Implemented today:
 - Real Stripe test-mode invoice flow through the orchestration layer.
 - Stripe test-double records are available for automated tests, CI, offline development, and diagnostics.
 - Deterministic Finance, Marketing, Research, and Ops outputs.
-- Vite React product shell with a local prototype auth gate, functional Customers workflow management, selected-workflow run controls, clickable workflow visualization, persisted run history, audit, and integrations views.
+- Vite React product shell with a local prototype auth gate, functional Customers workflow management, selected-workflow run controls, connected Workflow canvas, right selected-node inspector, persisted run history, audit, integrations, and settings views.
 - Goal 7.8 browser product workflow: create/select/delete saved local workflows, load Harbor Fleet Services as the sample, start a run for the active workflow, inspect proof nodes, and return later to run history.
+- Goal 7.9C Workflow page redesign: connected enterprise workflow canvas, visible approved/blocked branches, selected-node inspector, and compact proof access without stacked Workflow proof panels.
 - Harbor Fleet Services sample run with the locked final report numbers, plus custom synthetic/sample workflows whose invoice amount and economics drive the run.
 
 Next targets:
 
-- Goal 7.9A: no-code UX blueprint for the workflow canvas product redesign.
-- Goal 7.9B-E: redesign the product shell around a central workflow canvas and selected-node inspector while preserving current proof.
+- Goal 7.9D: clean up Customers, Runs, Audit, Integrations, and Settings so the secondary views match the new Workflow canvas product shell.
+- Goal 7.9E: browser-only recording readiness and demo QA.
 - Goal 8: add NemoClaw or a NemoClaw-style policy safety adapter if it can be done safely.
 - Add future Verified Live Mode before any live-money Stripe capability.
 
-The product shell calls the local backend to run the complete compressed lifecycle and display job intake, Hermes planning, orchestration/tool calls, payment state, policy decisions, agent work, ledger entries, and the final profit report. The walkthrough is intended to be recorded as browser-only product usage: log in, open Customers, use Harbor or create a synthetic workflow, start the selected workflow run, watch the workflow map move, click proof nodes, review Audit, open Runs, and log out.
+The product shell calls the local backend to run the complete compressed lifecycle and display job intake, Hermes planning, orchestration/tool calls, payment state, policy decisions, agent work, ledger entries, and the final profit report. The walkthrough is intended to be recorded as browser-only product usage: log in, open Customers, use Harbor or create a synthetic workflow, start the selected workflow run, watch the connected Workflow canvas move, click proof nodes, review Audit, open Runs, and log out.
 
-Goal 7.8 makes ScaleX a functional product prototype with browser-usable workflow operations. The current UI is not the final product UX; Goal 7.9 plans and implements a workflow automation canvas with a selected-node inspector so the product feels like a control-room app instead of stacked proof cards. Local workflow/customer management is real SQLite-backed prototype behavior, but it is not production enterprise auth or full multi-tenant SaaS. No live-money Stripe support was added.
+Goal 7.8 made ScaleX a functional product prototype with browser-usable workflow operations. Goal 7.9C now makes the main Workflow page feel like a control-room app with a connected canvas and selected-node inspector instead of stacked proof cards. Local workflow/customer management is real SQLite-backed prototype behavior, but it is not production enterprise auth or full multi-tenant SaaS. No live-money Stripe support was added.
 
 ## Demo Modes
 
@@ -173,9 +174,9 @@ These commands must not use live Stripe mode or production service credentials f
 
 ## What Is Real, Test, and Future
 
-- Real now: isolated Hermes planning through `scalex-operator`, real Stripe test-mode invoice creation/finalization, SQLite audit ledger, local policy enforcement, local prototype auth, SQLite-backed local/sample workflows, selected-workflow runs, persisted run history, clickable proof nodes, and the product shell workflow experience.
+- Real now: isolated Hermes planning through `scalex-operator`, real Stripe test-mode invoice creation/finalization, SQLite audit ledger, local policy enforcement, local prototype auth, SQLite-backed local/sample workflows, selected-workflow runs, persisted run history, connected Workflow canvas, selected-node inspector, clickable proof nodes, and the product shell workflow experience.
 - Test/diagnostic only: deterministic Hermes planning and Stripe test doubles in automated tests, CI, offline development, or explicitly labeled diagnostics.
-- Future: Goal 7.9 workflow canvas UX redesign, NemoClaw-compatible safety integration in Goal 8, and Verified Live Mode before any live-money Stripe actions.
+- Future: Goal 7.9D/E secondary-view cleanup and recording readiness, NemoClaw-compatible safety integration in Goal 8, and Verified Live Mode before any live-money Stripe actions.
 
 ## Core Product Loop
 

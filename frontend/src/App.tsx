@@ -12,7 +12,6 @@ import {
   ClipboardList,
   CircleDashed,
   CircleDollarSign,
-  Clock3,
   CreditCard,
   Database,
   ExternalLink,
@@ -33,7 +32,6 @@ import {
   Users,
   WalletCards,
   Workflow,
-  X,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
@@ -52,23 +50,21 @@ import {
 import { darkToneClass, softToneClass } from "./components/ui/statusStyles";
 import type { Tone } from "./components/ui/statusStyles";
 import { formatCurrency, formatDateTime, formatPercent, humanize } from "./format";
+import { WorkflowPage } from "./features/workflow/WorkflowPage";
+import { WORKFLOW_NODE_ORDER, type WorkflowInspectorKey } from "./features/workflow/workflowModel";
 import { AppShell } from "./layout/AppShell";
 import { TopCommandBar } from "./layout/TopCommandBar";
 import type { AppView } from "./layout/navigation";
 import {
   auditRowCount,
-  eventByType,
   formatOptionalCurrency,
   formatOptionalPercent,
   hermesFailed,
   isApproved,
-  latestTimestamp,
   latestWhere,
   moneySnapshot,
   operatingPlanPhases,
   runStatusLabel,
-  stripeBadgeValue,
-  stripeModeLabel,
   taskRows,
 } from "./lib/demoSelectors";
 import type { BusyAction, MoneySnapshot } from "./lib/demoSelectors";
@@ -92,18 +88,6 @@ import type {
   WorkflowConfig,
 } from "./types";
 
-type StageStatus = "pending" | "current" | "complete" | "blocked" | "error";
-type WorkflowNodeKey =
-  | "intake"
-  | "hermes"
-  | "stripe"
-  | "payment"
-  | "policy"
-  | "spend"
-  | "agents"
-  | "audit"
-  | "report";
-
 interface OnboardingDraft {
   clientName: string;
   businessType: string;
@@ -114,40 +98,6 @@ interface OnboardingDraft {
   marginFloorPercent: string;
   approvedVendors: string;
   blockedVendors: string;
-}
-
-interface WorkflowNode {
-  key: WorkflowNodeKey;
-  name: string;
-  status: StageStatus;
-  proof: string;
-  timestamp: string | null;
-  badge: string;
-  icon: LucideIcon;
-}
-
-interface PipelineStage {
-  name: string;
-  status: StageStatus;
-  timestamp: string | null;
-  modeLabel: string;
-  proof: string;
-  icon: LucideIcon;
-}
-
-type PlaybackKey =
-  | "intake"
-  | "hermes"
-  | "stripe"
-  | "policy"
-  | "blocked"
-  | "agents"
-  | "report";
-
-interface PlaybackStep {
-  key: PlaybackKey;
-  label: string;
-  icon: LucideIcon;
 }
 
 const HARBOR_ONBOARDING_DRAFT: OnboardingDraft = {
@@ -163,52 +113,6 @@ const HARBOR_ONBOARDING_DRAFT: OnboardingDraft = {
   blockedVendors: "Premium Automation Suite",
 };
 
-const PLAYBACK_STEPS: PlaybackStep[] = [
-  { key: "intake", label: "Intake received", icon: Target },
-  { key: "hermes", label: "Hermes planned", icon: BrainCircuit },
-  { key: "stripe", label: "Stripe invoice created", icon: CreditCard },
-  { key: "policy", label: "Policy checked spend", icon: ShieldCheck },
-  { key: "blocked", label: "Unsafe spend blocked", icon: Ban },
-  { key: "agents", label: "Agents produced work", icon: Layers3 },
-  { key: "report", label: "Profit report generated", icon: FileText },
-];
-
-const stageStatusMeta: Record<
-  StageStatus,
-  { label: string; icon: LucideIcon; className: string; railClassName: string }
-> = {
-  pending: {
-    label: "Pending",
-    icon: CircleDashed,
-    className: "border-zinc-200 bg-zinc-50 text-zinc-600",
-    railClassName: "border-zinc-200 bg-white",
-  },
-  current: {
-    label: "Current",
-    icon: Clock3,
-    className: "border-amber-300 bg-amber-50 text-amber-800",
-    railClassName: "border-amber-300 bg-amber-50",
-  },
-  complete: {
-    label: "Complete",
-    icon: CheckCircle2,
-    className: "border-emerald-300 bg-emerald-50 text-emerald-800",
-    railClassName: "border-emerald-300 bg-emerald-50",
-  },
-  blocked: {
-    label: "Guardrail block",
-    icon: ShieldAlert,
-    className: "border-rose-300 bg-rose-50 text-rose-800",
-    railClassName: "border-rose-300 bg-rose-50",
-  },
-  error: {
-    label: "Error",
-    icon: AlertTriangle,
-    className: "border-rose-300 bg-rose-50 text-rose-800",
-    railClassName: "border-rose-300 bg-rose-50",
-  },
-};
-
 export default function App() {
   const [auth, setAuth] = useState<AuthStatus | null>(null);
   const [authError, setAuthError] = useState<string | null>(null);
@@ -218,7 +122,7 @@ export default function App() {
   const [onboardingError, setOnboardingError] = useState<string | null>(null);
   const [health, setHealth] = useState<HealthResponse | null>(null);
   const [state, setState] = useState<DemoState | null>(null);
-  const [selectedNodeKey, setSelectedNodeKey] = useState<WorkflowNodeKey | null>(null);
+  const [selectedNodeKey, setSelectedNodeKey] = useState<WorkflowInspectorKey>("summary");
   const [busyAction, setBusyAction] = useState<BusyAction>("initial");
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
@@ -226,15 +130,12 @@ export default function App() {
   const [runCompletedMoment, setRunCompletedMoment] = useState(false);
 
   const isBusy = busyAction !== null;
-  const pipeline = useMemo(() => buildPipeline(state), [state]);
   const money = useMemo(() => moneySnapshot(state), [state]);
   const auditRows = useMemo(() => auditRowCount(state), [state]);
   const runStatus = runStatusLabel(state, busyAction, error);
   const activeWorkflow = state?.workflow ?? null;
   const displayCustomer = activeWorkflow?.client_name ?? state?.job?.client_name ?? "No workflow selected";
   const displayJob = activeWorkflow?.job_name ?? state?.job?.job_name ?? "Create or select a workflow";
-  const showExecutionReplay =
-    busyAction === "run" || runCompletedMoment || Boolean(state?.report);
 
   useEffect(() => {
     void loadSession();
@@ -259,7 +160,7 @@ export default function App() {
     setPlaybackIndex(0);
     const timer = window.setInterval(() => {
       setPlaybackIndex((current) =>
-        current >= PLAYBACK_STEPS.length - 1 ? current : current + 1,
+        current >= WORKFLOW_NODE_ORDER.length - 1 ? current : current + 1,
       );
     }, 700);
 
@@ -341,7 +242,7 @@ export default function App() {
       setAuth(authResponse);
       setState(null);
       setHealth(null);
-      setSelectedNodeKey(null);
+      setSelectedNodeKey("summary");
       setActiveView("workflow");
     } catch (caught) {
       setAuthError(errorMessage(caught));
@@ -379,7 +280,7 @@ export default function App() {
       setState(response.state);
       setHealth(await getHealth());
       if (response.status === "completed") {
-        setPlaybackIndex(PLAYBACK_STEPS.length - 1);
+        setPlaybackIndex(WORKFLOW_NODE_ORDER.length - 1);
         setRunCompletedMoment(true);
         setNotice("Workflow run completed with API proof loaded.");
       } else {
@@ -454,7 +355,7 @@ export default function App() {
       setState(response.state);
       setHealth(await getHealth());
       setActiveView("workflow");
-      setSelectedNodeKey(null);
+      setSelectedNodeKey("summary");
       setNotice("Workflow selected. The next run will use this customer and economics.");
     } catch (caught) {
       setError(errorMessage(caught));
@@ -471,7 +372,7 @@ export default function App() {
       const response = await deleteWorkflow(workflowId);
       setState(response.state);
       setHealth(await getHealth());
-      setSelectedNodeKey(null);
+      setSelectedNodeKey("summary");
       setNotice("Local workflow deleted. Run history remains in SQLite.");
     } catch (caught) {
       setError(errorMessage(caught));
@@ -492,7 +393,7 @@ export default function App() {
       setHealth(healthResponse);
       setState(stateResponse);
       setActiveView("runs");
-      setSelectedNodeKey(null);
+      setSelectedNodeKey("summary");
       setNotice("Historical run loaded from SQLite.");
     } catch (caught) {
       setError(errorMessage(caught));
@@ -552,144 +453,27 @@ export default function App() {
       }
     >
       {activeView === "workflow" ? (
-        <>
-      <section className="border-b border-zinc-900 bg-zinc-950 text-white">
-        <div className="w-full px-4 py-5 sm:px-6 lg:px-8">
-          <div className="flex flex-col gap-5">
-            <div className="grid gap-5 xl:grid-cols-[minmax(0,1.08fr)_minmax(360px,0.92fr)] xl:items-stretch">
-              <div className="flex min-h-[19rem] flex-col justify-between rounded-lg border border-white/15 bg-white/5 p-5">
-                <div>
-                  <p className="text-sm font-semibold uppercase text-emerald-200">
-                    Profit-aware agent operations
-                  </p>
-                  <h1 className="mt-3 max-w-5xl text-4xl font-semibold leading-tight text-white lg:text-6xl">
-                    ScaleX ran a live AI business workflow.
-                  </h1>
-                  <p className="mt-4 max-w-4xl text-base leading-7 text-zinc-300 lg:text-lg">
-                    {displayCustomer} is configured for {displayJob}. Start a run to
-                    send the selected workflow through Hermes planning, Stripe test
-                    invoicing, policy-gated spend, agent work, and an audited profit
-                    report.
-                  </p>
-                </div>
-
-                <div className="mt-6 grid gap-2 sm:grid-cols-3">
-                  <HeroClaim
-                    icon={Workflow}
-                    label="What it does"
-                    value="Runs a paid service workflow end to end"
-                  />
-                  <HeroClaim
-                    icon={ShieldCheck}
-                    label="Why it matters"
-                    value="Blocks spend that would violate margin policy"
-                  />
-                  <HeroClaim
-                    icon={BookOpenCheck}
-                    label="What judges see"
-                    value="Proof records from integrations and SQLite"
-                  />
-                </div>
-              </div>
-
-              <ProfitProtectedHero money={money} workflow={activeWorkflow} />
-            </div>
-
-            <HeroStackProof state={state} health={health} auditRows={auditRows} />
-
-            {!activeWorkflow ? (
-              <div className="flex flex-col gap-3 rounded-lg border border-amber-300/40 bg-amber-300/10 p-4 text-sm text-amber-100 sm:flex-row sm:items-center sm:justify-between">
-                <span>Create or select a local workflow in Customers before starting a run.</span>
-                <button
-                  className="inline-flex min-h-10 items-center justify-center gap-2 rounded-md border border-amber-200/50 bg-white/10 px-3 font-semibold text-white transition hover:bg-white/15"
-                  onClick={() => setActiveView("customers")}
-                  type="button"
-                >
-                  <Users className="h-4 w-4" aria-hidden="true" />
-                  Open Customers
-                </button>
-              </div>
-            ) : null}
-
-            <WorkflowCanvas
-              auditRows={auditRows}
-              busy={busyAction === "run"}
-              money={money}
-              onSelectNode={setSelectedNodeKey}
-              playbackIndex={playbackIndex}
-              selectedNodeKey={selectedNodeKey}
-              onCloseNode={() => setSelectedNodeKey(null)}
-              state={state}
-            />
-
-            {showExecutionReplay ? (
-              <ExecutionPlayback
-                busy={busyAction === "run"}
-                error={error}
-                money={money}
-                playbackIndex={playbackIndex}
-                state={state}
-              />
-            ) : null}
-
-            {notice ? (
-              <div className="rounded-lg border border-emerald-300/30 bg-emerald-400/10 p-3 text-sm text-emerald-100">
-                {notice}
-              </div>
-            ) : null}
-            {error ? (
-              <div className="flex items-start gap-3 rounded-lg border border-rose-300/40 bg-rose-400/10 p-4 text-sm text-rose-100">
-                <AlertTriangle className="mt-0.5 h-4 w-4 flex-none" aria-hidden="true" />
-                <div>
-                  <p className="font-semibold">API request failed</p>
-                  <p className="mt-1">{error}</p>
-                </div>
-              </div>
-            ) : null}
-          </div>
-        </div>
-      </section>
-
-      <div className="w-full px-4 py-5 sm:px-6 lg:px-8">
-        <section className="grid gap-4 xl:grid-cols-[360px_minmax(0,1fr)_420px]">
-          <LivePipeline stages={pipeline} />
-
-          <HermesCommandPanel
-            hermes={state?.hermes ?? null}
-            planningRun={state?.planning_run ?? null}
-            calls={state?.orchestration_calls ?? []}
-            busy={busyAction === "run"}
-          />
-
-          <ProofColumn
-            money={money}
-            stripe={state?.stripe ?? null}
-            stripeEvents={state?.stripe_events ?? []}
-            policySummary={state?.policy.summary ?? null}
-            policyChecks={state?.policy_checks ?? []}
-          />
-        </section>
-
-        <section className="mt-4 grid gap-4 xl:grid-cols-[1fr_420px]">
-          <AgentOutputsPanel outputs={state?.agent_outputs ?? []} />
-          <JudgeProofPanel
-            state={state}
-            health={health}
-            auditRows={auditRows}
-          />
-        </section>
-
-        <section className="mt-4 grid gap-4 xl:grid-cols-[1fr_1fr]">
-          <AuditLedgerPanel
-            entries={state?.ledger.entries ?? []}
-            totals={state?.ledger.totals ?? null}
-            databasePath={state?.database.path ?? health?.database_path ?? null}
-            auditRows={auditRows}
-          />
-          <TimelinePanel events={state?.timeline_events ?? state?.events ?? []} />
-        </section>
-      </div>
-        </>
+        <WorkflowPage
+          activeWorkflow={activeWorkflow}
+          auditRows={auditRows}
+          busyAction={busyAction}
+          displayCustomer={displayCustomer}
+          displayJob={displayJob}
+          error={error}
+          health={health}
+          isBusy={isBusy}
+          money={money}
+          notice={notice}
+          onOpenCustomers={() => setActiveView("customers")}
+          onRefresh={refreshState}
+          onReset={handleResetDemo}
+          onRun={handleRunDemo}
+          onSelectNode={setSelectedNodeKey}
+          playbackIndex={playbackIndex}
+          runStatus={runStatus}
+          selectedNodeKey={selectedNodeKey}
+          state={state}
+        />
       ) : (
         <ProductView
           activeView={activeView}
@@ -1060,286 +844,6 @@ function OnboardingMetric({ label, value }: { label: string; value: string }) {
       <p className="text-xs font-semibold uppercase text-zinc-500">{label}</p>
       <p className="mt-2 text-xl font-semibold text-zinc-950">{value}</p>
     </div>
-  );
-}
-
-function WorkflowCanvas({
-  auditRows,
-  busy,
-  money,
-  onCloseNode,
-  onSelectNode,
-  playbackIndex,
-  selectedNodeKey,
-  state,
-}: {
-  auditRows: number;
-  busy: boolean;
-  money: MoneySnapshot;
-  onCloseNode: () => void;
-  onSelectNode: (key: WorkflowNodeKey) => void;
-  playbackIndex: number;
-  selectedNodeKey: WorkflowNodeKey | null;
-  state: DemoState | null;
-}) {
-  const nodes = buildWorkflowNodes(state, money, auditRows, busy, playbackIndex);
-  const approvedChecks = state?.policy_checks.filter(isApproved) ?? [];
-  const blockedChecks = state?.policy_checks.filter((check) => !isApproved(check)) ?? [];
-  const selectedNode = nodes.find((node) => node.key === selectedNodeKey) ?? null;
-
-  return (
-    <section className="rounded-lg border border-white/15 bg-zinc-900/80 p-4">
-      <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-        <div>
-          <div className="flex items-center gap-2">
-            <Workflow className="h-5 w-5 text-emerald-200" aria-hidden="true" />
-            <h2 className="text-base font-semibold text-white">Autonomous Workflow Map</h2>
-          </div>
-          <p className="mt-1 text-sm leading-6 text-zinc-300">
-            Animated presentation while the run is in flight; completed proof is loaded from the API state.
-          </p>
-        </div>
-        <span className="rounded-md border border-white/15 bg-white/10 px-3 py-2 text-xs font-semibold text-zinc-200">
-          {nodes.filter((node) => node.status !== "pending").length}/{nodes.length} nodes active
-        </span>
-      </div>
-
-      <div className="mt-4 grid gap-3 lg:grid-cols-3">
-        {nodes.map((node, index) => (
-          <WorkflowNodeCard
-            approvedChecks={approvedChecks}
-            blockedChecks={blockedChecks}
-            key={node.name}
-            node={node}
-            onSelect={() => onSelectNode(node.key)}
-            showBranches={node.name === "Spend Decision"}
-            showConnector={index < nodes.length - 1}
-          />
-        ))}
-      </div>
-      {selectedNode ? (
-        <WorkflowNodeDrawer
-          auditRows={auditRows}
-          money={money}
-          node={selectedNode}
-          onClose={onCloseNode}
-          state={state}
-        />
-      ) : null}
-    </section>
-  );
-}
-
-function WorkflowNodeCard({
-  approvedChecks,
-  blockedChecks,
-  node,
-  onSelect,
-  showBranches,
-  showConnector,
-}: {
-  approvedChecks: PolicyCheck[];
-  blockedChecks: PolicyCheck[];
-  node: WorkflowNode;
-  onSelect: () => void;
-  showBranches: boolean;
-  showConnector: boolean;
-}) {
-  const Icon = node.icon;
-  const StatusIcon = stageStatusMeta[node.status].icon;
-  return (
-    <button
-      className={`relative min-h-[13rem] rounded-lg border p-4 text-left transition hover:-translate-y-0.5 hover:border-white/30 ${darkStageClass(node.status)}`}
-      onClick={onSelect}
-      type="button"
-    >
-      {showConnector ? (
-        <ArrowRight className="absolute -right-3 top-1/2 z-10 hidden h-6 w-6 -translate-y-1/2 rounded-full border border-white/15 bg-zinc-950 p-1 text-zinc-300 lg:block" />
-      ) : null}
-      <div className="flex items-start justify-between gap-3">
-        <span className="flex h-10 w-10 items-center justify-center rounded-md border border-white/15 bg-white/10">
-          <Icon className={`h-5 w-5 ${node.status === "current" ? "animate-pulse" : ""}`} aria-hidden="true" />
-        </span>
-        <span className="inline-flex items-center gap-1 rounded-md border border-white/15 bg-white/10 px-2 py-1 text-xs font-semibold">
-          <StatusIcon className="h-3.5 w-3.5" aria-hidden="true" />
-          {stageStatusMeta[node.status].label}
-        </span>
-      </div>
-      <p className="mt-3 text-base font-semibold text-white">{node.name}</p>
-      <p className="mt-2 text-sm leading-5 text-zinc-200">{node.proof}</p>
-      <div className="mt-3 flex flex-wrap gap-2 text-xs">
-        <span className="rounded-md border border-white/15 bg-white/10 px-2 py-1 font-semibold">
-          {node.badge}
-        </span>
-        <span className="rounded-md border border-white/15 bg-white/10 px-2 py-1">
-          {formatDateTime(node.timestamp)}
-        </span>
-      </div>
-      {showBranches ? (
-        <div className="mt-3 grid gap-2 sm:grid-cols-2">
-          <div className="rounded-md border border-emerald-300/30 bg-emerald-300/10 p-2 text-xs text-emerald-100">
-            <p className="font-semibold">Proceed branch</p>
-            <p className="mt-1">{approvedChecks.length} approved spend checks</p>
-          </div>
-          <div className="rounded-md border border-rose-300/40 bg-rose-300/10 p-2 text-xs text-rose-100">
-            <p className="font-semibold">Blocked branch</p>
-            <p className="mt-1">
-              {blockedChecks[0]
-                ? `${formatCurrency(blockedChecks[0].requested_amount_cents)} ${blockedChecks[0].vendor}`
-                : "$750 unsafe spend pending"}
-            </p>
-          </div>
-        </div>
-      ) : null}
-    </button>
-  );
-}
-
-function WorkflowNodeDrawer({
-  auditRows,
-  money,
-  node,
-  onClose,
-  state,
-}: {
-  auditRows: number;
-  money: MoneySnapshot;
-  node: WorkflowNode;
-  onClose: () => void;
-  state: DemoState | null;
-}) {
-  const Icon = node.icon;
-  return (
-    <div className="fixed inset-0 z-40 flex justify-end bg-zinc-950/55">
-      <aside className="h-full w-full max-w-2xl overflow-auto border-l border-zinc-200 bg-stone-100 p-4 text-zinc-950 shadow-2xl">
-        <div className="rounded-lg border border-zinc-200 bg-white p-4 shadow-sm">
-          <div className="flex items-start justify-between gap-3">
-            <div className="flex items-start gap-3">
-              <span className="flex h-11 w-11 flex-none items-center justify-center rounded-lg border border-zinc-200 bg-zinc-50 text-zinc-800">
-                <Icon className="h-5 w-5" aria-hidden="true" />
-              </span>
-              <div>
-                <p className="text-xs font-semibold uppercase text-zinc-500">Workflow node</p>
-                <h2 className="mt-1 text-xl font-semibold text-zinc-950">{node.name}</h2>
-                <p className="mt-2 text-sm leading-6 text-zinc-600">{node.proof}</p>
-              </div>
-            </div>
-            <button
-              className="inline-flex h-10 w-10 items-center justify-center rounded-md border border-zinc-200 bg-white text-zinc-700 transition hover:bg-zinc-50"
-              onClick={onClose}
-              type="button"
-            >
-              <X className="h-5 w-5" aria-hidden="true" />
-            </button>
-          </div>
-        </div>
-
-        <div className="mt-4 space-y-4">
-          {node.key === "intake" ? (
-            <WorkflowConfigPanel workflow={state?.workflow ?? null} job={state?.job ?? null} />
-          ) : null}
-          {node.key === "hermes" ? (
-            <HermesCommandPanel
-              busy={false}
-              calls={state?.orchestration_calls ?? []}
-              hermes={state?.hermes ?? null}
-              planningRun={state?.planning_run ?? null}
-            />
-          ) : null}
-          {node.key === "stripe" || node.key === "payment" ? (
-            <StripeProofPanel summary={state?.stripe ?? null} events={state?.stripe_events ?? []} />
-          ) : null}
-          {node.key === "policy" || node.key === "spend" ? (
-            <GuardrailDecisionsPanel
-              summary={state?.policy.summary ?? null}
-              checks={state?.policy_checks ?? []}
-            />
-          ) : null}
-          {node.key === "agents" ? (
-            <AgentOutputsPanel outputs={state?.agent_outputs ?? []} />
-          ) : null}
-          {node.key === "audit" ? (
-            <AuditLedgerPanel
-              auditRows={auditRows}
-              databasePath={state?.database.path ?? null}
-              entries={state?.ledger.entries ?? []}
-              totals={state?.ledger.totals ?? null}
-            />
-          ) : null}
-          {node.key === "report" ? (
-            <section className="rounded-lg border border-zinc-200 bg-white p-4 shadow-sm">
-              <div className="flex items-center gap-2">
-                <FileText className="h-5 w-5 text-teal-700" aria-hidden="true" />
-                <h3 className="text-base font-semibold text-zinc-950">Final Profit Report</h3>
-              </div>
-              <div className="mt-4">
-                <MoneyFlow money={money} />
-              </div>
-              {state?.report ? (
-                <MarkdownPreview markdown={state.report.report_markdown} />
-              ) : (
-                <div className="mt-4 rounded-lg border border-dashed border-zinc-300 p-4 text-sm text-zinc-600">
-                  Final report appears after a run completes.
-                </div>
-              )}
-            </section>
-          ) : null}
-        </div>
-      </aside>
-    </div>
-  );
-}
-
-function WorkflowConfigPanel({
-  job,
-  workflow,
-}: {
-  job: DemoJob | null;
-  workflow: WorkflowConfig | null;
-}) {
-  const source = workflow ?? job;
-  return (
-    <section className="rounded-lg border border-zinc-200 bg-white p-4 shadow-sm">
-      <div className="flex items-center gap-2">
-        <Target className="h-5 w-5 text-teal-700" aria-hidden="true" />
-        <h3 className="text-base font-semibold text-zinc-950">Customer / Workflow</h3>
-      </div>
-      {source ? (
-        <>
-          <div className="mt-4 grid gap-3 sm:grid-cols-2">
-            <Fact label="Customer" value={source.client_name} />
-            <Fact label="Business type" value={source.business_type} />
-            <Fact label="Job" value={source.job_name} />
-            <Fact label="Invoice" value={formatCurrency(source.invoice_amount_cents)} />
-            <Fact label="Spend cap" value={formatCurrency(source.spend_cap_cents)} />
-            <Fact label="Margin floor" value={formatPercent(source.margin_floor_percent)} />
-          </div>
-          <p className="mt-4 rounded-lg border border-zinc-200 bg-zinc-50 p-3 text-sm leading-6 text-zinc-700">
-            {source.job_goal}
-          </p>
-          {workflow ? (
-            <div className="mt-4 grid gap-3 sm:grid-cols-2">
-              <ProofChip
-                icon={ShieldCheck}
-                label="Approved vendors"
-                value={workflow.approved_vendors.join(", ") || "Default local allowlist"}
-                tone="emerald"
-              />
-              <ProofChip
-                icon={ShieldAlert}
-                label="Blocked vendors"
-                value={workflow.blocked_vendors.join(", ") || "Default local blocklist"}
-                tone="rose"
-              />
-            </div>
-          ) : null}
-        </>
-      ) : (
-        <div className="mt-4 rounded-lg border border-dashed border-zinc-300 p-4 text-sm text-zinc-600">
-          Create or select a workflow in Customers before starting a run.
-        </div>
-      )}
-    </section>
   );
 }
 
@@ -1901,463 +1405,6 @@ function SettingsView({
   );
 }
 
-function HeroClaim({
-  icon: Icon,
-  label,
-  value,
-}: {
-  icon: LucideIcon;
-  label: string;
-  value: string;
-}) {
-  return (
-    <div className="rounded-lg border border-white/15 bg-white/10 p-3">
-      <div className="flex items-center gap-2">
-        <Icon className="h-4 w-4 flex-none text-emerald-200" aria-hidden="true" />
-        <p className="text-xs font-semibold uppercase text-zinc-300">{label}</p>
-      </div>
-      <p className="mt-2 text-sm font-semibold leading-5 text-white">{value}</p>
-    </div>
-  );
-}
-
-function ProfitProtectedHero({
-  money,
-  workflow,
-}: {
-  money: MoneySnapshot;
-  workflow: WorkflowConfig | null;
-}) {
-  return (
-    <section className="rounded-lg border border-emerald-300/30 bg-emerald-300/10 p-5 shadow-2xl shadow-emerald-950/20">
-      <div className="flex items-start justify-between gap-3">
-        <div>
-          <div className="flex items-center gap-2">
-            <CircleDollarSign className="h-5 w-5 text-emerald-200" aria-hidden="true" />
-            <h2 className="text-base font-semibold text-white">Profit Protected</h2>
-          </div>
-          <p className="mt-1 text-sm text-emerald-100">
-            {money.actual ? "API-backed result loaded" : "Locked demo target until the run completes"}
-          </p>
-        </div>
-        <span className="rounded-md border border-white/15 bg-white/10 px-2 py-1 text-xs font-semibold text-zinc-200">
-          {workflow?.client_name ?? "No workflow"}
-        </span>
-      </div>
-
-      <div className="mt-5">
-        <p className="text-6xl font-semibold leading-none text-white lg:text-7xl">
-          {formatOptionalCurrency(money.grossProfitCents)}
-        </p>
-        <p className="mt-3 text-base leading-6 text-emerald-100">
-          protected gross profit after ScaleX approved only policy-safe spend.
-        </p>
-      </div>
-
-      <div className="mt-5 grid gap-3 sm:grid-cols-2">
-        <OutcomeMetric
-          label="Protected margin"
-          value={formatOptionalPercent(money.marginPercent)}
-          tone="teal"
-        />
-        <OutcomeMetric
-          label="Blocked unsafe spend"
-          value={formatOptionalCurrency(money.blockedSpendCents)}
-          tone="rose"
-        />
-      </div>
-
-      <div className="mt-3 grid gap-3 sm:grid-cols-2">
-        <OutcomeMetric
-          label="Stripe test invoice"
-          value={formatOptionalCurrency(money.revenueCents)}
-          tone="sky"
-        />
-        <OutcomeMetric
-          label="Approved spend"
-          value={formatOptionalCurrency(money.approvedSpendCents)}
-          tone="amber"
-        />
-      </div>
-    </section>
-  );
-}
-
-function OutcomeMetric({
-  label,
-  value,
-  tone,
-}: {
-  label: string;
-  value: string;
-  tone: Tone;
-}) {
-  return (
-    <div className={`rounded-lg border p-3 ${darkToneClass(tone)}`}>
-      <p className="text-xs font-semibold uppercase">{label}</p>
-      <p className="mt-2 text-2xl font-semibold">{value}</p>
-    </div>
-  );
-}
-
-function HeroStackProof({
-  state,
-  health,
-  auditRows,
-}: {
-  state: DemoState | null;
-  health: HealthResponse | null;
-  auditRows: number;
-}) {
-  const hermes = state?.hermes ?? null;
-  const stripe = state?.stripe ?? null;
-  const policy = state?.policy.summary ?? null;
-  const stripePaidState =
-    stripe?.paid === null || stripe?.paid === undefined ? "pending" : String(stripe.paid);
-  const stripeLiveMode =
-    stripe?.livemode === null || stripe?.livemode === undefined ? "pending" : String(stripe.livemode);
-
-  return (
-    <section className="rounded-lg border border-white/15 bg-white/5 p-3">
-      <div className="grid gap-2 md:grid-cols-2 xl:grid-cols-5">
-        <StackProofCard
-          icon={BrainCircuit}
-          label="Real Hermes"
-          status={hermes?.used_real_hermes ? "Real Hermes" : "Test or pending"}
-          detail={`${hermes?.provider ?? "Pending"} / ${hermes?.model ?? "Pending"} / ${hermes?.skill_name ?? "Pending"}`}
-          tone={hermes?.used_real_hermes ? "emerald" : "amber"}
-        />
-        <StackProofCard
-          icon={CreditCard}
-          label="Real Stripe Test Mode"
-          status={stripe?.used_real_stripe ? "stripe_test" : stripeBadgeValue(stripe)}
-          detail={`livemode=${stripeLiveMode}; invoice_status=${stripe?.invoice_status ?? "pending"}; paid=${stripePaidState}`}
-          tone={stripe?.used_real_stripe ? "sky" : stripe?.error ? "rose" : "amber"}
-        />
-        <StackProofCard
-          icon={Database}
-          label="SQLite Audit Ledger"
-          status={health?.database_exists ? "Active" : "Pending"}
-          detail={`${auditRows} audit rows recorded`}
-          tone={health?.database_exists ? "teal" : "slate"}
-        />
-        <StackProofCard
-          icon={ShieldCheck}
-          label="Policy Guardrails"
-          status={policy ? "Active local policy" : "Pending"}
-          detail={policy ? `${policy.engine}: cap, payment, margin, vendors` : "Local policy loading"}
-          tone={policy ? "emerald" : "amber"}
-        />
-        <StackProofCard
-          icon={ShieldAlert}
-          label="NemoClaw"
-          status="Goal 8 next"
-          detail="Not claimed as real yet"
-          tone="violet"
-        />
-      </div>
-    </section>
-  );
-}
-
-function StackProofCard({
-  icon: Icon,
-  label,
-  status,
-  detail,
-  tone,
-}: {
-  icon: LucideIcon;
-  label: string;
-  status: string;
-  detail: string;
-  tone: Tone;
-}) {
-  return (
-    <article className={`rounded-lg border p-3 ${darkToneClass(tone)}`}>
-      <div className="flex items-center gap-2">
-        <Icon className="h-4 w-4 flex-none" aria-hidden="true" />
-        <p className="text-xs font-semibold uppercase">{label}</p>
-      </div>
-      <p className="mt-2 text-sm font-semibold text-white">{status}</p>
-      <p className="mt-1 break-words text-xs leading-5">{detail}</p>
-    </article>
-  );
-}
-
-function ExecutionPlayback({
-  busy,
-  error,
-  money,
-  playbackIndex,
-  state,
-}: {
-  busy: boolean;
-  error: string | null;
-  money: MoneySnapshot;
-  playbackIndex: number;
-  state: DemoState | null;
-}) {
-  const completed = Boolean(state?.report) && !busy && !error;
-
-  return (
-    <div className="rounded-lg border border-white/15 bg-white/10 p-4">
-      <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-        <div>
-          <p className="text-base font-semibold text-white">
-            {busy
-              ? "Live execution replay running"
-              : completed
-                ? "Run completed: profit report generated"
-                : "Execution replay"}
-          </p>
-          <p className="mt-1 text-sm text-zinc-300">
-            {busy
-              ? "Frontend stages pulse while POST /api/demo/run returns the audited state."
-              : "Replay cards now reflect the latest API-backed workflow state."}
-          </p>
-        </div>
-        <span
-          className={`inline-flex w-fit items-center gap-2 rounded-md border px-3 py-2 text-xs font-semibold ${
-            completed
-              ? "border-emerald-300/40 bg-emerald-300/10 text-emerald-100"
-              : error
-                ? "border-rose-300/40 bg-rose-300/10 text-rose-100"
-                : "border-amber-300/40 bg-amber-300/10 text-amber-100"
-          }`}
-        >
-          {completed ? (
-            <CheckCircle2 className="h-4 w-4" aria-hidden="true" />
-          ) : error ? (
-            <AlertTriangle className="h-4 w-4" aria-hidden="true" />
-          ) : (
-            <RefreshCw className="h-4 w-4 animate-spin" aria-hidden="true" />
-          )}
-          {completed ? "Completed" : error ? "Needs attention" : "In flight"}
-        </span>
-      </div>
-
-      <div className="mt-4 grid gap-2 md:grid-cols-2 xl:grid-cols-7">
-        {PLAYBACK_STEPS.map((step, index) => {
-          const status = playbackStepStatus(step, index, playbackIndex, busy, state, error);
-          const Icon = step.icon;
-          const StatusIcon = stageStatusMeta[status].icon;
-          return (
-            <article
-              className={`min-h-[9rem] rounded-lg border p-3 ${darkStageClass(status)}`}
-              key={step.key}
-            >
-              <div className="flex items-start justify-between gap-2">
-                <span className="flex h-9 w-9 items-center justify-center rounded-md border border-white/15 bg-white/10">
-                  <Icon className="h-4 w-4" aria-hidden="true" />
-                </span>
-                <span className="flex items-center gap-1 text-xs font-semibold">
-                  <StatusIcon className="h-3.5 w-3.5" aria-hidden="true" />
-                  {stageStatusMeta[status].label}
-                </span>
-              </div>
-              <span
-                className={`mt-3 block h-1.5 rounded-full ${
-                  status === "current" ? "animate-pulse bg-amber-300" : darkStageBarClass(status)
-                }`}
-              />
-              <p className="mt-3 text-sm font-semibold text-white">{step.label}</p>
-              <p className="mt-2 text-xs leading-5 text-zinc-200">
-                {playbackProof(step.key, state, money)}
-              </p>
-            </article>
-          );
-        })}
-      </div>
-    </div>
-  );
-}
-
-function playbackStepStatus(
-  step: PlaybackStep,
-  index: number,
-  playbackIndex: number,
-  busy: boolean,
-  state: DemoState | null,
-  error: string | null,
-): StageStatus {
-  if (busy) {
-    if (index === playbackIndex) {
-      return "current";
-    }
-    if (index < playbackIndex) {
-      return step.key === "blocked" ? "blocked" : "complete";
-    }
-    return "pending";
-  }
-
-  if (error && index >= playbackIndex) {
-    return "error";
-  }
-
-  if (state?.report) {
-    return step.key === "blocked" ? "blocked" : "complete";
-  }
-
-  const checks = state?.policy_checks ?? [];
-  const blockedChecks = checks.filter((check) => !isApproved(check));
-  switch (step.key) {
-    case "intake":
-      return state?.job ? "complete" : "pending";
-    case "hermes":
-      return hermesFailed(state?.hermes ?? null, state?.planning_run ?? null)
-        ? "error"
-        : state?.planning_run?.status === "completed"
-          ? "complete"
-          : state?.planning_run
-            ? "current"
-            : "pending";
-    case "stripe":
-      return state?.stripe?.error ? "error" : state?.stripe?.invoice_id ? "complete" : "pending";
-    case "policy":
-      return checks.length > 0 ? "complete" : state?.policy.summary ? "current" : "pending";
-    case "blocked":
-      return blockedChecks.length > 0 ? "blocked" : checks.length > 0 ? "complete" : "pending";
-    case "agents":
-      return (state?.agent_outputs.length ?? 0) >= 4 ? "complete" : "pending";
-    case "report":
-      return state?.report ? "complete" : "pending";
-    default:
-      return "pending";
-  }
-}
-
-function playbackProof(key: PlaybackKey, state: DemoState | null, money: MoneySnapshot): string {
-  const checks = state?.policy_checks ?? [];
-  const approvedChecks = checks.filter(isApproved);
-  const blockedCheck = checks.find((check) => !isApproved(check));
-
-  switch (key) {
-    case "intake":
-      return state?.job
-        ? `${state.job.client_name}: ${formatCurrency(state.job.invoice_amount_cents)} invoice.`
-        : "Selected workflow waiting for run state.";
-    case "hermes":
-      return state?.hermes?.used_real_hermes
-        ? `${state.hermes.provider ?? "provider"} / ${state.hermes.model ?? "model"} with ${state.hermes.skill_name ?? "skill"}.`
-        : "Hermes proof loads from the planning response.";
-    case "stripe":
-      return state?.stripe?.invoice_id
-        ? `${state.stripe.stripe_mode}; livemode=${String(state.stripe.livemode)}; invoice_status=${state.stripe.invoice_status ?? "pending"}.`
-        : state?.stripe?.error ?? "Stripe test invoice proof pending.";
-    case "policy":
-      return checks.length > 0
-        ? `${approvedChecks.length} spend requests approved under cap and margin rules.`
-        : "Spend checks run after invoice and policy state are available.";
-    case "blocked":
-      return blockedCheck
-        ? `${formatCurrency(blockedCheck.requested_amount_cents)} ${blockedCheck.vendor} blocked.`
-        : `${formatOptionalCurrency(money.blockedSpendCents)} unsafe spend target guarded by policy.`;
-    case "agents":
-      return state?.agent_outputs.length
-        ? `${state.agent_outputs.length} agent deliverables recorded.`
-        : "Finance, Marketing, Research, and Ops outputs pending.";
-    case "report":
-      return state?.report
-        ? `${formatCurrency(state.report.gross_profit_cents)} profit, ${formatPercent(state.report.actual_margin_percent)} margin.`
-        : `${formatOptionalCurrency(money.grossProfitCents)} protected profit target pending report.`;
-    default:
-      return "Proof pending.";
-  }
-}
-
-function darkStageClass(status: StageStatus): string {
-  switch (status) {
-    case "complete":
-      return "border-emerald-300/40 bg-emerald-300/10 text-emerald-100";
-    case "current":
-      return "border-amber-300/50 bg-amber-300/15 text-amber-100 shadow-lg shadow-amber-950/20";
-    case "blocked":
-      return "border-rose-300/50 bg-rose-300/15 text-rose-100";
-    case "error":
-      return "border-rose-300/50 bg-rose-300/20 text-rose-100";
-    case "pending":
-    default:
-      return "border-white/10 bg-zinc-950/30 text-zinc-400";
-  }
-}
-
-function darkStageBarClass(status: StageStatus): string {
-  switch (status) {
-    case "complete":
-      return "bg-emerald-300";
-    case "blocked":
-      return "bg-rose-300";
-    case "error":
-      return "bg-rose-400";
-    case "pending":
-    default:
-      return "bg-zinc-700";
-  }
-}
-
-function LivePipeline({ stages }: { stages: PipelineStage[] }) {
-  return (
-    <section className="rounded-lg border border-zinc-200 bg-white p-4 shadow-sm">
-      <div className="flex items-start justify-between gap-3">
-        <div>
-          <div className="flex items-center gap-2">
-            <Workflow className="h-5 w-5 text-teal-700" aria-hidden="true" />
-            <h2 className="text-base font-semibold text-zinc-950">Live Run Pipeline</h2>
-          </div>
-          <p className="mt-1 text-sm leading-6 text-zinc-600">
-            Intake to profit report with proof pulled from API state.
-          </p>
-        </div>
-        <span className="rounded-md border border-zinc-200 bg-zinc-50 px-2 py-1 text-xs font-semibold text-zinc-600">
-          {stages.filter((stage) => stage.status !== "pending").length}/{stages.length}
-        </span>
-      </div>
-
-      <ol className="mt-4 space-y-3">
-        {stages.map((stage, index) => {
-          const StatusIcon = stageStatusMeta[stage.status].icon;
-          const StageIcon = stage.icon;
-          return (
-            <li className="grid grid-cols-[2rem_1fr] gap-3" key={stage.name}>
-              <div className="flex flex-col items-center">
-                <span
-                  className={`flex h-8 w-8 items-center justify-center rounded-md border ${stageStatusMeta[stage.status].className}`}
-                >
-                  <StageIcon className="h-4 w-4" aria-hidden="true" />
-                </span>
-                {index < stages.length - 1 ? (
-                  <span className="mt-2 h-full min-h-9 w-px bg-zinc-200" />
-                ) : null}
-              </div>
-              <article
-                className={`rounded-lg border p-3 ${stageStatusMeta[stage.status].railClassName}`}
-              >
-                <div className="flex items-start justify-between gap-3">
-                  <div className="min-w-0">
-                    <p className="font-semibold text-zinc-950">{stage.name}</p>
-                    <p className="mt-1 text-xs font-medium uppercase text-zinc-500">
-                      {stage.modeLabel}
-                    </p>
-                  </div>
-                  <span
-                    className={`inline-flex flex-none items-center gap-1 rounded-md border px-2 py-1 text-xs font-semibold ${stageStatusMeta[stage.status].className}`}
-                  >
-                    <StatusIcon className="h-3.5 w-3.5" aria-hidden="true" />
-                    {stageStatusMeta[stage.status].label}
-                  </span>
-                </div>
-                <p className="mt-2 text-sm leading-5 text-zinc-700">{stage.proof}</p>
-                <p className="mt-2 text-xs text-zinc-500">{formatDateTime(stage.timestamp)}</p>
-              </article>
-            </li>
-          );
-        })}
-      </ol>
-    </section>
-  );
-}
-
 function HermesCommandPanel({
   hermes,
   planningRun,
@@ -2564,71 +1611,6 @@ function ExecutionFeed({ calls }: { calls: OrchestrationCall[] }) {
         </ol>
       )}
     </div>
-  );
-}
-
-function ProofColumn({
-  money,
-  stripe,
-  stripeEvents,
-  policySummary,
-  policyChecks,
-}: {
-  money: MoneySnapshot;
-  stripe: StripeSummary | null;
-  stripeEvents: StripeEvent[];
-  policySummary: PolicySummary | null;
-  policyChecks: PolicyCheck[];
-}) {
-  return (
-    <aside className="space-y-4">
-      <section className="rounded-lg border border-zinc-200 bg-white p-4 shadow-sm">
-        <div className="flex items-center justify-between gap-3">
-          <div className="flex items-center gap-2">
-            <CircleDollarSign className="h-5 w-5 text-emerald-700" aria-hidden="true" />
-            <h2 className="text-base font-semibold text-zinc-950">
-              Money, Policy, and Profit Proof
-            </h2>
-          </div>
-          <span className="rounded-md border border-emerald-200 bg-emerald-50 px-2 py-1 text-xs font-semibold text-emerald-800">
-            {money.actual ? "Actual run" : "Locked target"}
-          </span>
-        </div>
-        <p className="mt-2 text-sm leading-6 text-zinc-600">
-          One invoice, controlled spend, blocked unsafe automation, audited profit.
-        </p>
-        <MoneyFlow money={money} />
-        <div className="mt-4 grid gap-2 sm:grid-cols-2">
-          <ProofChip
-            icon={TrendingUp}
-            label="Protected margin"
-            value={formatOptionalPercent(money.marginPercent)}
-            tone="teal"
-          />
-          <ProofChip
-            icon={Ban}
-            label="Blocked unsafe spend"
-            value={formatOptionalCurrency(money.blockedSpendCents)}
-            tone="rose"
-          />
-          <ProofChip
-            icon={WalletCards}
-            label="Approved under cap"
-            value={`${formatOptionalCurrency(money.approvedSpendCents)} / ${formatOptionalCurrency(money.spendCapCents)}`}
-            tone="sky"
-          />
-          <ProofChip
-            icon={ShieldCheck}
-            label="Policy violations"
-            value={money.policyViolations === null ? "Pending" : String(money.policyViolations)}
-            tone="emerald"
-          />
-        </div>
-      </section>
-
-      <StripeProofPanel summary={stripe} events={stripeEvents} />
-      <GuardrailDecisionsPanel summary={policySummary} checks={policyChecks} />
-    </aside>
   );
 }
 
@@ -3274,274 +2256,6 @@ function MarkdownPreview({ markdown }: { markdown: string }) {
         })}
     </div>
   );
-}
-
-function buildWorkflowNodes(
-  state: DemoState | null,
-  money: MoneySnapshot,
-  auditRows: number,
-  busy: boolean,
-  playbackIndex: number,
-): WorkflowNode[] {
-  const job = state?.job ?? null;
-  const planningRun = state?.planning_run ?? null;
-  const hermes = state?.hermes ?? null;
-  const stripe = state?.stripe ?? null;
-  const checks = state?.policy_checks ?? [];
-  const outputs = state?.agent_outputs ?? [];
-  const report = state?.report ?? null;
-  const approvedChecks = checks.filter(isApproved);
-  const blockedChecks = checks.filter((check) => !isApproved(check));
-  const events = state?.events ?? [];
-
-  const settledNodes: WorkflowNode[] = [
-    {
-      key: "intake",
-      name: "Customer Intake",
-      status: job ? "complete" : "pending",
-      proof: job
-        ? `${job.client_name}: ${formatCurrency(job.invoice_amount_cents)} invoice.`
-        : "Local onboarding prepares the customer and job.",
-      timestamp: job?.created_at ?? eventByType(events, "job_intake")?.created_at ?? null,
-      badge: "SQLite job",
-      icon: Target,
-    },
-    {
-      key: "hermes",
-      name: "Hermes Brain",
-      status: hermesFailed(hermes, planningRun)
-        ? "error"
-        : planningRun?.status === "completed"
-          ? "complete"
-          : planningRun
-            ? "current"
-            : "pending",
-      proof: planningRun
-        ? `${hermes?.provider ?? planningRun.provider} / ${hermes?.model ?? planningRun.model}; Hermes plans only.`
-        : "Planning proof appears after the run.",
-      timestamp: planningRun?.completed_at ?? planningRun?.created_at ?? null,
-      badge: hermes?.used_real_hermes ? "real Hermes" : "test or pending",
-      icon: BrainCircuit,
-    },
-    {
-      key: "stripe",
-      name: "Stripe Test Invoice",
-      status: stripe?.error ? "error" : stripe?.invoice_id ? "complete" : "pending",
-      proof: stripe?.invoice_id
-        ? `${stripe.customer_id ?? "customer pending"} / ${stripe.invoice_id}`
-        : stripe?.error ?? "Stripe test invoice proof pending.",
-      timestamp: latestWhere(state?.stripe_events ?? [], (event) => Boolean(event.invoice_id))?.created_at ?? null,
-      badge: stripeModeLabel(stripe),
-      icon: CreditCard,
-    },
-    {
-      key: "payment",
-      name: "Payment Status",
-      status: stripe?.error
-        ? "error"
-        : stripe?.paid === true
-          ? "complete"
-          : stripe?.paid === false
-            ? "current"
-            : "pending",
-      proof:
-        stripe?.paid === true
-          ? "Stripe reports paid=true."
-          : stripe?.paid === false
-            ? "Stripe test invoice is open/unpaid; compressed run records local confirmation."
-            : "Payment status pending.",
-      timestamp: latestWhere(state?.stripe_events ?? [], (event) => event.paid !== null)?.created_at ?? null,
-      badge: stripe?.paid === false ? "open/unpaid" : stripe?.paid === true ? "paid" : "pending",
-      icon: ReceiptText,
-    },
-    {
-      key: "policy",
-      name: "Policy Guardrail",
-      status: state?.policy.summary ? "complete" : "pending",
-      proof: state?.policy.summary
-        ? `Cap ${formatCurrency((state.policy.summary.max_job_spend_usd ?? 0) * 100)}, margin floor ${formatPercent(job?.margin_floor_percent ?? state.policy.summary.margin_floor_percent)}.`
-        : "Policy state pending.",
-      timestamp: eventByType(events, "policy_gate")?.created_at ?? null,
-      badge: "local policy",
-      icon: ShieldCheck,
-    },
-    {
-      key: "spend",
-      name: "Spend Decision",
-      status: blockedChecks.length > 0 ? "blocked" : approvedChecks.length > 0 ? "complete" : "pending",
-      proof:
-        checks.length > 0
-          ? `${approvedChecks.length} approved; ${formatOptionalCurrency(money.blockedSpendCents)} blocked unsafe spend.`
-          : "Approved and blocked branches appear after policy checks.",
-      timestamp: checks[checks.length - 1]?.created_at ?? null,
-      badge: "branching",
-      icon: WalletCards,
-    },
-    {
-      key: "agents",
-      name: "Agent Work",
-      status: outputs.length >= 4 ? "complete" : outputs.length > 0 ? "current" : "pending",
-      proof: outputs.length > 0 ? `${outputs.length} agent deliverables recorded.` : "Agent work pending.",
-      timestamp: outputs[outputs.length - 1]?.created_at ?? null,
-      badge: "Finance / Marketing / Research / Ops",
-      icon: Layers3,
-    },
-    {
-      key: "audit",
-      name: "SQLite Audit Ledger",
-      status: auditRows > 0 ? "complete" : "pending",
-      proof: `${auditRows} audit rows across events, ledger, policy, Stripe, calls, agents, and reports.`,
-      timestamp: latestTimestamp([
-        ...(state?.events ?? []),
-        ...(state?.ledger.entries ?? []),
-        ...(state?.policy_checks ?? []),
-        ...(state?.orchestration_calls ?? []),
-      ]),
-      badge: "auditable",
-      icon: Database,
-    },
-    {
-      key: "report",
-      name: "Profit Report",
-      status: report ? "complete" : "pending",
-      proof: report
-        ? `${formatCurrency(report.gross_profit_cents)} gross profit, ${formatPercent(report.actual_margin_percent)} margin.`
-        : "Profit report pending.",
-      timestamp: report?.created_at ?? null,
-      badge: "final output",
-      icon: FileText,
-    },
-  ];
-
-  if (!busy) {
-    return settledNodes;
-  }
-
-  return settledNodes.map((node, index) => ({
-    ...node,
-    status:
-      index === playbackIndex
-        ? "current"
-        : index < playbackIndex
-          ? node.name === "Spend Decision"
-            ? "blocked"
-            : "complete"
-          : "pending",
-  }));
-}
-
-function buildPipeline(state: DemoState | null): PipelineStage[] {
-  const job = state?.job ?? null;
-  const planningRun = state?.planning_run ?? null;
-  const hermes = state?.hermes ?? null;
-  const stripe = state?.stripe ?? null;
-  const events = state?.events ?? [];
-  const checks = state?.policy_checks ?? [];
-  const stripeEvents = state?.stripe_events ?? [];
-  const outputs = state?.agent_outputs ?? [];
-  const report = state?.report ?? null;
-  const blockedChecks = checks.filter((check) => !isApproved(check));
-  const approvedChecks = checks.filter(isApproved);
-  const latestPolicyCheck = checks[checks.length - 1] ?? null;
-  const latestStripeInvoice = latestWhere(stripeEvents, (event) => Boolean(event.invoice_id));
-  const latestPayment = latestWhere(stripeEvents, (event) => event.paid !== null);
-
-  return [
-    {
-      name: "Intake",
-      status: job ? "complete" : "pending",
-      timestamp: job?.created_at ?? eventByType(events, "job_intake")?.created_at ?? null,
-      modeLabel: "sample workflow",
-      proof: job
-        ? `${job.client_name}: ${job.job_name}. Invoice ${formatCurrency(job.invoice_amount_cents)}.`
-        : "The selected workflow appears here after a run starts.",
-      icon: Target,
-    },
-    {
-      name: "Hermes Plan",
-      status: hermesFailed(hermes, planningRun)
-        ? "error"
-        : planningRun?.status === "completed"
-          ? "complete"
-          : planningRun
-            ? "current"
-            : "pending",
-      timestamp: planningRun?.completed_at ?? planningRun?.created_at ?? eventByType(events, "hermes_planning")?.created_at ?? null,
-      modeLabel: hermes?.used_real_hermes ? "real Hermes" : planningRun?.source ?? "pending",
-      proof: planningRun
-        ? `${hermes?.provider ?? planningRun.provider} / ${hermes?.model ?? planningRun.model}; skill ${hermes?.skill_name ?? "pending"}; toolsets ${hermes?.toolsets_used?.join(", ") || "none"}.`
-        : "Hermes planning proof appears after POST /api/demo/run.",
-      icon: BrainCircuit,
-    },
-    {
-      name: "Stripe Test Invoice",
-      status: stripe?.error ? "error" : stripe?.invoice_id ? "complete" : "pending",
-      timestamp: latestStripeInvoice?.created_at ?? eventByType(events, "stripe_test")?.created_at ?? null,
-      modeLabel: stripeModeLabel(stripe),
-      proof: stripe?.invoice_id
-        ? `${stripe.customer_id ?? "customer pending"} / ${stripe.invoice_id}; livemode=${String(stripe.livemode)}.`
-        : stripe?.error ?? "Stripe test customer and finalized invoice appear after the run.",
-      icon: CreditCard,
-    },
-    {
-      name: "Payment Status",
-      status: stripe?.error
-        ? "error"
-        : stripe?.paid === true
-          ? "complete"
-          : stripe?.paid === false
-            ? "current"
-            : "pending",
-      timestamp: latestPayment?.created_at ?? eventByType(events, "payment_confirmed")?.created_at ?? null,
-      modeLabel: stripe?.paid === false ? "open/unpaid" : stripe?.paid === true ? "paid" : "pending",
-      proof:
-        stripe?.paid === true
-          ? "Stripe reports paid=true; revenue can be labeled Stripe-paid."
-          : stripe?.paid === false
-            ? "Stripe test invoice finalized and open - not marked paid."
-            : "Payment status appears after Stripe invoice finalization.",
-      icon: ReceiptText,
-    },
-    {
-      name: "Policy Gate",
-      status: state?.policy.summary ? "complete" : "pending",
-      timestamp: eventByType(events, "policy_gate")?.created_at ?? null,
-      modeLabel: "local policy",
-      proof: state?.policy.summary
-        ? `Payment-before-spend=${String(state.policy.summary.require_payment_before_spend)}, margin floor ${formatPercent(state.policy.summary.margin_floor_percent)}.`
-        : "Policy configuration appears after state loads.",
-      icon: ShieldCheck,
-    },
-    {
-      name: "Spend Approval",
-      status: blockedChecks.length > 0 ? "blocked" : approvedChecks.length > 0 ? "complete" : "pending",
-      timestamp: latestPolicyCheck?.created_at ?? null,
-      modeLabel: "guardrail decisions",
-      proof:
-        checks.length > 0
-          ? `${approvedChecks.length} approved, ${blockedChecks.length} blocked. ${blockedChecks[0]?.vendor ?? "Unsafe spend"} blocked if unsafe.`
-          : "Spend decisions appear after policy checks run.",
-      icon: WalletCards,
-    },
-    {
-      name: "Agent Outputs",
-      status: outputs.length >= 4 ? "complete" : outputs.length > 0 ? "current" : "pending",
-      timestamp: outputs[outputs.length - 1]?.created_at ?? eventByType(events, "agent_work")?.created_at ?? null,
-      modeLabel: "deterministic agent outputs",
-      proof: outputs.length > 0 ? `${outputs.length} agent deliverables recorded.` : "Finance, Marketing, Research, and Ops outputs appear after policy decisions.",
-      icon: Layers3,
-    },
-    {
-      name: "Profit Report",
-      status: report ? "complete" : "pending",
-      timestamp: report?.created_at ?? eventByType(events, "profit_report")?.created_at ?? null,
-      modeLabel: "SQLite report",
-      proof: report
-        ? `${formatCurrency(report.gross_profit_cents)} gross profit, ${formatPercent(report.actual_margin_percent)} margin, ${report.policy_violations} policy violations.`
-        : "Final profit report appears after agent work completes.",
-      icon: FileText,
-    },
-  ];
 }
 
 function iconForEvent(type: string): LucideIcon {
