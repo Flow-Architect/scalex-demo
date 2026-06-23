@@ -2,19 +2,18 @@
 
 ## Current priority
 
-Goal 7.9A - UX Blueprint / Product IA Audit.
+Goal 7.9C - Workflow Canvas + Selected-Node Inspector.
 
 ## Next recommended goal
 
-Run Codex `/goal` 7.9A to produce the no-code UX blueprint for:
+Run Codex `/goal` 7.9C to make the Workflow page the product center with:
 
-- left navigation
-- top command bar
-- central workflow canvas
+- connected workflow canvas
 - right selected-node inspector
-- separate Customers, Runs, Audit, Integrations, and Settings views
+- separate Approved Spend and Blocked Spend branches
+- node-level proof for Hermes, Stripe test invoice, payment status, policy, spend, agents, SQLite audit, and Profit Report
 
-Goal 7.9 is product UX consolidation before Goal 8. Do not implement code during 7.9A.
+Goal 7.9B completed the app shell/design foundation. Do not implement Goal 8 during 7.9C.
 
 ## Why this is next
 
@@ -31,18 +30,20 @@ navigation, a moving workflow map, run history, audit, and integrations views.
 Goal 7.8 is complete in this working tree: ScaleX can create/select/delete saved local
 workflows, load the Harbor sample, run the selected workflow, inspect clickable workflow
 graph nodes, view persisted run history, load historical run proof by run ID, and review
-Audit and Settings/Integrations without terminal output.
+Audit, Integrations, and Settings without terminal output.
 
-The remaining gap before Goal 8 is product UX clarity. The current UI is functional but
-visually scattered: the Workflow page mixes a hero, replay cards, workflow map, Hermes
-panel, proof column, judge proof, audit ledger, and timeline. Goal 7.9 should make the
-app feel like a workflow automation/control-room product: canvas first, selected-node
-inspector second, and secondary views cleaned up for recording.
+Goal 7.9A is complete as a read-only UX blueprint. Goal 7.9B is complete for app shell
+extraction, navigation cleanup, shared selectors, and distinct Integrations and Settings
+views. The remaining gap before Goal 8 is the main Workflow experience: it still uses the
+current grid-based workflow map and stacked proof panels. Goal 7.9C should make the app
+feel like a workflow automation/control-room product: canvas first and selected-node
+inspector second.
 
 ## Goal 7.9 sequence
 
 ### Goal 7.9A - UX Blueprint / Product IA Audit
 
+- Complete.
 - No code.
 - Inspect current UI and define the exact target layout.
 - Identify duplicate proof panels, clutter, weak hierarchy, and unclear recording flow.
@@ -56,15 +57,22 @@ inspector second, and secondary views cleaned up for recording.
 
 ### Goal 7.9B - Design System + App Shell Foundation
 
+- Complete.
 - Clean the visual foundation before moving nodes around.
 - Establish a consistent dark command-center theme.
 - Create reusable layout primitives only if useful.
 - Ensure sidebar, top bar, cards, inspector, and node styles are consistent.
 - Reduce `App.tsx` complexity only if safe.
 - Preserve functionality.
+- Completed output:
+  - shell extracted into `frontend/src/layout/*`
+  - reusable status style helpers in `frontend/src/components/ui/*`
+  - shared selectors in `frontend/src/lib/demoSelectors.ts`
+  - distinct Integrations and Settings views
 
 ### Goal 7.9C - Workflow Canvas + Selected-Node Inspector
 
+- Next.
 - Make the Workflow page the product center.
 - Replace stacked proof panels with a connected workflow canvas.
 - Use nodes for Customer Intake, Hermes Brain, Stripe Test Invoice, Payment Status,
@@ -79,8 +87,8 @@ inspector second, and secondary views cleaned up for recording.
 - Customers: create/select/delete local workflow, prominent Harbor sample, obvious selected workflow.
 - Runs: prior runs list, selected run details, run proof summary.
 - Audit: timeline, orchestration calls, ledger, Stripe events, policy checks.
-- Integrations/Settings: Hermes status, Stripe test-mode status, SQLite ledger, local
-  policy, NemoClaw Goal 8 next, and prototype auth.
+- Integrations: Hermes status, Stripe test-mode status, SQLite ledger, local policy, and NemoClaw Goal 8 next.
+- Settings: prototype auth, local API/database status, active workflow/run records, and safety boundaries.
 - No placeholder-only tabs.
 
 ### Goal 7.9E - Recording Readiness / Browser-Only Demo QA
@@ -102,17 +110,13 @@ inspector second, and secondary views cleaned up for recording.
 - Ensure every visible claim is real, test-mode, or honestly labeled future work.
 - Update demo script and submission docs.
 
-## Required outputs for Goal 7.9A
+## Required outputs for Goal 7.9C
 
-- Current UI audit:
-  - duplicate panels
-  - clutter
-  - weak hierarchy
-  - unclear recording flow
-  - stale or ambiguous product language
-- Target information architecture and screen model.
-- Exact implementation prompts for 7.9B, 7.9C, 7.9D, and 7.9E.
-- Acceptance criteria for each sub-goal.
+- Connected workflow canvas with the exact Goal 7.9 node set.
+- Right selected-node inspector.
+- Approved Spend and Blocked Spend shown as separate branches.
+- Current proof panels collapsed or moved only where the inspector safely replaces them.
+- Existing behavior preserved for auth, onboarding, workflow selection, selected-workflow runs, run history, Audit, Integrations, and Settings.
 - Updates to STATUS.md, TASKS.md, and CHANGELOG.md at closeout.
 - `git diff --check`.
 - Tracked-file secret scan.

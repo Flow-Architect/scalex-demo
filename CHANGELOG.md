@@ -10,6 +10,47 @@ Use:
 
 ---
 
+## 2026-06-23 - Goal 7.9B: Design system and app shell foundation
+
+Completed:
+- Extracted the product shell out of `frontend/src/App.tsx` into layout components:
+  - `frontend/src/layout/AppShell.tsx`
+  - `frontend/src/layout/Sidebar.tsx`
+  - `frontend/src/layout/TopCommandBar.tsx`
+  - `frontend/src/layout/navigation.ts`
+- Added shared UI/status styling helpers:
+  - `frontend/src/components/ui/StatusBadge.tsx`
+  - `frontend/src/components/ui/statusStyles.ts`
+- Moved shared state-derived helpers into `frontend/src/lib/demoSelectors.ts`, including money snapshot, audit row count, run status labels, Stripe/Hermes status helpers, latest-record helpers, plan/task helpers, and optional formatting helpers.
+- Reduced `frontend/src/App.tsx` from 3,964 lines to 3,645 lines while keeping it responsible for top-level app state, session loading, API loading, active view state, primary handlers, and high-level routing.
+- Normalized the shell around a persistent dark command bar and dark sidebar.
+- Split the combined Settings / Integrations route into distinct Integrations and Settings navigation targets.
+- Kept Integrations focused on Hermes, Stripe test mode, SQLite, product records, local policy, and NemoClaw Goal 8 next/not real yet.
+- Added a real Settings view for prototype auth, local API/database state, active workflow/run records, SQLite path, no-live-money boundary, and NemoClaw not-real-yet boundary.
+- Preserved the current Workflow page, workflow map, proof panels, run controls, and clickable node drawer for Goal 7.9C.
+- Preserved local prototype auth, onboarding, workflow create/select/delete, selected-workflow runs, persisted run history, Audit proof, real Hermes proof fields, real Stripe test-mode proof fields, Stripe open/unpaid honesty, local policy proof, and NemoClaw honesty.
+- Did not implement Goal 7.9C, Goal 8, live-money payments, or real NemoClaw integration.
+
+Verified:
+- `npm run build` passed for the frontend.
+- `./scripts/test.sh` passed with 48 backend tests and a successful Vite production build.
+- Sanitized dev-server verification used temp SQLite DBs under `/tmp`, `HERMES_TEST_MODE=true`, `STRIPE_TEST_DOUBLE_MODE=true`, and an unset `STRIPE_SECRET_KEY`.
+- Headless Chrome rendered the app shell and a Chrome DevTools Protocol nav check confirmed Workflow, Customers, Runs, Audit, Integrations, and Settings all reached their expected view content.
+- The selected Harbor workflow run completed in sanitized test-double mode with $1,200 revenue, $187 approved spend, $750 blocked spend, $1,013 gross profit, 84.4% margin, 1 persisted run, and 45 audit rows.
+- `SCALEX_AUTH_ENABLED=true` with explicit test-only credentials verified unauthenticated protected state returned 401, login returned authenticated, `/api/auth/me` and protected state returned 200, logout returned 200, and protected state returned 401 afterward.
+- `git diff --check` passed.
+- The tracked-file secret scan returned no matches.
+- No `.env`, SQLite `.db`, `CODEX_GOALS.md`, or `GOAL_LOG.md` file is staged or present as a new tracked artifact.
+- No Stripe API calls or Hermes model calls were intentionally run for this goal.
+
+Suggested commit message:
+Extract ScaleX app shell foundation
+
+Next:
+- Goal 7.9C - Workflow Canvas + Selected-Node Inspector.
+
+---
+
 ## 2026-06-22 - Planned Goal 7.9: Workflow Canvas Product UX Redesign roadmap alignment
 
 Planned:

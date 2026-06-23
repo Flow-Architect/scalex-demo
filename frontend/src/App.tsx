@@ -22,10 +22,8 @@ import {
   Layers3,
   LockKeyhole,
   LogOut,
-  Play,
   ReceiptText,
   RefreshCw,
-  RotateCcw,
   Settings,
   ShieldAlert,
   ShieldCheck,
@@ -51,7 +49,29 @@ import {
   deleteWorkflow,
   selectWorkflow,
 } from "./api";
+import { darkToneClass, softToneClass } from "./components/ui/statusStyles";
+import type { Tone } from "./components/ui/statusStyles";
 import { formatCurrency, formatDateTime, formatPercent, humanize } from "./format";
+import { AppShell } from "./layout/AppShell";
+import { TopCommandBar } from "./layout/TopCommandBar";
+import type { AppView } from "./layout/navigation";
+import {
+  auditRowCount,
+  eventByType,
+  formatOptionalCurrency,
+  formatOptionalPercent,
+  hermesFailed,
+  isApproved,
+  latestTimestamp,
+  latestWhere,
+  moneySnapshot,
+  operatingPlanPhases,
+  runStatusLabel,
+  stripeBadgeValue,
+  stripeModeLabel,
+  taskRows,
+} from "./lib/demoSelectors";
+import type { BusyAction, MoneySnapshot } from "./lib/demoSelectors";
 import type {
   AgentOutput,
   AuthStatus,
@@ -72,10 +92,7 @@ import type {
   WorkflowConfig,
 } from "./types";
 
-type BusyAction = "initial" | "refresh" | "run" | "reset" | null;
 type StageStatus = "pending" | "current" | "complete" | "blocked" | "error";
-type Tone = "emerald" | "sky" | "amber" | "rose" | "teal" | "violet" | "slate";
-type AppView = "workflow" | "customers" | "runs" | "audit" | "integrations";
 type WorkflowNodeKey =
   | "intake"
   | "hermes"
@@ -118,18 +135,6 @@ interface PipelineStage {
   icon: LucideIcon;
 }
 
-interface MoneySnapshot {
-  actual: boolean;
-  revenueCents: number | null;
-  approvedSpendCents: number | null;
-  blockedSpendCents: number | null;
-  grossProfitCents: number | null;
-  marginPercent: number | null;
-  policyViolations: number | null;
-  spendCapCents: number | null;
-  marginFloorPercent: number | null;
-}
-
 type PlaybackKey =
   | "intake"
   | "hermes"
@@ -144,9 +149,6 @@ interface PlaybackStep {
   label: string;
   icon: LucideIcon;
 }
-
-const LOCKED_DEMO_BLOCKED_SPEND_CENTS = 75_000;
-const ONBOARDING_STORAGE_KEY = "scalex:onboarding-complete";
 
 const HARBOR_ONBOARDING_DRAFT: OnboardingDraft = {
   clientName: "Harbor Fleet Services",
@@ -528,76 +530,32 @@ export default function App() {
   }
 
   return (
-    <main className="min-h-screen bg-stone-100 text-zinc-950">
-      <div className="min-h-screen lg:grid lg:grid-cols-[17rem_minmax(0,1fr)]">
-        <AppSidebar
-          activeView={activeView}
-          auth={auth}
-          busy={isBusy}
-          onLogout={handleLogout}
-          onNavigate={setActiveView}
-          onStartOnboarding={() => setActiveView("customers")}
+    <AppShell
+      activeView={activeView}
+      auth={auth}
+      busy={isBusy}
+      onLogout={handleLogout}
+      onNavigate={setActiveView}
+      onStartOnboarding={() => setActiveView("customers")}
+      topBar={
+        <TopCommandBar
+          activeWorkflow={activeWorkflow}
+          busyAction={busyAction}
+          displayCustomer={displayCustomer}
+          displayJob={displayJob}
+          isBusy={isBusy}
+          onRefresh={refreshState}
+          onReset={handleResetDemo}
+          onRun={handleRunDemo}
+          runStatus={runStatus}
         />
-        <div className="min-w-0">
-          {activeView === "workflow" ? (
-            <>
+      }
+    >
+      {activeView === "workflow" ? (
+        <>
       <section className="border-b border-zinc-900 bg-zinc-950 text-white">
         <div className="w-full px-4 py-5 sm:px-6 lg:px-8">
           <div className="flex flex-col gap-5">
-            <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
-              <div className="flex flex-wrap items-center gap-2">
-                <span className="inline-flex items-center gap-2 rounded-md border border-emerald-400/30 bg-emerald-400/10 px-3 py-1.5 text-sm font-semibold text-emerald-100">
-                  <ShieldCheck className="h-4 w-4" aria-hidden="true" />
-                  ScaleX Command Center
-                </span>
-                <span className="inline-flex items-center gap-2 rounded-md border border-white/15 bg-white/10 px-3 py-1.5 text-sm text-zinc-200">
-                  <Activity className="h-4 w-4 text-sky-200" aria-hidden="true" />
-                  {runStatus}
-                </span>
-              </div>
-
-              <div className="flex flex-col gap-2 sm:flex-row">
-                <button
-                  className="inline-flex min-h-11 items-center justify-center gap-2 rounded-md bg-emerald-400 px-4 py-3 text-sm font-semibold text-zinc-950 transition hover:bg-emerald-300 disabled:cursor-not-allowed disabled:bg-zinc-600 disabled:text-zinc-300"
-                  disabled={isBusy || !activeWorkflow}
-                  onClick={handleRunDemo}
-                  type="button"
-                >
-                  {busyAction === "run" ? (
-                    <RefreshCw className="h-4 w-4 animate-spin" aria-hidden="true" />
-                  ) : (
-                    <Play className="h-4 w-4" aria-hidden="true" />
-                  )}
-                  Start Run
-                </button>
-                <button
-                  className="inline-flex min-h-11 items-center justify-center gap-2 rounded-md border border-white/20 bg-white/10 px-4 py-3 text-sm font-semibold text-white transition hover:bg-white/15 disabled:cursor-not-allowed disabled:text-zinc-500"
-                  disabled={isBusy}
-                  onClick={handleResetDemo}
-                  type="button"
-                >
-                  {busyAction === "reset" ? (
-                    <RefreshCw className="h-4 w-4 animate-spin" aria-hidden="true" />
-                  ) : (
-                    <RotateCcw className="h-4 w-4" aria-hidden="true" />
-                  )}
-                  Reset Data
-                </button>
-                <button
-                  className="inline-flex min-h-11 items-center justify-center gap-2 rounded-md border border-white/20 bg-white/10 px-4 py-3 text-sm font-semibold text-white transition hover:bg-white/15 disabled:cursor-not-allowed disabled:text-zinc-500"
-                  disabled={isBusy}
-                  onClick={refreshState}
-                  type="button"
-                >
-                  <RefreshCw
-                    className={`h-4 w-4 ${busyAction === "refresh" ? "animate-spin" : ""}`}
-                    aria-hidden="true"
-                  />
-                  Refresh
-                </button>
-              </div>
-            </div>
-
             <div className="grid gap-5 xl:grid-cols-[minmax(0,1.08fr)_minmax(360px,0.92fr)] xl:items-stretch">
               <div className="flex min-h-[19rem] flex-col justify-between rounded-lg border border-white/15 bg-white/5 p-5">
                 <div>
@@ -731,29 +689,28 @@ export default function App() {
           <TimelinePanel events={state?.timeline_events ?? state?.events ?? []} />
         </section>
       </div>
-            </>
-          ) : (
-            <ProductView
-              activeView={activeView}
-              auditRows={auditRows}
-              health={health}
-              money={money}
-              onDeleteWorkflow={handleDeleteWorkflow}
-              onDraftChange={setOnboardingDraft}
-              onInspectRun={handleInspectRun}
-              onSaveWorkflow={handleSaveOnboarding}
-              onSelectWorkflow={handleSelectWorkflow}
-              onStartOnboarding={() => setActiveView("customers")}
-              onUseHarborSample={handleUseHarborSample}
-              onboardingBusy={busyAction === "reset"}
-              onboardingDraft={onboardingDraft}
-              onboardingError={onboardingError}
-              state={state}
-            />
-          )}
-        </div>
-      </div>
-    </main>
+        </>
+      ) : (
+        <ProductView
+          activeView={activeView}
+          auditRows={auditRows}
+          auth={auth}
+          health={health}
+          money={money}
+          onDeleteWorkflow={handleDeleteWorkflow}
+          onDraftChange={setOnboardingDraft}
+          onInspectRun={handleInspectRun}
+          onSaveWorkflow={handleSaveOnboarding}
+          onSelectWorkflow={handleSelectWorkflow}
+          onStartOnboarding={() => setActiveView("customers")}
+          onUseHarborSample={handleUseHarborSample}
+          onboardingBusy={busyAction === "reset"}
+          onboardingDraft={onboardingDraft}
+          onboardingError={onboardingError}
+          state={state}
+        />
+      )}
+    </AppShell>
   );
 }
 
@@ -1106,97 +1063,6 @@ function OnboardingMetric({ label, value }: { label: string; value: string }) {
   );
 }
 
-function AppSidebar({
-  activeView,
-  auth,
-  busy,
-  onLogout,
-  onNavigate,
-  onStartOnboarding,
-}: {
-  activeView: AppView;
-  auth: AuthStatus | null;
-  busy: boolean;
-  onLogout: () => void;
-  onNavigate: (view: AppView) => void;
-  onStartOnboarding: () => void;
-}) {
-  const navItems: Array<{ view: AppView; label: string; icon: LucideIcon }> = [
-    { view: "workflow", label: "Dashboard / Workflow", icon: Workflow },
-    { view: "customers", label: "Customers", icon: Users },
-    { view: "runs", label: "Runs", icon: ClipboardList },
-    { view: "audit", label: "Audit", icon: BookOpenCheck },
-    { view: "integrations", label: "Settings / Integrations", icon: Settings },
-  ];
-
-  return (
-    <aside className="border-b border-zinc-800 bg-zinc-950 text-white lg:min-h-screen lg:border-b-0 lg:border-r">
-      <div className="flex h-full flex-col gap-5 p-4">
-        <div className="flex items-center gap-3">
-          <span className="flex h-10 w-10 items-center justify-center rounded-lg border border-emerald-300/30 bg-emerald-300/10 text-emerald-100">
-            <ShieldCheck className="h-5 w-5" aria-hidden="true" />
-          </span>
-          <div>
-            <p className="text-lg font-semibold">ScaleX</p>
-            <p className="text-xs text-zinc-400">Operator console</p>
-          </div>
-        </div>
-
-        <nav className="grid gap-2">
-          {navItems.map((item) => {
-            const Icon = item.icon;
-            const active = activeView === item.view;
-            return (
-              <button
-                className={`flex min-h-11 items-center gap-3 rounded-md border px-3 text-left text-sm font-semibold transition ${
-                  active
-                    ? "border-emerald-300/40 bg-emerald-300/10 text-emerald-100"
-                    : "border-white/10 bg-white/5 text-zinc-300 hover:bg-white/10"
-                }`}
-                key={item.view}
-                onClick={() => onNavigate(item.view)}
-                type="button"
-              >
-                <Icon className="h-4 w-4 flex-none" aria-hidden="true" />
-                <span>{item.label}</span>
-              </button>
-            );
-          })}
-        </nav>
-
-        <div className="rounded-lg border border-white/10 bg-white/5 p-3 text-sm text-zinc-300">
-          <p className="font-semibold text-white">Prototype local auth</p>
-          <p className="mt-1 text-xs leading-5">
-            {auth?.auth_enabled ? `Signed in as ${auth.username ?? "operator"}` : "Disabled for this local run"}
-          </p>
-        </div>
-
-        <div className="mt-auto grid gap-2">
-          <button
-            className="inline-flex min-h-10 items-center justify-center gap-2 rounded-md border border-white/10 bg-white/5 px-3 text-sm font-semibold text-zinc-200 transition hover:bg-white/10"
-            onClick={onStartOnboarding}
-            type="button"
-          >
-            <UserPlus className="h-4 w-4" aria-hidden="true" />
-            Onboard customer
-          </button>
-          {auth?.auth_enabled ? (
-            <button
-              className="inline-flex min-h-10 items-center justify-center gap-2 rounded-md border border-white/10 bg-white/5 px-3 text-sm font-semibold text-zinc-200 transition hover:bg-white/10 disabled:cursor-not-allowed disabled:text-zinc-500"
-              disabled={busy}
-              onClick={onLogout}
-              type="button"
-            >
-              <LogOut className="h-4 w-4" aria-hidden="true" />
-              Logout
-            </button>
-          ) : null}
-        </div>
-      </div>
-    </aside>
-  );
-}
-
 function WorkflowCanvas({
   auditRows,
   busy,
@@ -1480,6 +1346,7 @@ function WorkflowConfigPanel({
 function ProductView({
   activeView,
   auditRows,
+  auth,
   health,
   money,
   onDeleteWorkflow,
@@ -1496,6 +1363,7 @@ function ProductView({
 }: {
   activeView: AppView;
   auditRows: number;
+  auth: AuthStatus | null;
   health: HealthResponse | null;
   money: MoneySnapshot;
   onDeleteWorkflow: (workflowId: string) => void;
@@ -1550,6 +1418,9 @@ function ProductView({
       ) : null}
       {activeView === "integrations" ? (
         <IntegrationsView auditRows={auditRows} health={health} state={state} />
+      ) : null}
+      {activeView === "settings" ? (
+        <SettingsView auth={auth} auditRows={auditRows} health={health} state={state} />
       ) : null}
     </div>
   );
@@ -1889,11 +1760,11 @@ function IntegrationsView({
   return (
     <section className="rounded-lg border border-zinc-200 bg-white p-5 shadow-sm">
       <div className="flex items-center gap-2">
-        <Settings className="h-5 w-5 text-zinc-700" aria-hidden="true" />
-        <h1 className="text-xl font-semibold text-zinc-950">Settings / Integrations</h1>
+        <BrainCircuit className="h-5 w-5 text-violet-700" aria-hidden="true" />
+        <h1 className="text-xl font-semibold text-zinc-950">Integrations</h1>
       </div>
       <p className="mt-1 text-sm text-zinc-600">
-        Current integration proof and honest boundaries for this local product prototype.
+        Current Hermes, Stripe test-mode, SQLite, and policy proof for this local product prototype.
       </p>
       <div className="mt-5 grid gap-3 lg:grid-cols-2">
         <ProofRow
@@ -1940,6 +1811,93 @@ function IntegrationsView({
         />
       </div>
     </section>
+  );
+}
+
+function SettingsView({
+  auditRows,
+  auth,
+  health,
+  state,
+}: {
+  auditRows: number;
+  auth: AuthStatus | null;
+  health: HealthResponse | null;
+  state: DemoState | null;
+}) {
+  return (
+    <div className="grid gap-4 xl:grid-cols-[minmax(0,0.95fr)_minmax(360px,0.75fr)]">
+      <section className="rounded-lg border border-zinc-200 bg-white p-5 shadow-sm">
+        <div className="flex items-center gap-2">
+          <Settings className="h-5 w-5 text-zinc-700" aria-hidden="true" />
+          <h1 className="text-xl font-semibold text-zinc-950">Settings</h1>
+        </div>
+        <p className="mt-1 text-sm text-zinc-600">
+          Local prototype controls and safety boundaries. No production identity or live-money mode is enabled here.
+        </p>
+
+        <div className="mt-5 grid gap-3 lg:grid-cols-2">
+          <ProofRow
+            detail={auth?.auth_enabled ? "Signed HTTP-only local session cookie" : "Auth disabled for this local run"}
+            icon={LockKeyhole}
+            label="Prototype auth"
+            status={auth?.auth_enabled ? `Signed in as ${auth.username ?? "operator"}` : "Disabled"}
+            tone={auth?.authenticated ? "emerald" : auth?.auth_enabled ? "amber" : "slate"}
+          />
+          <ProofRow
+            detail={`${health?.mode ?? state?.mode ?? "local"}; database ${health?.database_exists ? "exists" : "pending"}`}
+            icon={Activity}
+            label="Local API"
+            status={health?.status ?? "Pending"}
+            tone={health?.status === "ok" ? "emerald" : "amber"}
+          />
+          <ProofRow
+            detail={state?.workflow ? state.workflow.job_name : "Create or select a local workflow before running."}
+            icon={Workflow}
+            label="Active workflow"
+            status={state?.workflow?.client_name ?? "No workflow selected"}
+            tone={state?.workflow ? "teal" : "amber"}
+          />
+          <ProofRow
+            detail={`${state?.runs.length ?? 0} persisted runs; selected run ${state?.selected_run_id ?? "none"}`}
+            icon={ClipboardList}
+            label="Run records"
+            status={`${auditRows} audit rows in current state`}
+            tone={auditRows > 0 ? "teal" : "slate"}
+          />
+        </div>
+      </section>
+
+      <section className="rounded-lg border border-zinc-200 bg-white p-5 shadow-sm">
+        <div className="flex items-center gap-2">
+          <ShieldAlert className="h-5 w-5 text-violet-700" aria-hidden="true" />
+          <h2 className="text-lg font-semibold text-zinc-950">Safety Boundaries</h2>
+        </div>
+        <div className="mt-4 space-y-3">
+          <ProofRow
+            detail="Goal 7 uses Stripe test mode only. Live-money execution is deferred to future Verified Live Mode."
+            icon={CreditCard}
+            label="Payments"
+            status="No live money"
+            tone="rose"
+          />
+          <ProofRow
+            detail="Goal 8 remains next. This settings view does not claim real NemoClaw integration."
+            icon={ShieldAlert}
+            label="NemoClaw"
+            status="Not real yet"
+            tone="violet"
+          />
+          <ProofRow
+            detail={state?.database.path ?? health?.database_path ?? "Path pending"}
+            icon={Database}
+            label="SQLite"
+            status="Local audit ledger"
+            tone="teal"
+          />
+        </div>
+      </section>
+    </div>
   );
 }
 
@@ -3586,263 +3544,6 @@ function buildPipeline(state: DemoState | null): PipelineStage[] {
   ];
 }
 
-function moneySnapshot(state: DemoState | null): MoneySnapshot {
-  const report = state?.report ?? null;
-  const totals = state?.ledger.totals ?? null;
-  const placeholder = state?.report_placeholder ?? null;
-  const job = state?.job ?? null;
-  const workflow = state?.workflow ?? null;
-  const hasLedgerRevenue = Boolean(totals && totals.revenue_cents > 0);
-  const hasPolicyChecks = Boolean(state && state.policy_checks.length > 0);
-
-  return {
-    actual: Boolean(report || hasLedgerRevenue),
-    revenueCents:
-      report?.revenue_cents ??
-      (hasLedgerRevenue ? totals?.revenue_cents ?? null : placeholder?.expected_revenue_cents ?? null),
-    approvedSpendCents:
-      report?.approved_spend_cents ??
-      (hasPolicyChecks ? totals?.approved_spend_cents ?? null : placeholder?.expected_approved_spend_cents ?? null),
-    blockedSpendCents:
-      report?.blocked_spend_cents ??
-      (hasPolicyChecks ? totals?.blocked_spend_cents ?? null : placeholder ? LOCKED_DEMO_BLOCKED_SPEND_CENTS : null),
-    grossProfitCents:
-      report?.gross_profit_cents ??
-      (hasLedgerRevenue ? totals?.gross_profit_cents ?? null : placeholder?.expected_gross_profit_cents ?? null),
-    marginPercent:
-      report?.actual_margin_percent ??
-      report?.margin_percent ??
-      (hasLedgerRevenue ? totals?.actual_margin_percent ?? null : placeholder?.expected_margin_percent ?? null),
-    policyViolations: report?.policy_violations ?? null,
-    spendCapCents: job?.spend_cap_cents ?? workflow?.spend_cap_cents ?? null,
-    marginFloorPercent:
-      job?.margin_floor_percent ??
-      workflow?.margin_floor_percent ??
-      state?.policy.summary.margin_floor_percent ??
-      null,
-  };
-}
-
-function auditRowCount(state: DemoState | null): number {
-  if (!state) {
-    return 0;
-  }
-
-  return (
-    state.events.length +
-    state.ledger.entries.length +
-    state.policy_checks.length +
-    state.stripe_events.length +
-    state.agent_outputs.length +
-    state.reports.length +
-    state.planning_runs.length +
-    state.orchestration_calls.length
-  );
-}
-
-function runStatusLabel(
-  state: DemoState | null,
-  busyAction: BusyAction,
-  error: string | null,
-): string {
-  if (busyAction === "initial") {
-    return "Loading backend state";
-  }
-  if (busyAction === "run") {
-    return "Running selected workflow";
-  }
-  if (busyAction === "reset") {
-    return "Updating local data";
-  }
-  if (busyAction === "refresh") {
-    return "Refreshing proof";
-  }
-  if (error) {
-    return "Action needed";
-  }
-  if (state?.report) {
-    return "Run complete";
-  }
-  if (state?.job) {
-    return humanize(state.job.status);
-  }
-  return "Ready";
-}
-
-function stripeBadgeValue(stripe: StripeSummary | null): string {
-  if (!stripe) {
-    return "Pending";
-  }
-  if (stripe.error) {
-    return "Integration error";
-  }
-  if (stripe.used_real_stripe) {
-    return "Real Stripe Test";
-  }
-  if (stripe.stripe_mode === "test_double") {
-    return "Test-double";
-  }
-  return humanize(stripe.stripe_mode);
-}
-
-function stripeModeLabel(stripe: StripeSummary | null): string {
-  if (!stripe) {
-    return "pending";
-  }
-  if (stripe.error) {
-    return "integration error";
-  }
-  if (stripe.used_real_stripe) {
-    return "real Stripe test";
-  }
-  if (stripe.stripe_mode === "test_double") {
-    return "test-double";
-  }
-  return stripe.stripe_mode || "pending";
-}
-
-function hermesFailed(hermes: HermesMetadata | null, planningRun: PlanningRun | null): boolean {
-  return Boolean(planningRun?.error || hermes?.failure_reason || hermes?.error);
-}
-
-function isApproved(check: PolicyCheck): boolean {
-  return Boolean(check.approved);
-}
-
-function eventByType(events: DemoEvent[], type: string): DemoEvent | null {
-  return latestWhere(events, (event) => event.type === type);
-}
-
-function latestWhere<T>(items: T[], predicate: (item: T) => boolean): T | null {
-  for (let index = items.length - 1; index >= 0; index -= 1) {
-    if (predicate(items[index])) {
-      return items[index];
-    }
-  }
-  return null;
-}
-
-function latestTimestamp(items: Array<{ created_at?: string | null }>): string | null {
-  const timestamps = items.map((item) => item.created_at).filter(Boolean) as string[];
-  return timestamps.length > 0 ? timestamps[timestamps.length - 1] : null;
-}
-
-function operatingPlanPhases(plan: PlanningRun["result_json"]): string[] {
-  if (!plan || !isRecord(plan.operating_plan)) {
-    return [];
-  }
-  const phases = plan.operating_plan.phases;
-  if (Array.isArray(phases)) {
-    return phases.map(displayValue).filter(Boolean).slice(0, 5);
-  }
-
-  const keyedPhases = Object.entries(plan.operating_plan)
-    .filter(([key]) => key.startsWith("phase_"))
-    .sort(([left], [right]) => left.localeCompare(right))
-    .map(([, value]) => displayValue(value))
-    .filter(Boolean);
-  if (keyedPhases.length > 0) {
-    return keyedPhases.slice(0, 6);
-  }
-
-  const objective = plan.operating_plan.objective;
-  return typeof objective === "string" ? [objective] : [];
-}
-
-function taskRows(tasks: unknown[]): Array<{ agent: string; task: string }> {
-  return tasks.slice(0, 6).map((task, index) => {
-    if (isRecord(task)) {
-      const taskList = Array.isArray(task.tasks)
-        ? task.tasks.map(displayValue).filter(Boolean).join(" ")
-        : "";
-      return {
-        agent: displayValue(task.agent) || `Task ${index + 1}`,
-        task:
-          displayValue(task.task) ||
-          taskList ||
-          displayValue(task.summary) ||
-          "Task detail pending",
-      };
-    }
-
-    return {
-      agent: `Task ${index + 1}`,
-      task: displayValue(task) || "Task detail pending",
-    };
-  });
-}
-
-function displayValue(value: unknown): string {
-  if (typeof value === "string") {
-    return value;
-  }
-  if (typeof value === "number" || typeof value === "boolean") {
-    return String(value);
-  }
-  if (value === null || value === undefined) {
-    return "";
-  }
-  try {
-    return JSON.stringify(value);
-  } catch {
-    return "";
-  }
-}
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return Boolean(value && typeof value === "object" && !Array.isArray(value));
-}
-
-function formatOptionalCurrency(cents: number | null | undefined): string {
-  return cents === null || cents === undefined ? "Pending" : formatCurrency(cents);
-}
-
-function formatOptionalPercent(value: number | null | undefined): string {
-  return value === null || value === undefined ? "Pending" : formatPercent(value);
-}
-
-function softToneClass(tone: Tone): string {
-  switch (tone) {
-    case "emerald":
-      return "border-emerald-200 bg-emerald-50 text-emerald-900";
-    case "sky":
-      return "border-sky-200 bg-sky-50 text-sky-900";
-    case "amber":
-      return "border-amber-200 bg-amber-50 text-amber-900";
-    case "rose":
-      return "border-rose-200 bg-rose-50 text-rose-900";
-    case "teal":
-      return "border-teal-200 bg-teal-50 text-teal-900";
-    case "violet":
-      return "border-violet-200 bg-violet-50 text-violet-900";
-    case "slate":
-      return "border-zinc-200 bg-zinc-50 text-zinc-700";
-    default:
-      return "border-zinc-200 bg-zinc-50 text-zinc-700";
-  }
-}
-
-function darkToneClass(tone: Tone): string {
-  switch (tone) {
-    case "emerald":
-      return "border-emerald-300/30 bg-emerald-300/10 text-emerald-100";
-    case "sky":
-      return "border-sky-300/30 bg-sky-300/10 text-sky-100";
-    case "amber":
-      return "border-amber-300/30 bg-amber-300/10 text-amber-100";
-    case "rose":
-      return "border-rose-300/30 bg-rose-300/10 text-rose-100";
-    case "teal":
-      return "border-teal-300/30 bg-teal-300/10 text-teal-100";
-    case "violet":
-      return "border-violet-300/30 bg-violet-300/10 text-violet-100";
-    case "slate":
-      return "border-zinc-300/20 bg-zinc-300/10 text-zinc-100";
-    default:
-      return "border-zinc-300/20 bg-zinc-300/10 text-zinc-100";
-  }
-}
-
 function iconForEvent(type: string): LucideIcon {
   switch (type) {
     case "job_intake":
@@ -3884,26 +3585,6 @@ function eventStatusClass(status: string): string {
     return "border-sky-200 bg-sky-50 text-sky-800";
   }
   return "border-zinc-200 bg-zinc-50 text-zinc-700";
-}
-
-function readOnboardingComplete(): boolean {
-  try {
-    return window.localStorage.getItem(ONBOARDING_STORAGE_KEY) === "true";
-  } catch {
-    return false;
-  }
-}
-
-function writeOnboardingComplete(value: boolean) {
-  try {
-    if (value) {
-      window.localStorage.setItem(ONBOARDING_STORAGE_KEY, "true");
-    } else {
-      window.localStorage.removeItem(ONBOARDING_STORAGE_KEY);
-    }
-  } catch {
-    // Local storage is optional; SQLite remains the backend source for workflow data.
-  }
 }
 
 function draftFromJob(job: DemoJob): OnboardingDraft {

@@ -1,15 +1,15 @@
 # STATUS - ScaleX
 
-Last updated: 2026-06-22
+Last updated: 2026-06-23
 
 ## Verified current state
 
 - Project folder exists at /home/ascabrya/dev/scalex-demo.
-- Latest committed baseline before this goal: `3b045dd Add ScaleX product shell auth and onboarding`.
-- Last completed implementation goal in this working tree: Goal 7.8 - usable browser product workflow with real customer/workflow management, selected-workflow runs, persisted run history, and clickable workflow graph proof.
-- Last completed documentation/audit goal in this working tree: Goal 7.9 roadmap/tracking plan update.
+- Latest committed baseline before this goal: `99d7c31 Plan Goal 7.9 workflow canvas UX redesign`.
+- Last completed implementation goal in this working tree: Goal 7.9B - design system and app shell foundation.
+- Last completed documentation/audit goal in this working tree: Goal 7.9A - UX Blueprint / Product IA Audit.
 - Current planned goal: Goal 7.9 - Workflow Canvas Product UX Redesign.
-- Current next task: Goal 7.9A - UX Blueprint / Product IA Audit.
+- Current next task: Goal 7.9C - Workflow Canvas + Selected-Node Inspector.
 - ScaleX is now a functional browser-usable product prototype for profit-aware agent operations in service workflows.
 - The current UI is functional but visually scattered; Goal 7.9 is planned to consolidate it into a workflow automation canvas with a selected-node inspector before Goal 8.
 - Product mode is real-integration-first:
@@ -19,7 +19,7 @@ Last updated: 2026-06-22
   - local policy engine until Goal 8 wires a real NemoClaw/NemoClaw-style safety adapter if safely available
 - Mock/fallback/test-double paths are for automated tests, CI, offline development, or explicitly labeled diagnostics only.
 - Product-mode real integration failures surface visible error states instead of silently falling back.
-- The frontend now opens as a product shell with local prototype auth, Customers workflow management, selected-workflow run controls, clickable workflow visualization, run history, audit, and integrations views.
+- The frontend now opens as a product shell with local prototype auth, Customers workflow management, selected-workflow run controls, clickable workflow visualization, run history, audit, distinct Integrations and Settings views, and a shared shell-level command bar.
 - The target Goal 7.9 product model is left navigation, top command bar, central workflow canvas, right selected-node inspector, and separate Customers, Runs, Audit, Integrations, and Settings views.
 
 ## Goal 6 state
@@ -280,15 +280,16 @@ Last updated: 2026-06-22
 
 - Goal 7.9 is planned before Goal 8 because the product loop is functional but the visual hierarchy still feels like stacked proof panels instead of a focused control-room workflow product.
 - Goal 7.9 is named: Workflow Canvas Product UX Redesign.
-- Goal 7.9A is the next active task and is no-code only.
-- Goal 7.9A must audit the current UI and define the exact target layout.
-- Goal 7.9A must identify duplicate panels, clutter, weak hierarchy, and unclear recording flow.
-- Goal 7.9A must output implementation prompts for:
+- Goal 7.9A is complete as a read-only UX blueprint and Product IA audit.
+- Goal 7.9B is complete for app shell extraction, navigation cleanup, shared selector helpers, and a distinct Settings view.
+- Goal 7.9C is the next active task and should implement the connected workflow canvas and selected-node inspector.
+- Goal 7.9A audited the current UI, duplicate proof panels, clutter, weak hierarchy, and recording-flow gaps.
+- Goal 7.9A output implementation prompts for:
   - Goal 7.9B - Design System + App Shell Foundation
   - Goal 7.9C - Workflow Canvas + Selected-Node Inspector
   - Goal 7.9D - Customers / Runs / Audit / Integrations Cleanup
   - Goal 7.9E - Recording Readiness / Browser-Only Demo QA
-- Goal 7.9B should clean the dark command-center visual foundation before moving nodes around.
+- Goal 7.9B cleaned the dark command-center visual foundation before moving nodes around.
 - Goal 7.9C should make the Workflow page the product center with a connected canvas and right inspector.
 - Goal 7.9D should make Customers, Runs, Audit, Integrations, and Settings real product views with no placeholder-only tabs.
 - Goal 7.9E should verify a browser-only recording path: login, select/create workflow, start run, watch graph progress, inspect Hermes, Stripe, blocked spend, and Profit Report nodes, open Runs, Audit, Integrations, and logout.
@@ -301,6 +302,25 @@ Last updated: 2026-06-22
   - Verified Live Mode is future live-money hardening
   - auth is local prototype auth
   - Stripe invoices are not paid unless Stripe returns `paid=true`
+
+## Goal 7.9B state
+
+- Goal 7.9B is complete in this working tree for the design system and app shell foundation.
+- `App.tsx` remains the top-level owner for session state, API loading, active view state, primary handlers, and high-level routing.
+- App shell responsibilities moved out of `App.tsx`:
+  - `frontend/src/layout/AppShell.tsx`
+  - `frontend/src/layout/Sidebar.tsx`
+  - `frontend/src/layout/TopCommandBar.tsx`
+  - `frontend/src/layout/navigation.ts`
+- Shared UI/style helpers were added:
+  - `frontend/src/components/ui/StatusBadge.tsx`
+  - `frontend/src/components/ui/statusStyles.ts`
+- Shared state selectors/helpers moved to `frontend/src/lib/demoSelectors.ts`, including money snapshot, audit row count, run status labels, Stripe/Hermes status helpers, latest-record helpers, plan/task helpers, and optional formatting helpers.
+- Navigation now has distinct entries for Workflow, Customers, Runs, Audit, Integrations, and Settings.
+- Integrations now focuses on Hermes, Stripe test mode, SQLite, product records, local policy, and NemoClaw Goal 8 next/not real yet.
+- Settings now separately shows prototype auth, local API/database state, active workflow/run records, SQLite path, no-live-money boundary, and NemoClaw not-real-yet boundary.
+- The current Workflow page content, workflow map, proof panels, run controls, and clickable node drawer were intentionally preserved for Goal 7.9C.
+- Real Hermes proof fields, real Stripe test-mode proof fields, Stripe open/unpaid honesty, SQLite audit proof, local policy proof, local prototype auth, onboarding, Customers, Runs, and Audit behavior were preserved.
 
 ## Final Goal 7.7 verification pass
 
@@ -600,6 +620,21 @@ The locked sample workflow remains unchanged:
 - `git status --short` showed documentation-only edits.
 - No code, `.env`, SQLite `.db`, Stripe API, or Hermes model changes were made.
 
+## Verified on 2026-06-23 for Goal 7.9B
+
+- `npm run build` passed for the frontend after the shell extraction and Settings split.
+- `./scripts/test.sh` passed with 48 backend tests and a successful Vite production build.
+- Sanitized dev-server verification used temp SQLite DBs under `/tmp`, `HERMES_TEST_MODE=true`, `STRIPE_TEST_DOUBLE_MODE=true`, and an unset `STRIPE_SECRET_KEY`.
+- Headless Chrome rendered the app shell and a Chrome DevTools Protocol nav check confirmed Workflow, Customers, Runs, Audit, Integrations, and Settings all reached their expected view content.
+- The selected Harbor workflow run completed in sanitized test-double mode with $1,200 revenue, $187 approved spend, $750 blocked spend, $1,013 gross profit, 84.4% margin, 1 persisted run, and 45 audit rows.
+- `SCALEX_AUTH_ENABLED=true` with explicit test-only credentials verified unauthenticated protected state returned 401, login returned authenticated, `/api/auth/me` and protected state returned 200, logout returned 200, and protected state returned 401 afterward.
+- `git diff --check` passed.
+- The tracked-file secret scan returned no matches.
+- No `.env`, SQLite `.db`, `CODEX_GOALS.md`, or `GOAL_LOG.md` file is staged or present as a new tracked artifact.
+- App shell extraction preserved the current Workflow page and did not implement the connected Goal 7.9C canvas yet.
+- Integrations and Settings now have distinct navigation targets and real state-backed content.
+- No Stripe API calls or Hermes model calls were intentionally run for this goal.
+
 ## Not yet verified
 
 - Fresh-clone setup on a clean machine.
@@ -608,7 +643,7 @@ The locked sample workflow remains unchanged:
 
 ## Not yet built
 
-- Goal 7.9 workflow canvas product UX redesign.
+- Goal 7.9C connected workflow canvas and selected-node inspector.
 - NemoClaw or external policy safety adapter.
 - Verified Live Mode live-money execution.
 - Demo recording and final submission assets.
@@ -624,4 +659,4 @@ The locked sample workflow remains unchanged:
 
 ## Current priority
 
-Goal 7.9A - UX Blueprint / Product IA Audit.
+Goal 7.9C - Workflow Canvas + Selected-Node Inspector.
