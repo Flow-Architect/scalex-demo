@@ -73,12 +73,15 @@ At the start of a new Codex session:
 4. Recommend the next /goal.
 5. Wait for approval before editing.
 
-Current next recommended /goal: Goal 7.9D - Customers / Runs / Audit / Integrations cleanup.
+Current next recommended /goal: Goal 8 - NemoClaw / policy safety integration and presentation.
 
 Goal 7.9 is a workflow canvas product UX redesign milestone before Goal 8. Goal 7.9A
 completed the no-code UX blueprint, Goal 7.9B completed the app shell foundation, and
 Goal 7.9C replaced the main Workflow page with a connected canvas plus right selected-node
-inspector. Goal 7.9D should clean up Customers, Runs, Audit, Integrations, and Settings.
+inspector. Goal 7.9D cleaned up the secondary views and aligned the product IA so Dashboard,
+Onboarding, Customers, Workflow, Runs, Audit, Integrations, and Settings are now distinct
+operator surfaces. Goal 7.9E then verified the browser-only recording flow across that IA
+and fixed local-only CORS for alternate QA ports.
 Goal 8 remains NemoClaw / policy safety integration and presentation after Goal 7.9.
 
 ## Session closeout requirement

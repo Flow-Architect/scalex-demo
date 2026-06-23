@@ -11,7 +11,6 @@ export function AppShell({
   children,
   onLogout,
   onNavigate,
-  onStartOnboarding,
   topBar,
 }: {
   activeView: AppView;
@@ -20,7 +19,6 @@ export function AppShell({
   children: ReactNode;
   onLogout: () => void;
   onNavigate: (view: AppView) => void;
-  onStartOnboarding: () => void;
   topBar: ReactNode;
 }) {
   return (
@@ -32,7 +30,6 @@ export function AppShell({
           busy={busy}
           onLogout={onLogout}
           onNavigate={onNavigate}
-          onStartOnboarding={onStartOnboarding}
         />
         <div className="min-w-0">
           {topBar}

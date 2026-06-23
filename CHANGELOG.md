@@ -10,6 +10,65 @@ Use:
 
 ---
 
+## 2026-06-23 - Goal 7.9E: Recording readiness and browser-only demo QA
+
+Completed:
+- Verified the browser-only recording path against an auth-enabled QA instance on temp ports with a temp SQLite path.
+- Confirmed the updated route model works in-browser across:
+  - login
+  - Dashboard
+  - Onboarding
+  - Harbor sample save
+  - Customers
+  - Workflow
+  - Start Run
+  - Hermes inspector
+  - Stripe inspector
+  - Blocked Spend inspector
+  - Profit Report inspector
+  - Runs
+  - Audit
+  - Integrations
+  - Settings
+  - logout back to the login gate
+- Fixed the empty-state app-shell route so a fresh authenticated session lands on Dashboard before the operator chooses Onboarding or Customers.
+- Fixed local-only CORS so auth-enabled QA instances can run on alternate localhost ports without breaking browser login.
+
+Verified:
+- Headless Chrome with DevTools Protocol completed the browser route-and-click pass on `http://127.0.0.1:5176` against an auth-enabled backend on `http://127.0.0.1:8789`.
+- `./scripts/test.sh` passed with 48 backend tests and a successful Vite production build after the route and CORS fixes.
+- `git diff --check` passed.
+
+Suggested commit message:
+Finish Goal 7.9E browser QA and local auth port fixes
+
+Next:
+- Goal 8 - NemoClaw / policy safety integration and presentation.
+
+---
+
+## 2026-06-23 - Goal 7.9D follow-up: Dashboard / Onboarding IA alignment
+
+Completed:
+- Restored Dashboard as an explicit app-shell route and made it the landing surface after login, workflow save, and workflow selection.
+- Split local workflow intake out of Customers and into a dedicated Onboarding route.
+- Kept Customers focused on saved workflow selection, active customer proof, and workflow deletion instead of mixing record management with intake form entry.
+- Added Onboarding and Dashboard navigation entries in the left shell so the product IA now reads as Dashboard, Workflow, Onboarding, Customers, Runs, Audit, Integrations, and Settings.
+- Added a visible top-command-bar logout action while keeping the sidebar logout control.
+- Removed the legacy inline onboarding screen implementation from `frontend/src/App.tsx` and kept App-level routing delegated through the extracted operations product view.
+
+Verified:
+- `./scripts/test.sh` passed with 48 backend tests and a successful Vite production build.
+- `git diff --check` passed.
+
+Suggested commit message:
+Align dashboard, onboarding, and logout navigation after Goal 7.9D
+
+Next:
+- Goal 7.9E - Recording readiness / browser-only demo QA.
+
+---
+
 ## 2026-06-23 - Goal 7.9D: Secondary product-view cleanup
 
 Completed:

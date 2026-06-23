@@ -2,19 +2,19 @@
 
 ## Current priority
 
-Goal 7.9E - Recording readiness / browser-only demo QA.
+Goal 8 - NemoClaw / policy safety integration and presentation.
 
 ## Next recommended goal
 
-Run Codex `/goal` 7.9E to tighten the browser-only recording path after the Workflow and secondary-view cleanup:
+Run Codex `/goal` 8 to move from the finished Goal 7.9 UX/product-shell milestone into real policy-safety integration and presentation:
 
-- verify the login -> Customers -> Workflow -> Runs -> Audit -> Integrations -> Settings -> logout flow in the browser
-- confirm no terminal output is needed in the recording
-- confirm the Workflow canvas, selected-node inspector, and secondary views all read coherently in one product pass
-- remove any last duplicate proof, awkward spacing, or naming friction that hurts a live demo
-- update demo-facing docs only where the final recording flow changed
+- keep Hermes planning/proposal authority separate from policy execution
+- investigate a safe NemoClaw-compatible or NemoClaw-style adapter path without touching production, homelab/OpenClaw, or real client systems
+- route spend checks through the real safety adapter only if it is actually wired, testable, and documentable
+- keep the local policy engine honestly labeled if a real adapter is not yet ready
+- preserve the finished browser product shell and recording flow from Goal 7.9E
 
-Goal 7.9C completed the main Workflow canvas and selected-node inspector. Goal 7.9D completed the secondary-view cleanup. Do not implement Goal 8 during 7.9E.
+Goal 7.9C completed the main Workflow canvas and selected-node inspector. Goal 7.9D completed the secondary-view cleanup and IA alignment for Dashboard, Onboarding, Customers, Runs, Audit, Integrations, and Settings. Goal 7.9E completed the browser-only recording QA path. Goal 8 is now the next milestone.
 
 ## Why this is next
 
@@ -38,8 +38,8 @@ extraction, navigation cleanup, shared selectors, and distinct Integrations and 
 views. Goal 7.9C is complete for the main Workflow page: it now uses a connected
 workflow canvas with a right selected-node inspector, fixed canvas background, and
 repositionable nodes that redraw their connectors in place. Goal 7.9D is complete for the
-secondary product views. The remaining UI gap before Goal 8 is recording readiness and
-browser-only demo QA.
+secondary product views and top-level IA alignment. Goal 7.9E then verified the browser-only
+recording path and fixed local-only CORS for alternate QA ports. Goal 8 is now next.
 
 ## Goal 7.9 sequence
 
@@ -97,19 +97,21 @@ browser-only demo QA.
 
 ### Goal 7.9E - Recording Readiness / Browser-Only Demo QA
 
+- Complete.
 - Support the browser-only recording path:
   1. Login.
-  2. Select or create workflow.
-  3. Start run.
-  4. Watch graph nodes progress.
-  5. Click Hermes node.
-  6. Click Stripe node.
-  7. Click blocked spend node.
-  8. Click Profit Report node.
-  9. Open Runs.
-  10. Open Audit.
-  11. Open Integrations.
-  12. Logout.
+  2. Land on Dashboard.
+  3. Select or create workflow through Onboarding or Customers.
+  4. Open Workflow and start run.
+  5. Watch graph nodes progress.
+  6. Click Hermes node.
+  7. Click Stripe node.
+  8. Click blocked spend node.
+  9. Click Profit Report node.
+  10. Open Runs.
+  11. Open Audit.
+  12. Open Integrations.
+  13. Logout.
 - Ensure no terminal output is needed in the video.
 - Ensure every visible claim is real, test-mode, or honestly labeled future work.
 - Update demo script and submission docs.
@@ -141,7 +143,7 @@ browser-only demo QA.
 ## Required outputs for Goal 7.9E
 
 - Confirm the browser-only recording path from login through logout.
-- Confirm Workflow plus Customers/Runs/Audit/Integrations/Settings all read like one product.
+- Confirm Dashboard, Onboarding, Workflow, Customers, Runs, Audit, Integrations, and Settings all read like one product.
 - Keep Stripe open/unpaid honesty and NemoClaw not-real-yet honesty.
 - Update STATUS.md, TASKS.md, CHANGELOG.md, and demo-facing docs if the final recording flow changes.
 - `./scripts/test.sh`.

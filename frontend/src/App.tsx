@@ -1,17 +1,12 @@
 import { useEffect, useMemo, useState } from "react";
 import type { FormEvent } from "react";
 import {
-  AlertTriangle,
   BrainCircuit,
-  Building2,
-  CheckCircle2,
   CreditCard,
   KeyRound,
   LockKeyhole,
-  LogOut,
   RefreshCw,
   ShieldCheck,
-  UserPlus,
   Workflow,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
@@ -28,8 +23,10 @@ import {
   deleteWorkflow,
   selectWorkflow,
 } from "./api";
-import { formatCurrency, formatDateTime, formatPercent, humanize } from "./format";
-import { ProductView as OperationsProductView } from "./features/operations/ProductView";
+import {
+  ProductView as OperationsProductView,
+  type OnboardingDraft,
+} from "./features/operations/ProductView";
 import { WorkflowPage } from "./features/workflow/WorkflowPage";
 import { WORKFLOW_NODE_ORDER, type WorkflowInspectorKey } from "./features/workflow/workflowModel";
 import { AppShell } from "./layout/AppShell";
@@ -40,7 +37,7 @@ import {
   moneySnapshot,
   runStatusLabel,
 } from "./lib/demoSelectors";
-import type { BusyAction, MoneySnapshot } from "./lib/demoSelectors";
+import type { BusyAction } from "./lib/demoSelectors";
 import type {
   AuthStatus,
   DemoJob,
@@ -49,18 +46,6 @@ import type {
   OnboardingRequest,
   WorkflowConfig,
 } from "./types";
-
-interface OnboardingDraft {
-  clientName: string;
-  businessType: string;
-  jobName: string;
-  jobGoal: string;
-  invoiceAmountUsd: string;
-  spendCapUsd: string;
-  marginFloorPercent: string;
-  approvedVendors: string;
-  blockedVendors: string;
-}
 
 const HARBOR_ONBOARDING_DRAFT: OnboardingDraft = {
   clientName: "Harbor Fleet Services",
@@ -79,7 +64,7 @@ export default function App() {
   const [auth, setAuth] = useState<AuthStatus | null>(null);
   const [authError, setAuthError] = useState<string | null>(null);
   const [loginForm, setLoginForm] = useState({ username: "", password: "" });
-  const [activeView, setActiveView] = useState<AppView>("workflow");
+  const [activeView, setActiveView] = useState<AppView>("dashboard");
   const [onboardingDraft, setOnboardingDraft] = useState<OnboardingDraft>(HARBOR_ONBOARDING_DRAFT);
   const [onboardingError, setOnboardingError] = useState<string | null>(null);
   const [health, setHealth] = useState<HealthResponse | null>(null);
@@ -151,9 +136,7 @@ export default function App() {
       ]);
       setHealth(healthResponse);
       setState(stateResponse);
-      if (!stateResponse.workflow && stateResponse.workflows.length === 0) {
-        setActiveView("customers");
-      }
+      setActiveView("dashboard");
     } catch (caught) {
       setError(errorMessage(caught));
     } finally {
@@ -205,7 +188,7 @@ export default function App() {
       setState(null);
       setHealth(null);
       setSelectedNodeKey("summary");
-      setActiveView("workflow");
+      setActiveView("dashboard");
     } catch (caught) {
       setAuthError(errorMessage(caught));
     } finally {
@@ -281,7 +264,7 @@ export default function App() {
       const response = await saveOnboarding(onboardingRequestFromDraft(onboardingDraft));
       setState(response.state);
       setHealth(await getHealth());
-      setActiveView("workflow");
+      setActiveView("dashboard");
       setNotice("Local workflow saved and selected. It is ready to run.");
     } catch (caught) {
       setOnboardingError(errorMessage(caught));
@@ -299,7 +282,7 @@ export default function App() {
       const response = await saveOnboarding(onboardingRequestFromDraft(HARBOR_ONBOARDING_DRAFT));
       setState(response.state);
       setHealth(await getHealth());
-      setActiveView("workflow");
+      setActiveView("dashboard");
       setNotice("Harbor Fleet Services sample loaded.");
     } catch (caught) {
       setOnboardingError(errorMessage(caught));
@@ -316,7 +299,7 @@ export default function App() {
       const response = await selectWorkflow(workflowId);
       setState(response.state);
       setHealth(await getHealth());
-      setActiveView("workflow");
+      setActiveView("dashboard");
       setSelectedNodeKey("summary");
       setNotice("Workflow selected. The next run will use this customer and economics.");
     } catch (caught) {
@@ -399,14 +382,15 @@ export default function App() {
       busy={isBusy}
       onLogout={handleLogout}
       onNavigate={setActiveView}
-      onStartOnboarding={() => setActiveView("customers")}
       topBar={
         <TopCommandBar
           activeWorkflow={activeWorkflow}
+          authEnabled={Boolean(auth?.auth_enabled)}
           busyAction={busyAction}
           displayCustomer={displayCustomer}
           displayJob={displayJob}
           isBusy={isBusy}
+          onLogout={handleLogout}
           onRefresh={refreshState}
           onReset={handleResetDemo}
           onRun={handleRunDemo}
@@ -443,6 +427,7 @@ export default function App() {
           auth={auth}
           health={health}
           money={money}
+          onNavigate={setActiveView}
           onDeleteWorkflow={handleDeleteWorkflow}
           onDraftChange={setOnboardingDraft}
           onInspectRun={handleInspectRun}
@@ -590,220 +575,6 @@ function LoginProof({ icon: Icon, label }: { icon: LucideIcon; label: string }) 
     <div className="flex items-center gap-2 rounded-lg border border-white/15 bg-white/10 p-3">
       <Icon className="h-4 w-4 text-emerald-200" aria-hidden="true" />
       <span>{label}</span>
-    </div>
-  );
-}
-
-function OnboardingScreen({
-  auth,
-  busy,
-  draft,
-  error,
-  onDraftChange,
-  onLogout,
-  onSubmit,
-  onUseHarborSample,
-}: {
-  auth: AuthStatus | null;
-  busy: boolean;
-  draft: OnboardingDraft;
-  error: string | null;
-  onDraftChange: (draft: OnboardingDraft) => void;
-  onLogout: () => void;
-  onSubmit: (event: FormEvent<HTMLFormElement>) => void;
-  onUseHarborSample: () => void;
-}) {
-  return (
-    <main className="min-h-screen bg-stone-100 text-zinc-950">
-      <header className="border-b border-zinc-200 bg-white">
-        <div className="flex flex-col gap-3 px-4 py-4 sm:px-6 lg:flex-row lg:items-center lg:justify-between lg:px-8">
-          <div className="flex items-center gap-3">
-            <span className="flex h-10 w-10 items-center justify-center rounded-lg border border-emerald-200 bg-emerald-50 text-emerald-800">
-              <Workflow className="h-5 w-5" aria-hidden="true" />
-            </span>
-            <div>
-              <p className="text-lg font-semibold">ScaleX onboarding</p>
-              <p className="text-sm text-zinc-600">
-                Local sample workflow setup before the operator console.
-              </p>
-            </div>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            <span className="rounded-md border border-zinc-200 bg-zinc-50 px-3 py-2 text-xs font-semibold text-zinc-700">
-              {auth?.auth_enabled ? `Signed in as ${auth.username ?? "operator"}` : "Prototype auth disabled"}
-            </span>
-            {auth?.auth_enabled ? (
-              <button
-                className="inline-flex min-h-10 items-center gap-2 rounded-md border border-zinc-200 bg-white px-3 text-sm font-semibold text-zinc-700 transition hover:bg-zinc-50"
-                onClick={onLogout}
-                type="button"
-              >
-                <LogOut className="h-4 w-4" aria-hidden="true" />
-                Logout
-              </button>
-            ) : null}
-          </div>
-        </div>
-      </header>
-
-      <div className="grid gap-5 px-4 py-5 sm:px-6 lg:grid-cols-[minmax(0,0.85fr)_minmax(420px,1fr)] lg:px-8">
-        <section className="rounded-lg border border-zinc-200 bg-white p-5 shadow-sm">
-          <p className="text-sm font-semibold uppercase text-emerald-700">Customer onboarding</p>
-          <h1 className="mt-3 text-3xl font-semibold leading-tight text-zinc-950 lg:text-5xl">
-            Prepare one local revenue-backed workflow.
-          </h1>
-          <p className="mt-4 text-base leading-7 text-zinc-600">
-            Use Harbor Fleet Services or enter a synthetic local sample. ScaleX keeps this
-            narrow: one customer, one campaign, one invoice, local policy, SQLite audit.
-          </p>
-
-          <div className="mt-6 grid gap-3 sm:grid-cols-2">
-            <OnboardingMetric label="Invoice" value={`$${draft.invoiceAmountUsd || "0"}`} />
-            <OnboardingMetric label="Spend cap" value={`$${draft.spendCapUsd || "0"}`} />
-            <OnboardingMetric label="Margin floor" value={`${draft.marginFloorPercent || "0"}%`} />
-            <OnboardingMetric label="Mode" value="Local sample" />
-          </div>
-
-          <button
-            className="mt-6 inline-flex min-h-11 items-center justify-center gap-2 rounded-md bg-zinc-950 px-4 py-3 text-sm font-semibold text-white transition hover:bg-zinc-800 disabled:cursor-not-allowed disabled:bg-zinc-400"
-            disabled={busy}
-            onClick={onUseHarborSample}
-            type="button"
-          >
-            {busy ? (
-              <RefreshCw className="h-4 w-4 animate-spin" aria-hidden="true" />
-            ) : (
-              <Building2 className="h-4 w-4" aria-hidden="true" />
-            )}
-            Use Harbor sample
-          </button>
-        </section>
-
-        <form
-          className="rounded-lg border border-zinc-200 bg-white p-5 shadow-sm"
-          onSubmit={onSubmit}
-        >
-          <div className="flex items-center gap-3">
-            <span className="flex h-10 w-10 items-center justify-center rounded-lg border border-sky-200 bg-sky-50 text-sky-800">
-              <UserPlus className="h-5 w-5" aria-hidden="true" />
-            </span>
-            <div>
-              <h2 className="text-lg font-semibold text-zinc-950">Workflow intake</h2>
-              <p className="text-sm text-zinc-600">Synthetic/sample customer data only.</p>
-            </div>
-          </div>
-
-          <div className="mt-5 grid gap-4 sm:grid-cols-2">
-            <TextField
-              label="Customer/business name"
-              value={draft.clientName}
-              onChange={(value) => onDraftChange({ ...draft, clientName: value })}
-            />
-            <TextField
-              label="Business type"
-              value={draft.businessType}
-              onChange={(value) => onDraftChange({ ...draft, businessType: value })}
-            />
-            <TextField
-              label="Job/campaign name"
-              value={draft.jobName}
-              onChange={(value) => onDraftChange({ ...draft, jobName: value })}
-            />
-            <TextField
-              label="Invoice amount"
-              type="number"
-              value={draft.invoiceAmountUsd}
-              onChange={(value) => onDraftChange({ ...draft, invoiceAmountUsd: value })}
-            />
-            <TextField
-              label="Spend cap"
-              type="number"
-              value={draft.spendCapUsd}
-              onChange={(value) => onDraftChange({ ...draft, spendCapUsd: value })}
-            />
-            <TextField
-              label="Margin floor"
-              type="number"
-              value={draft.marginFloorPercent}
-              onChange={(value) => onDraftChange({ ...draft, marginFloorPercent: value })}
-            />
-          </div>
-
-          <label className="mt-4 block text-sm font-semibold text-zinc-700">
-            Job goal
-            <textarea
-              className="mt-2 min-h-28 w-full rounded-md border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-950 outline-none transition focus:border-emerald-500"
-              onChange={(event) => onDraftChange({ ...draft, jobGoal: event.target.value })}
-              value={draft.jobGoal}
-            />
-          </label>
-
-          <div className="mt-4 grid gap-4 sm:grid-cols-2">
-            <TextField
-              label="Optional approved vendors"
-              value={draft.approvedVendors}
-              onChange={(value) => onDraftChange({ ...draft, approvedVendors: value })}
-            />
-            <TextField
-              label="Optional blocked vendors"
-              value={draft.blockedVendors}
-              onChange={(value) => onDraftChange({ ...draft, blockedVendors: value })}
-            />
-          </div>
-
-          {error ? (
-            <div className="mt-4 rounded-lg border border-rose-200 bg-rose-50 p-3 text-sm text-rose-800">
-              {error}
-            </div>
-          ) : null}
-
-          <button
-            className="mt-5 inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-md bg-emerald-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-emerald-500 disabled:cursor-not-allowed disabled:bg-zinc-400"
-            disabled={busy}
-            type="submit"
-          >
-            {busy ? (
-              <RefreshCw className="h-4 w-4 animate-spin" aria-hidden="true" />
-            ) : (
-              <CheckCircle2 className="h-4 w-4" aria-hidden="true" />
-            )}
-            Save local workflow
-          </button>
-        </form>
-      </div>
-    </main>
-  );
-}
-
-function TextField({
-  label,
-  onChange,
-  type = "text",
-  value,
-}: {
-  label: string;
-  onChange: (value: string) => void;
-  type?: string;
-  value: string;
-}) {
-  return (
-    <label className="block text-sm font-semibold text-zinc-700">
-      {label}
-      <input
-        className="mt-2 min-h-11 w-full rounded-md border border-zinc-200 bg-white px-3 text-sm text-zinc-950 outline-none transition focus:border-emerald-500"
-        onChange={(event) => onChange(event.target.value)}
-        type={type}
-        value={value}
-      />
-    </label>
-  );
-}
-
-function OnboardingMetric({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="rounded-lg border border-zinc-200 bg-zinc-50 p-4">
-      <p className="text-xs font-semibold uppercase text-zinc-500">{label}</p>
-      <p className="mt-2 text-xl font-semibold text-zinc-950">{value}</p>
     </div>
   );
 }

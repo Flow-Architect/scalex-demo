@@ -1,7 +1,6 @@
 import {
   LogOut,
   ShieldCheck,
-  UserPlus,
 } from "lucide-react";
 
 import type { AuthStatus } from "../types";
@@ -14,14 +13,12 @@ export function Sidebar({
   busy,
   onLogout,
   onNavigate,
-  onStartOnboarding,
 }: {
   activeView: AppView;
   auth: AuthStatus | null;
   busy: boolean;
   onLogout: () => void;
   onNavigate: (view: AppView) => void;
-  onStartOnboarding: () => void;
 }) {
   return (
     <aside className="border-b border-zinc-800 bg-zinc-950 text-white lg:min-h-screen lg:border-b-0 lg:border-r">
@@ -66,14 +63,6 @@ export function Sidebar({
         </div>
 
         <div className="mt-auto grid gap-2">
-          <button
-            className="inline-flex min-h-10 items-center justify-center gap-2 rounded-md border border-white/10 bg-white/5 px-3 text-sm font-semibold text-zinc-200 transition hover:bg-white/10"
-            onClick={onStartOnboarding}
-            type="button"
-          >
-            <UserPlus className="h-4 w-4" aria-hidden="true" />
-            Onboard customer
-          </button>
           {auth?.auth_enabled ? (
             <button
               className="inline-flex min-h-10 items-center justify-center gap-2 rounded-md border border-white/10 bg-white/5 px-3 text-sm font-semibold text-zinc-200 transition hover:bg-white/10 disabled:cursor-not-allowed disabled:text-zinc-500"

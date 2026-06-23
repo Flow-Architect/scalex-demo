@@ -1,5 +1,6 @@
 import {
   Activity,
+  LogOut,
   Play,
   RefreshCw,
   RotateCcw,
@@ -12,20 +13,24 @@ import { StatusBadge } from "../components/ui/StatusBadge";
 
 export function TopCommandBar({
   activeWorkflow,
+  authEnabled,
   busyAction,
   displayCustomer,
   displayJob,
   isBusy,
+  onLogout,
   onRefresh,
   onReset,
   onRun,
   runStatus,
 }: {
   activeWorkflow: WorkflowConfig | null;
+  authEnabled: boolean;
   busyAction: BusyAction;
   displayCustomer: string;
   displayJob: string;
   isBusy: boolean;
+  onLogout: () => void;
   onRefresh: () => void;
   onReset: () => void;
   onRun: () => void;
@@ -87,6 +92,17 @@ export function TopCommandBar({
             />
             Refresh
           </button>
+          {authEnabled ? (
+            <button
+              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-md border border-white/20 bg-white/10 px-4 py-3 text-sm font-semibold text-white transition hover:bg-white/15 disabled:cursor-not-allowed disabled:text-zinc-500"
+              disabled={isBusy}
+              onClick={onLogout}
+              type="button"
+            >
+              <LogOut className="h-4 w-4" aria-hidden="true" />
+              Logout
+            </button>
+          ) : null}
         </div>
       </div>
     </header>

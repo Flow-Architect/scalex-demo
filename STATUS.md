@@ -5,11 +5,11 @@ Last updated: 2026-06-23
 ## Verified current state
 
 - Project folder exists at /home/ascabrya/dev/scalex-demo.
-- Latest committed baseline before this goal: `41f10c2 Extract ScaleX app shell foundation`.
-- Last completed implementation goal in this working tree: Goal 7.9D - Customers / Runs / Audit / Integrations / Settings cleanup.
+- Latest committed baseline before this goal: `6d6daa8 Clean up secondary product views for Goal 7.9D`.
+- Last completed implementation goal in this working tree: Goal 7.9E - Recording readiness / browser-only demo QA.
 - Last completed documentation/audit goal in this working tree: Goal 7.9A - UX Blueprint / Product IA Audit.
-- Current planned goal: Goal 7.9 - Workflow Canvas Product UX Redesign.
-- Current next task: Goal 7.9E - Recording readiness / browser-only demo QA.
+- Current planned goal: Goal 8 - NemoClaw / policy safety integration and presentation.
+- Current next task: Goal 8 - NemoClaw / policy safety integration and presentation.
 - ScaleX is now a functional browser-usable product prototype for profit-aware agent operations in service workflows.
 - The main Workflow page now centers on a connected enterprise workflow canvas with a right selected-node inspector before Goal 8.
 - The Workflow canvas now behaves like a workflow workspace rather than a static diagram:
@@ -24,13 +24,18 @@ Last updated: 2026-06-23
   - local policy engine until Goal 8 wires a real NemoClaw/NemoClaw-style safety adapter if safely available
 - Mock/fallback/test-double paths are for automated tests, CI, offline development, or explicitly labeled diagnostics only.
 - Product-mode real integration failures surface visible error states instead of silently falling back.
-- The frontend now opens as a product shell with local prototype auth, Customers workflow management, selected-workflow run controls, connected Workflow canvas, right selected-node inspector, run history, audit, distinct Integrations and Settings views, and a shared shell-level command bar.
-- Goal 7.9D is now complete:
+- The frontend now opens as a product shell with local prototype auth, a Dashboard landing view, separate Onboarding and Customers sections, selected-workflow run controls, connected Workflow canvas, right selected-node inspector, run history, audit, distinct Integrations and Settings views, and a shared shell-level command bar.
+- Goal 7.9E is now complete:
+  - Dashboard is back as the landing surface after login and after workflow selection/save.
+  - Onboarding is now its own routed section instead of being embedded inside Customers.
   - Customers is a darker product-style workflow manager with clearer active workflow proof and Harbor sample ergonomics.
   - Runs is a persistent run-history view with a selected-run summary, execution feed, and report proof.
   - Audit is organized around timeline, execution feed, ledger, Stripe evidence, and policy evidence.
   - Integrations and Settings now match the command-center product styling and keep Hermes, Stripe, SQLite, local policy, and safety-boundary facts visible.
-- Goal 7.9E remains next to tighten the recording path and browser-only QA before Goal 8.
+  - Logout is now visible both in the sidebar footer and the top command bar.
+  - Local-only CORS now accepts localhost and `127.0.0.1` on alternate ports so auth-enabled QA instances can be verified without editing origin lists.
+  - Headless browser QA verified login, Dashboard, Onboarding, Harbor sample save, Customers, Workflow, Start Run, Hermes inspector, Stripe inspector, Blocked Spend inspector, Profit Report inspector, Runs, Audit, Integrations, Settings, and logout on a temp-port auth-enabled instance.
+- Goal 8 remains next for NemoClaw / policy safety integration and presentation.
 
 ## Goal 6 state
 
