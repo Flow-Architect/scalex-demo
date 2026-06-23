@@ -1,6 +1,6 @@
 # ScaleX Demo Script
 
-Target recording after Goal 7.9C:
+Target recording after Goal 7.9D:
 
 1. Open ScaleX.
 2. Log in through the Secure Operator Console.
@@ -16,10 +16,10 @@ Target recording after Goal 7.9C:
 12. Click Payment Status and confirm it does not claim Stripe-paid revenue unless `paid=true`; local compressed-run confirmation is labeled separately.
 13. Click Blocked Spend and show why the $750 Premium Automation Suite request was blocked and that no spend ledger row was created for it.
 14. Click Profit Report and show the final economics. For Harbor, show $1,200 revenue, $187 approved spend, $750 blocked unsafe spend, $1,013 gross profit, and about 84.4% margin.
-15. Open Runs and show persisted run history with selected run proof.
-16. Open Audit and show SQLite events, orchestration calls, ledger rows, Stripe records, and policy checks.
+15. Open Runs and show the selected-run summary, execution feed, and final report proof.
+16. Open Audit and show the organized SQLite timeline, orchestration calls, ledger rows, Stripe records, and policy checks.
 17. Open Integrations and show Hermes status, Stripe test mode/open-unpaid honesty, SQLite ledger, local policy engine, and NemoClaw as Goal 8 next/not real yet.
-18. Open Settings and show prototype auth, local API/database status, active workflow/run records, and no-live-money safety boundaries.
+18. Open Settings and show prototype auth, local API/database status, selected workflow/run records, and no-live-money safety boundaries.
 19. Log out.
 
 Goal 7.9C makes the main Workflow recording feel like product usage in a workflow
@@ -29,6 +29,7 @@ be needed in the video.
 Hosted judge demo mode must not expose secrets. Local full-proof mode can use ignored
 `.env` values for real isolated Hermes and real Stripe test-mode invoice proof.
 
-Current state after Goal 7.9C: the Workflow page has the central connected canvas,
-repositionable nodes on a fixed background, and a right selected-node inspector. Goal 7.9D
-remains next to clean up Customers, Runs, Audit, Integrations, and Settings before Goal 8.
+Current state after Goal 7.9D: the Workflow page has the central connected canvas,
+repositionable nodes on a fixed background, and a right selected-node inspector, while the
+secondary views now share the darker command-center product styling. Goal 7.9E remains
+next for recording readiness and browser-only QA before Goal 8.

@@ -10,6 +10,57 @@ Use:
 
 ---
 
+## 2026-06-23 - Goal 7.9D: Secondary product-view cleanup
+
+Completed:
+- Reworked the secondary operator views so Customers, Runs, Audit, Integrations, and Settings now match the darker command-center style established by Goals 7.9B and 7.9C.
+- Added `frontend/src/features/operations/ProductView.tsx` and moved the secondary routed surfaces out of `frontend/src/App.tsx`.
+- Changed `frontend/src/App.tsx` so non-Workflow routes now delegate to the extracted operations product-view module instead of rendering the full secondary-view UI inline.
+- Rebuilt Customers as a clearer workflow-management surface with:
+  - stronger active-workflow proof
+  - Harbor sample action at the top
+  - darker saved-workflow cards
+  - SQLite-backed create/select/delete workflow management still intact
+- Rebuilt Runs as a product run-history surface with:
+  - clearer selected-run summary
+  - persisted run list
+  - execution feed
+  - final report proof in the selected-run context
+- Rebuilt Audit around the main evidence categories:
+  - timeline
+  - orchestration feed
+  - SQLite ledger
+  - Stripe evidence
+  - policy evidence
+- Rebuilt Integrations around current Hermes, Stripe test mode, SQLite, local policy, and NemoClaw Goal 8 next/not-real-yet proof.
+- Rebuilt Settings around prototype auth, runtime state, selected workflow/run records, and visible safety boundaries.
+- Preserved existing behavior for:
+  - local prototype auth
+  - workflow create/select/delete
+  - persisted run history
+  - selected run loading
+  - Stripe open/unpaid honesty
+  - local policy proof
+  - NemoClaw not-real-yet labeling
+- Did not change backend business logic and did not implement Goal 8.
+
+Verified:
+- `./scripts/test.sh` passed with 48 backend tests and a successful Vite production build.
+- `npm run build` passed during intermediate frontend verification.
+- `git diff --check` passed.
+- `git status --short` showed only the intended frontend/docs edits before closeout.
+- Tracked-file secret scan returned no matches.
+- No `.env`, SQLite `.db`, `CODEX_GOALS.md`, or `GOAL_LOG.md` file was added or staged.
+- No Stripe API calls or Hermes model calls were intentionally run for this goal.
+
+Suggested commit message:
+Clean up secondary product views for Goal 7.9D
+
+Next:
+- Goal 7.9E - Recording readiness / browser-only demo QA.
+
+---
+
 ## 2026-06-23 - Goal 7.9C: Workflow canvas and selected-node inspector
 
 Completed:

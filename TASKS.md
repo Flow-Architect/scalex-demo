@@ -2,19 +2,19 @@
 
 ## Current priority
 
-Goal 7.9D - Customers / Runs / Audit / Integrations cleanup.
+Goal 7.9E - Recording readiness / browser-only demo QA.
 
 ## Next recommended goal
 
-Run Codex `/goal` 7.9D to clean up the secondary product views after the Workflow page redesign:
+Run Codex `/goal` 7.9E to tighten the browser-only recording path after the Workflow and secondary-view cleanup:
 
-- Customers: active workflow clarity, Harbor sample ergonomics, and saved workflow management polish
-- Runs: persisted run history and selected-run proof summary cleanup
-- Audit: timeline, orchestration calls, ledger, Stripe events, and policy checks organization
-- Integrations: Hermes, Stripe test mode, SQLite, local policy, and NemoClaw Goal 8 next/not real yet
-- Settings: prototype auth, local API/database status, active workflow/run records, and safety boundaries
+- verify the login -> Customers -> Workflow -> Runs -> Audit -> Integrations -> Settings -> logout flow in the browser
+- confirm no terminal output is needed in the recording
+- confirm the Workflow canvas, selected-node inspector, and secondary views all read coherently in one product pass
+- remove any last duplicate proof, awkward spacing, or naming friction that hurts a live demo
+- update demo-facing docs only where the final recording flow changed
 
-Goal 7.9C completed the main Workflow canvas and selected-node inspector. Do not implement Goal 8 during 7.9D.
+Goal 7.9C completed the main Workflow canvas and selected-node inspector. Goal 7.9D completed the secondary-view cleanup. Do not implement Goal 8 during 7.9E.
 
 ## Why this is next
 
@@ -37,8 +37,9 @@ Goal 7.9A is complete as a read-only UX blueprint. Goal 7.9B is complete for app
 extraction, navigation cleanup, shared selectors, and distinct Integrations and Settings
 views. Goal 7.9C is complete for the main Workflow page: it now uses a connected
 workflow canvas with a right selected-node inspector, fixed canvas background, and
-repositionable nodes that redraw their connectors in place. The remaining UI gap before
-Goal 8 is the secondary product views.
+repositionable nodes that redraw their connectors in place. Goal 7.9D is complete for the
+secondary product views. The remaining UI gap before Goal 8 is recording readiness and
+browser-only demo QA.
 
 ## Goal 7.9 sequence
 
@@ -86,6 +87,7 @@ Goal 8 is the secondary product views.
 
 ### Goal 7.9D - Customers / Runs / Audit / Integrations Cleanup
 
+- Complete.
 - Customers: create/select/delete local workflow, prominent Harbor sample, obvious selected workflow.
 - Runs: prior runs list, selected run details, run proof summary.
 - Audit: timeline, orchestration calls, ledger, Stripe events, policy checks.
@@ -130,6 +132,18 @@ Goal 8 is the secondary product views.
 - Do not change backend business logic unless absolutely required for display.
 - Preserve real Hermes, Stripe test-mode, SQLite, local policy, profit proof, Stripe open/unpaid honesty, and NemoClaw not-real-yet labeling.
 - Update STATUS.md, TASKS.md, and CHANGELOG.md at closeout.
+- `./scripts/test.sh`.
+- Vite build if not already covered by the test script.
+- `git diff --check`.
+- Tracked-file secret scan.
+- `git status --short`.
+
+## Required outputs for Goal 7.9E
+
+- Confirm the browser-only recording path from login through logout.
+- Confirm Workflow plus Customers/Runs/Audit/Integrations/Settings all read like one product.
+- Keep Stripe open/unpaid honesty and NemoClaw not-real-yet honesty.
+- Update STATUS.md, TASKS.md, CHANGELOG.md, and demo-facing docs if the final recording flow changes.
 - `./scripts/test.sh`.
 - Vite build if not already covered by the test script.
 - `git diff --check`.
