@@ -1,3 +1,4 @@
+import type { PointerEvent as ReactPointerEvent } from "react";
 import {
   AlertTriangle,
   CheckCircle2,
@@ -8,7 +9,7 @@ import {
 import type { LucideIcon } from "lucide-react";
 
 import { formatDateTime, humanize } from "../../format";
-import type { WorkflowInspectorKey, WorkflowNodeModel, WorkflowNodeStatus, WorkflowTone } from "./workflowModel";
+import type { WorkflowNodeKey, WorkflowNodeModel, WorkflowNodeStatus, WorkflowTone } from "./workflowModel";
 
 const statusIcon: Record<WorkflowNodeStatus, LucideIcon> = {
   pending: CircleDashed,
@@ -19,60 +20,77 @@ const statusIcon: Record<WorkflowNodeStatus, LucideIcon> = {
 };
 
 export function WorkflowNode({
+  dragging,
   node,
+  onPointerDown,
+  onPointerMove,
+  onPointerUp,
   onSelect,
   selected,
 }: {
+  dragging: boolean;
   node: WorkflowNodeModel;
-  onSelect: (key: WorkflowInspectorKey) => void;
+  onPointerDown: (key: WorkflowNodeModel["key"], event: ReactPointerEvent<HTMLDivElement>) => void;
+  onPointerMove: (key: WorkflowNodeModel["key"], event: ReactPointerEvent<HTMLDivElement>) => void;
+  onPointerUp: (key: WorkflowNodeModel["key"], event: ReactPointerEvent<HTMLDivElement>) => void;
+  onSelect: (key: WorkflowNodeKey) => void;
   selected: boolean;
 }) {
   const Icon = node.icon;
   const StatusIcon = statusIcon[node.status];
 
   return (
-    <button
-      className={`absolute rounded-lg border p-3 text-left transition duration-150 hover:-translate-y-0.5 hover:border-white/35 focus:outline-none focus:ring-2 focus:ring-emerald-300 ${
-        nodeClass(node.tone, node.status, selected)
-      }`}
-      onClick={() => onSelect(node.key)}
+    <div
+      data-workflow-node="true"
+      className={`absolute touch-none ${dragging ? "cursor-grabbing" : "cursor-grab"}`}
+      onPointerCancel={(event) => onPointerUp(node.key, event)}
+      onPointerDown={(event) => onPointerDown(node.key, event)}
+      onPointerMove={(event) => onPointerMove(node.key, event)}
+      onPointerUp={(event) => onPointerUp(node.key, event)}
       style={{
-        height: node.position.height,
-        left: node.position.x,
-        top: node.position.y,
-        width: node.position.width,
+        height: `${node.position.height}%`,
+        left: `${node.position.x}%`,
+        top: `${node.position.y}%`,
+        width: `${node.position.width}%`,
       }}
-      type="button"
     >
-      <div className="flex items-start justify-between gap-2">
-        <span className={`flex h-9 w-9 flex-none items-center justify-center rounded-md border ${iconClass(node.tone)}`}>
-          <Icon className={`h-4 w-4 ${node.status === "current" ? "animate-pulse" : ""}`} aria-hidden="true" />
-        </span>
-        <span className={`inline-flex min-w-0 items-center gap-1 rounded-md border px-1.5 py-1 text-[0.68rem] font-semibold ${statusClass(node.status)}`}>
-          <StatusIcon className="h-3 w-3 flex-none" aria-hidden="true" />
-          <span className="truncate">{humanize(node.status)}</span>
-        </span>
-      </div>
-
-      <p className="mt-2 text-[0.68rem] font-semibold uppercase text-zinc-500">{node.eyebrow}</p>
-      <h3 className="mt-1 truncate text-sm font-semibold text-white">{node.title}</h3>
-      <p
-        className="mt-1 min-h-[2.25rem] overflow-hidden text-xs leading-[1.1rem] text-zinc-300"
-        style={{
-          WebkitBoxOrient: "vertical",
-          WebkitLineClamp: 2,
-          display: "-webkit-box",
-        }}
+      <button
+        className={`h-full w-full rounded-lg border p-3 text-left transition duration-150 hover:-translate-y-0.5 hover:border-white/35 focus:outline-none focus:ring-2 focus:ring-emerald-300 ${
+          nodeClass(node.tone, node.status, selected)
+        }`}
+        onClick={() => onSelect(node.key)}
+        type="button"
       >
-        {node.proof}
-      </p>
-      <div className="mt-2 flex items-center justify-between gap-2 text-[0.65rem] text-zinc-500">
-        <span className="truncate rounded border border-white/10 bg-white/5 px-1.5 py-0.5 font-semibold text-zinc-300">
-          {node.badge}
-        </span>
-        <span className="flex-none">{formatDateTime(node.timestamp)}</span>
-      </div>
-    </button>
+        <div className="flex items-start justify-between gap-2">
+          <span className={`flex h-9 w-9 flex-none items-center justify-center rounded-md border ${iconClass(node.tone)}`}>
+            <Icon className={`h-4 w-4 ${node.status === "current" ? "animate-pulse" : ""}`} aria-hidden="true" />
+          </span>
+          <span className={`inline-flex min-w-0 items-center gap-1 rounded-md border px-1.5 py-1 text-[0.68rem] font-semibold ${statusClass(node.status)}`}>
+            <StatusIcon className="h-3 w-3 flex-none" aria-hidden="true" />
+            <span className="truncate">{humanize(node.status)}</span>
+          </span>
+        </div>
+
+        <p className="mt-2 text-[0.68rem] font-semibold uppercase text-zinc-500">{node.eyebrow}</p>
+        <h3 className="mt-1 truncate text-sm font-semibold text-white">{node.title}</h3>
+        <p
+          className="mt-1 min-h-[2.25rem] overflow-hidden text-xs leading-[1.1rem] text-zinc-300"
+          style={{
+            WebkitBoxOrient: "vertical",
+            WebkitLineClamp: 2,
+            display: "-webkit-box",
+          }}
+        >
+          {node.proof}
+        </p>
+        <div className="mt-2 flex items-center justify-between gap-2 text-[0.65rem] text-zinc-500">
+          <span className="truncate rounded border border-white/10 bg-white/5 px-1.5 py-0.5 font-semibold text-zinc-300">
+            {node.badge}
+          </span>
+          <span className="flex-none">{formatDateTime(node.timestamp)}</span>
+        </div>
+      </button>
+    </div>
   );
 }
 

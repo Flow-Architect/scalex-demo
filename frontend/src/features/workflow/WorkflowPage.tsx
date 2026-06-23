@@ -114,7 +114,7 @@ export function WorkflowPage({
             </div>
           ) : null}
 
-          <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_420px]">
+          <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_360px] 2xl:grid-cols-[minmax(0,1fr)_380px]">
             <WorkflowCanvas
               model={model}
               onSelect={onSelectNode}

@@ -115,20 +115,20 @@ export const WORKFLOW_NODE_ORDER: WorkflowNodeKey[] = [
 ];
 
 const NODE_POSITIONS: Record<WorkflowNodeKey, WorkflowNodePosition> = {
-  customer: { x: 24, y: 96, width: 172, height: 118 },
-  hermes: { x: 232, y: 96, width: 172, height: 118 },
-  stripe: { x: 440, y: 96, width: 172, height: 118 },
-  payment: { x: 648, y: 96, width: 172, height: 118 },
-  policy: { x: 856, y: 96, width: 172, height: 118 },
-  approved: { x: 856, y: 318, width: 172, height: 118 },
-  blocked: { x: 648, y: 318, width: 172, height: 118 },
-  agents: { x: 440, y: 318, width: 172, height: 118 },
-  audit: { x: 232, y: 318, width: 172, height: 118 },
-  report: { x: 24, y: 318, width: 172, height: 118 },
+  customer: { x: 2, y: 34, width: 11, height: 19 },
+  hermes: { x: 16, y: 34, width: 11, height: 19 },
+  stripe: { x: 30, y: 34, width: 11, height: 19 },
+  payment: { x: 44, y: 34, width: 11, height: 19 },
+  policy: { x: 58, y: 34, width: 11, height: 19 },
+  approved: { x: 72, y: 8, width: 11, height: 19 },
+  blocked: { x: 72, y: 63, width: 11, height: 19 },
+  agents: { x: 86, y: 8, width: 11, height: 19 },
+  audit: { x: 86, y: 45, width: 11, height: 19 },
+  report: { x: 86, y: 79, width: 11, height: 18 },
 };
 
-export const WORKFLOW_CANVAS_WIDTH = 1052;
-export const WORKFLOW_CANVAS_HEIGHT = 532;
+export const WORKFLOW_CANVAS_WIDTH = 100;
+export const WORKFLOW_CANVAS_HEIGHT = 100;
 
 export function buildWorkflowModel({
   auditRows,

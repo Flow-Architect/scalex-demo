@@ -37,6 +37,8 @@ Completed:
 - Added API-state-backed node status logic for workflow/job presence, Hermes metadata and planning runs, Stripe invoice/payment state, policy checks, spend checks, agent outputs, SQLite counts, and report presence.
 - Kept frontend run progress as presentation-only while `POST /api/demo/run` is in flight, then settled statuses from API state.
 - Added a right inspector that defaults to Run Summary and switches on node click.
+- Refined the Workflow canvas interaction layer so the background stays fixed while workflow nodes can be repositioned directly on the canvas.
+- Added node dragging with live connector redraw and click-vs-drag handling so layout adjustments do not accidentally change the selected inspector node.
 - Preserved proof access for real Hermes, real Stripe test mode, Stripe hosted invoice URL, Stripe `livemode=false`, `invoice_status=open`, `paid=false`, local policy, approved/blocked spend, SQLite counts, agent outputs, and final profit report.
 - Preserved Stripe open/unpaid honesty and labels local compressed-run confirmation separately from Stripe-paid revenue.
 - Preserved NemoClaw truthfulness: Goal 8 next/not real yet, with local policy active now.
@@ -55,6 +57,7 @@ Completed:
 
 Verified:
 - `npm run build` passed for the frontend.
+- `npm run build` passed again after the canvas interaction refinement.
 - `./scripts/test.sh` passed with 48 backend tests and a successful Vite production build.
 - Sanitized dev-server verification used `/tmp/scalex-goal79c-manual.db`, `HERMES_TEST_MODE=true`, `HERMES_REQUIRE_REAL=false`, `STRIPE_TEST_DOUBLE_MODE=true`, and an unset `STRIPE_SECRET_KEY`.
 - Headless Chrome desktop verification completed login, Harbor sample selection, Workflow run, connected canvas checks, Hermes inspector, Stripe inspector, Blocked Spend inspector, Profit Report inspector, Customers/Runs/Audit/Integrations/Settings navigation, and logout.
@@ -66,7 +69,7 @@ Verified:
 - No Stripe API calls or Hermes model calls were intentionally run for this goal.
 
 Suggested commit message:
-Redesign Workflow as connected canvas inspector
+Finalize Goal 7.9C workflow canvas interactions
 
 Next:
 - Goal 7.9D - Customers / Runs / Audit / Integrations cleanup.

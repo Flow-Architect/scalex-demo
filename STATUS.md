@@ -12,6 +12,11 @@ Last updated: 2026-06-23
 - Current next task: Goal 7.9D - Customers / Runs / Audit / Integrations cleanup.
 - ScaleX is now a functional browser-usable product prototype for profit-aware agent operations in service workflows.
 - The main Workflow page now centers on a connected enterprise workflow canvas with a right selected-node inspector before Goal 8.
+- The Workflow canvas now behaves like a workflow workspace rather than a static diagram:
+  - fixed command-center background
+  - repositionable workflow nodes
+  - live connector redraw as nodes move
+  - selected-node inspection without leaving the page
 - Product mode is real-integration-first:
   - real isolated Hermes Agent for planning/orchestration proposals
   - real Stripe test-mode API calls for Goal 7 payment/invoice records

@@ -36,8 +36,9 @@ Audit, Integrations, and Settings without terminal output.
 Goal 7.9A is complete as a read-only UX blueprint. Goal 7.9B is complete for app shell
 extraction, navigation cleanup, shared selectors, and distinct Integrations and Settings
 views. Goal 7.9C is complete for the main Workflow page: it now uses a connected
-workflow canvas with a right selected-node inspector. The remaining UI gap before Goal 8
-is the secondary product views.
+workflow canvas with a right selected-node inspector, fixed canvas background, and
+repositionable nodes that redraw their connectors in place. The remaining UI gap before
+Goal 8 is the secondary product views.
 
 ## Goal 7.9 sequence
 
@@ -116,11 +117,12 @@ is the secondary product views.
 - Connected workflow canvas with the exact Goal 7.9 node set.
 - Right selected-node inspector.
 - Approved Spend and Blocked Spend shown as separate branches.
+- Fixed-background canvas with repositionable nodes and connector redraw on drag.
 - Current proof panels removed from Workflow where the inspector safely replaces them.
 - Existing behavior preserved for auth, onboarding, workflow selection, selected-workflow runs, run history, Audit, Integrations, and Settings.
 - Workflow feature files created under `frontend/src/features/workflow/`.
 - `App.tsx` delegates the Workflow route to `WorkflowPage`.
-- `./scripts/test.sh` passed.
+- `./scripts/test.sh` should be rerun after any 7.9C interaction refinements.
 
 ## Required outputs for Goal 7.9D
 
