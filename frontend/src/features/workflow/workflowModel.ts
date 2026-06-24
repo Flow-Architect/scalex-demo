@@ -155,8 +155,8 @@ export function buildWorkflowModel({
       { from: "hermes", to: "stripe", tone: "violet" },
       { from: "stripe", to: "payment", tone: "sky" },
       { from: "payment", to: "policy", tone: "amber" },
-      { from: "policy", to: "approved", tone: "emerald", label: "approved path" },
-      { from: "policy", to: "blocked", tone: "rose", label: "blocked path" },
+      { from: "policy", to: "approved", tone: "emerald", label: "approved" },
+      { from: "policy", to: "blocked", tone: "rose", label: "blocked" },
       { from: "approved", to: "agents", tone: "emerald" },
       { from: "blocked", to: "audit", tone: "rose" },
       { from: "agents", to: "audit", tone: "teal" },
@@ -220,8 +220,8 @@ function buildSettledNodes(
   return [
     {
       key: "customer",
-      title: "Client Operation Intake",
-      eyebrow: "operation seed",
+      title: "Client Intake",
+      eyebrow: "operation file",
       proof: workflow
         ? `${workflow.client_name} - ${formatCurrency(workflow.invoice_amount_cents)} invoice`
         : job
@@ -236,12 +236,12 @@ function buildSettledNodes(
     },
     {
       key: "hermes",
-      title: "Hermes Brain",
+      title: "Hermes Plan",
       eyebrow: "planning",
       proof: planningRun
         ? `${hermes?.provider ?? planningRun.provider} / ${hermes?.model ?? planningRun.model}`
         : "Planning proof appears after a run.",
-      badge: hermes?.used_real_hermes ? "real Hermes" : planningRun?.source ?? "pending",
+      badge: hermes?.used_real_hermes ? "real Hermes" : planningRun?.source ?? "awaiting run",
       status: hermesFailed(hermes, planningRun)
         ? "error"
         : planningRun?.status === "completed"
@@ -256,11 +256,11 @@ function buildSettledNodes(
     },
     {
       key: "stripe",
-      title: "Stripe Test Invoice",
-      eyebrow: "invoice",
+      title: "Finance Proof",
+      eyebrow: "Stripe test mode",
       proof: stripe?.invoice_id
-        ? `${stripe.customer_id ?? "customer pending"} / ${stripe.invoice_id}`
-        : stripe?.error ?? "Stripe test invoice proof pending.",
+        ? `${stripe.customer_id ?? "customer not recorded"} / ${stripe.invoice_id}`
+        : stripe?.error ?? "Stripe test invoice proof appears after launch.",
       badge: stripeModeLabel(stripe),
       status: stripe?.error ? "error" : stripe?.invoice_id ? "complete" : "pending",
       tone: "sky",
@@ -270,15 +270,15 @@ function buildSettledNodes(
     },
     {
       key: "payment",
-      title: "Payment Status",
+      title: "Revenue Gate",
       eyebrow: "revenue gate",
       proof:
         stripe?.paid === true
           ? "Stripe reports paid=true."
           : stripe?.paid === false
             ? "Open/unpaid. Local confirmation is labeled separately."
-            : "Payment state pending.",
-      badge: stripe?.paid === true ? "paid" : stripe?.paid === false ? "open/unpaid" : "pending",
+            : "Finance proof awaiting run.",
+      badge: stripe?.paid === true ? "paid" : stripe?.paid === false ? "open/unpaid" : "awaiting proof",
       status: stripe?.error
         ? "error"
         : stripe?.paid === true
@@ -297,8 +297,8 @@ function buildSettledNodes(
       eyebrow: "local guardrails",
       proof: state?.policy.summary
         ? `${state.policy.summary.engine}: cap ${formatCurrency(state.policy.summary.max_job_spend_usd * 100)}, floor ${formatPercent(state.policy.summary.margin_floor_percent)}`
-        : "Policy configuration pending.",
-      badge: state?.policy.summary ? "local policy" : "pending",
+        : "Policy configuration appears after setup.",
+      badge: state?.policy.summary ? "local policy" : "not configured",
       status: checks.length > 0 ? "complete" : state?.policy.summary ? "current" : "pending",
       tone: "violet",
       icon: ShieldCheck,
@@ -307,12 +307,12 @@ function buildSettledNodes(
     },
     {
       key: "approved",
-      title: "Approved Setup Spend",
-      eyebrow: "safe spend path",
+      title: "Approved Resources",
+      eyebrow: "controlled setup",
       proof:
         approvedChecks.length > 0
           ? `${formatCurrency(approvedChecks.reduce((total, check) => total + check.requested_amount_cents, 0))} approved`
-          : "Approved setup spend decisions pending.",
+          : "Approved setup spend decisions appear after launch.",
       badge: `${approvedChecks.length} approved`,
       status: approvedChecks.length > 0 ? "complete" : "pending",
       tone: "emerald",
@@ -327,7 +327,7 @@ function buildSettledNodes(
       proof:
         blockedChecks.length > 0
           ? `${formatOptionalCurrency(money.blockedSpendCents)} blocked before ledger spend`
-          : "Blocked risk decisions pending.",
+          : "Blocked risk decisions appear after launch.",
       badge: blockedChecks[0]?.vendor ?? "guarded",
       status: blockedChecks.length > 0 ? "blocked" : "pending",
       tone: "rose",
@@ -337,10 +337,10 @@ function buildSettledNodes(
     },
     {
       key: "agents",
-      title: "Work Units",
+      title: "Launch Work",
       eyebrow: "deliverables",
-      proof: outputs.length > 0 ? `${outputs.length} deliverables recorded` : "Agent outputs pending.",
-      badge: outputs.length > 0 ? `${outputs.length}/4 outputs` : "pending",
+      proof: outputs.length > 0 ? `${outputs.length} deliverables recorded` : "Launch work appears after execution.",
+      badge: outputs.length > 0 ? `${outputs.length}/4 outputs` : "awaiting work",
       status: outputs.length >= 4 ? "complete" : outputs.length > 0 ? "current" : "pending",
       tone: "teal",
       icon: Layers3,
@@ -349,15 +349,15 @@ function buildSettledNodes(
     },
     {
       key: "audit",
-      title: "SQLite Audit",
+      title: "Evidence Ledger",
       eyebrow: "records",
       proof:
         auditRows > 0
           ? `${auditRows} current-state records`
           : health?.database_exists
-            ? "SQLite database is present; run proof pending."
-            : "SQLite proof pending.",
-      badge: health?.database_exists || state?.database.exists ? "SQLite active" : "pending",
+            ? "SQLite database is present; run proof is not recorded yet."
+            : "SQLite proof appears after launch.",
+      badge: health?.database_exists || state?.database.exists ? "SQLite active" : "not recorded",
       status: auditRows > 0 ? "complete" : health?.database_exists ? "current" : "pending",
       tone: "teal",
       icon: Database,
@@ -378,8 +378,8 @@ function buildSettledNodes(
       eyebrow: "economics",
       proof: report
         ? `${formatCurrency(report.gross_profit_cents)} profit, ${formatPercent(report.actual_margin_percent)} margin`
-        : "Final report pending.",
-      badge: report ? "report ready" : "pending",
+        : "Final report appears after execution.",
+      badge: report ? "report ready" : "awaiting outcome",
       status: report ? "complete" : "pending",
       tone: "emerald",
       icon: FileText,

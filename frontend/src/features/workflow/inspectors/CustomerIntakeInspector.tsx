@@ -12,7 +12,7 @@ export function CustomerIntakeInspector({
   state: DemoState | null;
 }) {
   const source = activeWorkflow ?? state?.job ?? null;
-  const workflowId = activeWorkflow?.id ?? state?.job?.workflow_id ?? "Pending";
+  const workflowId = activeWorkflow?.id ?? state?.job?.workflow_id ?? "Not recorded";
 
   if (!source) {
     return (
@@ -40,9 +40,9 @@ export function CustomerIntakeInspector({
           <Fact label="Job ID" value={state?.job?.id ?? "Run not started"} />
         </FactGrid>
 
-        <div className="mt-3 rounded-md border border-white/10 bg-zinc-950/35 p-3">
+        <div className="mt-3 border border-zinc-200 bg-zinc-50 p-3">
           <p className="text-[0.68rem] font-semibold uppercase text-zinc-500">Operation goal</p>
-          <p className="mt-1 text-sm leading-6 text-zinc-200">{source.job_goal}</p>
+          <p className="mt-1 text-sm leading-6 text-zinc-700">{source.job_goal}</p>
         </div>
 
         <div className="mt-3 flex flex-wrap gap-2">

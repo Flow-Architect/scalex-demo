@@ -2,9 +2,10 @@
 
 ## Current Priority
 
-Goal 7.11C - ClientOps Function Studio Visual Pass.
+Goal 8A - NeMo Guardrails Preflight / Architecture Audit.
 
-Goal 8A remains intact and should run after the 7.11C visual pass unless the plan changes.
+Goal 7.11C is complete after the required follow-up product-workspace redesign. Goal 8A remains
+intact and should run next unless the plan changes.
 
 ## Goal 7.11A Gate Result
 
@@ -55,24 +56,46 @@ the sample implementation pass.
 
 ## Next Recommended Goal
 
-Run Codex `/goal` 7.11C:
+Run Codex `/goal` 8A:
 
-- Align the browser experience with ClientOps Autopilot / Enterprise Function Accelerator.
-- Present the Studio as a ClientOps Function Studio surface with Northstar already implemented.
-- Keep finance proof, business rules, local policy guardrails, evidence ledger, protected profit,
-  and blocked risk visible without terminal output.
-- Preserve Stripe test-mode honesty: invoice is not paid unless `paid=true`.
-- Preserve local policy active now / NeMo Guardrails planned and not wired.
+- Perform the read-only NeMo Guardrails preflight / architecture audit.
+- Inspect whether `nemoguardrails`, `nemoclaw`, `openclaw`, Docker, and NVIDIA tooling are locally available.
+- Inspect the current local policy engine and SQLite audit schema.
+- Decide whether real NeMo Guardrails is safely available.
+- Produce the exact Goal 8B implementation prompt.
+- Preserve product-mode truthfulness: local policy is active now; real NeMo is not wired yet.
 
-## Goal 7.11C
+## Goal 7.11C Gate Result
 
-After Goal 7.11B, run Goal 7.11C - ClientOps Function Studio Visual Pass:
+Goal 7.11C - ClientOps Function Studio Visual Pass is complete after the follow-up pass replaced
+the old card-dashboard shell with a ClientOps product workspace.
 
-- Align the browser experience with ClientOps Autopilot / Enterprise Function Accelerator.
-- Present the Studio route as a ClientOps Function Studio surface, not the product identity.
-- Keep finance proof, business rules, guardrail enforcement, evidence ledger, protected profit,
-  and blocked risk visible without terminal output.
-- Avoid fake NeMo claims, fake live-money support, or real customer workflow claims.
+- Replaced the old Dashboard card-grid console with a business landing page for one revenue-backed
+  Northstar Dental Group / Client Implementation Launch operation.
+- Added the hero operation brief with `Open Function Studio` and `Review Evidence Ledger` CTAs.
+- Added the business outcome strip: $8,500 revenue, $1,150 approved setup spend, $3,200 blocked
+  risk, $7,350 protected gross profit, and 86.5% protected margin.
+- Added the ClientOps operating stack: Hermes plans the operation, Stripe provides finance proof,
+  Guardrails review spend/risk, SQLite records evidence, and Profit Outcome reports the result.
+- Added the function templates section with Implemented: Client Implementation Launch and Planned:
+  Invoice-to-Cash, Vendor Spend Approval, Client Onboarding, Research-to-Report, Ops Handoff,
+  and Renewal Recommendation.
+- Moved payment state, policy state, SQLite state, raw invoice IDs, database paths, and detailed
+  counts lower or into Audit / Integrations.
+- Added shared workspace primitives for operation pages, operation hero, outcome rail, operation
+  timeline, template shelf, proof routes, empty workspace states, and plain tables.
+- Reworked Function Studio into a business-readable workspace with operation brief, Function Map,
+  Evidence Drawer, and activity timeline.
+- Reworked Onboarding into Configure Client Implementation Launch, Customers into Client Operation
+  Files, Runs into Execution History, Audit into Evidence Ledger, Integrations into Operating
+  Stack, and Settings into Boundaries & Runtime.
+- Preserved Stripe honesty: invoice is not paid unless `paid=true`.
+- Preserved local policy active now / real NeMo Guardrails planned and not wired.
+- Did not add fake live-money support, real customer workflow claims, real NeMo claims, live Stripe
+  calls, real Hermes model calls, `.env` edits, or `data/*.db` changes.
+- Verified with `./scripts/test.sh`, `npm run build` in `frontend/`, `git diff --check`, strict
+  tracked-file secret scan, staged-artifact checks, and auth-enabled browser QA including Start Run
+  on backend `8793` / frontend `5180`.
 
 ## Goal 8 Sequence
 

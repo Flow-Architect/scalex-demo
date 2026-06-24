@@ -40,29 +40,30 @@ export function NodeInspector({
 }) {
   const node = nodeByKey(model, selectedKey);
   const Icon = node?.icon ?? Activity;
+  const evidenceTime = node?.timestamp ? formatDateTime(node.timestamp) : "Awaiting run evidence";
 
   return (
-    <aside className="flex min-h-[44rem] flex-col overflow-hidden rounded-lg border border-white/10 bg-zinc-950 text-white shadow-2xl shadow-zinc-950/30">
-      <div className="border-b border-white/10 bg-white/[0.04] p-4">
+    <aside className="flex min-h-[44rem] flex-col overflow-hidden bg-white text-zinc-950 shadow-sm ring-1 ring-zinc-200">
+      <div className="border-b border-zinc-200 bg-white p-4">
         <div className="flex items-start justify-between gap-3">
           <div className="flex min-w-0 items-start gap-3">
-            <span className="flex h-10 w-10 flex-none items-center justify-center rounded-md border border-white/10 bg-white/10 text-zinc-100">
+            <span className="flex h-10 w-10 flex-none items-center justify-center rounded-md bg-zinc-950 text-white">
               <Icon className="h-5 w-5" aria-hidden="true" />
             </span>
             <div className="min-w-0">
-              <p className="text-xs font-semibold uppercase text-zinc-500">Selected node</p>
-              <h2 className="mt-1 break-words text-lg font-semibold text-white">
+              <p className="text-xs font-semibold uppercase text-zinc-500">Evidence Drawer</p>
+              <h2 className="mt-1 break-words text-lg font-semibold text-zinc-950">
                 {node?.title ?? "Run Summary"}
               </h2>
-              <p className="mt-1 text-sm leading-5 text-zinc-400">
-                {node ? `${humanize(node.status)} - ${formatDateTime(node.timestamp)}` : runStatus}
+              <p className="mt-1 text-sm leading-5 text-zinc-600">
+                {node ? `${inspectorStatusLabel(node.status)} - ${evidenceTime}` : runStatus}
               </p>
             </div>
           </div>
           {selectedKey !== "summary" ? (
             <button
               aria-label="Return to run summary"
-              className="inline-flex h-9 w-9 flex-none items-center justify-center rounded-md border border-white/10 bg-white/5 text-zinc-300 transition hover:bg-white/10 hover:text-white"
+              className="inline-flex h-9 w-9 flex-none items-center justify-center rounded-md border border-zinc-300 bg-white text-zinc-600 transition hover:bg-zinc-50 hover:text-zinc-950"
               onClick={() => onSelect("summary")}
               type="button"
             >
@@ -72,7 +73,7 @@ export function NodeInspector({
         </div>
       </div>
 
-      <div className="flex-1 space-y-4 overflow-auto p-4">
+      <div className="flex-1 space-y-4 overflow-auto bg-zinc-50 p-4">
         {selectedKey === "summary" ? (
           <RunSummaryInspector
             activeWorkflow={activeWorkflow}
@@ -98,4 +99,8 @@ export function NodeInspector({
       </div>
     </aside>
   );
+}
+
+function inspectorStatusLabel(status: string): string {
+  return status === "pending" ? "Awaiting run" : humanize(status);
 }

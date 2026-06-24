@@ -1,6 +1,6 @@
 import type { LucideIcon } from "lucide-react";
 
-import { darkToneClass } from "./statusStyles";
+import { softToneClass } from "./statusStyles";
 import type { Tone } from "./statusStyles";
 
 export function StatusBadge({
@@ -13,7 +13,7 @@ export function StatusBadge({
   tone?: Tone;
 }) {
   return (
-    <span className={`inline-flex items-center gap-2 rounded-md border px-3 py-1.5 text-sm font-semibold ${darkToneClass(tone)}`}>
+    <span className={`inline-flex items-center gap-2 rounded-md border px-3 py-1.5 text-sm font-semibold ${softToneClass(tone)}`}>
       {Icon ? <Icon className="h-4 w-4" aria-hidden="true" /> : null}
       {label}
     </span>

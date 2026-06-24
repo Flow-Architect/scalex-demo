@@ -48,7 +48,7 @@ export function SpendInspector({
           <Fact label="Blocked risk total" value={formatCurrency(blockedTotal)} />
           <Fact
             label="Remaining cap"
-            value={remainingCap === null ? "Pending" : formatCurrency(remainingCap)}
+            value={remainingCap === null ? "Not recorded" : formatCurrency(remainingCap)}
           />
           <Fact label="Spend ledger rows" value={String(spendEntries.length)} />
         </FactGrid>
@@ -87,15 +87,15 @@ export function SpendInspector({
           ) : (
             <div className="space-y-2">
               {spendEntries.map((entry) => (
-                <div className="rounded-md border border-white/10 bg-zinc-950/35 p-3" key={entry.id}>
+                <div className="border border-zinc-200 bg-zinc-50 p-3" key={entry.id}>
                   <div className="flex items-start justify-between gap-3">
                     <div>
-                      <p className="text-sm font-semibold text-white">{entry.label}</p>
+                      <p className="text-sm font-semibold text-zinc-950">{entry.label}</p>
                       <p className="mt-1 text-xs text-zinc-500">
                         {entry.source} - {formatDateTime(entry.created_at)}
                       </p>
                     </div>
-                    <p className="text-sm font-semibold text-zinc-100">{formatCurrency(entry.amount_cents)}</p>
+                    <p className="text-sm font-semibold text-zinc-950">{formatCurrency(entry.amount_cents)}</p>
                   </div>
                 </div>
               ))}
@@ -122,24 +122,24 @@ function SpendCheckCard({
 
   return (
     <article
-      className={`rounded-lg border p-3 ${
+      className={`border p-3 ${
         mode === "approved"
-          ? "border-emerald-300/20 bg-emerald-300/10"
-          : "border-rose-300/20 bg-rose-300/10"
+          ? "border-emerald-200 bg-emerald-50"
+          : "border-rose-200 bg-rose-50"
       }`}
     >
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <p className="break-words text-sm font-semibold text-white">{check.vendor}</p>
-          <p className="mt-1 text-xs font-semibold uppercase text-zinc-400">
+          <p className="break-words text-sm font-semibold text-zinc-950">{check.vendor}</p>
+          <p className="mt-1 text-xs font-semibold uppercase text-zinc-500">
             {mode === "approved" ? "Approved setup spend" : "Blocked vendor risk"}
           </p>
         </div>
-        <p className="flex-none text-sm font-semibold text-white">
+        <p className="flex-none text-sm font-semibold text-zinc-950">
           {formatCurrency(check.requested_amount_cents)}
         </p>
       </div>
-      <p className="mt-2 text-sm leading-5 text-zinc-300">{check.reason}</p>
+      <p className="mt-2 text-sm leading-5 text-zinc-700">{check.reason}</p>
       <FactGrid>
         <Fact label="Required action" value={check.required_action} />
         <Fact label="Margin after spend" value={`${check.margin_after_spend_percent.toFixed(1)}%`} />
@@ -153,7 +153,7 @@ function SpendCheckCard({
                 : "None created"
               : matchingSpendEntry
                 ? matchingSpendEntry.id
-                : "Pending"
+                : "Not recorded"
           }
         />
       </FactGrid>

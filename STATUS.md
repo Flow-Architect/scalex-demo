@@ -5,11 +5,14 @@ Last updated: 2026-06-24
 ## Verified Current State
 
 - Project folder exists at `/home/ascabrya/dev/scalex-demo`.
-- Latest committed baseline before Goal 7.11A: `29de64d Verify ScaleX browser product readiness`.
-- Last completed goal: Goal 7.11B - Replace Harbor Sample with Northstar Client Implementation Launch.
-- Last completed implementation/QA goal: Goal 7.10 - Product Functionality Readiness / Browser Demo Gate.
-- Current priority: Goal 7.11C - ClientOps Function Studio Visual Pass.
+- Latest committed baseline before Goal 7.11C follow-up: `882567f Replace Harbor with Northstar ClientOps launch`.
+- Last completed goal: Goal 7.11C-followup - Replace Card Dashboard With ClientOps Product Workspace.
+- Last completed implementation/QA goal: Goal 7.11C-followup - Replace Card Dashboard With ClientOps Product Workspace.
+- Current priority: Goal 8A - NeMo Guardrails Preflight / Architecture Audit.
 - Goal 7.11B replaced the legacy Harbor sample with Northstar Dental Group / Client Implementation Launch.
+- Goal 7.11C-followup replaced the remaining generated dashboard/card shell with a ClientOps
+  operation-file workspace across Dashboard, Function Studio, Onboarding, Customers, Runs,
+  Audit, Integrations, and Settings.
 - Goal 8A - NeMo Guardrails Preflight / Architecture Audit remains intact and planned after the 7.11B/7.11C positioning pass.
 - Goal 9 remains final polish and submission assets.
 - Goal 7B remains future Verified Live Mode hardening.
@@ -74,6 +77,50 @@ Functional product surfaces remain:
 - deterministic test-double paths for tests/CI/diagnostics only
 - local policy engine for current guardrail enforcement
 
+## Verified For Goal 7.11C-followup
+
+- Replaced the card-grid Dashboard architecture with a top-to-bottom ClientOps operation file for
+  the Northstar Dental Group / Client Implementation Launch function.
+- Added shared workspace primitives for operation pages, operation hero, outcome rail, operation
+  timeline, template shelf, proof routes, empty workspace states, and plain tables.
+- Replaced repeated bordered panel/card patterns with larger sections, table/list layouts,
+  operation rows, timelines, drawers, and supporting workspace routes.
+- Kept Dashboard business-first: hero operation brief, outcome rail, operating stack timeline,
+  template shelf, and small supporting routes only.
+- Removed Payment, Policy, SQLite, raw invoice IDs, database paths, and detailed counts from the
+  first Dashboard screen; they now live in Audit, Integrations, Settings, or the Studio Evidence Drawer.
+- Reworked Function Studio into a business workspace with operation brief, readable Function Map,
+  Evidence Drawer, and client activity timeline.
+- Reworked Onboarding into a Configure Client Implementation Launch operation setup document.
+- Reworked Customers into Client Operation Files and Runs into Execution History with a clear
+  no-execution empty state.
+- Reworked Audit into Evidence Ledger, Integrations into Operating Stack, and Settings into
+  Boundaries & Runtime.
+- Preserved Northstar economics and truthfulness: synthetic account only, no patient data, no PHI,
+  no HIPAA claim, local policy active now, NeMo planned/not wired, Stripe not paid unless `paid=true`,
+  no live-money support, and no production auth claim.
+- Did not touch `.env`, `data/*.db`, live Stripe, real Hermes production config, live-money paths,
+  or Goal 8 implementation.
+
+## Verified For Goal 7.11C Initial Pass
+
+- Replaced the Dashboard card-grid console with a business landing page for one revenue-backed
+  Northstar client operation.
+- Added a hero operation brief for Northstar Dental Group / Client Implementation Launch with
+  primary `Open Function Studio` and secondary `Review Evidence Ledger` CTAs.
+- Added the business outcome strip: $8,500 revenue, $1,150 approved setup spend, $3,200 blocked
+  risk, $7,350 protected gross profit, and 86.5% protected margin.
+- Added the ClientOps operating stack: Hermes plans the operation, Stripe provides finance proof,
+  guardrails review spend/risk, SQLite records evidence, and Profit Outcome reports the result.
+- Added the function templates section with implemented Client Implementation Launch and planned
+  Invoice-to-Cash, Vendor Spend Approval, Client Onboarding, Research-to-Report, Ops Handoff,
+  and Renewal Recommendation templates.
+- Moved payment, policy, SQLite, raw IDs, database paths, and detailed counts out of the first
+  business screen and into supporting evidence routes.
+- Preserved Stripe honesty: the Dashboard shows `paid=false` unless Stripe returns `paid=true`.
+- Preserved guardrail truthfulness: no real NeMo Guardrails claim was added.
+- Did not touch `.env`, `data/*.db`, live Stripe, real Hermes production config, or live-money paths.
+
 ## Template Model
 
 Goal 7.11B implemented the previously selected template:
@@ -115,20 +162,37 @@ Research-to-Report, Ops Handoff, and Renewal Recommendation.
 
 ## Verification Commands
 
-- `./scripts/test.sh` passed: 48 backend tests and Vite production build.
-- Safe browser QA passed with `/tmp/scalex-goal711b-browser.db`, local prototype auth,
+- For Goal 7.11C-followup, `./scripts/test.sh` passed: 48 backend tests and Vite production build.
+- For Goal 7.11C-followup, `npm run build` in `frontend/` passed before the full test script and
+  after final visual fixes.
+- Auth-enabled browser QA used `/tmp/scalex-goal711c-followup.db`,
+  `SCALEX_AUTH_ENABLED=true`, `SCALEX_DEMO_USERNAME=operator`,
+  `SCALEX_DEMO_PASSWORD=local-password`, `SCALEX_SESSION_SECRET=local-test-session`,
+  `HERMES_TEST_MODE=true`, `HERMES_REQUIRE_REAL=false`, and `STRIPE_TEST_DOUBLE_MODE=true`.
+- Browser QA ran on backend port `8793` and frontend port `5180`.
+- Browser QA confirmed login, Dashboard operation file, Start Run in the test-double QA environment,
+  Function Studio with Guardrail Review selected in the Evidence Drawer, post-run Studio/Runs
+  evidence, Onboarding, Customers, Runs, Audit, Integrations, Settings, and logout.
+- Final QA screenshots were written to `/tmp/scalex-goal711c-followup-final`.
+- The stale-copy sweep found no current UI matches for `proof routes`, `debug console`, `raw invoice
+  identifiers`, `Payment state`, `Policy state`, `SQLite state`, `Selected node`, `nodes active`,
+  `Operator console`, or `proof panel`.
+- Previous Goal 7.11B full-suite verification passed: 48 backend tests and Vite production build.
+- Previous Goal 7.11B safe browser QA passed with `/tmp/scalex-goal711b-browser.db`, local prototype auth,
   `HERMES_TEST_MODE=true`, `HERMES_REQUIRE_REAL=false`, and `STRIPE_TEST_DOUBLE_MODE=true`.
 - Browser QA confirmed login, Dashboard, Northstar sample load, Studio run, $8,500 revenue,
   $1,150 approved setup spend, $3,200 blocked risk, $7,350 protected gross profit, 86.5%
   margin, Hermes/Stripe/Guardrail/Blocked Risk/Profit Outcome inspectors, Runs, Audit,
   Integrations, Settings, and logout.
 - `git diff --check` passed.
-- Tracked-file secret scan passed.
+- Tracked-file secret scan passed; broad placeholder hits were reviewed, and the strict tracked-file
+  key-material scan returned no matches.
+- No `.env`, `data/*.db`, `frontend/dist`, `data/backups`, `CODEX_GOALS.md`, or `GOAL_LOG.md`
+  file was staged.
 - `git status --short` was reviewed.
 
 ## Incomplete Items
 
-- Goal 7.11C visual pass has not run yet.
 - Goal 8A read-only NeMo Guardrails preflight has not run yet.
 - Real NVIDIA NeMo Guardrails is not wired yet.
 - Verified Live Mode live-money execution is not implemented.
@@ -144,4 +208,4 @@ Research-to-Report, Ops Handoff, and Renewal Recommendation.
 
 ## Current Priority
 
-Goal 7.11C - ClientOps Function Studio Visual Pass.
+Goal 8A - NeMo Guardrails Preflight / Architecture Audit.

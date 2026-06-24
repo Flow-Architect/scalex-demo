@@ -127,56 +127,89 @@ export function WorkflowCanvas({
   };
 
   return (
-    <section className="flex h-full min-h-[44rem] flex-col overflow-hidden rounded-lg border border-white/10 bg-zinc-950 text-white shadow-2xl shadow-zinc-950/30">
-      <div className="border-b border-white/10 bg-white/[0.04] p-4">
+    <section className="flex h-full min-h-[44rem] flex-col overflow-hidden bg-white text-zinc-950 shadow-sm ring-1 ring-zinc-200">
+      <div className="border-b border-zinc-200 bg-white p-4">
         <div className="flex flex-col gap-3 2xl:flex-row 2xl:items-center 2xl:justify-between">
           <div>
-            <h2 className="text-base font-semibold text-white">ClientOps Function Studio</h2>
-            <p className="mt-1 text-sm text-zinc-400">
-              Revenue-backed client operation with policy-gated setup spend and audited profit proof.
+            <p className="text-xs font-semibold uppercase text-zinc-500">Function Map</p>
+            <h2 className="mt-1 text-xl font-semibold text-zinc-950">Client implementation path</h2>
+            <p className="mt-1 text-sm text-zinc-600">
+              Revenue, finance proof, guardrail review, evidence, and profit outcome in one governed route.
             </p>
           </div>
           <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center 2xl:justify-end">
             <CanvasLegend />
-            <span className="w-fit rounded-md border border-white/10 bg-white/5 px-3 py-2 text-xs font-semibold text-zinc-300">
-              {model.activeCount}/{model.nodes.length} nodes active
+            <span className="w-fit rounded-md border border-zinc-200 bg-zinc-50 px-3 py-2 text-xs font-semibold text-zinc-700">
+              {model.activeCount}/{model.nodes.length} steps available
             </span>
           </div>
         </div>
       </div>
 
-      <div className="flex-1">
-        <div
-          ref={viewportRef}
-          className="relative h-full min-h-[48rem] overflow-hidden"
-        >
-          <div
-            className="relative h-full w-full"
-            style={{
-              backgroundImage:
-                "linear-gradient(rgba(255,255,255,0.045) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.045) 1px, transparent 1px)",
-              backgroundSize: "28px 28px",
-            }}
-          >
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_15%,rgba(16,185,129,0.10),transparent_34%),radial-gradient(circle_at_85%_78%,rgba(244,63,94,0.10),transparent_28%)]" />
-            <ConnectorLayer connections={model.connections} nodes={nodes} />
-            {nodes.map((node) => (
-              <WorkflowNode
-                key={node.key}
-                dragging={draggingKey === node.key}
-                node={node}
-                onPointerDown={handleNodePointerDown}
-                onPointerMove={handleNodePointerMove}
-                onPointerUp={handleNodePointerEnd}
-                onSelect={handleNodeSelect}
-                selected={selectedKey === node.key}
-              />
-            ))}
-          </div>
-        </div>
+      <div ref={viewportRef} className="flex-1 bg-zinc-50 p-4">
+        <ol className="grid gap-3">
+          {nodes.map((node, index) => (
+            <li key={node.key}>
+              <button
+                className={`grid w-full gap-4 rounded-md border bg-white p-4 text-left transition hover:border-zinc-500 lg:grid-cols-[3rem_minmax(0,1fr)_8rem] lg:items-center ${
+                  selectedKey === node.key ? "border-emerald-600 ring-2 ring-emerald-600 ring-offset-2 ring-offset-zinc-50" : stepBorderClass(node.tone)
+                }`}
+                onClick={() => handleNodeSelect(node.key)}
+                type="button"
+              >
+                <span className="flex h-10 w-10 items-center justify-center rounded-md bg-zinc-950 text-sm font-semibold text-white">
+                  {String(index + 1).padStart(2, "0")}
+                </span>
+                <span className="min-w-0">
+                  <span className="text-xs font-semibold uppercase text-zinc-500">{node.eyebrow}</span>
+                  <span className="mt-1 block text-lg font-semibold text-zinc-950">{node.title}</span>
+                  <span className="mt-1 block text-sm leading-6 text-zinc-600">{node.proof}</span>
+                </span>
+                <span className={`inline-flex w-fit items-center justify-center rounded-md px-2 py-1 text-xs font-semibold lg:justify-self-end ${stepStatusClass(node.status)}`}>
+                  {node.badge}
+                </span>
+              </button>
+            </li>
+          ))}
+        </ol>
       </div>
     </section>
   );
+}
+
+function stepBorderClass(tone: WorkflowTone): string {
+  switch (tone) {
+    case "emerald":
+      return "border-emerald-200";
+    case "rose":
+      return "border-rose-200";
+    case "amber":
+      return "border-amber-200";
+    case "sky":
+      return "border-sky-200";
+    case "teal":
+      return "border-teal-200";
+    case "violet":
+      return "border-violet-200";
+    case "slate":
+    default:
+      return "border-zinc-200";
+  }
+}
+
+function stepStatusClass(status: WorkflowNodeModel["status"]): string {
+  switch (status) {
+    case "complete":
+      return "bg-emerald-100 text-emerald-900";
+    case "blocked":
+    case "error":
+      return "bg-rose-100 text-rose-900";
+    case "current":
+      return "bg-amber-100 text-amber-900";
+    case "pending":
+    default:
+      return "bg-zinc-100 text-zinc-700";
+  }
 }
 
 function ConnectorLayer({
@@ -258,12 +291,12 @@ function ConnectorLayer({
 
 function CanvasLegend() {
   return (
-    <div className="flex w-fit flex-wrap gap-2 rounded-lg border border-white/10 bg-zinc-950/80 p-2 text-[0.68rem] font-semibold text-zinc-300 backdrop-blur">
+    <div className="flex w-fit flex-wrap gap-2 border border-zinc-200 bg-zinc-50 p-2 text-[0.68rem] font-semibold text-zinc-700">
       <LegendDot className="bg-emerald-300" label="Approved" />
       <LegendDot className="bg-rose-300" label="Blocked" />
-      <LegendDot className="bg-amber-300" label="Open/pending" />
-      <LegendDot className="bg-violet-300" label="Hermes/future" />
-      <LegendDot className="bg-sky-300" label="Stripe proof" />
+      <LegendDot className="bg-amber-300" label="Awaiting run" />
+      <LegendDot className="bg-violet-300" label="Planning" />
+      <LegendDot className="bg-sky-300" label="Finance proof" />
     </div>
   );
 }

@@ -35,7 +35,7 @@ export function RunSummaryInspector({
           <Metric
             label="Policy violations"
             tone="violet"
-            value={money.policyViolations === null ? "Pending" : String(money.policyViolations)}
+            value={money.policyViolations === null ? "Not recorded" : String(money.policyViolations)}
           />
         </div>
       </InspectorSection>
@@ -46,7 +46,7 @@ export function RunSummaryInspector({
           <Fact label="Template" value={source?.job_name ?? "Create or select a client operation"} />
           <Fact
             label="Invoice amount"
-            value={source ? formatCurrency(source.invoice_amount_cents) : "Pending"}
+            value={source ? formatCurrency(source.invoice_amount_cents) : "Not selected"}
           />
           <Fact label="Current run status" value={runStatus} />
           <Fact label="Selected run ID" value={state?.selected_run_id ?? state?.job?.id ?? "None"} />

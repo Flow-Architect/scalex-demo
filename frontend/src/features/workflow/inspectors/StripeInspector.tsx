@@ -17,8 +17,8 @@ export function StripeInspector({ state }: { state: DemoState | null }) {
   const latestInvoice = latestWhere(state?.stripe_events ?? [], (event) => Boolean(event.invoice_id));
   const failed = Boolean(stripe?.error);
   const livemode =
-    stripe?.livemode === null || stripe?.livemode === undefined ? "Pending" : String(stripe.livemode);
-  const paid = stripe?.paid === null || stripe?.paid === undefined ? "Pending" : String(stripe.paid);
+    stripe?.livemode === null || stripe?.livemode === undefined ? "Not recorded" : String(stripe.livemode);
+  const paid = stripe?.paid === null || stripe?.paid === undefined ? "Not recorded" : String(stripe.paid);
 
   return (
     <div className="space-y-4">
@@ -28,12 +28,12 @@ export function StripeInspector({ state }: { state: DemoState | null }) {
         title="Stripe Test Invoice"
       >
         <FactGrid>
-          <Fact label="used_real_stripe" value={String(Boolean(stripe?.used_real_stripe))} />
-          <Fact label="stripe_mode" value={stripe?.stripe_mode ?? "Pending"} />
+          <Fact label="Real Stripe test path" value={String(Boolean(stripe?.used_real_stripe))} />
+          <Fact label="Stripe mode" value={stripe?.stripe_mode ?? "Not recorded"} />
           <Fact label="livemode" value={livemode} />
-          <Fact label="Customer ID" value={stripe?.customer_id ?? "Pending"} />
-          <Fact label="Invoice ID" value={stripe?.invoice_id ?? "Pending"} />
-          <Fact label="invoice_status" value={stripe?.invoice_status ?? "Pending"} />
+          <Fact label="Customer ID" value={stripe?.customer_id ?? "Not recorded"} />
+          <Fact label="Invoice ID" value={stripe?.invoice_id ?? "Not recorded"} />
+          <Fact label="Invoice status" value={stripe?.invoice_status ?? "Not recorded"} />
           <Fact label="paid" value={paid} />
           <Fact label="Latest proof" value={formatDateTime(latestInvoice?.created_at)} />
         </FactGrid>
@@ -41,7 +41,7 @@ export function StripeInspector({ state }: { state: DemoState | null }) {
         <div className="mt-3 flex flex-wrap gap-2">
           <StatusPill
             icon={failed ? AlertTriangle : CreditCard}
-            label={failed ? "Stripe error" : stripe?.used_real_stripe ? "Real Stripe test mode" : humanize(stripe?.stripe_mode ?? "pending")}
+            label={failed ? "Stripe error" : stripe?.used_real_stripe ? "Real Stripe test mode" : stripe?.stripe_mode ? humanize(stripe.stripe_mode) : "Awaiting Stripe proof"}
             tone={failed ? "rose" : stripe?.used_real_stripe ? "sky" : "amber"}
           />
           <StatusPill label="No live money" tone="rose" />
@@ -58,19 +58,19 @@ export function StripeInspector({ state }: { state: DemoState | null }) {
         )}
 
         {stripe?.invoice_status === "open" && stripe.paid === false ? (
-          <div className="mt-3 rounded-lg border border-amber-300/30 bg-amber-300/10 p-3 text-sm font-semibold text-amber-100">
+            <div className="mt-3 border border-amber-200 bg-amber-50 p-3 text-sm font-semibold text-amber-900">
             Stripe test invoice is finalized and open. It is not marked paid.
           </div>
         ) : null}
 
         {failed ? (
-          <div className="mt-3 rounded-lg border border-rose-300/30 bg-rose-300/10 p-3 text-sm leading-6 text-rose-100">
+            <div className="mt-3 border border-rose-200 bg-rose-50 p-3 text-sm leading-6 text-rose-900">
             {stripe?.error}
           </div>
         ) : null}
 
         {stripe?.diagnostic_reason ? (
-          <p className="mt-3 text-sm leading-6 text-zinc-400">{stripe.diagnostic_reason}</p>
+          <p className="mt-3 text-sm leading-6 text-zinc-600">{stripe.diagnostic_reason}</p>
         ) : null}
       </InspectorSection>
     </div>

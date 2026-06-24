@@ -8,13 +8,11 @@ import {
   Building2,
   CheckCircle2,
   CircleDashed,
-  CircleDollarSign,
   ClipboardList,
   CreditCard,
   Database,
   ExternalLink,
   FileText,
-  Gauge,
   Layers3,
   LockKeyhole,
   ReceiptText,
@@ -25,14 +23,27 @@ import {
   TrendingUp,
   UserPlus,
   Users,
-  WalletCards,
   Workflow,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
 import { StatusBadge } from "../../components/ui/StatusBadge";
-import { darkToneClass } from "../../components/ui/statusStyles";
+import { softToneClass } from "../../components/ui/statusStyles";
 import type { Tone } from "../../components/ui/statusStyles";
+import {
+  EmptyWorkspaceState,
+  OperationHero,
+  OperationTimeline,
+  OutcomeRail,
+  PlainTable,
+  ProofRoute,
+  TemplateShelf,
+  WorkspacePage,
+  WorkspaceSection,
+  type OperationStateItem,
+  type RailItem,
+  type TimelineStep,
+} from "../../components/workspace/WorkspacePrimitives";
 import { formatCurrency, formatDateTime, formatPercent, humanize } from "../../format";
 import {
   formatOptionalCurrency,
@@ -106,7 +117,7 @@ export function ProductView({
   state: DemoState | null;
 }) {
   return (
-    <section className="min-h-screen bg-zinc-950 text-white">
+    <section className="min-h-screen bg-stone-100 text-zinc-950">
       <div className="w-full px-4 py-5 sm:px-6 lg:px-8">
         {activeView === "dashboard" ? (
           <DashboardView money={money} onNavigate={onNavigate} state={state} />
@@ -162,184 +173,233 @@ function DashboardView({
   const reports = state?.reports ?? [];
   const latestReport = state?.report ?? reports[reports.length - 1] ?? null;
   const latestRun = state?.job ?? runs[0] ?? null;
-  const paymentTone: Tone =
-    state?.stripe?.paid === true
-      ? "emerald"
-      : state?.stripe?.invoice_status === "open"
-        ? "amber"
-        : state?.stripe?.error
-          ? "rose"
-          : "slate";
+  const clientName = activeWorkflow?.client_name ?? latestRun?.client_name ?? "Northstar Dental Group";
+  const operationName = activeWorkflow?.job_name ?? latestRun?.job_name ?? "Client Implementation Launch";
+  const businessType = activeWorkflow?.business_type ?? latestRun?.business_type ?? "Multi-location healthcare services group";
+  const spendCapCents = activeWorkflow?.spend_cap_cents ?? latestRun?.spend_cap_cents ?? money.spendCapCents ?? 115_000;
+  const revenueCents = money.revenueCents ?? activeWorkflow?.invoice_amount_cents ?? latestRun?.invoice_amount_cents ?? 850_000;
+  const approvedSpendCents = money.approvedSpendCents ?? spendCapCents;
+  const blockedSpendCents = money.blockedSpendCents ?? 320_000;
+  const grossProfitCents = money.grossProfitCents ?? revenueCents - approvedSpendCents;
+  const marginPercent = money.marginPercent ?? (revenueCents > 0 ? (grossProfitCents / revenueCents) * 100 : null);
+  const operationStates: OperationStateItem[] = [
+    { icon: Workflow, label: "Launch readiness", value: activeWorkflow ? "Ready for Studio" : "Select operation", tone: activeWorkflow ? "emerald" : "amber" },
+    { icon: ShieldCheck, label: "Data boundary", value: "No patient data / no PHI", tone: "teal" },
+    { icon: ShieldCheck, label: "Guardrails", value: "Local policy active", tone: "emerald" },
+    { icon: ShieldAlert, label: "Goal 8", value: "NeMo planned / not wired", tone: "violet" },
+  ];
+  const outcomeItems: RailItem[] = [
+    { label: "Revenue", value: formatCurrency(revenueCents), tone: "emerald" },
+    { label: "Setup spend", value: formatCurrency(approvedSpendCents), tone: "sky" },
+    { label: "Blocked risk", value: formatCurrency(blockedSpendCents), tone: "rose" },
+    { label: "Protected profit", value: formatCurrency(grossProfitCents), tone: "teal" },
+    { label: "Margin", value: formatOptionalPercent(marginPercent), tone: "amber" },
+  ];
+  const stackSteps: TimelineStep[] = [
+    { icon: Building2, label: "Intake", description: "Northstar implementation scope and operating rules are selected." },
+    { icon: BrainCircuit, label: "Hermes Plan", description: "The operation is routed into a coordinated launch plan." },
+    { icon: CreditCard, label: "Stripe Finance Proof", description: "Finance proof is created through the configured test-mode path." },
+    { icon: ShieldCheck, label: "Guardrail Review", description: "Spend, vendor, and margin risk are checked before work proceeds." },
+    { icon: Database, label: "Evidence Ledger", description: "Timeline, finance, policy, and work evidence are recorded." },
+    { icon: TrendingUp, label: "Profit Outcome", description: "Protected profit and margin are reported for the run." },
+  ];
+  const plannedTemplates = [
+    "Invoice-to-Cash",
+    "Vendor Spend Approval",
+    "Client Onboarding",
+    "Research-to-Report",
+    "Ops Handoff",
+    "Renewal Recommendation",
+  ];
 
   return (
-    <div className="space-y-5">
-      <Panel className="p-5">
-        <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
-          <div className="min-w-0">
-            <Eyebrow>Dashboard</Eyebrow>
-            <h1 className="mt-2 text-2xl font-semibold text-white lg:text-3xl">
-              ClientOps Autopilot overview
-            </h1>
-            <p className="mt-2 max-w-4xl text-sm leading-6 text-zinc-300">
-              Confirm the selected revenue-backed client operation, current economics, run health, and where to go next before opening the ClientOps Function Studio.
-            </p>
-            <div className="mt-3 flex flex-wrap gap-2">
-              <StatusBadge
-                icon={Workflow}
-                label={activeWorkflow ? "Operation selected" : "Needs onboarding"}
-                tone={activeWorkflow ? "emerald" : "amber"}
-              />
-              <StatusBadge
-                icon={ClipboardList}
-                label={latestRun ? humanize(latestRun.status) : "No run loaded"}
-                tone={latestRun ? runStatusTone(latestRun.status) : "slate"}
-              />
-              <StatusBadge
-                icon={CreditCard}
-                label={state?.stripe?.paid ? "Stripe paid" : humanize(state?.stripe?.invoice_status ?? "pending")}
-                tone={paymentTone}
-              />
-            </div>
-          </div>
-          <div className="grid gap-2 sm:grid-cols-2 xl:min-w-[31rem] xl:grid-cols-3">
-            <MetricTile label="Revenue" tone="emerald" value={formatOptionalCurrency(money.revenueCents)} />
-            <MetricTile label="Approved setup spend" tone="sky" value={formatOptionalCurrency(money.approvedSpendCents)} />
-            <MetricTile label="Blocked risk" tone="rose" value={formatOptionalCurrency(money.blockedSpendCents)} />
-            <MetricTile label="Protected profit" tone="teal" value={formatOptionalCurrency(money.grossProfitCents)} />
-            <MetricTile label="Margin" tone="amber" value={formatOptionalPercent(money.marginPercent)} />
-            <MetricTile label="Saved operations" tone="slate" value={String(state?.workflows.length ?? 0)} />
-          </div>
+    <WorkspacePage
+      description={`${clientName} is the current synthetic account for the implemented ${operationName} function.`}
+      eyebrow="ClientOps operation file"
+      title="Revenue-backed implementation launch"
+    >
+      <OperationHero
+        actions={
+          <>
+            <PrimaryButton icon={Workflow} label="Open Function Studio" onClick={() => onNavigate("workflow")} />
+            <SecondaryButton icon={BookOpenCheck} label="Review Evidence Ledger" onClick={() => onNavigate("audit")} />
+          </>
+        }
+        client={clientName}
+        states={operationStates}
+        subtitle="Launch a governed client implementation with finance proof, controlled setup spend, blocked vendor risk, and a recorded evidence trail."
+        title={operationName}
+      >
+        <p>{businessType}. Synthetic B2B implementation operations only: no patient data, no PHI, and no healthcare compliance claim.</p>
+      </OperationHero>
+
+      <OutcomeRail items={outcomeItems} />
+
+      <WorkspaceSection
+        description="The launch reads from left to right as an operation file, not a developer graph."
+        title="Operating stack timeline"
+      >
+        <OperationTimeline steps={stackSteps} />
+      </WorkspaceSection>
+
+      <WorkspaceSection
+        description="One implemented function is available today. Additional ClientOps functions remain planned."
+        title="Function template shelf"
+      >
+        <TemplateShelf implemented="Client Implementation Launch" planned={plannedTemplates} />
+      </WorkspaceSection>
+
+      <WorkspaceSection
+        description="Detailed finance, guardrail, and record evidence is kept in the supporting workspaces."
+        title="Supporting workspaces"
+      >
+        <div className="grid gap-3 lg:grid-cols-3">
+          <button onClick={() => onNavigate("integrations")} type="button">
+            <ProofRoute
+              description="Hermes, Stripe test mode, local policy, SQLite, prototype auth, and Goal 8 boundaries."
+              icon={Layers3}
+              label="Integrations"
+              tone="sky"
+            />
+          </button>
+          <button onClick={() => onNavigate("audit")} type="button">
+            <ProofRoute
+              description={`${state?.policy_checks.length ?? 0} guardrail decisions, ${state?.ledger.entries.length ?? 0} ledger rows, and finance evidence after launch.`}
+              icon={BookOpenCheck}
+              label="Audit"
+              tone="teal"
+            />
+          </button>
+          <button onClick={() => onNavigate("runs")} type="button">
+            <ProofRoute
+              description={latestRun ? `${humanize(latestRun.status)} execution is available for review.` : "No execution has been launched for this client operation yet."}
+              icon={ClipboardList}
+              label="Runs"
+              tone={latestRun ? "emerald" : "slate"}
+            />
+          </button>
         </div>
-      </Panel>
+      </WorkspaceSection>
+    </WorkspacePage>
+  );
+}
 
-      <div className="grid gap-5 xl:grid-cols-[minmax(0,1.05fr)_420px]">
-        <Panel className="p-5">
-          <SectionHeader
-            description="The selected client operation seed that the next run will use."
-            icon={Building2}
-            title="Current client operation"
-          />
-          {activeWorkflow ? (
-            <>
-              <div className="mt-4 flex flex-wrap gap-2">
-                <StatusBadge icon={CheckCircle2} label="Ready to run" tone="emerald" />
-                <StatusBadge icon={Users} label={activeWorkflow.client_name} tone="slate" />
-                <StatusBadge icon={Gauge} label={formatCurrency(activeWorkflow.spend_cap_cents)} tone="sky" />
-                <StatusBadge icon={TrendingUp} label={formatPercent(activeWorkflow.margin_floor_percent)} tone="teal" />
-              </div>
-              <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-                <MetricTile label="Business type" tone="slate" value={activeWorkflow.business_type} />
-                <MetricTile label="Invoice" tone="emerald" value={formatCurrency(activeWorkflow.invoice_amount_cents)} />
-                <MetricTile label="Spend cap" tone="sky" value={formatCurrency(activeWorkflow.spend_cap_cents)} />
-                <MetricTile label="Margin floor" tone="teal" value={formatPercent(activeWorkflow.margin_floor_percent)} />
-              </div>
-              <p className="mt-4 text-sm leading-6 text-zinc-300">{activeWorkflow.job_goal}</p>
-              <div className="mt-4 grid gap-3 lg:grid-cols-2">
-                <InlineList items={activeWorkflow.approved_vendors} title="Approved setup vendors" tone="sky" />
-                <InlineList items={activeWorkflow.blocked_vendors} title="Blocked risk vendors" tone="rose" />
-              </div>
-            </>
-          ) : (
-            <EmptyState className="mt-4">
-              No client operation is selected yet. Open Onboarding to create the Northstar sample operation.
-            </EmptyState>
-          )}
-        </Panel>
+function PrimaryButton({
+  icon: Icon,
+  label,
+  onClick,
+}: {
+  icon: LucideIcon;
+  label: string;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      className="inline-flex min-h-12 items-center justify-center gap-2 rounded-md bg-zinc-950 px-5 text-sm font-semibold text-white transition hover:bg-zinc-800"
+      onClick={onClick}
+      type="button"
+    >
+      <Icon className="h-4 w-4" aria-hidden="true" />
+      {label}
+    </button>
+  );
+}
 
-        <Panel className="p-5">
-          <SectionHeader
-            description="Fast access to the next product surface."
-            icon={Layers3}
-            title="Next moves"
-          />
-          <div className="mt-4 space-y-3">
-            <button
-              className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-md bg-emerald-400 px-4 py-3 text-sm font-semibold text-zinc-950 transition hover:bg-emerald-300"
-              onClick={() => onNavigate(activeWorkflow ? "workflow" : "onboarding")}
-              type="button"
-            >
-              <Workflow className="h-4 w-4" aria-hidden="true" />
-              {activeWorkflow ? "Open Function Studio" : "Open onboarding"}
-            </button>
-            <button
-              className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-md border border-white/15 bg-white/5 px-4 py-3 text-sm font-semibold text-white transition hover:bg-white/10"
-              onClick={() => onNavigate("customers")}
-              type="button"
-            >
-              <Users className="h-4 w-4" aria-hidden="true" />
-              Manage accounts
-            </button>
-            <button
-              className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-md border border-white/15 bg-white/5 px-4 py-3 text-sm font-semibold text-white transition hover:bg-white/10"
-              onClick={() => onNavigate("runs")}
-              type="button"
-            >
-              <ClipboardList className="h-4 w-4" aria-hidden="true" />
-              Review run history
-            </button>
-          </div>
+function SecondaryButton({
+  icon: Icon,
+  label,
+  onClick,
+}: {
+  icon: LucideIcon;
+  label: string;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      className="inline-flex min-h-12 items-center justify-center gap-2 rounded-md border border-zinc-300 bg-white px-5 text-sm font-semibold text-zinc-900 transition hover:bg-zinc-50"
+      onClick={onClick}
+      type="button"
+    >
+      <Icon className="h-4 w-4" aria-hidden="true" />
+      {label}
+    </button>
+  );
+}
 
-          <div className="mt-4 space-y-3">
-            <EvidenceCard
-              description={state?.hermes?.used_real_hermes ? `${state.hermes.provider ?? "Hermes"} / ${state.hermes.model ?? "model pending"}` : state?.hermes?.failure_reason ?? state?.hermes?.error ?? "Hermes proof appears after planning or run execution."}
-              icon={BrainCircuit}
-              title="Hermes state"
-              tone={state?.hermes?.used_real_hermes ? "emerald" : state?.hermes?.error ? "rose" : "violet"}
-            />
-            <EvidenceCard
-              description={latestReport ? "Final profit outcome is available in the selected run and Function Studio views." : "Final profit outcome proof appears after the operation completes."}
-              icon={FileText}
-              title="Profit outcome"
-              tone={latestReport ? "teal" : "slate"}
-            />
-          </div>
-        </Panel>
+function FormSection({
+  children,
+  description,
+  title,
+}: {
+  children: ReactNode;
+  description: string;
+  title: string;
+}) {
+  return (
+    <section className="grid gap-5 border-b border-zinc-200 px-6 py-6 sm:px-8 lg:grid-cols-[18rem_minmax(0,1fr)]">
+      <div>
+        <h2 className="text-base font-semibold text-zinc-950">{title}</h2>
+        <p className="mt-2 text-sm leading-6 text-zinc-600">{description}</p>
       </div>
+      <div>{children}</div>
+    </section>
+  );
+}
 
-      <div className="grid gap-5 xl:grid-cols-3">
-        <Panel className="p-5">
-          <SectionHeader
-            description="Current payment honesty remains visible here."
-            icon={CreditCard}
-            title="Payment state"
-          />
-          <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-1">
-            <MetricTile label="Invoice status" tone={paymentTone} value={humanize(state?.stripe?.invoice_status ?? "pending")} />
-            <MetricTile label="Paid" tone={state?.stripe?.paid ? "emerald" : "amber"} value={String(Boolean(state?.stripe?.paid))} />
-            <MetricTile label="Invoice ID" tone="slate" value={state?.stripe?.invoice_id ?? "Pending"} />
-            <MetricTile label="Customer ID" tone="slate" value={state?.stripe?.customer_id ?? "Pending"} />
-          </div>
-        </Panel>
-
-        <Panel className="p-5">
-          <SectionHeader
-            description="Guardrail decisions and local policy proof."
-            icon={ShieldCheck}
-            title="Policy state"
-          />
-          <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-1">
-            <MetricTile label="Approved checks" tone="emerald" value={String((state?.policy_checks ?? []).filter((check) => Boolean(check.approved)).length)} />
-            <MetricTile label="Blocked checks" tone="rose" value={String((state?.policy_checks ?? []).filter((check) => !Boolean(check.approved)).length)} />
-            <MetricTile label="Engine" tone="violet" value="Local policy engine" />
-            <MetricTile label="Goal 8" tone="violet" value="NeMo planned / not wired" />
-          </div>
-        </Panel>
-
-        <Panel className="p-5">
-          <SectionHeader
-            description="Persisted records behind the operator shell."
-            icon={Database}
-            title="SQLite state"
-          />
-          <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-1">
-            <MetricTile label="Database path" tone="slate" value={state?.database.path ?? "Pending"} />
-            <MetricTile label="Runs" tone="sky" value={String(state?.runs.length ?? 0)} />
-            <MetricTile label="Audit rows" tone="teal" value={String((state?.timeline_events ?? state?.events ?? []).length)} />
-            <MetricTile label="Agent outputs" tone="emerald" value={String(state?.agent_outputs.length ?? 0)} />
-          </div>
-        </Panel>
-      </div>
+function FileFact({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="border-t border-zinc-200 pt-3">
+      <dt className="text-xs font-semibold uppercase text-zinc-500">{label}</dt>
+      <dd className="mt-1 break-words font-semibold text-zinc-900">{value}</dd>
     </div>
+  );
+}
+
+function StackRow({
+  boundary,
+  icon: Icon,
+  name,
+  proof,
+  role,
+}: {
+  boundary: string;
+  icon: LucideIcon;
+  name: string;
+  proof: string;
+  role: string;
+}) {
+  return (
+    <tr className="bg-white">
+      <td className="px-4 py-4">
+        <div className="flex items-center gap-3">
+          <span className="flex h-9 w-9 flex-none items-center justify-center rounded-md bg-zinc-950 text-white">
+            <Icon className="h-4 w-4" aria-hidden="true" />
+          </span>
+          <span className="font-semibold text-zinc-950">{name}</span>
+        </div>
+      </td>
+      <td className="px-4 py-4 text-zinc-700">{role}</td>
+      <td className="px-4 py-4 text-zinc-700">{proof}</td>
+      <td className="px-4 py-4 text-zinc-600">{boundary}</td>
+    </tr>
+  );
+}
+
+function BoundaryRow({
+  area,
+  boundary,
+  value,
+}: {
+  area: string;
+  boundary: string;
+  value: string;
+}) {
+  return (
+    <tr className="bg-white">
+      <td className="px-4 py-4 font-semibold text-zinc-950">{area}</td>
+      <td className="px-4 py-4 text-zinc-700">{value}</td>
+      <td className="px-4 py-4 text-zinc-600">{boundary}</td>
+    </tr>
   );
 }
 
@@ -363,162 +423,80 @@ function OnboardingView({
   const activeWorkflow = state?.workflow ?? null;
 
   return (
-    <div className="space-y-5">
-      <Panel className="p-5">
-        <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
-          <div className="min-w-0">
-            <Eyebrow>Onboarding</Eyebrow>
-            <h1 className="mt-2 text-2xl font-semibold text-white lg:text-3xl">
-              Create a client operation seed
-            </h1>
-            <p className="mt-2 max-w-4xl text-sm leading-6 text-zinc-300">
-              Create or update the Northstar Client Implementation Launch sample without mixing intake, account selection, or run review.
-            </p>
-            <div className="mt-3 flex flex-wrap gap-2">
-              <StatusBadge icon={UserPlus} label="Synthetic sample only" tone="sky" />
-              <StatusBadge icon={Workflow} label={activeWorkflow ? "Operation selected" : "No active operation"} tone={activeWorkflow ? "emerald" : "amber"} />
-              <StatusBadge icon={ShieldCheck} label="No patient data / no PHI" tone="teal" />
-              <StatusBadge icon={ShieldAlert} label="No secrets in browser" tone="amber" />
+    <WorkspacePage
+      actions={
+        <button
+          className="inline-flex min-h-11 items-center justify-center gap-2 rounded-md border border-zinc-300 bg-white px-4 text-sm font-semibold text-zinc-900 transition hover:bg-zinc-50 disabled:cursor-not-allowed disabled:text-zinc-400"
+          disabled={busy}
+          onClick={onUseNorthstarSample}
+          type="button"
+        >
+          {busy ? <RefreshCw className="h-4 w-4 animate-spin" aria-hidden="true" /> : <Building2 className="h-4 w-4" aria-hidden="true" />}
+          Load Northstar sample
+        </button>
+      }
+      description="Configure the synthetic Northstar client implementation operation, revenue rules, setup resources, and blocked risk before launching the function."
+      eyebrow="Configure operation"
+      meta={
+        activeWorkflow ? (
+          <p className="text-sm font-semibold text-emerald-700">
+            Selected: {activeWorkflow.client_name} / {activeWorkflow.job_name}
+          </p>
+        ) : (
+          <p className="text-sm font-semibold text-amber-700">No operation selected yet.</p>
+        )
+      }
+      title="Configure Client Implementation Launch"
+    >
+      <form className="bg-white shadow-sm ring-1 ring-zinc-200" onSubmit={onSubmit}>
+        <FormSection description="Name the synthetic account and the function template." title="Client profile">
+          <div className="grid gap-5 xl:grid-cols-2">
+            <FieldInput label="Client/account name" onChange={(value) => onDraftChange({ ...draft, clientName: value })} value={draft.clientName} />
+            <FieldInput label="Business type" onChange={(value) => onDraftChange({ ...draft, businessType: value })} value={draft.businessType} />
+            <div className="xl:col-span-2">
+              <FieldInput label="Implementation/template name" onChange={(value) => onDraftChange({ ...draft, jobName: value })} value={draft.jobName} />
             </div>
           </div>
+        </FormSection>
+
+        <FormSection description="These rules drive the protected-profit outcome and spend guardrails." title="Revenue and margin rules">
+          <div className="grid gap-5 md:grid-cols-3">
+            <FieldInput label="Invoice amount" onChange={(value) => onDraftChange({ ...draft, invoiceAmountUsd: value })} type="number" value={draft.invoiceAmountUsd} />
+            <FieldInput label="Setup spend cap" onChange={(value) => onDraftChange({ ...draft, spendCapUsd: value })} type="number" value={draft.spendCapUsd} />
+            <FieldInput label="Margin floor" onChange={(value) => onDraftChange({ ...draft, marginFloorPercent: value })} type="number" value={draft.marginFloorPercent} />
+          </div>
+        </FormSection>
+
+        <FormSection description="Allowed resources can be approved by the local policy engine when the run executes." title="Approved setup resources">
+          <FieldInput label="Approved setup vendors" onChange={(value) => onDraftChange({ ...draft, approvedVendors: value })} value={draft.approvedVendors} />
+        </FormSection>
+
+        <FormSection description="Risky spend remains blocked unless a future policy milestone explicitly changes the rules." title="Blocked risk">
+          <FieldInput label="Blocked risk vendors" onChange={(value) => onDraftChange({ ...draft, blockedVendors: value })} value={draft.blockedVendors} />
+        </FormSection>
+
+        <FormSection description="Describe what this operation should produce for the implementation team." title="Operation objective">
+          <TextAreaField label="Operation objective" onChange={(value) => onDraftChange({ ...draft, jobGoal: value })} value={draft.jobGoal} />
+        </FormSection>
+
+        {error ? (
+          <div className="mx-6 mb-6 border border-rose-200 bg-rose-50 p-3 text-sm text-rose-800 sm:mx-8">
+            {error}
+          </div>
+        ) : null}
+
+        <div className="border-t border-zinc-200 px-6 py-5 sm:px-8">
           <button
-            className="inline-flex min-h-10 items-center justify-center gap-2 rounded-md bg-emerald-400 px-4 text-sm font-semibold text-zinc-950 transition hover:bg-emerald-300 disabled:cursor-not-allowed disabled:bg-zinc-600 disabled:text-zinc-300"
+            className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-md bg-zinc-950 px-4 text-sm font-semibold text-white transition hover:bg-zinc-800 disabled:cursor-not-allowed disabled:bg-zinc-300 disabled:text-zinc-500 sm:w-auto"
             disabled={busy}
-            onClick={onUseNorthstarSample}
-            type="button"
+            type="submit"
           >
-            {busy ? (
-              <RefreshCw className="h-4 w-4 animate-spin" aria-hidden="true" />
-            ) : (
-              <Building2 className="h-4 w-4" aria-hidden="true" />
-            )}
-            Load Northstar sample
+            {busy ? <RefreshCw className="h-4 w-4 animate-spin" aria-hidden="true" /> : <CheckCircle2 className="h-4 w-4" aria-hidden="true" />}
+            Save and select operation
           </button>
         </div>
-
-        <div className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-          <MetricTile label="Invoice" tone="emerald" value={`$${draft.invoiceAmountUsd || "0"}`} />
-          <MetricTile label="Spend cap" tone="sky" value={`$${draft.spendCapUsd || "0"}`} />
-          <MetricTile label="Margin floor" tone="teal" value={`${draft.marginFloorPercent || "0"}%`} />
-          <MetricTile label="Blocked risk vendor" tone="rose" value={draft.blockedVendors || "Unapproved Data Broker Enrichment"} />
-        </div>
-      </Panel>
-
-      <div className="grid gap-5 xl:grid-cols-[minmax(0,0.92fr)_minmax(420px,1fr)]">
-        <Panel className="p-5">
-          <SectionHeader
-            description="This left rail stays focused on the selected sample account and current operating bounds."
-            icon={Building2}
-            title="Onboarding summary"
-          />
-          <div className="mt-4 space-y-4">
-            <EvidenceCard
-              description={draft.jobGoal}
-              icon={Workflow}
-              title={draft.clientName || "Account name pending"}
-              tone="emerald"
-            />
-            <div className="grid gap-3 sm:grid-cols-2">
-              <MetricTile label="Business type" tone="slate" value={draft.businessType || "Pending"} />
-              <MetricTile label="Implementation/template" tone="slate" value={draft.jobName || "Pending"} />
-              <MetricTile label="Approved setup vendors" tone="sky" value={draft.approvedVendors || "Pending"} />
-              <MetricTile label="Blocked risk vendors" tone="rose" value={draft.blockedVendors || "Pending"} />
-            </div>
-            {activeWorkflow ? (
-              <div className="rounded-lg border border-emerald-300/25 bg-emerald-300/10 p-4">
-                <p className="text-xs font-semibold uppercase text-emerald-100">Current selected operation</p>
-                <p className="mt-2 text-base font-semibold text-white">{activeWorkflow.client_name}</p>
-                <p className="mt-1 text-sm text-zinc-200">{activeWorkflow.job_name}</p>
-              </div>
-            ) : null}
-          </div>
-        </Panel>
-
-        <Panel className="p-5">
-          <SectionHeader
-            description="Saving updates SQLite and selects the client operation for the next run."
-            icon={UserPlus}
-            title="Operation intake form"
-          />
-
-          <form className="mt-4 space-y-4" onSubmit={onSubmit}>
-            <div className="grid gap-4 sm:grid-cols-2">
-              <FieldInput
-                label="Client/account name"
-                onChange={(value) => onDraftChange({ ...draft, clientName: value })}
-                value={draft.clientName}
-              />
-              <FieldInput
-                label="Business type"
-                onChange={(value) => onDraftChange({ ...draft, businessType: value })}
-                value={draft.businessType}
-              />
-              <FieldInput
-                label="Implementation/template name"
-                onChange={(value) => onDraftChange({ ...draft, jobName: value })}
-                value={draft.jobName}
-              />
-              <FieldInput
-                label="Invoice amount"
-                onChange={(value) => onDraftChange({ ...draft, invoiceAmountUsd: value })}
-                type="number"
-                value={draft.invoiceAmountUsd}
-              />
-              <FieldInput
-                label="Spend cap"
-                onChange={(value) => onDraftChange({ ...draft, spendCapUsd: value })}
-                type="number"
-                value={draft.spendCapUsd}
-              />
-              <FieldInput
-                label="Margin floor"
-                onChange={(value) => onDraftChange({ ...draft, marginFloorPercent: value })}
-                type="number"
-                value={draft.marginFloorPercent}
-              />
-            </div>
-
-            <TextAreaField
-              label="Operation goal"
-              onChange={(value) => onDraftChange({ ...draft, jobGoal: value })}
-              value={draft.jobGoal}
-            />
-
-            <div className="grid gap-4 sm:grid-cols-2">
-              <FieldInput
-                label="Approved setup vendors"
-                onChange={(value) => onDraftChange({ ...draft, approvedVendors: value })}
-                value={draft.approvedVendors}
-              />
-              <FieldInput
-                label="Blocked risk vendors"
-                onChange={(value) => onDraftChange({ ...draft, blockedVendors: value })}
-                value={draft.blockedVendors}
-              />
-            </div>
-
-            {error ? (
-              <div className="rounded-lg border border-rose-300/30 bg-rose-300/10 p-3 text-sm text-rose-100">
-                {error}
-              </div>
-            ) : null}
-
-            <button
-              className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-md bg-emerald-400 px-4 py-3 text-sm font-semibold text-zinc-950 transition hover:bg-emerald-300 disabled:cursor-not-allowed disabled:bg-zinc-600 disabled:text-zinc-300"
-              disabled={busy}
-              type="submit"
-            >
-              {busy ? (
-                <RefreshCw className="h-4 w-4 animate-spin" aria-hidden="true" />
-              ) : (
-                <CheckCircle2 className="h-4 w-4" aria-hidden="true" />
-              )}
-              Save and select operation
-            </button>
-          </form>
-        </Panel>
-      </div>
-    </div>
+      </form>
+    </WorkspacePage>
   );
 }
 
@@ -539,139 +517,78 @@ function CustomersView({
   const workflows = state?.workflows ?? [];
 
   return (
-    <div className="space-y-5">
-      <Panel className="p-5">
-        <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
-          <div className="min-w-0">
-            <Eyebrow>Customers</Eyebrow>
-            <h1 className="mt-2 text-2xl font-semibold text-white lg:text-3xl">
-              Saved client operations
-            </h1>
-            <p className="mt-2 max-w-4xl text-sm leading-6 text-zinc-300">
-              Accounts focuses on saved client operation selection and lifecycle management. New intake happens in Onboarding, and the dashboard remains the landing surface.
-            </p>
-            <div className="mt-3 flex flex-wrap gap-2">
-              <StatusBadge icon={Users} label={`${workflows.length} saved operations`} tone="slate" />
-              <StatusBadge
-                icon={Workflow}
-                label={activeWorkflow ? "Operation selected" : "No active operation"}
-                tone={activeWorkflow ? "emerald" : "amber"}
-              />
-            </div>
-          </div>
-          <button
-            className="inline-flex min-h-10 items-center justify-center gap-2 rounded-md bg-emerald-400 px-4 text-sm font-semibold text-zinc-950 transition hover:bg-emerald-300"
-            onClick={() => onNavigate("onboarding")}
-            type="button"
-          >
-            <UserPlus className="h-4 w-4" aria-hidden="true" />
-            Open onboarding
-          </button>
-        </div>
-
-        <div className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-          <MetricTile label="Active account" tone={activeWorkflow ? "emerald" : "amber"} value={activeWorkflow?.client_name ?? "None selected"} />
-          <MetricTile label="Invoice" tone="emerald" value={activeWorkflow ? formatCurrency(activeWorkflow.invoice_amount_cents) : "Pending"} />
-          <MetricTile label="Spend cap" tone="sky" value={activeWorkflow ? formatCurrency(activeWorkflow.spend_cap_cents) : "Pending"} />
-          <MetricTile label="Margin floor" tone="teal" value={activeWorkflow ? formatPercent(activeWorkflow.margin_floor_percent) : "Pending"} />
-        </div>
-      </Panel>
-
-      <div className="grid gap-5 xl:grid-cols-[minmax(0,1.05fr)_420px]">
-        <Panel className="p-5">
-          <SectionHeader
-            description="Select the next run seed or delete obsolete local samples."
-            icon={Users}
-            title="Saved operations"
-          />
-
-          <div className="mt-5 space-y-3">
-            {workflows.length === 0 ? (
-              <EmptyState>No saved local operations yet. Open Onboarding to create the Northstar sample.</EmptyState>
-            ) : (
-              workflows.map((workflow) => (
-                <article
-                  className={`rounded-lg border p-4 transition ${
-                    workflow.is_active
-                      ? "border-emerald-300/40 bg-emerald-300/10"
-                      : "border-white/10 bg-white/[0.03]"
-                  }`}
-                  key={workflow.id}
-                >
-                  <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
-                    <div className="min-w-0">
-                      <div className="flex flex-wrap items-center gap-2">
-                        <h3 className="text-base font-semibold text-white">{workflow.client_name}</h3>
-                        {workflow.is_active ? (
-                          <StatusBadge icon={CheckCircle2} label="Active" tone="emerald" />
-                        ) : null}
-                      </div>
-                      <p className="mt-1 text-sm text-zinc-300">{workflow.job_name}</p>
-                      <div className="mt-3 grid gap-2 sm:grid-cols-2 xl:grid-cols-4">
-                        <MetricTile label="Invoice" tone="emerald" value={formatCurrency(workflow.invoice_amount_cents)} />
-                        <MetricTile label="Cap" tone="sky" value={formatCurrency(workflow.spend_cap_cents)} />
-                        <MetricTile label="Floor" tone="teal" value={formatPercent(workflow.margin_floor_percent)} />
-                        <MetricTile label="Updated" tone="slate" value={formatDateTime(workflow.updated_at)} />
-                      </div>
-                    </div>
-                    <div className="flex flex-wrap gap-2">
-                      <button
-                        className="inline-flex min-h-10 items-center justify-center gap-2 rounded-md border border-white/15 bg-white/5 px-3 text-sm font-semibold text-white transition hover:bg-white/10 disabled:cursor-not-allowed disabled:text-zinc-500"
-                        disabled={busy || workflow.is_active}
-                        onClick={() => onSelectWorkflow(workflow.id)}
-                        type="button"
-                      >
-                        <CheckCircle2 className="h-4 w-4" aria-hidden="true" />
-                        {workflow.is_active ? "Selected" : "Select"}
-                      </button>
-                      <button
-                        className="inline-flex min-h-10 items-center justify-center gap-2 rounded-md border border-rose-300/25 bg-rose-300/10 px-3 text-sm font-semibold text-rose-100 transition hover:bg-rose-300/15 disabled:cursor-not-allowed disabled:text-zinc-500"
-                        disabled={busy}
-                        onClick={() => onDeleteWorkflow(workflow.id)}
-                        type="button"
-                      >
-                        <Ban className="h-4 w-4" aria-hidden="true" />
-                        Delete
-                      </button>
-                    </div>
+    <WorkspacePage
+      actions={<PrimaryButton icon={UserPlus} label="Configure operation" onClick={() => onNavigate("onboarding")} />}
+      description="Select the client operation file that drives the next Function Studio run."
+      eyebrow="Client operation files"
+      meta={<p className="text-sm font-semibold text-zinc-600">{workflows.length} saved operation files</p>}
+      title="Client Operation Files"
+    >
+      <div className="grid gap-8 xl:grid-cols-[minmax(0,1fr)_24rem]">
+        {workflows.length === 0 ? (
+          <EmptyWorkspaceState>No saved local operations yet. Open Onboarding to create the Northstar sample.</EmptyWorkspaceState>
+        ) : (
+          <PlainTable headers={["Client", "Function", "Revenue", "Controls", "Updated", ""]}>
+            {workflows.map((workflow) => (
+              <tr className={workflow.is_active ? "bg-emerald-50/70" : "bg-white"} key={workflow.id}>
+                <td className="px-4 py-4">
+                  <p className="font-semibold text-zinc-950">{workflow.client_name}</p>
+                  <p className="mt-1 text-xs text-zinc-500">{workflow.business_type}</p>
+                </td>
+                <td className="px-4 py-4 text-zinc-700">{workflow.job_name}</td>
+                <td className="px-4 py-4 font-semibold text-zinc-950">{formatCurrency(workflow.invoice_amount_cents)}</td>
+                <td className="px-4 py-4 text-sm text-zinc-600">
+                  Cap {formatCurrency(workflow.spend_cap_cents)} / floor {formatPercent(workflow.margin_floor_percent)}
+                </td>
+                <td className="px-4 py-4 text-sm text-zinc-600">{formatDateTime(workflow.updated_at)}</td>
+                <td className="px-4 py-4">
+                  <div className="flex flex-wrap justify-end gap-2">
+                    <button
+                      className="inline-flex min-h-9 items-center justify-center rounded-md border border-zinc-300 bg-white px-3 text-xs font-semibold text-zinc-900 transition hover:bg-zinc-50 disabled:cursor-not-allowed disabled:text-zinc-400"
+                      disabled={busy || workflow.is_active}
+                      onClick={() => onSelectWorkflow(workflow.id)}
+                      type="button"
+                    >
+                      {workflow.is_active ? "Selected" : "Select"}
+                    </button>
+                    <button
+                      className="inline-flex min-h-9 items-center justify-center gap-1.5 rounded-md border border-rose-200 bg-rose-50 px-3 text-xs font-semibold text-rose-800 transition hover:bg-rose-100 disabled:cursor-not-allowed disabled:text-zinc-400"
+                      disabled={busy}
+                      onClick={() => onDeleteWorkflow(workflow.id)}
+                      type="button"
+                    >
+                      <Ban className="h-3.5 w-3.5" aria-hidden="true" />
+                      Delete
+                    </button>
                   </div>
-                </article>
-              ))
-            )}
-          </div>
-        </Panel>
+                </td>
+              </tr>
+            ))}
+          </PlainTable>
+        )}
 
-        <Panel className="p-5">
-          <SectionHeader
-            description="Selected account proof for the next run."
-            icon={Building2}
-            title="Active account"
-          />
+        <aside className="border-l border-zinc-200 pl-6">
+          <p className="text-sm font-semibold uppercase text-zinc-500">Active file</p>
           {activeWorkflow ? (
-            <div className="mt-4 space-y-4">
-              <EvidenceCard
-                description={activeWorkflow.job_goal}
-                icon={Workflow}
-                title={activeWorkflow.client_name}
-                tone="emerald"
-              />
-              <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-1">
-                <MetricTile label="Business type" tone="slate" value={activeWorkflow.business_type} />
-                <MetricTile label="Template" tone="slate" value={activeWorkflow.job_name} />
-                <MetricTile label="Operation ID" tone="slate" value={activeWorkflow.id} />
-                <MetricTile label="Updated" tone="slate" value={formatDateTime(activeWorkflow.updated_at)} />
+            <div className="mt-4 space-y-5">
+              <div>
+                <p className="text-2xl font-semibold text-zinc-950">{activeWorkflow.client_name}</p>
+                <p className="mt-1 text-sm text-zinc-600">{activeWorkflow.job_name}</p>
               </div>
-              <InlineList items={activeWorkflow.approved_vendors} title="Approved setup vendors" tone="sky" />
-              <InlineList items={activeWorkflow.blocked_vendors} title="Blocked risk vendors" tone="rose" />
+              <dl className="space-y-3 text-sm">
+                <FileFact label="Revenue" value={formatCurrency(activeWorkflow.invoice_amount_cents)} />
+                <FileFact label="Spend cap" value={formatCurrency(activeWorkflow.spend_cap_cents)} />
+                <FileFact label="Margin floor" value={formatPercent(activeWorkflow.margin_floor_percent)} />
+                <FileFact label="Approved resources" value={activeWorkflow.approved_vendors.join(", ")} />
+                <FileFact label="Blocked risk" value={activeWorkflow.blocked_vendors.join(", ")} />
+              </dl>
             </div>
           ) : (
-            <EmptyState className="mt-4">
-              No account is selected. Open Onboarding or choose a saved operation from the left.
-            </EmptyState>
+            <EmptyWorkspaceState>No account is selected. Choose a saved operation file or configure the Northstar sample.</EmptyWorkspaceState>
           )}
-        </Panel>
+        </aside>
       </div>
-    </div>
+    </WorkspacePage>
   );
 }
 
@@ -691,130 +608,71 @@ function RunsView({
   const selectedRun = state?.job ?? null;
 
   return (
-    <div className="space-y-5">
-      <Panel className="p-5">
-        <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
-          <div>
-            <Eyebrow>Runs</Eyebrow>
-            <h1 className="mt-2 text-2xl font-semibold text-white lg:text-3xl">
-              Persisted run history
-            </h1>
-            <p className="mt-2 max-w-4xl text-sm leading-6 text-zinc-300">
-              Review historical proof without leaving the product shell. The selected run should make economics, orchestration steps, and final profit outcome status immediately obvious.
-            </p>
-          </div>
-          <div className="grid gap-2 sm:grid-cols-3 xl:min-w-[26rem]">
-            <MetricTile label="Runs" tone="slate" value={String(runs.length)} />
-            <MetricTile label="Selected run" tone="emerald" value={selectedRunId ? "Loaded" : "None"} />
-            <MetricTile label="Margin" tone="teal" value={formatOptionalPercent(money.marginPercent)} />
-          </div>
-        </div>
-      </Panel>
+    <WorkspacePage
+      description="Review launched executions and inspect the profit outcome, orchestration activity, and run evidence."
+      eyebrow="Execution history"
+      meta={<p className="text-sm font-semibold text-zinc-600">{runs.length} executions recorded</p>}
+      title="Execution History"
+    >
+      {runs.length === 0 ? (
+        <EmptyWorkspaceState>No execution has been launched for this client operation yet.</EmptyWorkspaceState>
+      ) : (
+        <div className="grid gap-8 xl:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
+          <PlainTable headers={["Execution", "Status", "Revenue", "Started", ""]}>
+            {runs.map((run) => (
+              <tr className={run.id === selectedRunId ? "bg-emerald-50/70" : "bg-white"} key={run.id}>
+                <td className="px-4 py-4">
+                  <p className="font-semibold text-zinc-950">{run.client_name}</p>
+                  <p className="mt-1 text-xs text-zinc-500">{run.job_name}</p>
+                </td>
+                <td className="px-4 py-4 text-sm font-semibold text-zinc-700">{humanize(run.status)}</td>
+                <td className="px-4 py-4 font-semibold text-zinc-950">{formatCurrency(run.invoice_amount_cents)}</td>
+                <td className="px-4 py-4 text-sm text-zinc-600">{formatDateTime(run.created_at)}</td>
+                <td className="px-4 py-4 text-right">
+                  <button
+                    className="inline-flex min-h-9 items-center justify-center rounded-md border border-zinc-300 bg-white px-3 text-xs font-semibold text-zinc-900 transition hover:bg-zinc-50"
+                    onClick={() => onInspectRun(run.id)}
+                    type="button"
+                  >
+                    Inspect
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </PlainTable>
 
-      <div className="grid gap-5 xl:grid-cols-[380px_minmax(0,1fr)]">
-        <Panel className="p-5">
-          <SectionHeader
-            description="Every client operation run remains inspectable after completion."
-            icon={ClipboardList}
-            title="Run list"
-          />
-          <div className="mt-4 space-y-3">
-            {runs.length === 0 ? (
-              <EmptyState>Run history appears after a client operation run starts.</EmptyState>
-            ) : (
-              runs.map((run) => (
-                <button
-                  className={`block w-full rounded-lg border p-4 text-left transition ${
-                    run.id === selectedRunId
-                      ? "border-emerald-300/35 bg-emerald-300/10"
-                      : "border-white/10 bg-white/[0.03] hover:bg-white/[0.05]"
-                  }`}
-                  key={run.id}
-                  onClick={() => onInspectRun(run.id)}
-                  type="button"
-                >
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="min-w-0">
-                      <p className="break-words text-base font-semibold text-white">{run.client_name}</p>
-                      <p className="mt-1 text-sm text-zinc-300">{run.job_name}</p>
-                    </div>
-                    <StatusBadge label={humanize(run.status)} tone={runStatusTone(run.status)} />
-                  </div>
-                  <div className="mt-3 grid gap-2">
-                    <MetricTile label="Run ID" tone="slate" value={run.id} />
-                    <div className="grid gap-2 sm:grid-cols-2">
-                      <MetricTile label="Invoice" tone="emerald" value={formatCurrency(run.invoice_amount_cents)} />
-                      <MetricTile label="Started" tone="slate" value={formatDateTime(run.created_at)} />
-                    </div>
-                  </div>
-                </button>
-              ))
-            )}
-          </div>
-        </Panel>
-
-        <div className="space-y-5">
-          <Panel className="p-5">
-            <SectionHeader
-              description="Current proof surface for the selected run."
-              icon={Workflow}
-              title="Selected run"
-            />
-            {selectedRun ? (
-              <>
-                <div className="mt-4 flex flex-wrap gap-2">
-                  <StatusBadge label={humanize(selectedRun.status)} tone={runStatusTone(selectedRun.status)} />
-                  <StatusBadge icon={CircleDollarSign} label={formatCurrency(selectedRun.invoice_amount_cents)} tone="emerald" />
-                  <StatusBadge icon={Gauge} label={formatCurrency(selectedRun.spend_cap_cents)} tone="sky" />
-                  <StatusBadge icon={TrendingUp} label={formatOptionalPercent(money.marginPercent)} tone="teal" />
-                </div>
-
-                <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-                  <MetricTile label="Account" tone="slate" value={selectedRun.client_name} />
-                  <MetricTile label="Template" tone="slate" value={selectedRun.job_name} />
-                  <MetricTile label="Operation ID" tone="slate" value={selectedRun.workflow_id ?? "Detached"} />
-                  <MetricTile label="Updated" tone="slate" value={formatDateTime(selectedRun.updated_at)} />
-                </div>
-
-                <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
-                  <MetricTile label="Revenue" tone="emerald" value={formatOptionalCurrency(money.revenueCents)} />
-                  <MetricTile label="Approved setup spend" tone="sky" value={formatOptionalCurrency(money.approvedSpendCents)} />
-                  <MetricTile label="Blocked risk" tone="rose" value={formatOptionalCurrency(money.blockedSpendCents)} />
-                  <MetricTile label="Protected profit" tone="teal" value={formatOptionalCurrency(money.grossProfitCents)} />
-                  <MetricTile label="Margin" tone="amber" value={formatOptionalPercent(money.marginPercent)} />
-                </div>
-              </>
-            ) : (
-              <EmptyState>Select a run from the left to load its proof summary.</EmptyState>
-            )}
-          </Panel>
-
-          <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_minmax(0,0.95fr)]">
-            <Panel className="p-5">
-              <ExecutionFeed calls={calls} />
-            </Panel>
-            <Panel className="p-5">
-              <SectionHeader
-                description="The protected-profit proof remains loaded with the selected run."
-                icon={FileText}
-                title="Profit outcome"
-              />
-              {reports.length > 0 ? (
-                <div className="mt-4 space-y-4">
-                  <div className="grid gap-2 sm:grid-cols-2">
-                    <MetricTile label="Revenue" tone="emerald" value={formatOptionalCurrency(money.revenueCents)} />
-                    <MetricTile label="Protected profit" tone="teal" value={formatOptionalCurrency(money.grossProfitCents)} />
-                  </div>
-                  <MarkdownPreview markdown={reports[reports.length - 1].report_markdown} />
+          <div className="space-y-8">
+            <WorkspaceSection description="Selected execution economics and operation metadata." title="Selected execution">
+              {selectedRun ? (
+                <div className="bg-white p-5 shadow-sm ring-1 ring-zinc-200">
+                  <p className="text-xl font-semibold text-zinc-950">{selectedRun.client_name}</p>
+                  <p className="mt-1 text-sm text-zinc-600">{selectedRun.job_name}</p>
+                  <OutcomeRail
+                    items={[
+                      { label: "Revenue", value: formatOptionalCurrency(money.revenueCents), tone: "emerald" },
+                      { label: "Setup spend", value: formatOptionalCurrency(money.approvedSpendCents), tone: "sky" },
+                      { label: "Blocked risk", value: formatOptionalCurrency(money.blockedSpendCents), tone: "rose" },
+                      { label: "Protected profit", value: formatOptionalCurrency(money.grossProfitCents), tone: "teal" },
+                      { label: "Margin", value: formatOptionalPercent(money.marginPercent), tone: "amber" },
+                    ]}
+                  />
                 </div>
               ) : (
-                <EmptyState>Final report proof appears after the run completes.</EmptyState>
+                <EmptyWorkspaceState>Select an execution from the history table.</EmptyWorkspaceState>
               )}
-            </Panel>
+            </WorkspaceSection>
+
+            <WorkspaceSection description="Ordered activity from the selected execution." title="Activity timeline">
+              <ExecutionFeed calls={calls} />
+            </WorkspaceSection>
+
+            <WorkspaceSection description="Final profit report for the selected execution." title="Profit Outcome">
+              {reports.length > 0 ? <MarkdownPreview markdown={reports[reports.length - 1].report_markdown} /> : <EmptyWorkspaceState>Profit Outcome appears after the run completes.</EmptyWorkspaceState>}
+            </WorkspaceSection>
           </div>
         </div>
-      </div>
-    </div>
+      )}
+    </WorkspacePage>
   );
 }
 
@@ -837,59 +695,40 @@ function AuditView({
   const databasePath = state?.database.path ?? health?.database_path ?? null;
 
   return (
-    <div className="space-y-5">
-      <Panel className="p-5">
-        <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
-          <div>
-            <Eyebrow>Audit</Eyebrow>
-            <h1 className="mt-2 text-2xl font-semibold text-white lg:text-3xl">
-              SQLite evidence trail
-            </h1>
-            <p className="mt-2 max-w-4xl text-sm leading-6 text-zinc-300">
-              Timeline, orchestration calls, ledger movement, Stripe records, and policy decisions stay organized here instead of crowding the Function Studio.
-            </p>
-          </div>
-          <div className="grid gap-2 sm:grid-cols-3 xl:min-w-[28rem]">
-            <MetricTile label="Audit rows" tone="teal" value={String(auditRows)} />
-            <MetricTile label="Calls" tone="emerald" value={String(calls.length)} />
-            <MetricTile label="Policy checks" tone="amber" value={String(checks.length)} />
-          </div>
-        </div>
+    <WorkspacePage
+      description="Grouped evidence for the selected client operation: lifecycle events, finance proof, guardrail decisions, ledger rows, and agent/Hermes calls."
+      eyebrow="Evidence Ledger"
+      meta={<p className="text-sm font-semibold text-zinc-600">{auditRows} evidence rows in the current view</p>}
+      title="Evidence Ledger"
+    >
+      <OutcomeRail
+        items={[
+          { label: "Timeline", value: String(events.length), tone: "slate" },
+          { label: "Finance proof", value: String(stripeEvents.length), tone: "sky" },
+          { label: "Guardrails", value: String(checks.length), tone: "amber" },
+          { label: "Ledger entries", value: String(entries.length), tone: "teal" },
+          { label: "Agent/Hermes calls", value: String(calls.length), tone: "emerald" },
+        ]}
+      />
 
-        <div className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
-          <MetricTile label="Ledger rows" tone="sky" value={String(entries.length)} />
-          <MetricTile label="Timeline events" tone="slate" value={String(events.length)} />
-          <MetricTile label="Stripe events" tone="sky" value={String(stripeEvents.length)} />
-          <MetricTile label="Reports" tone="emerald" value={String(state?.reports.length ?? 0)} />
-          <MetricTile label="Database" tone="slate" value={databasePath ?? "Path pending"} />
-        </div>
-      </Panel>
-
-      <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
-        <Panel className="p-5">
+      <div className="grid gap-8 xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
+        <WorkspaceSection title="Timeline">
           <TimelinePanel events={events} />
-        </Panel>
-        <Panel className="p-5">
+        </WorkspaceSection>
+        <WorkspaceSection title="Finance proof">
+          <StripeEvidence summary={state?.stripe ?? null} events={stripeEvents} />
+        </WorkspaceSection>
+        <WorkspaceSection title="Guardrail decisions">
+          <PolicyEvidence checks={checks} summary={summary} />
+        </WorkspaceSection>
+        <WorkspaceSection title="Ledger entries">
+          <LedgerPanel auditRows={auditRows} databasePath={databasePath} entries={entries} totals={totals} />
+        </WorkspaceSection>
+        <WorkspaceSection title="Agent/Hermes calls">
           <ExecutionFeed calls={calls} />
-        </Panel>
-        <Panel className="p-5">
-          <LedgerPanel
-            auditRows={auditRows}
-            databasePath={databasePath}
-            entries={entries}
-            totals={totals}
-          />
-        </Panel>
-        <div className="space-y-5">
-          <Panel className="p-5">
-            <StripeEvidence summary={state?.stripe ?? null} events={stripeEvents} />
-          </Panel>
-          <Panel className="p-5">
-            <PolicyEvidence checks={checks} summary={summary} />
-          </Panel>
-        </div>
+        </WorkspaceSection>
       </div>
-    </div>
+    </WorkspacePage>
   );
 }
 
@@ -906,100 +745,66 @@ function IntegrationsView({
   const stripe = state?.stripe ?? null;
 
   return (
-    <div className="space-y-5">
-      <Panel className="p-5">
-        <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
-          <div>
-            <Eyebrow>Integrations</Eyebrow>
-            <h1 className="mt-2 text-2xl font-semibold text-white lg:text-3xl">
-              Runtime proof surfaces
-            </h1>
-            <p className="mt-2 max-w-4xl text-sm leading-6 text-zinc-300">
-              Hermes, Stripe test mode, SQLite, and the local policy layer stay visible here as product evidence, with Goal 8 still clearly marked as future work.
-            </p>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            <StatusBadge
-              icon={BrainCircuit}
-              label={hermes?.used_real_hermes ? "Real isolated Hermes" : "Hermes pending or test"}
-              tone={hermes?.used_real_hermes ? "emerald" : hermes?.error ? "rose" : "amber"}
-            />
-            <StatusBadge
-              icon={CreditCard}
-              label={stripe?.used_real_stripe ? "Real Stripe test mode" : humanize(stripe?.stripe_mode ?? "pending")}
-              tone={stripe?.used_real_stripe ? "sky" : stripe?.error ? "rose" : "amber"}
-            />
-            <StatusBadge icon={ShieldAlert} label="NeMo not wired yet" tone="violet" />
-          </div>
-        </div>
-      </Panel>
+    <WorkspacePage
+      description="The operating stack behind a ClientOps run, with current proof and explicit integration boundaries."
+      eyebrow="Operating stack"
+      meta={<p className="text-sm font-semibold text-zinc-600">{auditRows} evidence rows available in Audit</p>}
+      title="Operating Stack"
+    >
+      <PlainTable headers={["Component", "Role", "Current proof", "Boundary"]}>
+        <StackRow
+          boundary="Product mode uses the isolated ScaleX Hermes path; test mode stays labeled."
+          icon={BrainCircuit}
+          name="Hermes"
+          proof={hermes?.used_real_hermes ? `${hermes.provider ?? "Hermes"} / ${hermes.model ?? "model recorded"}` : hermes?.failure_reason ?? hermes?.error ?? "Not run in this local state"}
+          role="Plans the client implementation operation."
+        />
+        <StackRow
+          boundary="Stripe invoice is not shown as paid unless Stripe returns paid=true."
+          icon={CreditCard}
+          name="Stripe"
+          proof={stripe?.used_real_stripe ? "Real Stripe test mode" : humanize(stripe?.stripe_mode ?? "not configured")}
+          role="Provides finance proof through test-mode invoice records."
+        />
+        <StackRow
+          boundary="Local policy is the active guardrail layer today."
+          icon={ShieldCheck}
+          name="Local policy"
+          proof={`${state?.policy.summary.approved_vendors.length ?? 0} approved vendors / ${state?.policy.summary.blocked_vendors.length ?? 0} blocked vendors`}
+          role="Controls setup spend, vendor risk, cap, and margin floor."
+        />
+        <StackRow
+          boundary="Goal 8A remains future/read-only. No real NeMo integration is wired."
+          icon={ShieldAlert}
+          name="NeMo planned"
+          proof="Planned / not wired"
+          role="Future governed autonomy layer."
+        />
+        <StackRow
+          boundary="Local evidence ledger only; no production customer data."
+          icon={Database}
+          name="SQLite"
+          proof={`${state?.runs.length ?? 0} runs / ${state?.workflows.length ?? 0} operation files / ${health?.mode ?? state?.mode ?? "local"}`}
+          role="Records run evidence and operation files."
+        />
+        <StackRow
+          boundary="Prototype auth only, not enterprise identity."
+          icon={LockKeyhole}
+          name="Prototype auth"
+          proof="Local session boundary"
+          role="Protects the local browser product surface."
+        />
+      </PlainTable>
 
-      <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
-        <Panel className="p-5">
-          <SectionHeader
-            description="Direct proof from the running Hermes integration surface."
-            icon={BrainCircuit}
-            title="Hermes"
-          />
-          <div className="mt-4 grid gap-3 sm:grid-cols-2">
-            <MetricTile label="used_real_hermes" tone={hermes?.used_real_hermes ? "emerald" : "amber"} value={String(Boolean(hermes?.used_real_hermes))} />
-            <MetricTile label="Provider" tone="slate" value={hermes?.provider ?? "Pending"} />
-            <MetricTile label="Model" tone="slate" value={hermes?.model ?? "Pending"} />
-            <MetricTile label="Skill" tone="violet" value={hermes?.skill_name ?? "Pending"} />
-            <MetricTile label="Toolsets" tone="slate" value={hermes?.toolsets_used?.join(", ") || "Pending"} />
-            <MetricTile label="Safety summary" tone="slate" value={hermes?.command_safety_summary ?? "Pending"} />
-          </div>
-          {hermes?.error || hermes?.failure_reason ? (
-            <div className="mt-4 rounded-lg border border-rose-300/30 bg-rose-300/10 p-3 text-sm text-rose-100">
-              <p className="font-semibold">Hermes integration error</p>
-              <p className="mt-1">{hermes.failure_reason ?? hermes.error}</p>
-            </div>
-          ) : null}
-        </Panel>
-
-        <Panel className="p-5">
+      <div className="grid gap-8 xl:grid-cols-2">
+        <WorkspaceSection title="Stripe finance detail">
           <StripeEvidence summary={stripe} events={state?.stripe_events ?? []} />
-        </Panel>
-
-        <Panel className="p-5">
-          <SectionHeader
-            description="Current persisted state behind the product shell."
-            icon={Database}
-            title="SQLite and records"
-          />
-          <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-            <MetricTile label="Database path" tone="slate" value={state?.database.path ?? health?.database_path ?? "Pending"} />
-            <MetricTile label="Audit rows" tone="teal" value={String(auditRows)} />
-            <MetricTile label="Persisted runs" tone="sky" value={String(state?.runs.length ?? 0)} />
-            <MetricTile label="Operations" tone="slate" value={String(state?.workflows.length ?? 0)} />
-            <MetricTile label="Selected run" tone="emerald" value={state?.selected_run_id ?? "None"} />
-            <MetricTile label="API mode" tone="slate" value={health?.mode ?? state?.mode ?? "local"} />
-          </div>
-        </Panel>
-
-        <Panel className="p-5">
-          <SectionHeader
-            description="Current safety layer facts and future integration boundary."
-            icon={ShieldCheck}
-            title="Policy and NeMo Guardrails"
-          />
-          <div className="mt-4 space-y-3">
-            <EvidenceCard
-              description="Local policy engine enforces payment-before-spend, vendor allow/block lists, spend cap, and margin floor."
-              icon={ShieldCheck}
-              title="Local guardrails active"
-              tone="emerald"
-            />
-            <EvidenceCard
-              description="Goal 8 remains the NVIDIA NeMo Guardrails or NeMo-compatible safety-adapter milestone. This view does not claim it is wired yet."
-              icon={ShieldAlert}
-              title="Goal 8 planned"
-              tone="violet"
-            />
-          </div>
-        </Panel>
+        </WorkspaceSection>
+        <WorkspaceSection title="Guardrail boundary">
+          <PolicyEvidence checks={state?.policy_checks ?? []} summary={state?.policy.summary ?? null} />
+        </WorkspaceSection>
       </div>
-    </div>
+    </WorkspacePage>
   );
 }
 
@@ -1015,110 +820,50 @@ function SettingsView({
   state: DemoState | null;
 }) {
   return (
-    <div className="space-y-5">
-      <Panel className="p-5">
-        <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
-          <div>
-            <Eyebrow>Settings</Eyebrow>
-            <h1 className="mt-2 text-2xl font-semibold text-white lg:text-3xl">
-              Local operator boundaries
-            </h1>
-            <p className="mt-2 max-w-4xl text-sm leading-6 text-zinc-300">
-              Prototype auth, runtime status, selected operation/run references, and hard safety boundaries remain visible here without exposing secrets or pretending this is production identity.
-            </p>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            <StatusBadge
-              icon={LockKeyhole}
-              label={auth?.authenticated ? `Signed in as ${auth.username ?? "operator"}` : auth?.auth_enabled ? "Auth enabled" : "Auth disabled"}
-              tone={auth?.authenticated ? "emerald" : auth?.auth_enabled ? "amber" : "slate"}
-            />
-            <StatusBadge
-              icon={Activity}
-              label={health?.status ?? "Pending"}
-              tone={health?.status === "ok" ? "emerald" : "amber"}
-            />
-          </div>
-        </div>
-      </Panel>
-
-      <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_minmax(0,0.95fr)]">
-        <Panel className="p-5">
-          <SectionHeader
-            description="Current local runtime and selected product record state."
-            icon={Settings}
-            title="Runtime"
-          />
-          <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-            <MetricTile label="Prototype auth" tone={auth?.authenticated ? "emerald" : auth?.auth_enabled ? "amber" : "slate"} value={auth?.auth_enabled ? auth?.authenticated ? "Signed in" : "Enabled" : "Disabled"} />
-            <MetricTile label="API mode" tone="slate" value={health?.mode ?? state?.mode ?? "local"} />
-            <MetricTile label="Operation" tone={state?.workflow ? "teal" : "amber"} value={state?.workflow?.client_name ?? "None selected"} />
-            <MetricTile label="Selected run" tone={state?.selected_run_id ? "emerald" : "slate"} value={state?.selected_run_id ?? "None"} />
-          </div>
-
-          <div className="mt-5 grid gap-3 sm:grid-cols-2">
-            <EvidenceCard
-              description={auth?.auth_enabled ? "Signed HTTP-only local session cookie. This is prototype auth, not enterprise identity." : "Prototype auth disabled for this local run."}
-              icon={LockKeyhole}
-              title="Auth model"
-              tone={auth?.authenticated ? "emerald" : auth?.auth_enabled ? "amber" : "slate"}
-            />
-            <EvidenceCard
-              description={`${health?.status ?? "Pending"} API; database ${health?.database_exists ? "exists" : "pending"}; ${auditRows} audit rows in current proof state.`}
-              icon={Database}
-              title="Local runtime"
-              tone={health?.database_exists ? "teal" : "amber"}
-            />
-            <EvidenceCard
-              description={state?.workflow ? state.workflow.job_name : "Create or select a client operation before starting a run."}
-              icon={Workflow}
-              title="Active operation"
-              tone={state?.workflow ? "teal" : "amber"}
-            />
-            <EvidenceCard
-              description={`${state?.runs.length ?? 0} persisted runs; ${state?.workflows.length ?? 0} saved operations; SQLite path ${state?.database.path ?? health?.database_path ?? "pending"}.`}
-              icon={ClipboardList}
-              title="Stored records"
-              tone="slate"
-            />
-          </div>
-        </Panel>
-
-        <Panel className="p-5">
-          <SectionHeader
-            description="These boundaries are visible because they are product claims, not internal notes."
-            icon={ShieldAlert}
-            title="Safety boundaries"
-          />
-          <div className="mt-4 space-y-3">
-            <EvidenceCard
-              description="Goal 7 uses Stripe test mode only. Live-money execution is deferred to a future Verified Live Mode milestone."
-              icon={CreditCard}
-              title="No live money"
-              tone="rose"
-            />
-            <EvidenceCard
-              description="Hosted judge mode must not expose secrets. Local full-proof mode may use ignored `.env` values."
-              icon={LockKeyhole}
-              title="No secrets in browser"
-              tone="amber"
-            />
-            <EvidenceCard
-              description="NeMo Guardrails remains Goal 8 planned. This settings view does not claim a real NeMo or NemoClaw integration."
-              icon={ShieldAlert}
-              title="NeMo not wired yet"
-              tone="violet"
-            />
-            <EvidenceCard
-              description="Synthetic Northstar Dental Group account only for B2B implementation operations. No patient data, no PHI, and no healthcare compliance claim."
-              icon={Building2}
-              title="Sample-only data"
-              tone="sky"
-            />
-          </div>
-        </Panel>
-      </div>
-    </div>
+    <WorkspacePage
+      description="Runtime facts and non-negotiable boundaries for the local ClientOps workspace."
+      eyebrow="Boundaries & Runtime"
+      meta={<p className="text-sm font-semibold text-zinc-600">API {health?.status ?? "not checked"} / {auditRows} evidence rows</p>}
+      title="Boundaries & Runtime"
+    >
+      <PlainTable headers={["Area", "Current value", "Boundary"]}>
+        <BoundaryRow
+          area="Prototype auth"
+          boundary="Local prototype auth only; no production identity claim."
+          value={auth?.auth_enabled ? auth?.authenticated ? `Signed in as ${auth.username ?? "operator"}` : "Enabled" : "Disabled for this local run"}
+        />
+        <BoundaryRow
+          area="Runtime"
+          boundary="Local API and SQLite-backed product workspace."
+          value={`${health?.mode ?? state?.mode ?? "local"} / database ${health?.database_exists || state?.database.exists ? "available" : "not initialized"}`}
+        />
+        <BoundaryRow
+          area="Active operation"
+          boundary="Synthetic Northstar B2B implementation operation only."
+          value={state?.workflow ? `${state.workflow.client_name} / ${state.workflow.job_name}` : "No operation selected"}
+        />
+        <BoundaryRow
+          area="Data"
+          boundary="No patient data, no PHI, no healthcare compliance or HIPAA claim."
+          value="Synthetic sample"
+        />
+        <BoundaryRow
+          area="Money movement"
+          boundary="No live-money support; future live execution requires Verified Live Mode."
+          value="Stripe test mode only when configured"
+        />
+        <BoundaryRow
+          area="Guardrails"
+          boundary="Local policy active now; real NeMo Guardrails is planned and not wired."
+          value="Local policy active"
+        />
+        <BoundaryRow
+          area="Records"
+          boundary="SQLite evidence is local; no production customer workflow claim."
+          value={`${state?.runs.length ?? 0} runs / ${state?.workflows.length ?? 0} operation files`}
+        />
+      </PlainTable>
+    </WorkspacePage>
   );
 }
 
@@ -1134,29 +879,11 @@ function SectionHeader({
   return (
     <div>
       <div className="flex items-center gap-2">
-        <Icon className="h-5 w-5 text-zinc-200" aria-hidden="true" />
-        <h2 className="text-lg font-semibold text-white">{title}</h2>
+        <Icon className="h-5 w-5 text-zinc-700" aria-hidden="true" />
+        <h2 className="text-lg font-semibold text-zinc-950">{title}</h2>
       </div>
-      <p className="mt-1 text-sm leading-6 text-zinc-400">{description}</p>
+      <p className="mt-1 text-sm leading-6 text-zinc-600">{description}</p>
     </div>
-  );
-}
-
-function Eyebrow({ children }: { children: string }) {
-  return <p className="text-sm font-semibold uppercase text-emerald-200">{children}</p>;
-}
-
-function Panel({
-  children,
-  className = "",
-}: {
-  children: ReactNode;
-  className?: string;
-}) {
-  return (
-    <section className={`rounded-lg border border-white/10 bg-white/[0.04] shadow-2xl shadow-zinc-950/20 ${className}`}>
-      {children}
-    </section>
   );
 }
 
@@ -1170,63 +897,9 @@ function MetricTile({
   value: string;
 }) {
   return (
-    <div className={`rounded-lg border p-3 ${darkToneClass(tone)}`}>
+    <div className={`rounded-md border p-3 ${softToneClass(tone)}`}>
       <p className="text-[0.68rem] font-semibold uppercase">{label}</p>
       <p className="mt-1 break-words text-sm font-semibold">{value}</p>
-    </div>
-  );
-}
-
-function EvidenceCard({
-  description,
-  icon: Icon,
-  title,
-  tone,
-}: {
-  description: string;
-  icon: LucideIcon;
-  title: string;
-  tone: Tone;
-}) {
-  return (
-    <article className={`rounded-lg border p-3 ${darkToneClass(tone)}`}>
-      <div className="flex items-start gap-3">
-        <Icon className="mt-0.5 h-5 w-5 flex-none" aria-hidden="true" />
-        <div className="min-w-0">
-          <p className="text-sm font-semibold text-white">{title}</p>
-          <p className="mt-1 text-xs leading-5">{description}</p>
-        </div>
-      </div>
-    </article>
-  );
-}
-
-function InlineList({
-  items,
-  title,
-  tone,
-}: {
-  items: string[];
-  title: string;
-  tone: Tone;
-}) {
-  return (
-    <div className={`rounded-lg border p-3 ${darkToneClass(tone)}`}>
-      <p className="text-xs font-semibold uppercase">{title}</p>
-      <div className="mt-2 flex flex-wrap gap-2">
-        {items.length === 0 ? (
-          <span className="text-xs text-zinc-300">None configured</span>
-        ) : (
-          items.map((item) => (
-            <span
-              className="rounded-md border border-white/10 bg-white/10 px-2 py-1 text-xs font-semibold text-white"
-              key={item}
-            >
-              {item}
-            </span>
-          ))
-        )}
-      </div>
     </div>
   );
 }
@@ -1243,10 +916,10 @@ function FieldInput({
   value: string;
 }) {
   return (
-    <label className="block text-sm font-semibold text-zinc-200">
+    <label className="block text-sm font-semibold text-zinc-700">
       {label}
       <input
-        className="mt-2 min-h-11 w-full rounded-md border border-white/10 bg-zinc-950/60 px-3 text-sm text-white outline-none transition focus:border-emerald-400"
+        className="mt-2 min-h-11 w-full rounded-md border border-zinc-300 bg-white px-3 text-sm text-zinc-950 outline-none transition focus:border-emerald-600"
         onChange={(event) => onChange(event.target.value)}
         type={type}
         value={value}
@@ -1265,10 +938,10 @@ function TextAreaField({
   value: string;
 }) {
   return (
-    <label className="block text-sm font-semibold text-zinc-200">
+    <label className="block text-sm font-semibold text-zinc-700">
       {label}
       <textarea
-        className="mt-2 min-h-28 w-full rounded-md border border-white/10 bg-zinc-950/60 px-3 py-2 text-sm text-white outline-none transition focus:border-emerald-400"
+        className="mt-2 min-h-32 w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-950 outline-none transition focus:border-emerald-600"
         onChange={(event) => onChange(event.target.value)}
         value={value}
       />
@@ -1284,7 +957,7 @@ function EmptyState({
   className?: string;
 }) {
   return (
-    <div className={`rounded-lg border border-dashed border-white/15 bg-zinc-950/30 p-4 text-sm text-zinc-400 ${className}`}>
+    <div className={`border border-dashed border-zinc-300 bg-white p-4 text-sm text-zinc-600 ${className}`}>
       {children}
     </div>
   );
@@ -1306,18 +979,18 @@ function ExecutionFeed({ calls }: { calls: OrchestrationCall[] }) {
             const failed = call.status === "failed";
             return (
               <li
-                className={`rounded-lg border p-3 ${
-                  failed ? "border-rose-300/25 bg-rose-300/10" : "border-white/10 bg-white/[0.03]"
+                className={`border p-3 ${
+                  failed ? "border-rose-200 bg-rose-50" : "border-zinc-200 bg-white"
                 }`}
                 key={call.id}
               >
                 <div className="grid gap-3 sm:grid-cols-[3rem_1fr_auto] sm:items-start">
                   <p className="font-mono text-sm font-semibold text-zinc-500">#{call.sequence}</p>
                   <div className="min-w-0">
-                    <p className="break-words text-sm font-semibold text-white">{call.tool_name}</p>
+                    <p className="break-words text-sm font-semibold text-zinc-950">{call.tool_name}</p>
                     <p className="mt-1 text-xs text-zinc-500">{formatDateTime(call.created_at)}</p>
                     {call.error ? (
-                      <p className="mt-2 text-xs leading-5 text-rose-200">{call.error}</p>
+                      <p className="mt-2 text-xs leading-5 text-rose-700">{call.error}</p>
                     ) : null}
                   </div>
                   <StatusBadge
@@ -1350,22 +1023,22 @@ function TimelinePanel({ events }: { events: DemoEvent[] }) {
           {events.map((event) => {
             const Icon = iconForEvent(event.type);
             return (
-              <li className="rounded-lg border border-white/10 bg-white/[0.03] p-3" key={event.id}>
+              <li className="border border-zinc-200 bg-white p-3" key={event.id}>
                 <div className="flex items-start gap-3">
-                  <span className="flex h-8 w-8 flex-none items-center justify-center rounded-md border border-white/10 bg-white/5 text-zinc-200">
+                  <span className="flex h-8 w-8 flex-none items-center justify-center rounded-md bg-zinc-950 text-white">
                     <Icon className="h-4 w-4" aria-hidden="true" />
                   </span>
                   <div className="min-w-0 flex-1">
                     <div className="flex items-start justify-between gap-3">
                       <div>
-                        <p className="font-semibold text-white">{event.title}</p>
+                        <p className="font-semibold text-zinc-950">{event.title}</p>
                         <p className="mt-1 text-xs font-semibold uppercase text-zinc-500">
                           {humanize(event.type)}
                         </p>
                       </div>
                       <StatusBadge label={humanize(event.status)} tone={runStatusTone(event.status)} />
                     </div>
-                    <p className="mt-2 text-sm leading-6 text-zinc-300">{event.detail}</p>
+                    <p className="mt-2 text-sm leading-6 text-zinc-600">{event.detail}</p>
                     <p className="mt-2 text-xs text-zinc-500">{formatDateTime(event.created_at)}</p>
                   </div>
                 </div>
@@ -1398,36 +1071,36 @@ function LedgerPanel({
       />
       <div className="mt-4 flex flex-wrap gap-2">
         <StatusBadge icon={Database} label={`${auditRows} audit rows`} tone="teal" />
-        <StatusBadge label={databasePath ?? "Ledger path pending"} tone="slate" />
+        <StatusBadge label={databasePath ?? "Ledger path not recorded"} tone="slate" />
       </div>
 
       {entries.length === 0 ? (
         <EmptyState className="mt-4">Ledger entries appear after revenue and approved spend are recorded.</EmptyState>
       ) : (
-        <div className="mt-4 overflow-hidden rounded-lg border border-white/10">
-          <table className="min-w-full divide-y divide-white/10 text-sm">
-            <thead className="bg-white/[0.04] text-left text-xs uppercase text-zinc-500">
+        <div className="mt-4 overflow-hidden border border-zinc-200 bg-white">
+          <table className="min-w-full divide-y divide-zinc-200 text-sm">
+            <thead className="bg-zinc-50 text-left text-xs uppercase text-zinc-500">
               <tr>
                 <th className="px-3 py-3 font-semibold">Type</th>
                 <th className="px-3 py-3 font-semibold">Label</th>
                 <th className="px-3 py-3 text-right font-semibold">Amount</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-white/10 bg-transparent">
+            <tbody className="divide-y divide-zinc-200 bg-white">
               {entries.map((entry) => (
                 <tr key={entry.id}>
                   <td className="px-3 py-3">
-                    <span className="rounded-md border border-white/10 bg-white/5 px-2 py-1 text-xs font-semibold text-zinc-200">
+                    <span className="rounded-md border border-zinc-200 bg-zinc-50 px-2 py-1 text-xs font-semibold text-zinc-700">
                       {humanize(entry.entry_type)}
                     </span>
                   </td>
                   <td className="px-3 py-3">
-                    <p className="font-semibold text-white">{entry.label}</p>
+                    <p className="font-semibold text-zinc-950">{entry.label}</p>
                     <p className="mt-1 text-xs text-zinc-500">
                       {entry.source} · {formatDateTime(entry.created_at)}
                     </p>
                   </td>
-                  <td className="px-3 py-3 text-right font-semibold text-white">
+                  <td className="px-3 py-3 text-right font-semibold text-zinc-950">
                     {formatCurrency(entry.amount_cents)}
                   </td>
                 </tr>
@@ -1479,47 +1152,49 @@ function StripeEvidence({
               ? "Integration error"
               : summary?.used_real_stripe
                 ? "Real Stripe test mode"
-                : humanize(summary?.stripe_mode ?? "pending")
+                : summary?.stripe_mode
+                  ? humanize(summary.stripe_mode)
+                  : "Awaiting Stripe proof"
           }
           tone={failed ? "rose" : summary?.used_real_stripe ? "emerald" : "amber"}
         />
         <StatusBadge
-          label={`livemode=${summary?.livemode === null || summary?.livemode === undefined ? "pending" : String(summary.livemode)}`}
+          label={`livemode=${summary?.livemode === null || summary?.livemode === undefined ? "not recorded" : String(summary.livemode)}`}
           tone={summary?.livemode === false ? "sky" : "amber"}
         />
       </div>
 
       {failed ? (
-        <div className="mt-4 rounded-lg border border-rose-300/30 bg-rose-300/10 p-3 text-sm text-rose-100">
+        <div className="mt-4 border border-rose-200 bg-rose-50 p-3 text-sm text-rose-800">
           <p className="font-semibold">Stripe integration error</p>
           <p className="mt-1">{summary?.error}</p>
         </div>
       ) : null}
 
       {invoiceOpenUnpaid ? (
-        <div className="mt-4 rounded-lg border border-amber-300/30 bg-amber-300/10 p-3 text-sm font-semibold text-amber-100">
+        <div className="mt-4 border border-amber-200 bg-amber-50 p-3 text-sm font-semibold text-amber-900">
           Stripe test invoice finalized and open. It is not marked paid.
         </div>
       ) : null}
 
       <div className="mt-4 grid gap-3 sm:grid-cols-2">
-        <MetricTile label="used_real_stripe" tone={summary?.used_real_stripe ? "emerald" : "amber"} value={String(Boolean(summary?.used_real_stripe))} />
-        <MetricTile label="Customer ID" tone="slate" value={summary?.customer_id ?? "Pending"} />
-        <MetricTile label="Invoice ID" tone="slate" value={summary?.invoice_id ?? "Pending"} />
-        <MetricTile label="Invoice status" tone="amber" value={summary?.invoice_status ?? "Pending"} />
-        <MetricTile label="Paid" tone={summary?.paid ? "emerald" : "amber"} value={summary?.paid === null || summary?.paid === undefined ? "Pending" : String(summary.paid)} />
-        <MetricTile label="Hosted URL" tone="slate" value={summary?.hosted_invoice_url ? "Available" : "Pending"} />
+        <MetricTile label="Real Stripe test path" tone={summary?.used_real_stripe ? "emerald" : "amber"} value={String(Boolean(summary?.used_real_stripe))} />
+        <MetricTile label="Customer ID" tone="slate" value={summary?.customer_id ?? "Not recorded"} />
+        <MetricTile label="Invoice ID" tone="slate" value={summary?.invoice_id ?? "Not recorded"} />
+        <MetricTile label="Invoice status" tone="amber" value={summary?.invoice_status ?? "Not recorded"} />
+        <MetricTile label="Paid" tone={summary?.paid ? "emerald" : "amber"} value={summary?.paid === null || summary?.paid === undefined ? "Not recorded" : String(summary.paid)} />
+        <MetricTile label="Hosted URL" tone="slate" value={summary?.hosted_invoice_url ? "Available" : "Not recorded"} />
       </div>
 
       {summary?.hosted_invoice_url ? (
         <a
-          className="mt-4 flex items-center justify-between gap-3 rounded-lg border border-sky-300/30 bg-sky-300/10 p-3 text-sm font-semibold text-sky-100 transition hover:bg-sky-300/15"
+          className="mt-4 flex items-center justify-between gap-3 border border-sky-200 bg-sky-50 p-3 text-sm font-semibold text-sky-900 transition hover:bg-sky-100"
           href={summary.hosted_invoice_url}
           rel="noreferrer"
           target="_blank"
         >
           <span className="min-w-0">
-            <span className="block text-xs uppercase text-sky-200">Hosted invoice URL</span>
+            <span className="block text-xs uppercase text-sky-700">Hosted invoice URL</span>
             <span className="mt-1 block break-all">{summary.hosted_invoice_url}</span>
           </span>
           <ExternalLink className="h-5 w-5 flex-none" aria-hidden="true" />
@@ -1572,21 +1247,21 @@ function PolicyEvidence({
             const approved = isApproved(check);
             return (
               <article
-                className={`rounded-lg border p-3 ${
-                  approved ? "border-emerald-300/25 bg-emerald-300/10" : "border-rose-300/25 bg-rose-300/10"
+                className={`border p-3 ${
+                  approved ? "border-emerald-200 bg-emerald-50" : "border-rose-200 bg-rose-50"
                 }`}
                 key={check.id}
               >
                 <div className="flex items-start justify-between gap-3">
                   <div>
-                    <p className="font-semibold text-white">{check.vendor}</p>
+                    <p className="font-semibold text-zinc-950">{check.vendor}</p>
                     <p className="mt-1 text-xs font-semibold uppercase text-zinc-400">
                       {approved ? "Approved vendor spend" : "Blocked unsafe spend"}
                     </p>
                   </div>
                   <StatusBadge label={formatCurrency(check.requested_amount_cents)} tone={approved ? "emerald" : "rose"} />
                 </div>
-                <p className="mt-2 text-sm leading-6 text-zinc-200">{check.reason}</p>
+                <p className="mt-2 text-sm leading-6 text-zinc-700">{check.reason}</p>
                 <div className="mt-3 flex flex-wrap gap-2">
                   <StatusBadge label={`Margin after ${formatPercent(check.margin_after_spend_percent)}`} tone="teal" />
                   <StatusBadge label={`Action ${check.required_action}`} tone="slate" />
@@ -1599,7 +1274,7 @@ function PolicyEvidence({
       </div>
 
       {summary ? (
-        <div className="mt-4 rounded-lg border border-white/10 bg-zinc-950/40 p-3 text-xs leading-5 text-zinc-400">
+        <div className="mt-4 border border-zinc-200 bg-white p-3 text-xs leading-5 text-zinc-600">
           Approved vendors: {summary.approved_vendors.join(", ")}. Blocked vendors: {summary.blocked_vendors.join(", ")}.
         </div>
       ) : null}
@@ -1614,7 +1289,7 @@ function PolicyEvidence({
 
 function MarkdownPreview({ markdown }: { markdown: string }) {
   return (
-    <div className="space-y-2 text-sm leading-6 text-zinc-300">
+    <div className="space-y-2 text-sm leading-6 text-zinc-700">
       {markdown
         .split("\n")
         .map((line) => line.trim())
@@ -1622,7 +1297,7 @@ function MarkdownPreview({ markdown }: { markdown: string }) {
         .map((line, index) => {
           if (line.startsWith("# ")) {
             return (
-              <h3 className="text-sm font-semibold text-white" key={`${line}-${index}`}>
+              <h3 className="text-sm font-semibold text-zinc-950" key={`${line}-${index}`}>
                 {line.replace("# ", "")}
               </h3>
             );
@@ -1630,7 +1305,7 @@ function MarkdownPreview({ markdown }: { markdown: string }) {
 
           if (line.startsWith("- ")) {
             return (
-              <p className="pl-4 text-zinc-300" key={`${line}-${index}`}>
+              <p className="pl-4 text-zinc-700" key={`${line}-${index}`}>
                 <span className="mr-2 text-zinc-500">-</span>
                 {line.replace("- ", "")}
               </p>

@@ -37,7 +37,7 @@ export function TopCommandBar({
   runStatus: string;
 }) {
   return (
-    <header className="border-b border-zinc-800 bg-zinc-950 px-4 py-4 text-white sm:px-6 lg:px-8">
+    <header className="border-b border-zinc-200 bg-white px-4 py-4 text-zinc-950 sm:px-6 lg:px-8">
       <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-2">
@@ -45,11 +45,11 @@ export function TopCommandBar({
             <StatusBadge icon={Activity} label={runStatus} tone="sky" />
           </div>
           <div className="mt-3 min-w-0">
-            <p className="text-xs font-semibold uppercase text-zinc-400">Active client operation</p>
-            <p className="mt-1 truncate text-base font-semibold text-white">
+            <p className="text-xs font-semibold uppercase text-zinc-500">Active client operation</p>
+            <p className="mt-1 truncate text-base font-semibold text-zinc-950">
               {displayCustomer}
             </p>
-            <p className="mt-1 truncate text-sm text-zinc-300">{displayJob}</p>
+            <p className="mt-1 truncate text-sm text-zinc-600">{displayJob}</p>
           </div>
         </div>
 
@@ -68,7 +68,7 @@ export function TopCommandBar({
             Start Run
           </button>
           <button
-            className="inline-flex min-h-11 items-center justify-center gap-2 rounded-md border border-white/20 bg-white/10 px-4 py-3 text-sm font-semibold text-white transition hover:bg-white/15 disabled:cursor-not-allowed disabled:text-zinc-500"
+            className="inline-flex min-h-11 items-center justify-center gap-2 rounded-md border border-zinc-300 bg-white px-4 py-3 text-sm font-semibold text-zinc-900 transition hover:bg-zinc-50 disabled:cursor-not-allowed disabled:text-zinc-400"
             disabled={isBusy}
             onClick={onReset}
             type="button"
@@ -81,7 +81,7 @@ export function TopCommandBar({
             Reset Data
           </button>
           <button
-            className="inline-flex min-h-11 items-center justify-center gap-2 rounded-md border border-white/20 bg-white/10 px-4 py-3 text-sm font-semibold text-white transition hover:bg-white/15 disabled:cursor-not-allowed disabled:text-zinc-500"
+            className="inline-flex min-h-11 items-center justify-center gap-2 rounded-md border border-zinc-300 bg-white px-4 py-3 text-sm font-semibold text-zinc-900 transition hover:bg-zinc-50 disabled:cursor-not-allowed disabled:text-zinc-400"
             disabled={isBusy}
             onClick={onRefresh}
             type="button"
@@ -94,7 +94,7 @@ export function TopCommandBar({
           </button>
           {authEnabled ? (
             <button
-              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-md border border-white/20 bg-white/10 px-4 py-3 text-sm font-semibold text-white transition hover:bg-white/15 disabled:cursor-not-allowed disabled:text-zinc-500"
+              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-md border border-zinc-300 bg-white px-4 py-3 text-sm font-semibold text-zinc-900 transition hover:bg-zinc-50 disabled:cursor-not-allowed disabled:text-zinc-400"
               disabled={isBusy}
               onClick={onLogout}
               type="button"

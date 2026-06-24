@@ -13,7 +13,7 @@ export function AuditInspector({
   health: HealthResponse | null;
   state: DemoState | null;
 }) {
-  const databasePath = state?.database.path ?? health?.database_path ?? "Path pending";
+  const databasePath = state?.database.path ?? health?.database_path ?? "Path not recorded";
   const databaseExists = Boolean(state?.database.exists ?? health?.database_exists);
 
   return (
@@ -24,7 +24,7 @@ export function AuditInspector({
         title="SQLite Audit"
       >
         <FactGrid>
-          <Fact label="Database status" value={databaseExists ? "Present" : "Pending"} />
+          <Fact label="Database status" value={databaseExists ? "Present" : "Not recorded"} />
           <Fact label="Database path" value={databasePath} />
           <Fact label="Initialized" value={String(Boolean(state?.database.initialized))} />
           <Fact label="Current-state records" value={String(counts.total)} />
@@ -32,7 +32,7 @@ export function AuditInspector({
         <div className="mt-3 flex flex-wrap gap-2">
           <StatusPill
             icon={Database}
-            label={databaseExists ? "SQLite audit active" : "SQLite pending"}
+            label={databaseExists ? "SQLite audit active" : "SQLite not recorded"}
             tone={databaseExists ? "teal" : "amber"}
           />
         </div>
@@ -56,9 +56,9 @@ export function AuditInspector({
 
 function CountTile({ label, value }: { label: string; value: number }) {
   return (
-    <div className="rounded-md border border-white/10 bg-zinc-950/35 p-3">
+    <div className="border border-zinc-200 bg-zinc-50 p-3">
       <p className="text-[0.68rem] font-semibold uppercase text-zinc-500">{label}</p>
-      <p className="mt-1 text-2xl font-semibold text-white">{value}</p>
+      <p className="mt-1 text-2xl font-semibold text-zinc-950">{value}</p>
     </div>
   );
 }

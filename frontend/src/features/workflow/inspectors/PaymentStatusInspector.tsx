@@ -20,7 +20,7 @@ export function PaymentStatusInspector({ state }: { state: DemoState | null }) {
     revenueEntry?.source.includes("local_test_confirmation") ||
       paymentEvent?.status === "local_test_confirmed",
   );
-  const paid = stripe?.paid === null || stripe?.paid === undefined ? "Pending" : String(stripe.paid);
+  const paid = stripe?.paid === null || stripe?.paid === undefined ? "Not recorded" : String(stripe.paid);
 
   return (
     <div className="space-y-4">
@@ -30,11 +30,11 @@ export function PaymentStatusInspector({ state }: { state: DemoState | null }) {
         title="Payment Status"
       >
         <FactGrid>
-          <Fact label="invoice_status" value={stripe?.invoice_status ?? "Pending"} />
+          <Fact label="Invoice status" value={stripe?.invoice_status ?? "Not recorded"} />
           <Fact label="paid" value={paid} />
-          <Fact label="Revenue ledger entry" value={revenueEntry ? formatCurrency(revenueEntry.amount_cents) : "Pending"} />
-          <Fact label="Revenue source" value={revenueEntry?.source ?? "Pending"} />
-          <Fact label="Revenue label" value={revenueEntry?.label ?? "Pending"} />
+          <Fact label="Revenue ledger entry" value={revenueEntry ? formatCurrency(revenueEntry.amount_cents) : "Not recorded"} />
+          <Fact label="Revenue source" value={revenueEntry?.source ?? "Not recorded"} />
+          <Fact label="Revenue label" value={revenueEntry?.label ?? "Not recorded"} />
           <Fact label="Recorded" value={formatDateTime(revenueEntry?.created_at)} />
         </FactGrid>
 
@@ -50,7 +50,7 @@ export function PaymentStatusInspector({ state }: { state: DemoState | null }) {
         </div>
 
         {stripe?.paid === false ? (
-          <div className="mt-3 rounded-lg border border-amber-300/30 bg-amber-300/10 p-3 text-sm leading-6 text-amber-100">
+          <div className="mt-3 border border-amber-200 bg-amber-50 p-3 text-sm leading-6 text-amber-900">
             Stripe reports paid=false. Revenue economics are recorded only through the explicitly labeled local test confirmation.
           </div>
         ) : null}

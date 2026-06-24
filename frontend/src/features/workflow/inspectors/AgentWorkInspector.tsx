@@ -36,13 +36,13 @@ export function AgentWorkInspector({ state }: { state: DemoState | null }) {
         ) : (
           <div className="space-y-3">
             {outputs.map((output) => (
-              <article className="rounded-lg border border-white/10 bg-zinc-950/35 p-3" key={output.id}>
+              <article className="border border-zinc-200 bg-zinc-50 p-3" key={output.id}>
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
-                    <p className="break-words text-sm font-semibold text-white">
+                    <p className="break-words text-sm font-semibold text-zinc-950">
                       {output.agent_name} Agent
                     </p>
-                    <p className="mt-1 text-sm leading-5 text-zinc-300">{output.summary}</p>
+                    <p className="mt-1 text-sm leading-5 text-zinc-700">{output.summary}</p>
                   </div>
                   <StatusPill label={humanize(output.status)} tone={output.status === "complete" ? "emerald" : "amber"} />
                 </div>

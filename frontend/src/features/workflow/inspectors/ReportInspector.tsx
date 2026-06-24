@@ -56,7 +56,7 @@ export function ReportInspector({
         <div className="mt-3 flex flex-wrap gap-2">
           <StatusPill
             icon={TrendingUp}
-            label={report ? "Profit outcome generated" : "Profit outcome pending"}
+            label={report ? "Profit outcome generated" : "Profit outcome awaiting run"}
             tone={report ? "emerald" : "amber"}
           />
         </div>

@@ -10,6 +10,91 @@ Use:
 
 ---
 
+## 2026-06-24 - Goal 7.11C-followup: Replace Card Dashboard with ClientOps product workspace
+
+Completed:
+- Replaced the remaining generated dashboard/card shell with a ClientOps operation-file workspace.
+- Added shared workspace primitives for operation pages, operation hero, outcome rail, operation
+  timeline, template shelf, proof routes, empty workspace states, and plain tables.
+- Rebuilt Dashboard as a Northstar Dental Group / Client Implementation Launch operation file with
+  business-first hero, outcome rail, operating stack timeline, template shelf, and small supporting
+  workspace routes.
+- Removed the Dashboard Payment/Policy/SQLite proof panel wall; technical proof now lives in
+  Evidence Ledger, Operating Stack, Boundaries & Runtime, and the Function Studio Evidence Drawer.
+- Reworked Function Studio into a three-column business workspace with operation brief, readable
+  Function Map, Evidence Drawer, and activity timeline.
+- Reworked Onboarding, Customers, Runs, Audit, Integrations, and Settings away from repeated
+  bordered cards into configuration rows, operation files, execution history, evidence groups,
+  operating stack tables, and runtime boundary tables.
+- Preserved the Northstar economics: $8,500 revenue, $1,150 approved setup spend, $3,200 blocked
+  risk, $7,350 protected gross profit, and 86.5% protected margin.
+- Preserved truthfulness: Northstar is synthetic, no patient data, no PHI, no HIPAA claim, local
+  policy active now, NeMo planned/not wired, no Stripe paid claim unless `paid=true`, no live-money
+  support, and no production auth claim.
+- Did not implement Goal 8, install or wire NeMo, run Stripe API calls, run Hermes model calls,
+  edit `.env`, touch `data/*.db`, create extra goal logs, or commit.
+
+Verified:
+- `./scripts/test.sh` passed with 48 backend tests and a successful Vite production build.
+- `npm run build` passed in `frontend/` after final visual changes.
+- Auth-enabled browser QA passed on backend `8793` and frontend `5180`, using
+  `/tmp/scalex-goal711c-followup.db`, `HERMES_TEST_MODE=true`, `HERMES_REQUIRE_REAL=false`, and
+  `STRIPE_TEST_DOUBLE_MODE=true`.
+- Browser QA confirmed login, Dashboard operation file, Start Run in the test-double QA environment,
+  Function Studio with Guardrail Review selected in the Evidence Drawer, post-run Studio/Runs
+  evidence, Onboarding, Customers, Runs, Audit, Integrations, Settings, and logout.
+- Final screenshots were written to `/tmp/scalex-goal711c-followup-final`.
+- Stale UI sweep found no current UI matches for the removed debug-console phrases.
+- `git diff --check` passed.
+- Broad secret scan found only documented placeholder/redaction patterns; strict tracked-file
+  key-material scan returned no matches.
+- No `.env`, SQLite `.db`, `frontend/dist`, `data/backups`, `CODEX_GOALS.md`, or `GOAL_LOG.md`
+  file was staged.
+- `git status --short` was reviewed; pre-existing untracked `data/backups/` remained untouched.
+
+Suggested commit message:
+Replace card dashboard with ClientOps product workspace
+
+Next:
+- Goal 8A - NeMo Guardrails Preflight / Architecture Audit.
+
+---
+
+## 2026-06-24 - Goal 7.11C: ClientOps Dashboard business landing page
+
+Completed:
+- Reworked the Dashboard from the old generated card-grid console into a business landing page
+  for the Northstar Dental Group / Client Implementation Launch operation.
+- Added the hero operation brief with Northstar Dental Group, Client Implementation Launch,
+  business-first positioning, `Open Function Studio`, and `Review Evidence Ledger`.
+- Added the business outcome strip for $8,500 revenue, $1,150 approved setup spend, $3,200
+  blocked risk, $7,350 protected gross profit, and 86.5% protected margin.
+- Added the ClientOps operating stack and the function templates section with the implemented
+  Client Implementation Launch template and six planned templates.
+- Moved payment state, policy state, SQLite state, raw invoice IDs, database paths, and detailed
+  counts below the business story or into Audit / Integrations.
+- Preserved Stripe honesty: the Dashboard does not claim paid unless `paid=true`.
+- Preserved guardrail truthfulness: local policy remains active now, and no real NeMo Guardrails
+  claim was added.
+- Did not touch `.env`, `data/*.db`, live Stripe, real Hermes production config, live-money paths,
+  or Goal 8 implementation.
+
+Verified:
+- `./scripts/test.sh` passed with 48 backend tests and a successful Vite production build.
+- `npm run build` passed in `frontend/` before the full test script.
+- Safe browser QA used `/tmp/scalex-goal711c.db`, `SCALEX_AUTH_ENABLED=false`,
+  `HERMES_TEST_MODE=true`, `HERMES_REQUIRE_REAL=false`, and `STRIPE_TEST_DOUBLE_MODE=true`.
+- Headless Chrome screenshots verified the redesigned Dashboard at desktop and narrow widths on
+  local QA ports `8791` and `5178`.
+
+Suggested commit message:
+Redesign Dashboard as ClientOps operation landing page
+
+Next:
+- Goal 8A - NeMo Guardrails Preflight / Architecture Audit.
+
+---
+
 ## 2026-06-24 - Goal 7.11B: Replace Harbor sample with Northstar Client Implementation Launch
 
 Completed:
