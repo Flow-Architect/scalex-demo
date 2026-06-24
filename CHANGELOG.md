@@ -10,6 +10,48 @@ Use:
 
 ---
 
+## 2026-06-24 - Goal 7.10: Product functionality readiness / browser demo gate
+
+Completed:
+- Ran the product-readiness gate before any Goal 8 implementation.
+- Verified local prototype auth:
+  - login screen appears
+  - wrong login fails
+  - correct login succeeds
+  - logout works
+  - protected demo state rejects logged-out users
+- Verified workflow/customer behavior:
+  - Harbor Fleet Services can be selected
+  - a synthetic Summit Pool Services workflow can be created
+  - selected workflow state persists
+  - selected workflow values drive the next run
+  - selecting and deleting workflows works
+- Verified browser-only recording flow with headless Chrome DevTools Protocol:
+  - Dashboard, Onboarding, Customers, Workflow, Runs, Audit, Integrations, and Settings are reachable
+  - Start Run completes in the browser
+  - the Workflow canvas renders 10 connected nodes
+  - Hermes, Stripe, Blocked Spend, and Profit Report node clicks change the inspector
+  - logout returns to the login screen
+- Updated stale UI copy so current screens say local policy is active and NeMo Guardrails is planned/not wired yet.
+- Did not implement Goal 8, install NeMo, add live-money support, edit `.env`, touch SQLite `.db` files, run Stripe API calls, or run Hermes model calls.
+
+Verified:
+- `./scripts/test.sh` passed with 48 backend tests and a successful Vite production build.
+- Safe QA server used `/tmp/scalex-goal710-browser.db`, auth-enabled local credentials, `HERMES_TEST_MODE=true`, `HERMES_REQUIRE_REAL=false`, and `STRIPE_TEST_DOUBLE_MODE=true`.
+- Browser-only flow completed in about 3 seconds in headless Chrome.
+- `git diff --check` passed.
+- Value-shaped tracked-file secret scan returned no matches.
+- No `CODEX_GOALS.md` or `GOAL_LOG.md` file exists.
+- `git status --short` showed only intended frontend copy and docs edits.
+
+Suggested commit message:
+Verify browser demo readiness for Goal 7.10
+
+Next:
+- Goal 8A - NeMo Guardrails Preflight / Architecture Audit.
+
+---
+
 ## 2026-06-23 - Goal 8 planning: Governed Autonomy Layer with NVIDIA NeMo Guardrails
 
 Completed:

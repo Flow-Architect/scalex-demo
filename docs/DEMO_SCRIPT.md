@@ -1,6 +1,6 @@
 # ScaleX Demo Script
 
-Target recording after Goal 7.9E:
+Target recording after Goal 7.10:
 
 1. Open ScaleX.
 2. Log in through the Secure Operator Console.
@@ -23,17 +23,15 @@ Target recording after Goal 7.9E:
 19. Open Settings and show prototype auth, local API/database status, selected workflow/run records, and no-live-money safety boundaries.
 20. Log out from the visible top-bar or sidebar control.
 
-Goal 7.9C makes the main Workflow recording feel like product usage in a workflow
-automation control room rather than a passive proof-panel tour. No terminal output should
-be needed in the video.
+Goal 7.10 verified this as a browser-only product flow rather than a passive proof-panel
+tour. No terminal output should be needed in the video.
 
 Hosted judge demo mode must not expose secrets. Local full-proof mode can use ignored
 `.env` values for real isolated Hermes and real Stripe test-mode invoice proof.
 
-Current state after Goal 7.9E: the product now lands on Dashboard, separates Onboarding
+Current state after Goal 7.10: the product now lands on Dashboard, separates Onboarding
 from Customers, keeps the Workflow page on the central connected canvas with repositionable
 nodes on a fixed background and a right selected-node inspector, keeps the secondary views
 on the darker command-center styling, and has a verified browser-only route from login
-through logout. Goal 8 is now planned as the Governed Autonomy Layer with NVIDIA NeMo
-Guardrails; Goal 8A is the next read-only preflight. Local policy is active now, and real
-NeMo Guardrails is not wired yet.
+through logout. Goal 7.10 also aligned UI copy so local policy is active now and NeMo
+Guardrails is planned/not wired yet. Goal 8A is the next read-only preflight.

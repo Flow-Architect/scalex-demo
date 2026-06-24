@@ -13,7 +13,7 @@ export function PolicyInspector({ state }: { state: DemoState | null }) {
   return (
     <div className="space-y-4">
       <InspectorSection
-        description="ScaleX code currently runs the policy engine locally. Goal 8 remains the NemoClaw/safety-adapter integration step."
+        description="ScaleX code currently runs the policy engine locally. Goal 8 remains the NeMo Guardrails or NeMo-compatible adapter integration step."
         icon={ShieldCheck}
         title="Policy Gate"
       >
@@ -33,7 +33,7 @@ export function PolicyInspector({ state }: { state: DemoState | null }) {
               <StatusPill icon={Gauge} label="Spend cap enforced" tone="sky" />
               <StatusPill icon={TrendingUp} label="Margin floor enforced" tone="teal" />
               <StatusPill icon={LockKeyhole} label="Payment-before-spend checked" tone="amber" />
-              <StatusPill icon={ShieldAlert} label="NemoClaw Goal 8 next - not real yet" tone="violet" />
+              <StatusPill icon={ShieldAlert} label="NeMo Goal 8 planned - not wired yet" tone="violet" />
             </div>
           </>
         ) : (

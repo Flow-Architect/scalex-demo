@@ -1,12 +1,12 @@
 # STATUS - ScaleX
 
-Last updated: 2026-06-23
+Last updated: 2026-06-24
 
 ## Verified current state
 
 - Project folder exists at /home/ascabrya/dev/scalex-demo.
-- Latest committed baseline before this goal: `f89f4c8 Finish Goal 7.9E browser QA and local auth port fixes`.
-- Last completed implementation goal in this working tree: Goal 7.9E - Recording readiness / browser-only demo QA.
+- Latest committed baseline before this goal: `2f77fff Plan Goal 8 governed autonomy guardrails`.
+- Last completed implementation/QA goal in this working tree: Goal 7.10 - Product Functionality Readiness / Browser Demo Gate.
 - Last completed documentation/audit goal in this working tree: Goal 7.9A - UX Blueprint / Product IA Audit.
 - Current planned goal: Goal 8 - Governed Autonomy Layer with NVIDIA NeMo Guardrails.
 - Current next task: Goal 8A - NeMo Guardrails Preflight / Architecture Audit.
@@ -35,12 +35,71 @@ Last updated: 2026-06-23
   - Logout is now visible both in the sidebar footer and the top command bar.
   - Local-only CORS now accepts localhost and `127.0.0.1` on alternate ports so auth-enabled QA instances can be verified without editing origin lists.
   - Headless browser QA verified login, Dashboard, Onboarding, Harbor sample save, Customers, Workflow, Start Run, Hermes inspector, Stripe inspector, Blocked Spend inspector, Profit Report inspector, Runs, Audit, Integrations, Settings, and logout on a temp-port auth-enabled instance.
+- Goal 7.10 is complete as the product functionality/browser demo gate before Goal 8A.
 - Goal 8A is next as a read-only preflight before any governed-autonomy implementation.
 - Current guardrail reality:
   - local policy is active now
   - real NVIDIA NeMo Guardrails is not wired yet
   - no real NeMo/NemoClaw claim should be made yet
   - Goal 8 target is governed autonomy with NeMo-style input, planning/dialog, execution, and output rails
+
+## Verified on 2026-06-24 for Goal 7.10
+
+- Goal 7.10 was a functionality QA and product-readiness pass, not a redesign and not a Goal 8 implementation.
+- Small UI copy fixes aligned the Workflow, Policy inspector, Dashboard, Integrations, and Settings views with the current Goal 8 wording:
+  - local policy active now
+  - NeMo Guardrails planned/not wired yet
+  - no real NeMo/NemoClaw claim
+- Auth verification passed:
+  - login screen appeared
+  - wrong login returned 401 and showed the browser error state
+  - correct login returned 200 and loaded Dashboard
+  - logout returned to the login screen
+  - protected `/api/demo/state` returned 401 after logout
+- Workflow/customer verification passed:
+  - Harbor Fleet Services can be selected
+  - a synthetic Summit Pool Services workflow can be created
+  - selected workflow state persists through API state
+  - a synthetic workflow run used its selected $1,800 invoice seed
+  - workflow selection and deletion endpoints returned 200
+- Run execution verification passed in safe QA mode:
+  - temp database: `/tmp/scalex-goal710-browser.db`
+  - backend/frontend: `127.0.0.1:8790` / `127.0.0.1:5177`
+  - `SCALEX_AUTH_ENABLED=true`
+  - `HERMES_TEST_MODE=true`
+  - `HERMES_REQUIRE_REAL=false`
+  - `STRIPE_TEST_DOUBLE_MODE=true`
+  - no Stripe API calls or Hermes model calls were made
+- Browser-only flow passed in headless Chrome DevTools Protocol in about 3 seconds:
+  - login
+  - Dashboard
+  - Onboarding
+  - Customers
+  - Workflow
+  - Start Run
+  - connected canvas with 10 nodes
+  - Hermes inspector
+  - Stripe inspector
+  - Blocked Spend inspector
+  - Profit Report inspector
+  - Runs
+  - Audit
+  - Integrations
+  - Settings
+  - logout
+- Real proof surfaces remained accessible in the product shell:
+  - Hermes proof surface
+  - Stripe proof surface
+  - Stripe open/unpaid honesty
+  - local policy proof
+  - SQLite audit proof
+  - Profit Report proof
+- `./scripts/test.sh` passed with 48 backend tests and a successful Vite production build.
+- `git diff --check` passed.
+- Value-shaped tracked-file secret scan returned no matches.
+- No `CODEX_GOALS.md` or `GOAL_LOG.md` file exists.
+- `git status --short` showed only intended frontend copy and docs edits.
+- It is safe to proceed to Goal 8A.
 
 ## Verified on 2026-06-23 for Goal 8 planning docs
 

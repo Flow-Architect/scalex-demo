@@ -321,7 +321,7 @@ function DashboardView({
             <MetricTile label="Approved checks" tone="emerald" value={String((state?.policy_checks ?? []).filter((check) => Boolean(check.approved)).length)} />
             <MetricTile label="Blocked checks" tone="rose" value={String((state?.policy_checks ?? []).filter((check) => !Boolean(check.approved)).length)} />
             <MetricTile label="Engine" tone="violet" value="Local policy engine" />
-            <MetricTile label="Goal 8" tone="violet" value="NemoClaw not real yet" />
+            <MetricTile label="Goal 8" tone="violet" value="NeMo planned / not wired" />
           </div>
         </Panel>
 
@@ -928,7 +928,7 @@ function IntegrationsView({
               label={stripe?.used_real_stripe ? "Real Stripe test mode" : humanize(stripe?.stripe_mode ?? "pending")}
               tone={stripe?.used_real_stripe ? "sky" : stripe?.error ? "rose" : "amber"}
             />
-            <StatusBadge icon={ShieldAlert} label="NemoClaw not real yet" tone="violet" />
+            <StatusBadge icon={ShieldAlert} label="NeMo not wired yet" tone="violet" />
           </div>
         </div>
       </Panel>
@@ -980,7 +980,7 @@ function IntegrationsView({
           <SectionHeader
             description="Current safety layer facts and future integration boundary."
             icon={ShieldCheck}
-            title="Policy and NemoClaw"
+            title="Policy and NeMo Guardrails"
           />
           <div className="mt-4 space-y-3">
             <EvidenceCard
@@ -990,9 +990,9 @@ function IntegrationsView({
               tone="emerald"
             />
             <EvidenceCard
-              description="Goal 8 remains the real NemoClaw or NemoClaw-style safety-adapter milestone. This view does not claim it is wired yet."
+              description="Goal 8 remains the NVIDIA NeMo Guardrails or NeMo-compatible safety-adapter milestone. This view does not claim it is wired yet."
               icon={ShieldAlert}
-              title="Goal 8 next"
+              title="Goal 8 planned"
               tone="violet"
             />
           </div>
@@ -1103,9 +1103,9 @@ function SettingsView({
               tone="amber"
             />
             <EvidenceCard
-              description="NemoClaw remains Goal 8 next. This settings view does not claim a real NemoClaw integration."
+              description="NeMo Guardrails remains Goal 8 planned. This settings view does not claim a real NeMo or NemoClaw integration."
               icon={ShieldAlert}
-              title="NemoClaw not real yet"
+              title="NeMo not wired yet"
               tone="violet"
             />
             <EvidenceCard

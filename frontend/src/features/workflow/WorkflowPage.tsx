@@ -181,7 +181,7 @@ function WorkflowHeader({
               {activeWorkflow ? "Workflow selected" : "Needs workflow"}
             </span>
             <span className="rounded-md border border-violet-300/30 bg-violet-300/10 px-2 py-1 text-violet-100">
-              Local policy now - NemoClaw Goal 8 next
+              Local policy now - NeMo Goal 8 planned
             </span>
           </div>
         </div>

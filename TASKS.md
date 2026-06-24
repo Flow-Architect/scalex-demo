@@ -4,6 +4,17 @@
 
 Goal 8A - NeMo Guardrails Preflight / Architecture Audit.
 
+## Goal 7.10 Gate Result
+
+Goal 7.10 - Product Functionality Readiness / Browser Demo Gate is complete.
+
+- The app is usable as a browser product flow before Goal 8 implementation.
+- Auth, workflow/customer management, selected-workflow runs, connected canvas, node inspector,
+  secondary views, and logout were verified on a temp auth-enabled QA instance.
+- The browser-only recording path completed in under 3 minutes.
+- Small UI copy fixes now say local policy is active and NeMo Guardrails is planned/not wired yet.
+- No Goal 8 implementation, NeMo install, live-money support, `.env` edit, Stripe API call, or Hermes model call was made.
+
 ## Next Recommended Goal
 
 Run Codex `/goal` 8A as a read-only preflight before any Goal 8 implementation:
