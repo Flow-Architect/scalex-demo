@@ -1,28 +1,41 @@
 {
-  "clientName": "Harbor Fleet Services",
-  "businessType": "Regional fleet maintenance provider",
-  "jobName": "30-day fleet brake inspection campaign",
-  "jobGoal": "Generate a client-ready fleet brake inspection package, including campaign copy, operations handoff notes, landing page copy, follow-up messages, and a final profitability report.",
-  "invoiceAmountUsd": 1200,
-  "spendCapUsd": 300,
+  "clientName": "Northstar Dental Group",
+  "businessType": "Multi-location healthcare services group",
+  "jobName": "Client Implementation Launch",
+  "jobGoal": "Launch a synthetic B2B client implementation operation for a multi-location account, including onboarding kickoff, secure workspace setup, data migration sandbox coordination, launch asset kit preparation, stakeholder handoff, evidence summary, and a final protected-profit outcome. This sample uses no patient data and no PHI.",
+  "invoiceAmountUsd": 8500,
+  "spendCapUsd": 1150,
   "marginFloorPercent": 50,
+  "approvedVendors": [
+    "Secure Workspace Pack",
+    "Data Migration Sandbox",
+    "Launch Asset Kit"
+  ],
+  "blockedVendors": [
+    "Unapproved Data Broker Enrichment"
+  ],
   "approvedSpendRequests": [
     {
-      "vendor": "Local Ads API",
-      "amountUsd": 89,
-      "purpose": "Regional fleet campaign distribution test"
+      "vendor": "Secure Workspace Pack",
+      "amountUsd": 350,
+      "purpose": "Provision secure implementation workspace for the synthetic client account"
     },
     {
-      "vendor": "Design Asset Pack",
-      "amountUsd": 98,
-      "purpose": "Fleet brake inspection creative asset package"
+      "vendor": "Data Migration Sandbox",
+      "amountUsd": 500,
+      "purpose": "Prepare a non-PHI migration sandbox for implementation testing"
+    },
+    {
+      "vendor": "Launch Asset Kit",
+      "amountUsd": 300,
+      "purpose": "Prepare kickoff, handoff, and launch assets for implementation"
     }
   ],
   "blockedSpendRequests": [
     {
-      "vendor": "Premium Automation Suite",
-      "amountUsd": 750,
-      "purpose": "Overpriced automation bundle that violates the margin floor"
+      "vendor": "Unapproved Data Broker Enrichment",
+      "amountUsd": 3200,
+      "purpose": "Risky enrichment request outside the approved implementation scope"
     }
   ]
 }

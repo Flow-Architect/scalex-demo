@@ -2,20 +2,21 @@
   "name": "ScaleX Demo Policy",
   "rules": {
     "stripe_live_mode": false,
-    "max_job_spend_usd": 300,
+    "max_job_spend_usd": 1150,
     "margin_floor_percent": 50,
     "require_invoice_before_spend": true,
     "require_payment_before_spend": true,
-    "require_human_approval_above_usd": 250,
+    "require_human_approval_above_usd": 1000,
     "approved_vendors": [
-      "Local Ads API",
-      "Design Asset Pack",
+      "Secure Workspace Pack",
+      "Data Migration Sandbox",
+      "Launch Asset Kit",
       "SMS Campaign Tool",
       "Email Campaign Tool"
     ],
     "blocked_vendors": [
       "Unknown SaaS Vendor",
-      "Premium Automation Suite"
+      "Unapproved Data Broker Enrichment"
     ]
   }
 }

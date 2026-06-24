@@ -22,7 +22,7 @@ export type AppView =
 
 export const NAV_ITEMS: Array<{ view: AppView; label: string; icon: LucideIcon }> = [
   { view: "dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { view: "workflow", label: "Workflow", icon: Workflow },
+  { view: "workflow", label: "Studio", icon: Workflow },
   { view: "onboarding", label: "Onboarding", icon: UserPlus },
   { view: "customers", label: "Customers", icon: Users },
   { view: "runs", label: "Runs", icon: ClipboardList },

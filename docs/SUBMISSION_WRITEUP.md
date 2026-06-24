@@ -1,43 +1,51 @@
-# ScaleX Submission Writeup
+# ScaleX ClientOps Autopilot Submission Writeup
 
-ScaleX turns repeatable enterprise functions into autonomous, governed workflows while protecting gross margin.
+ScaleX ClientOps Autopilot is an Enterprise Function Accelerator for revenue-backed client operations.
 
-ScaleX is a functional live working product prototype, not a static mock-card demo. The walkthrough is
-an operator using the product: log in, create or select a saved local workflow, review money
-rules, start a run for the active workflow, watch the workflow graph move, click proof
-nodes, review blocked spend, inspect persisted run history, and finish with an audited
-profit report.
+ScaleX helps B2B teams turn repeatable client operations into autonomous, revenue-backed,
+policy-governed runs with finance proof, guardrail enforcement, and audit evidence.
 
-Under the product shell, ScaleX uses a local FastAPI backend, real isolated Hermes Agent
-planning through the ScaleX `scalex-operator` skill, real Stripe test-mode invoice
-creation/finalization, SQLite audit records for planning and orchestration calls,
-local policy-gated spend, and deterministic agent outputs for the Harbor Fleet Services
-sample workflow. Judges should see the enterprise-function workflow, Hermes orchestrator,
-Stripe finance skill, NeMo Guardrail Gate target with local policy active until wired,
-SQLite audit ledger, and profit report. Hosted mode must not expose secrets; local
-full-proof mode can use an ignored `.env` for real isolated Hermes and Stripe `sk_test_...`
-configuration.
+B2B companies win clients, but onboarding and delivery still happen through fragmented handoffs
+across operations, finance, tools, approvals, vendors, and reporting. AI can suggest next steps,
+but enterprises cannot safely let an agent execute client operations unless money, spend, policy,
+and evidence are governed.
 
-The current proof is integration-backed: isolated Hermes/GPT-5.5 planning is wired; Goal 7
-added real Stripe test-mode customer and finalized invoice records through orchestration
-when a local `sk_test_...` key is configured; Goal 7.8 adds saved local workflows, active
-workflow selection, selected-workflow-driven runs, persisted run history, historical run
-inspection, functional Dashboard/Onboarding/Customers/Runs/Audit/Integrations/Settings views,
-and clickable workflow proof nodes. Goal 7.9 replaces the main Workflow surface with a
-connected enterprise canvas, visible approved/blocked branches, a right selected-node inspector,
-aligned secondary views, visible logout, and browser-only QA while preserving backend proof.
-Stripe payment status is labeled honestly: the
-verified invoice is `invoice_status=open` and `paid=false` unless Stripe reports otherwise.
+ScaleX demonstrates the governed operating loop: Hermes plans and routes the operation, Stripe
+provides finance proof in test mode, ScaleX enforces business rules, local policy checks spend and
+margin today, SQLite records evidence, and the final Profit Outcome reports protected profit and
+blocked risk. NeMo Guardrails is the planned governed autonomy layer after Goal 8; it is not wired
+yet and is not claimed as real.
 
-Goal 7.9 is complete as the product UX consolidation before Goal 8. The intent is a
-commercial-style browser recording where the demo is the operator using ScaleX, not a tour
-through static proof panels.
+The current proof is a functional live working product prototype, not a static mock. The operator
+logs in, creates or selects a saved local client operation, reviews money rules, starts a run for
+the active operation, watches the connected proof graph move, clicks proof nodes, reviews blocked
+risk, inspects persisted run history, and finishes with an audited profit outcome.
 
-The login gate is local prototype auth, not production enterprise auth. Workflow management is
-local/sample workflow management, not full multi-tenant SaaS. The active spend authority is
-the local policy engine. Goal 8 is now planned as the Governed Autonomy Layer with NVIDIA
-NeMo Guardrails, split into Goals 8A-8E. Goal 8A is the next read-only preflight to decide
-whether real NeMo Guardrails or a NeMo-compatible adapter is safely available. ScaleX does not
-yet claim real NeMo Guardrails or real NemoClaw integration. Test doubles must stay clearly
-labeled and must not be described as product-mode integrations. Future live-money payments
-require Verified Live Mode. No live-money support was added.
+Current implementation note:
+
+- Northstar Dental Group / Client Implementation Launch is the implemented sample.
+- Northstar is a synthetic multi-location client account for B2B implementation operations only.
+- It uses no patient data and no PHI, and ScaleX does not claim healthcare compliance or HIPAA
+  support.
+- It proves $8,500 revenue, $1,150 approved setup spend, $3,200 blocked risk, $7,350 protected
+  gross profit, and 86.5% protected margin.
+- Harbor Fleet Services is historical only and is no longer the current implemented sample.
+
+Demo story:
+
+Northstar Dental Group is a multi-location client that purchased an implementation package.
+ScaleX launches the client operation, confirms revenue through Stripe test invoice proof, lets
+Hermes plan onboarding and delivery, checks spend and vendor actions through local policy now and
+NeMo Guardrails later, approves safe setup spend, blocks risky enrichment spend, coordinates work
+units, records evidence, and reports protected profit and launch status.
+
+Truthfulness boundaries:
+
+- The login gate is local prototype auth, not production enterprise auth.
+- Workflow management is local/sample workflow management, not full multi-tenant SaaS.
+- The active spend authority is the local policy engine.
+- Real NeMo Guardrails is planned and not wired yet.
+- Stripe payment status is labeled honestly; invoices are not called paid unless Stripe reports `paid=true`.
+- Test doubles stay clearly labeled and are not product-mode integrations.
+- Future live-money payments require Verified Live Mode.
+- No live-money support was added.

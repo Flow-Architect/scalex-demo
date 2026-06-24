@@ -22,15 +22,15 @@ export function RunSummaryInspector({
   return (
     <div className="space-y-4">
       <InspectorSection
-        description="Current selected workflow and latest run economics."
+        description="Current selected client operation and latest run economics."
         icon={Activity}
         title="Run Summary"
       >
         <div className="grid gap-3 sm:grid-cols-2">
           <Metric label="Revenue" tone="emerald" value={formatOptionalCurrency(money.revenueCents)} />
-          <Metric label="Approved spend" tone="sky" value={formatOptionalCurrency(money.approvedSpendCents)} />
-          <Metric label="Blocked spend" tone="rose" value={formatOptionalCurrency(money.blockedSpendCents)} />
-          <Metric label="Gross profit" tone="teal" value={formatOptionalCurrency(money.grossProfitCents)} />
+          <Metric label="Approved setup spend" tone="sky" value={formatOptionalCurrency(money.approvedSpendCents)} />
+          <Metric label="Blocked risk" tone="rose" value={formatOptionalCurrency(money.blockedSpendCents)} />
+          <Metric label="Protected profit" tone="teal" value={formatOptionalCurrency(money.grossProfitCents)} />
           <Metric label="Margin" tone="amber" value={formatOptionalPercent(money.marginPercent)} />
           <Metric
             label="Policy violations"
@@ -40,10 +40,10 @@ export function RunSummaryInspector({
         </div>
       </InspectorSection>
 
-      <InspectorSection icon={ClipboardList} title="Active workflow">
+      <InspectorSection icon={ClipboardList} title="Active operation">
         <FactGrid>
-          <Fact label="Customer" value={source?.client_name ?? "No workflow selected"} />
-          <Fact label="Job" value={source?.job_name ?? "Create or select a workflow"} />
+          <Fact label="Account" value={source?.client_name ?? "No operation selected"} />
+          <Fact label="Template" value={source?.job_name ?? "Create or select a client operation"} />
           <Fact
             label="Invoice amount"
             value={source ? formatCurrency(source.invoice_amount_cents) : "Pending"}
@@ -54,7 +54,7 @@ export function RunSummaryInspector({
         </FactGrid>
         <div className="mt-3 flex flex-wrap gap-2">
           <StatusPill icon={CircleDollarSign} label="Stripe test invoice proof in inspector" tone="sky" />
-          <StatusPill icon={WalletCards} label="Local policy spend gate" tone="emerald" />
+          <StatusPill icon={WalletCards} label="Local policy setup spend gate" tone="emerald" />
           <StatusPill icon={TrendingUp} label={money.actual ? "API-backed economics" : "Awaiting run proof"} tone={money.actual ? "teal" : "amber"} />
         </div>
       </InspectorSection>

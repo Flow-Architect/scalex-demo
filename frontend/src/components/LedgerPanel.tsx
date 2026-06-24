@@ -15,10 +15,10 @@ export function LedgerPanel({ entries, totals }: LedgerPanelProps) {
         <div>
           <div className="flex items-center gap-2">
             <BookOpenCheck className="h-5 w-5 text-slate-700" aria-hidden="true" />
-            <h2 className="text-base font-semibold text-slate-950">Job ledger</h2>
+            <h2 className="text-base font-semibold text-slate-950">Evidence ledger</h2>
           </div>
           <p className="mt-1 text-sm text-slate-600">
-            Local SQLite entries for booked revenue and approved spend.
+            Local SQLite entries for booked revenue and approved setup spend.
           </p>
         </div>
         <span className="rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-semibold uppercase tracking-wide text-slate-600">
@@ -28,7 +28,7 @@ export function LedgerPanel({ entries, totals }: LedgerPanelProps) {
 
       {entries.length === 0 ? (
         <div className="mt-5 rounded-lg border border-dashed border-slate-300 p-5 text-sm text-slate-600">
-          Ledger entries appear after payment and approved spend.
+          Ledger entries appear after payment and approved setup spend.
         </div>
       ) : (
         <div className="mt-5 overflow-hidden rounded-lg border border-slate-200">
@@ -67,7 +67,7 @@ export function LedgerPanel({ entries, totals }: LedgerPanelProps) {
       {totals ? (
         <dl className="mt-5 grid gap-3 text-sm sm:grid-cols-3">
           <Total label="Revenue" value={formatCurrency(totals.revenue_cents)} />
-          <Total label="Approved spend" value={formatCurrency(totals.approved_spend_cents)} />
+          <Total label="Approved setup spend" value={formatCurrency(totals.approved_spend_cents)} />
           <Total label="Remaining cap" value={formatCurrency(totals.remaining_spend_cap_cents)} />
         </dl>
       ) : null}

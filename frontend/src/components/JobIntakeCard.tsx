@@ -15,9 +15,9 @@ export function JobIntakeCard({ job, totals }: JobIntakeCardProps) {
         <div className="flex items-start gap-3">
           <BriefcaseBusiness className="mt-1 h-5 w-5 text-slate-500" aria-hidden="true" />
           <div>
-            <h2 className="text-base font-semibold text-slate-950">Job intake</h2>
+            <h2 className="text-base font-semibold text-slate-950">Client operation intake</h2>
             <p className="mt-2 text-sm text-slate-600">
-              Run the local demo to create the Harbor Fleet Services job.
+              Run the local demo to create the Northstar Dental Group implementation launch.
             </p>
           </div>
         </div>
@@ -31,7 +31,7 @@ export function JobIntakeCard({ job, totals }: JobIntakeCardProps) {
         <div>
           <div className="flex items-center gap-2">
             <BriefcaseBusiness className="h-5 w-5 text-sky-700" aria-hidden="true" />
-            <h2 className="text-base font-semibold text-slate-950">Active job</h2>
+            <h2 className="text-base font-semibold text-slate-950">Active operation</h2>
           </div>
           <p className="mt-3 text-xl font-semibold text-slate-950">{job.client_name}</p>
           <p className="mt-1 text-sm text-slate-600">{job.job_name}</p>

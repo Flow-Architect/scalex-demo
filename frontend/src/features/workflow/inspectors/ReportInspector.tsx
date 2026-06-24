@@ -26,9 +26,9 @@ export function ReportInspector({
   return (
     <div className="space-y-4">
       <InspectorSection
-        description="Final economics are generated from the SQLite ledger and policy checks."
+        description="Final protected-profit economics are generated from the SQLite ledger and policy checks."
         icon={FileText}
-        title="Profit Report"
+        title="Profit Outcome"
       >
         <div className="grid gap-3 sm:grid-cols-2">
           <Metric
@@ -37,12 +37,12 @@ export function ReportInspector({
             value={report ? formatCurrency(report.revenue_cents) : formatOptionalCurrency(money.revenueCents)}
           />
           <Metric
-            label="Approved spend"
+            label="Approved setup spend"
             tone="sky"
             value={report ? formatCurrency(report.approved_spend_cents) : formatOptionalCurrency(money.approvedSpendCents)}
           />
           <Metric
-            label="Gross profit"
+            label="Protected profit"
             tone="teal"
             value={report ? formatCurrency(report.gross_profit_cents) : formatOptionalCurrency(money.grossProfitCents)}
           />
@@ -56,7 +56,7 @@ export function ReportInspector({
         <div className="mt-3 flex flex-wrap gap-2">
           <StatusPill
             icon={TrendingUp}
-            label={report ? "Final report generated" : "Report pending"}
+            label={report ? "Profit outcome generated" : "Profit outcome pending"}
             tone={report ? "emerald" : "amber"}
           />
         </div>
@@ -65,19 +65,19 @@ export function ReportInspector({
       <InspectorSection title="Recommendation">
         {report ? (
           <FactGrid>
-            <Fact label="Blocked spend" value={formatCurrency(report.blocked_spend_cents)} />
+            <Fact label="Blocked risk" value={formatCurrency(report.blocked_spend_cents)} />
             <Fact label="Policy violations" value={String(report.policy_violations)} />
             <Fact label="Recommendation" value={report.recommendation} />
             <Fact label="Report ID" value={report.id} />
           </FactGrid>
         ) : (
-          <EmptyState>Final report appears after the workflow run completes.</EmptyState>
+          <EmptyState>Profit outcome appears after the client operation run completes.</EmptyState>
         )}
       </InspectorSection>
 
-      <InspectorSection title="Report markdown">
+      <InspectorSection title="Outcome markdown">
         {report ? (
-          <MarkdownDetails markdown={report.report_markdown} open title="Final report markdown" />
+          <MarkdownDetails markdown={report.report_markdown} open title="Profit outcome markdown" />
         ) : (
           <EmptyState>Report markdown is confined to this inspector once available.</EmptyState>
         )}

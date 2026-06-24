@@ -102,7 +102,7 @@ export function WorkflowPage({
 
           {!activeWorkflow ? (
             <div className="flex flex-col gap-3 rounded-lg border border-amber-300/40 bg-amber-300/10 p-4 text-sm text-amber-100 sm:flex-row sm:items-center sm:justify-between">
-              <span>Create or select a local workflow in Customers before starting a run.</span>
+              <span>Create or select a local client operation in Customers before starting a run.</span>
               <button
                 className="inline-flex min-h-10 items-center justify-center gap-2 rounded-md border border-amber-200/50 bg-white/10 px-3 font-semibold text-white transition hover:bg-white/15"
                 onClick={onOpenCustomers}
@@ -167,7 +167,7 @@ function WorkflowHeader({
       <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
         <div className="min-w-0">
           <p className="text-sm font-semibold uppercase text-emerald-200">
-            Enterprise function template
+              ClientOps Function Studio
           </p>
           <h1 className="mt-2 break-words text-2xl font-semibold text-white lg:text-3xl">
             {displayCustomer}
@@ -178,7 +178,7 @@ function WorkflowHeader({
               {runStatus}
             </span>
             <span className="rounded-md border border-white/10 bg-white/5 px-2 py-1 text-zinc-300">
-              {activeWorkflow ? "Workflow selected" : "Needs workflow"}
+              {activeWorkflow ? "Operation selected" : "Needs operation"}
             </span>
             <span className="rounded-md border border-violet-300/30 bg-violet-300/10 px-2 py-1 text-violet-100">
               Local policy now - NeMo Goal 8 planned
@@ -188,9 +188,9 @@ function WorkflowHeader({
 
         <div className="grid gap-2 sm:grid-cols-3 xl:min-w-[30rem]">
           <SummaryMetric label="Revenue" value={formatOptionalCurrency(money.revenueCents)} />
-          <SummaryMetric label="Approved spend" value={formatOptionalCurrency(money.approvedSpendCents)} />
-          <SummaryMetric label="Gross profit" value={formatOptionalCurrency(money.grossProfitCents)} />
-          <SummaryMetric label="Blocked spend" value={formatOptionalCurrency(money.blockedSpendCents)} />
+          <SummaryMetric label="Approved setup spend" value={formatOptionalCurrency(money.approvedSpendCents)} />
+          <SummaryMetric label="Protected profit" value={formatOptionalCurrency(money.grossProfitCents)} />
+          <SummaryMetric label="Blocked risk" value={formatOptionalCurrency(money.blockedSpendCents)} />
           <SummaryMetric label="Margin" value={formatOptionalPercent(money.marginPercent)} />
           <SummaryMetric
             label="Run proof"

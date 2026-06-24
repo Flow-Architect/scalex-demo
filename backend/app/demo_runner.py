@@ -32,7 +32,7 @@ from .services.stripe_service import (
 )
 
 
-FINAL_RECOMMENDATION = "Renew campaign for another 30 days"
+FINAL_RECOMMENDATION = "Proceed with implementation launch while preserving setup spend guardrails"
 def run_demo() -> dict[str, Any]:
     initialize_database()
 
@@ -179,9 +179,9 @@ def run_demo() -> dict[str, Any]:
             connection,
             job_id=job["id"],
             type="job_complete",
-            title=f"{job['client_name']} workflow run completed",
+            title=f"{job['client_name']} client operation run completed",
             detail=(
-                "Completed the compressed local demo lifecycle from intake through final profit report. "
+                "Completed the compressed local ClientOps lifecycle from intake through final profit outcome. "
                 "Stripe/payment records are labeled with their actual execution mode."
             ),
             status="complete",
@@ -260,7 +260,7 @@ def _record_margin_plan(connection, job: dict[str, Any]) -> None:
         title="Margin plan locked",
         detail=(
             f"Planned ${job['invoice_amount_cents'] / 100:,.0f} revenue, "
-            f"${job['spend_cap_cents'] / 100:,.0f} spend cap, "
+            f"${job['spend_cap_cents'] / 100:,.0f} setup spend cap, "
             f"${projected_profit_cents / 100:,.0f} projected profit, and "
             f"{projected_margin_percent}% projected margin against a "
             f"{job['margin_floor_percent']}% floor."
@@ -275,9 +275,9 @@ def _record_payment_gate_note(connection, job: dict[str, Any]) -> None:
         connection,
         job_id=job["id"],
         type="policy_gate",
-        title="Spend locked until local payment confirmation",
+        title="Setup spend locked until local payment confirmation",
         detail=(
-            "The local policy engine requires payment confirmation before vendor spend. "
+            "The local policy engine requires payment confirmation before setup spend. "
             "The one-click path records this as a timeline note instead of creating a pre-payment block, "
             "so prerequisite blocks do not inflate final blocked spend."
         ),
@@ -380,9 +380,9 @@ def _create_final_report(connection, job: dict[str, Any]) -> dict[str, Any]:
         title="Final profit report created",
         detail=(
             f"${totals['revenue_cents'] / 100:,.0f} revenue, "
-            f"${totals['approved_spend_cents'] / 100:,.0f} approved spend, "
-            f"${totals['blocked_spend_cents'] / 100:,.0f} blocked unsafe spend, "
-            f"${totals['gross_profit_cents'] / 100:,.0f} gross profit, and "
+            f"${totals['approved_spend_cents'] / 100:,.0f} approved setup spend, "
+            f"${totals['blocked_spend_cents'] / 100:,.0f} blocked risk, "
+            f"${totals['gross_profit_cents'] / 100:,.0f} protected gross profit, and "
             f"{totals['actual_margin_percent']}% final margin."
         ),
         status="complete",
@@ -392,17 +392,17 @@ def _create_final_report(connection, job: dict[str, Any]) -> dict[str, Any]:
 
 
 def _final_report_markdown(job: dict[str, Any], totals: dict[str, Any]) -> str:
-    return f"""# {job['client_name']} Final Profit Report
+    return f"""# {job['client_name']} Profit Outcome
 
-Revenue: ${totals['revenue_cents'] / 100:,.0f}
+Implementation package revenue: ${totals['revenue_cents'] / 100:,.0f}
 
-Approved spend: ${totals['approved_spend_cents'] / 100:,.0f}
+Approved setup spend: ${totals['approved_spend_cents'] / 100:,.0f}
 
-Blocked unsafe spend: ${totals['blocked_spend_cents'] / 100:,.0f}
+Blocked risk: ${totals['blocked_spend_cents'] / 100:,.0f}
 
-Gross profit: ${totals['gross_profit_cents'] / 100:,.0f}
+Protected gross profit: ${totals['gross_profit_cents'] / 100:,.0f}
 
-Final margin: {totals['actual_margin_percent']}%
+Protected margin: {totals['actual_margin_percent']}%
 
 Policy violations: 0
 
@@ -524,7 +524,7 @@ def _active_workflow_seed(connection) -> tuple[dict[str, Any], dict[str, Any]]:
         workflow = repository.create_workflow(
             connection,
             default_seed,
-            workflow_id=repository.HARBOR_WORKFLOW_ID,
+            workflow_id=repository.NORTHSTAR_WORKFLOW_ID,
             activate=True,
         )
         repository.upsert_onboarding_config(connection, default_seed)

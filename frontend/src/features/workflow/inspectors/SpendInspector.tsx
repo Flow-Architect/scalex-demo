@@ -35,17 +35,17 @@ export function SpendInspector({
       <InspectorSection
         description={
           mode === "approved"
-            ? "Approved spend checks can create local spend ledger rows."
-            : "Blocked spend checks stop unsafe vendor spend before any spend ledger row is created."
+            ? "Approved setup spend checks can create local spend ledger rows."
+            : "Blocked risk checks stop unsafe vendor spend before any spend ledger row is created."
         }
         icon={mode === "approved" ? WalletCards : Ban}
-        title={mode === "approved" ? "Approved Spend" : "Blocked Spend"}
+        title={mode === "approved" ? "Approved Setup Spend" : "Blocked Risk"}
       >
         <FactGrid>
           <Fact label="Approved checks" value={String(approvedChecks.length)} />
-          <Fact label="Approved total" value={formatCurrency(approvedTotal)} />
+          <Fact label="Approved setup total" value={formatCurrency(approvedTotal)} />
           <Fact label="Blocked checks" value={String(blockedChecks.length)} />
-          <Fact label="Blocked total" value={formatCurrency(blockedTotal)} />
+          <Fact label="Blocked risk total" value={formatCurrency(blockedTotal)} />
           <Fact
             label="Remaining cap"
             value={remainingCap === null ? "Pending" : formatCurrency(remainingCap)}
@@ -64,12 +64,12 @@ export function SpendInspector({
         </div>
       </InspectorSection>
 
-      <InspectorSection title={mode === "approved" ? "Approved policy checks" : "Blocked policy checks"}>
+      <InspectorSection title={mode === "approved" ? "Approved setup checks" : "Blocked risk checks"}>
         {checks.length === 0 ? (
           <EmptyState>
             {mode === "approved"
-              ? "Approved spend checks appear after the policy gate runs."
-              : "Blocked spend checks appear after the policy gate evaluates unsafe requests."}
+              ? "Approved setup spend checks appear after the guardrail review runs."
+              : "Blocked risk checks appear after the guardrail review evaluates unsafe requests."}
           </EmptyState>
         ) : (
           <div className="space-y-3">
@@ -83,7 +83,7 @@ export function SpendInspector({
       {mode === "approved" ? (
         <InspectorSection title="Spend ledger rows">
           {spendEntries.length === 0 ? (
-            <EmptyState>Spend ledger rows appear after approved spend is recorded.</EmptyState>
+            <EmptyState>Spend ledger rows appear after approved setup spend is recorded.</EmptyState>
           ) : (
             <div className="space-y-2">
               {spendEntries.map((entry) => (
@@ -132,7 +132,7 @@ function SpendCheckCard({
         <div className="min-w-0">
           <p className="break-words text-sm font-semibold text-white">{check.vendor}</p>
           <p className="mt-1 text-xs font-semibold uppercase text-zinc-400">
-            {mode === "approved" ? "Approved vendor spend" : "Blocked vendor spend"}
+            {mode === "approved" ? "Approved setup spend" : "Blocked vendor risk"}
           </p>
         </div>
         <p className="flex-none text-sm font-semibold text-white">

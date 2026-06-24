@@ -220,14 +220,14 @@ function buildSettledNodes(
   return [
     {
       key: "customer",
-      title: "Customer Intake",
-      eyebrow: "workflow seed",
+      title: "Client Operation Intake",
+      eyebrow: "operation seed",
       proof: workflow
         ? `${workflow.client_name} - ${formatCurrency(workflow.invoice_amount_cents)} invoice`
         : job
           ? `${job.client_name} - ${formatCurrency(job.invoice_amount_cents)} invoice`
-          : "Select or create a local workflow.",
-      badge: workflow ? "workflow ready" : job ? "run loaded" : "needs workflow",
+        : "Select or create a local client operation.",
+      badge: workflow ? "operation ready" : job ? "run loaded" : "needs operation",
       status: workflow || job ? "complete" : "pending",
       tone: "teal",
       icon: Target,
@@ -293,7 +293,7 @@ function buildSettledNodes(
     },
     {
       key: "policy",
-      title: "Policy Gate",
+      title: "Guardrail Review",
       eyebrow: "local guardrails",
       proof: state?.policy.summary
         ? `${state.policy.summary.engine}: cap ${formatCurrency(state.policy.summary.max_job_spend_usd * 100)}, floor ${formatPercent(state.policy.summary.margin_floor_percent)}`
@@ -307,12 +307,12 @@ function buildSettledNodes(
     },
     {
       key: "approved",
-      title: "Approved Spend",
+      title: "Approved Setup Spend",
       eyebrow: "safe spend path",
       proof:
         approvedChecks.length > 0
           ? `${formatCurrency(approvedChecks.reduce((total, check) => total + check.requested_amount_cents, 0))} approved`
-          : "Approved spend decisions pending.",
+          : "Approved setup spend decisions pending.",
       badge: `${approvedChecks.length} approved`,
       status: approvedChecks.length > 0 ? "complete" : "pending",
       tone: "emerald",
@@ -322,12 +322,12 @@ function buildSettledNodes(
     },
     {
       key: "blocked",
-      title: "Blocked Spend",
+      title: "Blocked Risk",
       eyebrow: "unsafe spend path",
       proof:
         blockedChecks.length > 0
           ? `${formatOptionalCurrency(money.blockedSpendCents)} blocked before ledger spend`
-          : "Blocked spend decisions pending.",
+          : "Blocked risk decisions pending.",
       badge: blockedChecks[0]?.vendor ?? "guarded",
       status: blockedChecks.length > 0 ? "blocked" : "pending",
       tone: "rose",
@@ -337,7 +337,7 @@ function buildSettledNodes(
     },
     {
       key: "agents",
-      title: "Agent Work",
+      title: "Work Units",
       eyebrow: "deliverables",
       proof: outputs.length > 0 ? `${outputs.length} deliverables recorded` : "Agent outputs pending.",
       badge: outputs.length > 0 ? `${outputs.length}/4 outputs` : "pending",
@@ -374,7 +374,7 @@ function buildSettledNodes(
     },
     {
       key: "report",
-      title: "Profit Report",
+      title: "Profit Outcome",
       eyebrow: "economics",
       proof: report
         ? `${formatCurrency(report.gross_profit_cents)} profit, ${formatPercent(report.actual_margin_percent)} margin`

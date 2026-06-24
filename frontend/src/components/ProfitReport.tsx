@@ -36,7 +36,7 @@ export function ProfitReport({ report, totals, placeholder }: ProfitReportProps)
         <div>
           <div className="flex items-center gap-2">
             <FileText className="h-5 w-5 text-teal-700" aria-hidden="true" />
-            <h2 className="text-base font-semibold text-slate-950">Final profit report</h2>
+            <h2 className="text-base font-semibold text-slate-950">Profit outcome</h2>
           </div>
           <p className="mt-1 text-sm text-slate-600">
             {report ? "Completed local demo report" : "Expected report after demo run"}
@@ -50,17 +50,17 @@ export function ProfitReport({ report, totals, placeholder }: ProfitReportProps)
       <div className="mt-5 grid gap-3 sm:grid-cols-2">
         <ReportMetric label="Revenue" value={formatCurrency(revenue)} detail={centsLabel(revenue)} />
         <ReportMetric
-          label="Approved spend"
+          label="Approved setup spend"
           value={formatCurrency(approvedSpend)}
           detail={centsLabel(approvedSpend)}
         />
         <ReportMetric
-          label="Blocked unsafe spend"
+          label="Blocked risk"
           value={formatCurrency(blockedSpend)}
           detail={centsLabel(blockedSpend)}
         />
         <ReportMetric
-          label="Gross profit"
+          label="Protected profit"
           value={formatCurrency(grossProfit)}
           detail={centsLabel(grossProfit)}
         />

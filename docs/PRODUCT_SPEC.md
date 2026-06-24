@@ -1,78 +1,82 @@
-# ScaleX Product Spec
+# ScaleX ClientOps Autopilot Product Spec
 
-ScaleX is a live working product-style prototype for turning repeatable enterprise functions into autonomous, governed workflows.
+ScaleX ClientOps Autopilot is an Enterprise Function Accelerator for revenue-backed client operations.
 
 ## Product Standard
 
-ScaleX proves a real enterprise-function operating loop: intake a repeatable workflow, route the
-work through Hermes, execute finance primitives through the appropriate Stripe test-mode path,
-approve only margin-safe spend, coordinate agent work, and produce an audit-backed profit report.
+ScaleX proves a real client-operations loop: intake a repeatable client operation, route the work
+through Hermes, create finance proof through Stripe test mode, approve only policy-safe spend,
+coordinate agent work, record evidence, and produce a protected-profit report.
 
 Product mode is real-integration-first. Test doubles are for automated tests, CI, offline
 development, or explicitly labeled diagnostics. Product-mode integration failures must become
 visible error states.
 
-The Harbor Fleet Services fleet brake inspection campaign is the sample run, not the whole product. It uses synthetic data with a $1,200 invoice, $300 spend cap, 50% margin floor, $187 approved spend, one blocked $750 spend request, and a final report showing $1,013 gross profit and about 84.4% margin.
+## Problem Statement
+
+B2B teams struggle to turn signed client work into coordinated execution because onboarding,
+billing, vendor spend, approvals, task routing, and reporting are fragmented. ScaleX gives them a
+governed AI operations layer that can run those functions safely.
 
 ## Implemented Today
 
 - Local FastAPI backend and Vite React product shell.
-- Local prototype auth gate for the operator console.
-- SQLite-backed local/sample customer and workflow management with Harbor Fleet Services defaults.
-- Product navigation for Dashboard, Workflow, Onboarding, Customers, Runs, Audit, Integrations, and Settings.
-- Connected Workflow canvas for the autonomous run, with approved/proceed and blocked spend branches.
-- Right selected-node inspector for Run Summary, Customer Intake, Hermes, Stripe, Payment Status, Policy, Spend, Agent Work, SQLite Audit, and Profit Report proof.
-- Selected workflow runs where customer, job, invoice amount, spend cap, margin floor, and vendor lists drive Stripe amount, policy math, ledger totals, and final report.
+- Local prototype auth gate.
+- SQLite-backed local/sample customer and operation management with Northstar Dental Group defaults.
+- Product navigation for Dashboard, Studio, Onboarding, Customers, Runs, Audit, Integrations, and Settings.
+- Connected Function Studio page for the autonomous run, with approved setup spend and blocked risk branches.
+- Right selected-node inspector for Run Summary, Client Operation Intake, Hermes, Stripe, Payment
+  Status, Guardrail Review, Spend, Work Units, SQLite Audit, and Profit Outcome proof.
+- Selected workflow runs where customer, job, invoice amount, spend cap, margin floor, and vendor
+  lists drive Stripe amount, policy math, ledger totals, and final report.
 - Persisted run history with historical proof inspection by run ID.
 - Real isolated Hermes Agent planning through a ScaleX `scalex-operator` skill.
-- Orchestration audit trail for the proposed and executed ScaleX tool sequence.
-- SQLite audit ledger for jobs, events, Stripe records, ledger entries, policy checks, agent outputs, and reports.
+- Orchestration audit trail for proposed and executed ScaleX tool sequence.
+- SQLite evidence ledger for jobs, events, Stripe records, ledger entries, policy checks, agent outputs, and reports.
 - Local policy engine that blocks unsafe spend before it reaches the ledger.
-- Real Stripe test-mode customer and finalized invoice records through orchestration for Goal 7, with `invoice_status` and `paid` displayed honestly.
+- Real Stripe test-mode customer and finalized invoice records through orchestration for Goal 7,
+  with `invoice_status` and `paid` displayed honestly.
 - Stripe test-double payment records for tests and diagnostics.
 - Deterministic Finance, Marketing, Research, and Ops outputs for reliability.
-- Goal 7.9 complete product UX with connected canvas, selected-node inspector, compact proof access, aligned secondary views, browser QA, Stripe open/unpaid honesty, and local-policy/NeMo-not-wired honesty.
 
-The intended recording flow is product usage rather than a passive proof-panel tour: open ScaleX,
-log in, create or select a local sample workflow, review workflow and money rules, start the
-selected workflow run, watch the connected canvas move, click Hermes/Stripe/Policy/Report proof nodes,
-review blocked spend, inspect Audit, and return to Runs history.
+## Current Template
 
-## Goal 7.9 UX State
+Implemented today:
 
-Goal 7.9 is complete as the Workflow Canvas Product UX Redesign before Goal 8. Goal 7.9A
-completed the UX blueprint, Goal 7.9B completed the app shell foundation, Goal 7.9C replaced
-the main Workflow page with the target canvas and inspector, Goal 7.9D aligned the secondary
-views, and Goal 7.9E verified the browser-only recording path. The product model is:
+- Template: Client Implementation Launch
+- Sample account: Northstar Dental Group
+- Synthetic data boundary: multi-location client account for B2B implementation operations only;
+  no patient data, no PHI, no healthcare compliance claim, and no HIPAA support claim.
+- Story: a multi-location client purchased an implementation package. ScaleX launches the
+  client operation, confirms revenue, creates finance proof, checks business rules, blocks risky
+  spend, coordinates work units, records evidence, and reports protected profit and launch status.
+- Numbers: $8,500 revenue, $1,150 approved setup spend, $3,200 blocked risk,
+  $7,350 protected gross profit, 86.5% protected margin, and a 50% margin floor.
+- Harbor Fleet Services is historical only and is no longer the current implemented sample.
 
-- left navigation
-- top command bar
-- central workflow canvas
-- right selected-node inspector
-- Dashboard and Onboarding views
-- separate Customers, Runs, Audit, Integrations, and Settings views
+Future templates, not implemented:
 
-The Workflow page now serves as the product center for a business operations workflow
-automation tool. The canvas shows Customer Intake, Hermes Brain, Stripe Test Invoice,
-Payment Status, Policy Gate, Approved Spend, Blocked Spend, Agent Work, SQLite Audit, and
-Profit Report. The inspector shows real proof for the selected node without requiring
-terminal output or hidden context.
+- Invoice-to-Cash
+- Vendor Spend Approval
+- Client Onboarding
+- Research-to-Report
+- Ops Handoff
+- Renewal Recommendation
 
 ## Target Integrations
 
-- Goal 8 - Governed Autonomy Layer with NVIDIA NeMo Guardrails:
-  - Goal 8A read-only preflight / architecture audit.
-  - Goal 8B guardrail adapter plus schema/API.
-  - Goal 8C guardrail execution rails in the run lifecycle.
-  - Goal 8D guardrail proof UI in the Workflow canvas.
-  - Goal 8E enterprise-function template positioning and recording proof.
-- NVIDIA NeMo Guardrails or a NeMo-compatible adapter is planned, not wired. Local policy remains active and deterministic for tests until a real adapter is verified.
-- Future Verified Live Mode for live-money Stripe capability.
+- Hermes = planning and routing the client operation.
+- Stripe = finance proof / invoice / payment state.
+- ScaleX = execution and policy authority.
+- Local policy now = spend, margin, vendor, and payment-before-spend enforcement.
+- NeMo Guardrails planned = governed autonomy layer after Goal 8.
+- SQLite = evidence ledger.
+- Profit Outcome = protected profit and blocked risk result.
 
 ## Boundaries
 
 Live-money payments, real client data, production Hermes, production Prometheus,
-homelab/OpenClaw, Recall memory, production auth, hosted secret exposure, and production
-SaaS features are out of scope. Local/sample workflow management demonstrates the product path;
-production multi-client onboarding is future work. Future live-money payments require
-Verified Live Mode.
+homelab/OpenClaw, Recall memory, production auth, hosted secret exposure, and production SaaS
+features are out of scope. Local/sample workflow management demonstrates the product path;
+production multi-client onboarding is future work. Future live-money payments require Verified
+Live Mode. Real NeMo Guardrails is not wired yet.

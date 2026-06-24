@@ -10,8 +10,8 @@ from uuid import uuid4
 from .services.ledger_service import usd_to_cents
 
 
-DEMO_JOB_ID = "job_harbor_brake_campaign"
-HARBOR_WORKFLOW_ID = "wf_harbor_fleet_services"
+DEMO_JOB_ID = "job_northstar_client_implementation"
+NORTHSTAR_WORKFLOW_ID = "wf_northstar_dental_group"
 
 
 def utc_now() -> str:

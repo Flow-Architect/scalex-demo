@@ -10,6 +10,84 @@ Use:
 
 ---
 
+## 2026-06-24 - Goal 7.11B: Replace Harbor sample with Northstar Client Implementation Launch
+
+Completed:
+- Replaced the current implemented sample with Northstar Dental Group / Client Implementation Launch.
+- Updated seed data, onboarding defaults, local policy rules, Stripe test-double identifiers,
+  Hermes prompt/skill text, deterministic agent outputs, UI copy, and tests for the new sample.
+- Implemented the Northstar economics: $8,500 revenue, $1,150 approved setup spend, $3,200
+  blocked risk, $7,350 protected gross profit, and 86.5% protected margin.
+- Added the synthetic-account boundary in product copy and docs: no patient data, no PHI, no
+  healthcare compliance claim, and no HIPAA support claim.
+- Preserved Stripe honesty: test invoices are not called paid unless Stripe returns `paid=true`.
+- Preserved guardrail truthfulness: local policy is active now; real NeMo Guardrails is planned
+  and not wired yet.
+- Preserved Goal 8A, Goal 9, and Goal 7B / Verified Live Mode.
+- Did not implement Goal 8, wire NeMo, add live-money support, install dependencies, edit `.env`
+  with real values, touch SQLite `.db` files, create extra goal-tracking files, commit, run live
+  Stripe API calls, or run real Hermes model calls.
+
+Verified:
+- `./scripts/test.sh` passed with 48 backend tests and a successful Vite production build.
+- Safe browser QA passed with `/tmp/scalex-goal711b-browser.db`, local prototype auth,
+  deterministic Hermes, and Stripe test doubles; it verified login, Northstar sample load, Studio
+  run, target economics, proof inspectors, Runs, Audit, Integrations, Settings, and logout.
+- `git diff --check` passed.
+- Tracked-file secret scan returned no matches.
+- No `.env`, SQLite `.db`, `CODEX_GOALS.md`, or `GOAL_LOG.md` file was staged or created.
+- `git status --short` was reviewed.
+
+Suggested commit message:
+Replace Harbor sample with Northstar Client Implementation Launch
+
+Next:
+- Goal 7.11C - ClientOps Function Studio Visual Pass.
+
+---
+
+## 2026-06-24 - Goal 7.11A: ClientOps Autopilot product pivot docs
+
+Completed:
+- Repositioned ScaleX as `ScaleX ClientOps Autopilot`, an Enterprise Function Accelerator for
+  revenue-backed client operations.
+- Added the enterprise problem statement: B2B teams struggle to turn signed client work into
+  coordinated execution because onboarding, billing, vendor spend, approvals, task routing, and
+  reporting are fragmented.
+- Updated roadmap, handoff, product, architecture, demo, submission, repo instruction, decision,
+  and environment-example comment docs for the new product framing.
+- Clarified the stack mapping:
+  - Hermes plans and routes the client operation.
+  - Stripe provides finance proof.
+  - ScaleX executes and enforces business rules.
+  - local policy is active now for spend, margin, vendor, and payment-before-spend enforcement.
+  - NeMo Guardrails is planned after Goal 8 and is not wired yet.
+  - SQLite records evidence.
+  - Profit Outcome reports protected profit and blocked risk.
+- Preserved Harbor Fleet Services only as the current implemented legacy sample.
+- Selected Northstar Dental Group / Client Implementation Launch as the next implementation
+  template, with target future economics documented but not claimed as implemented.
+- Added the new sequence: Goal 7.11B sample replacement, Goal 7.11C visual pass, then Goal 8A
+  NeMo Guardrails preflight.
+- Preserved Goal 8A, Goal 9, and Goal 7B / Verified Live Mode.
+- Did not implement code, change backend logic, change frontend code, change sample data in code,
+  install dependencies, edit `.env`, touch SQLite `.db` files, run Stripe API calls, run Hermes
+  model calls, wire NeMo, add live-money support, create extra goal-tracking files, commit, or use
+  real client data.
+
+Verified:
+- `git diff --check` passed.
+- Tracked-file secret scan returned no matches.
+- `git status --short` showed only intended docs and `.env.example` comment edits.
+
+Suggested commit message:
+Reposition ScaleX as ClientOps Autopilot
+
+Next:
+- Goal 7.11B - Replace Harbor Sample with Northstar Client Implementation Launch.
+
+---
+
 ## 2026-06-24 - Goal 7.10: Product functionality readiness / browser demo gate
 
 Completed:
@@ -336,7 +414,7 @@ Next:
 ## 2026-06-21 - Goal 7.8: Functional product workflow, saved workflows, and run history
 
 Completed:
-- Added persisted SQLite workflow configs for local/sample customers and service workflows.
+- Added persisted SQLite workflow configs for local/sample customer operations.
 - Added active workflow selection so the browser can create/select/delete saved workflows and load Harbor Fleet Services as the sample.
 - Changed `POST /api/demo/run` to use the selected workflow instead of resetting to a single Harbor-only state.
 - Changed runs to append unique `jobs` records and run-scoped events, planning runs, orchestration calls, Stripe events, ledger entries, policy checks, agent outputs, and reports.
@@ -918,7 +996,7 @@ Next:
 
 ---
 
-## 2026-06-19 - Goal 5 follow-up: browser verification fix and service workflow positioning
+## 2026-06-19 - Goal 5 follow-up: browser verification fix and early positioning
 
 Completed:
 - Added FastAPI CORS allowlist entries for:
@@ -931,8 +1009,8 @@ Completed:
 - Changed the default frontend dev port to 5174 in scripts/dev.sh, frontend/vite.config.ts, and .env.example.
 - Added Vite strict port behavior so port conflicts fail visibly instead of silently moving to another port.
 - Updated README local demo instructions to http://127.0.0.1:5174.
-- Updated public-facing positioning to service workflows/service teams while keeping Harbor Auto Care as the demo client.
-- Updated DECISIONS.md to lock the target user as service teams running revenue-backed service workflows.
+- Updated public-facing positioning for the then-current Harbor Auto Care demo client.
+- Updated DECISIONS.md to lock the then-current target user and revenue-backed operating model.
 - Updated STATUS.md and TASKS.md with the verified current state and next handoff.
 
 Verified:
@@ -942,7 +1020,7 @@ Verified:
 - GET /api/health returned HTTP 200.
 - Vite frontend at http://127.0.0.1:5174 returned HTTP 200.
 - Served frontend source shows API base default http://127.0.0.1:8787.
-- Served frontend source shows the updated service workflows positioning.
+- Served frontend source showed the then-current positioning.
 - OPTIONS preflight from Origin http://127.0.0.1:5174 returned HTTP 200 for GET /api/health, GET /api/demo/state, POST /api/demo/run, and POST /api/demo/reset.
 - OPTIONS preflight to POST /api/demo/run returned HTTP 200 for all required local frontend origins.
 - POST /api/demo/run returned HTTP 200 and the completed lifecycle state.

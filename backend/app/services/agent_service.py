@@ -40,8 +40,8 @@ def record_demo_agent_work_complete(connection: sqlite3.Connection, job: dict[st
         type="agent_work",
         title="Deterministic agent work completed",
         detail=(
-            "Finance, Marketing, Research, and Ops outputs were created from local deterministic "
-            f"content for {job['client_name']}."
+            "Finance, Marketing, Research, and Ops implementation outputs were created from local "
+            f"deterministic content for {job['client_name']}."
         ),
         status="complete",
         event_id=_job_scoped_output_id("evt_agent_work_complete", job["id"]),
@@ -72,61 +72,61 @@ def _render_agent_output(job: dict[str, Any], output: dict[str, Any], totals: di
 
     if output["agent_name"] == "Finance":
         return {
-            "summary": f"Finance Agent confirmed the {client_name} P&L and margin guardrails.",
+            "summary": f"Finance Agent confirmed the {client_name} implementation P&L and margin guardrails.",
             "output_markdown": f"""# Finance Agent
 
-- Revenue booked: {revenue}.
-- Approved spend: {approved_spend}.
-- Blocked unsafe spend: {blocked_spend}.
-- Gross profit: {gross_profit}.
-- Final margin: {margin}.
+- Implementation package revenue: {revenue}.
+- Approved setup spend: {approved_spend}.
+- Blocked risk: {blocked_spend}.
+- Protected gross profit: {gross_profit}.
+- Protected margin: {margin}.
 
-Spend control result: {job_name} stayed above the {margin_floor} margin floor and inside the {spend_cap} spend cap.""",
+Spend control result: {job_name} stayed above the {margin_floor} margin floor and inside the {spend_cap} setup spend cap.""",
         }
 
     if output["agent_name"] == "Marketing":
         return {
-            "summary": f"Marketing Agent prepared campaign copy for {client_name}.",
+            "summary": f"Marketing Agent prepared launch asset kit copy for {client_name}.",
             "output_markdown": f"""# Marketing Agent
 
-Campaign theme: Make the service offer clear, timely, and easy to schedule.
+Launch theme: Start the implementation with clear stakeholders, scope, and next steps.
 
-Offer copy: Book {job_name} with {client_name} and get a clear plan before small service issues become larger operational problems.
+Kickoff copy: {client_name} can start {job_name} with a governed setup path, finance proof, approved setup spend, and recorded evidence.
 
-Social posts:
-- Operators can schedule {job_name} with a focused service team.
-- Keep work moving with a campaign that explains value, timing, and next steps.
-- Service outreach should be direct, useful, and tied to a measurable business outcome.
+Stakeholder notes:
+- Confirm implementation owner, finance contact, and operations handoff lead.
+- Keep workspace setup, sandbox preparation, and launch assets tied to the approved scope.
+- No patient data or PHI is used in this synthetic implementation sample.
 
-Landing page copy: Start {job_name} with {client_name} and receive a straightforward service plan.
+Launch asset copy: Start {job_name} with {client_name} and receive a documented onboarding plan.
 
-Follow-up message: Thanks for checking in with {client_name}. Reply with your preferred timing and the team will help schedule the next step.""",
+Follow-up message: Thanks for joining the launch. Reply with stakeholder availability and the implementation team will confirm the next checkpoint.""",
         }
 
     if output["agent_name"] == "Research":
         return {
-            "summary": f"Research Agent summarized positioning for {client_name}.",
+            "summary": f"Research Agent summarized implementation risk boundaries for {client_name}.",
             "output_markdown": f"""# Research Agent
 
-Positioning: emphasize uptime, scheduling confidence, transparent service planning, and measurable outcomes.
+Implementation risk notes: keep the work scoped to onboarding operations, workspace setup, sandbox testing, launch assets, and stakeholder handoff.
 
-Competitor-aware recommendation: avoid discount-only messaging. Lead with operational clarity, responsiveness, and the protected economics of the workflow.
+Vendor recommendation: use only approved setup vendors and block enrichment or data-broker requests until reviewed through explicit business rules.
 
-Audience note: target buyers who respond to concrete service outcomes, predictable scheduling, and clear pricing.""",
+Data boundary: this is a synthetic multi-location client account. Do not use patient data, do not include PHI, and do not claim healthcare compliance or HIPAA support.""",
         }
 
     return {
-        "summary": f"Ops Agent finalized the delivery checklist for {client_name}.",
+        "summary": f"Ops Agent finalized the implementation launch checklist for {client_name}.",
         "output_markdown": f"""# Ops Agent
 
-Delivery checklist:
+Implementation checklist:
 - Confirm revenue recorded in the local sandbox ledger.
-- Verify approved vendor spend totals {approved_spend}.
-- Verify blocked unsafe spend totals {blocked_spend}.
-- Package campaign copy, operations notes, landing copy, and follow-up copy.
-- Attach final profitability report.
+- Verify approved setup spend totals {approved_spend}.
+- Verify blocked risk totals {blocked_spend}.
+- Confirm workspace setup, data migration sandbox, launch asset kit, and stakeholder handoff evidence.
+- Attach final protected-profit report.
 
-Renewal recommendation: renew the workflow while preserving the {spend_cap} spend cap and {margin_floor} margin floor.""",
+Launch recommendation: proceed with implementation launch while preserving the {spend_cap} setup spend cap and {margin_floor} margin floor.""",
     }
 
 

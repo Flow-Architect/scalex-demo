@@ -1,3 +1,3 @@
 # Research Agent
 
-Local sample workflow role: prepare competitor positioning, regional fleet service angle, and promotion hook notes for the Harbor Fleet Services product walkthrough job.
+Local sample role: prepare implementation-risk notes, vendor-boundary notes, non-PHI sandbox assumptions, and blocked-risk rationale for the Northstar Dental Group Client Implementation Launch.

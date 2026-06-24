@@ -111,7 +111,7 @@ def create_stripe_invoice(
             customer=customer_id,
             amount=int(job["invoice_amount_cents"]),
             currency=settings.stripe_currency,
-            description=f"ScaleX {job['client_name']} {job['job_name']}",
+            description=f"ScaleX ClientOps Autopilot - {job['client_name']} {job['job_name']}",
             metadata={
                 "scalex_job_id": job["id"],
                 "scalex_client": job["client_name"],
@@ -528,8 +528,8 @@ def _test_double_invoice_item_id(job: dict[str, Any]) -> str:
 
 
 def _test_double_invoice_id(job: dict[str, Any]) -> str:
-    if job["client_name"] == "Harbor Fleet Services" and int(job["invoice_amount_cents"]) == 120000:
-        return "in_test_double_harbor_brake_1200"
+    if job["client_name"] == "Northstar Dental Group" and int(job["invoice_amount_cents"]) == 850000:
+        return "in_test_double_northstar_launch_8500"
     return f"in_test_double_{_safe_id(job['id'])}"
 
 

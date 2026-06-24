@@ -7,8 +7,8 @@ Here is the ScaleX plan:
 {
   "operating_plan": {"phases": ["Confirm invoice"]},
   "agent_task_list": [],
-  "campaign_strategy": {"client": "Sample HVAC Co"},
-  "executive_summary": "Plan the selected workflow safely.",
+  "campaign_strategy": {"client": "Sample Implementation Co"},
+  "executive_summary": "Plan the selected client operation safely.",
   "proposed_tool_sequence": ["job.create"]
 }
 Done.
@@ -18,4 +18,4 @@ Done.
 
     assert error is None
     assert parsed is not None
-    assert parsed["campaign_strategy"]["client"] == "Sample HVAC Co"
+    assert parsed["campaign_strategy"]["client"] == "Sample Implementation Co"

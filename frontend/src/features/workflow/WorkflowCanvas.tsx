@@ -131,9 +131,9 @@ export function WorkflowCanvas({
       <div className="border-b border-white/10 bg-white/[0.04] p-4">
         <div className="flex flex-col gap-3 2xl:flex-row 2xl:items-center 2xl:justify-between">
           <div>
-            <h2 className="text-base font-semibold text-white">Enterprise Workflow Canvas</h2>
+            <h2 className="text-base font-semibold text-white">ClientOps Function Studio</h2>
             <p className="mt-1 text-sm text-zinc-400">
-              Invoice-to-workflow orchestration with policy-gated spend and audited profit proof.
+              Revenue-backed client operation with policy-gated setup spend and audited profit proof.
             </p>
           </div>
           <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center 2xl:justify-end">

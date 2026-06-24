@@ -1,3 +1,3 @@
 # Marketing Agent
 
-Local sample workflow role: prepare campaign positioning, offer copy, operations notes, landing page copy, and follow-up messages for the Harbor Fleet Services product walkthrough job.
+Local sample role: prepare launch asset kit copy, stakeholder kickoff notes, and implementation handoff messaging for the Northstar Dental Group Client Implementation Launch.

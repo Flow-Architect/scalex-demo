@@ -124,7 +124,7 @@ class FakeInvoiceObject(StripeObject):
                 "customer": "cus_real_test_123",
                 "status": "paid" if self.module.paid else "open",
                 "paid": self.module.paid,
-                "amount_due": 120000,
+                "amount_due": 850000,
                 "currency": "usd",
                 "hosted_invoice_url": "https://invoice.stripe.test/in_real_test_123",
                 "payment_intent": "pi_real_test_123" if self.module.paid else None,
@@ -203,10 +203,10 @@ def test_real_stripe_test_invoice_flow_persists_expanded_events_and_idempotency(
         if "idempotency_key" in call[1]
     ]
     assert idempotency_keys == [
-        "scalex-demo-job_harbor_brake_campaign-customer-120000",
-        "scalex-demo-job_harbor_brake_campaign-invoice-item-120000",
-        "scalex-demo-job_harbor_brake_campaign-invoice-120000",
-        "scalex-demo-job_harbor_brake_campaign-finalize-invoice-120000",
+        "scalex-demo-job_northstar_client_implementation-customer-850000",
+        "scalex-demo-job_northstar_client_implementation-invoice-item-850000",
+        "scalex-demo-job_northstar_client_implementation-invoice-850000",
+        "scalex-demo-job_northstar_client_implementation-finalize-invoice-850000",
     ]
 
 

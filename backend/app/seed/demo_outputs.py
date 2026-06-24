@@ -4,63 +4,63 @@ DEMO_AGENTS = ("Finance", "Marketing", "Research", "Ops")
 
 DEMO_AGENT_OUTPUTS = [
     {
-        "id": "agt_finance_harbor_fleet_brake_inspection",
+        "id": "agt_finance_northstar_client_implementation",
         "agent_name": "Finance",
-        "summary": "Finance Agent confirmed the job P&L and preserved the 50% margin floor.",
+        "summary": "Finance Agent confirmed the implementation P&L and preserved the 50% margin floor.",
         "output_markdown": """# Finance Agent
 
-- Revenue booked: $1,200.
-- Approved spend: $187 across Local Ads API and Design Asset Pack.
-- Blocked unsafe spend: $750 Premium Automation Suite request.
-- Gross profit: $1,013.
-- Final margin: 84.4%.
+- Implementation package revenue booked: $8,500.
+- Approved setup spend: $1,150 across Secure Workspace Pack, Data Migration Sandbox, and Launch Asset Kit.
+- Blocked risk: $3,200 Unapproved Data Broker Enrichment request.
+- Protected gross profit: $7,350.
+- Protected margin: 86.5%.
 
-Spend control result: the fleet brake inspection campaign stayed well above the 50% margin floor and below the $300 spend cap.""",
+Spend control result: the client implementation launch stayed well above the 50% margin floor and inside the $1,150 setup spend cap.""",
     },
     {
-        "id": "agt_marketing_harbor_fleet_brake_inspection",
+        "id": "agt_marketing_northstar_client_implementation",
         "agent_name": "Marketing",
-        "summary": "Marketing Agent prepared the fleet brake inspection campaign package.",
+        "summary": "Marketing Agent prepared the launch asset kit package.",
         "output_markdown": """# Marketing Agent
 
-Campaign theme: Keep Every Route Stopping Safely.
+Launch theme: Start the implementation with clear stakeholders, scope, and next steps.
 
-Offer copy: Book a fleet brake inspection this month and get a clear maintenance plan before small brake issues interrupt routes.
+Kickoff copy: Northstar Dental Group can start Client Implementation Launch with a governed setup path, finance proof, approved setup spend, and recorded evidence.
 
-Social posts:
-- Fleet managers: Harbor Fleet Services can inspect brake systems across your vehicles this week.
-- Operations teams: keep routes moving with scheduled brake checks before small issues become downtime.
-- Brake maintenance should be clear, fairly priced, and documented for the whole fleet.
+Stakeholder notes:
+- Confirm implementation owner, finance contact, and operations handoff lead.
+- Keep workspace setup, sandbox preparation, and launch assets tied to the approved scope.
+- No patient data or PHI is used in this synthetic implementation sample.
 
-Landing page copy: Schedule a fleet brake inspection with Harbor Fleet Services and get straightforward recommendations from a regional maintenance team.
+Launch asset copy: Start Client Implementation Launch with Northstar Dental Group and receive a documented onboarding plan.
 
-Follow-up message: Thanks for checking in with Harbor Fleet Services. Reply with your vehicle count and preferred inspection window and we will help schedule the fleet brake inspection.""",
+Follow-up message: Thanks for joining the launch. Reply with stakeholder availability and the implementation team will confirm the next checkpoint.""",
     },
     {
-        "id": "agt_research_harbor_fleet_brake_inspection",
+        "id": "agt_research_northstar_client_implementation",
         "agent_name": "Research",
-        "summary": "Research Agent produced regional fleet positioning and competitor-aware recommendations.",
+        "summary": "Research Agent produced implementation-risk and vendor-boundary notes.",
         "output_markdown": """# Research Agent
 
-Positioning: emphasize uptime, route safety, transparent maintenance planning, and brake risk before peak service windows.
+Implementation risk notes: keep the work scoped to onboarding operations, workspace setup, sandbox testing, launch assets, and stakeholder handoff.
 
-Competitor-aware recommendation: avoid discount-only messaging. Lead with clear diagnostics, predictable scheduling, and confidence in the maintenance plan.
+Vendor recommendation: use only approved setup vendors and block enrichment or data-broker requests until reviewed through explicit business rules.
 
-Audience note: target operations teams who respond to safety, scheduling ease, and honest pricing rather than luxury-service language.""",
+Data boundary: this is a synthetic multi-location client account. Do not use patient data, do not include PHI, and do not claim healthcare compliance or HIPAA support.""",
     },
     {
-        "id": "agt_ops_harbor_fleet_brake_inspection",
+        "id": "agt_ops_northstar_client_implementation",
         "agent_name": "Ops",
-        "summary": "Ops Agent finalized the delivery checklist and renewal recommendation.",
+        "summary": "Ops Agent finalized the implementation launch checklist and recommendation.",
         "output_markdown": """# Ops Agent
 
 Delivery checklist:
 - Confirm payment recorded in the local sandbox ledger.
-- Verify approved vendor spend totals $187.
-- Verify Premium Automation Suite remained blocked.
-- Package campaign copy, fleet operations notes, landing copy, and follow-up copy.
-- Attach final profitability report.
+- Verify approved setup spend totals $1,150.
+- Verify Unapproved Data Broker Enrichment remained blocked.
+- Package workspace setup, non-PHI sandbox, launch asset, and stakeholder handoff evidence.
+- Attach final protected-profit report.
 
-Renewal recommendation: renew campaign for another 30 days while preserving the $300 spend cap and 50% margin floor.""",
+Launch recommendation: proceed with implementation launch while preserving the $1,150 setup spend cap and 50% margin floor.""",
     },
 ]

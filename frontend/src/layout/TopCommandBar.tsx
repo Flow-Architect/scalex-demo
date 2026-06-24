@@ -41,11 +41,11 @@ export function TopCommandBar({
       <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-2">
-            <StatusBadge icon={ShieldCheck} label="ScaleX Command Center" tone="emerald" />
+            <StatusBadge icon={ShieldCheck} label="ScaleX ClientOps Autopilot" tone="emerald" />
             <StatusBadge icon={Activity} label={runStatus} tone="sky" />
           </div>
           <div className="mt-3 min-w-0">
-            <p className="text-xs font-semibold uppercase text-zinc-400">Active workflow</p>
+            <p className="text-xs font-semibold uppercase text-zinc-400">Active client operation</p>
             <p className="mt-1 truncate text-base font-semibold text-white">
               {displayCustomer}
             </p>

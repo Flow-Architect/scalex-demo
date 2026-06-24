@@ -22,7 +22,7 @@ export interface MoneySnapshot {
   marginFloorPercent: number | null;
 }
 
-const LOCKED_DEMO_BLOCKED_SPEND_CENTS = 75_000;
+const LOCKED_DEMO_BLOCKED_SPEND_CENTS = 320_000;
 
 export function moneySnapshot(state: DemoState | null): MoneySnapshot {
   const report = state?.report ?? null;
@@ -87,7 +87,7 @@ export function runStatusLabel(
     return "Loading backend state";
   }
   if (busyAction === "run") {
-    return "Running selected workflow";
+    return "Running selected client operation";
   }
   if (busyAction === "reset") {
     return "Updating local data";

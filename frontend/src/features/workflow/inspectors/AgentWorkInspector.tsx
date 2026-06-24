@@ -19,7 +19,7 @@ export function AgentWorkInspector({ state }: { state: DemoState | null }) {
       <InspectorSection
         description="Deliverables are recorded in SQLite after policy-safe spend handling."
         icon={BrainCircuit}
-        title="Agent Work"
+        title="Work Units"
       >
         <div className="flex flex-wrap gap-2">
           <StatusPill
@@ -32,7 +32,7 @@ export function AgentWorkInspector({ state }: { state: DemoState | null }) {
 
       <InspectorSection title="Deliverable summaries">
         {outputs.length === 0 ? (
-          <EmptyState>Finance, Marketing, Research, and Ops outputs appear after the workflow run.</EmptyState>
+          <EmptyState>Finance, Marketing, Research, and Ops outputs appear after the client operation run.</EmptyState>
         ) : (
           <div className="space-y-3">
             {outputs.map((output) => (

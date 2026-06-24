@@ -82,7 +82,7 @@ export function ProductView({
   onInspectRun,
   onSaveWorkflow,
   onSelectWorkflow,
-  onUseHarborSample,
+  onUseNorthstarSample,
   onboardingBusy,
   onboardingDraft,
   onboardingError,
@@ -99,7 +99,7 @@ export function ProductView({
   onInspectRun: (runId: string) => void;
   onSaveWorkflow: (event?: FormEvent<HTMLFormElement>) => void;
   onSelectWorkflow: (workflowId: string) => void;
-  onUseHarborSample: () => void;
+  onUseNorthstarSample: () => void;
   onboardingBusy: boolean;
   onboardingDraft: OnboardingDraft;
   onboardingError: string | null;
@@ -118,7 +118,7 @@ export function ProductView({
             error={onboardingError}
             onDraftChange={onDraftChange}
             onSubmit={onSaveWorkflow}
-            onUseHarborSample={onUseHarborSample}
+            onUseNorthstarSample={onUseNorthstarSample}
             state={state}
           />
         ) : null}
@@ -178,15 +178,15 @@ function DashboardView({
           <div className="min-w-0">
             <Eyebrow>Dashboard</Eyebrow>
             <h1 className="mt-2 text-2xl font-semibold text-white lg:text-3xl">
-              Operator overview
+              ClientOps Autopilot overview
             </h1>
             <p className="mt-2 max-w-4xl text-sm leading-6 text-zinc-300">
-              This is the command center landing surface. Use it to confirm the selected workflow, current economics, run health, and where to go next before opening the workflow canvas.
+              Confirm the selected revenue-backed client operation, current economics, run health, and where to go next before opening the ClientOps Function Studio.
             </p>
             <div className="mt-3 flex flex-wrap gap-2">
               <StatusBadge
                 icon={Workflow}
-                label={activeWorkflow ? "Workflow selected" : "Needs onboarding"}
+                label={activeWorkflow ? "Operation selected" : "Needs onboarding"}
                 tone={activeWorkflow ? "emerald" : "amber"}
               />
               <StatusBadge
@@ -203,11 +203,11 @@ function DashboardView({
           </div>
           <div className="grid gap-2 sm:grid-cols-2 xl:min-w-[31rem] xl:grid-cols-3">
             <MetricTile label="Revenue" tone="emerald" value={formatOptionalCurrency(money.revenueCents)} />
-            <MetricTile label="Approved spend" tone="sky" value={formatOptionalCurrency(money.approvedSpendCents)} />
-            <MetricTile label="Blocked spend" tone="rose" value={formatOptionalCurrency(money.blockedSpendCents)} />
-            <MetricTile label="Gross profit" tone="teal" value={formatOptionalCurrency(money.grossProfitCents)} />
+            <MetricTile label="Approved setup spend" tone="sky" value={formatOptionalCurrency(money.approvedSpendCents)} />
+            <MetricTile label="Blocked risk" tone="rose" value={formatOptionalCurrency(money.blockedSpendCents)} />
+            <MetricTile label="Protected profit" tone="teal" value={formatOptionalCurrency(money.grossProfitCents)} />
             <MetricTile label="Margin" tone="amber" value={formatOptionalPercent(money.marginPercent)} />
-            <MetricTile label="Saved workflows" tone="slate" value={String(state?.workflows.length ?? 0)} />
+            <MetricTile label="Saved operations" tone="slate" value={String(state?.workflows.length ?? 0)} />
           </div>
         </div>
       </Panel>
@@ -215,9 +215,9 @@ function DashboardView({
       <div className="grid gap-5 xl:grid-cols-[minmax(0,1.05fr)_420px]">
         <Panel className="p-5">
           <SectionHeader
-            description="The selected workflow seed that the next run will use."
+            description="The selected client operation seed that the next run will use."
             icon={Building2}
-            title="Current workflow"
+            title="Current client operation"
           />
           {activeWorkflow ? (
             <>
@@ -235,13 +235,13 @@ function DashboardView({
               </div>
               <p className="mt-4 text-sm leading-6 text-zinc-300">{activeWorkflow.job_goal}</p>
               <div className="mt-4 grid gap-3 lg:grid-cols-2">
-                <InlineList items={activeWorkflow.approved_vendors} title="Approved vendors" tone="sky" />
-                <InlineList items={activeWorkflow.blocked_vendors} title="Blocked vendors" tone="rose" />
+                <InlineList items={activeWorkflow.approved_vendors} title="Approved setup vendors" tone="sky" />
+                <InlineList items={activeWorkflow.blocked_vendors} title="Blocked risk vendors" tone="rose" />
               </div>
             </>
           ) : (
             <EmptyState className="mt-4">
-              No workflow is selected yet. Open Onboarding to create the first local sample workflow.
+              No client operation is selected yet. Open Onboarding to create the Northstar sample operation.
             </EmptyState>
           )}
         </Panel>
@@ -259,7 +259,7 @@ function DashboardView({
               type="button"
             >
               <Workflow className="h-4 w-4" aria-hidden="true" />
-              {activeWorkflow ? "Open workflow canvas" : "Open onboarding"}
+              {activeWorkflow ? "Open Function Studio" : "Open onboarding"}
             </button>
             <button
               className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-md border border-white/15 bg-white/5 px-4 py-3 text-sm font-semibold text-white transition hover:bg-white/10"
@@ -267,7 +267,7 @@ function DashboardView({
               type="button"
             >
               <Users className="h-4 w-4" aria-hidden="true" />
-              Manage customers
+              Manage accounts
             </button>
             <button
               className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-md border border-white/15 bg-white/5 px-4 py-3 text-sm font-semibold text-white transition hover:bg-white/10"
@@ -287,9 +287,9 @@ function DashboardView({
               tone={state?.hermes?.used_real_hermes ? "emerald" : state?.hermes?.error ? "rose" : "violet"}
             />
             <EvidenceCard
-              description={latestReport ? "Final profit report is available in the selected run and workflow views." : "Final report proof appears after the workflow completes."}
+              description={latestReport ? "Final profit outcome is available in the selected run and Function Studio views." : "Final profit outcome proof appears after the operation completes."}
               icon={FileText}
-              title="Profit proof"
+              title="Profit outcome"
               tone={latestReport ? "teal" : "slate"}
             />
           </div>
@@ -349,7 +349,7 @@ function OnboardingView({
   error,
   onDraftChange,
   onSubmit,
-  onUseHarborSample,
+  onUseNorthstarSample,
   state,
 }: {
   busy: boolean;
@@ -357,7 +357,7 @@ function OnboardingView({
   error: string | null;
   onDraftChange: (draft: OnboardingDraft) => void;
   onSubmit: (event?: FormEvent<HTMLFormElement>) => void;
-  onUseHarborSample: () => void;
+  onUseNorthstarSample: () => void;
   state: DemoState | null;
 }) {
   const activeWorkflow = state?.workflow ?? null;
@@ -369,21 +369,22 @@ function OnboardingView({
           <div className="min-w-0">
             <Eyebrow>Onboarding</Eyebrow>
             <h1 className="mt-2 text-2xl font-semibold text-white lg:text-3xl">
-              Create a workflow intake seed
+              Create a client operation seed
             </h1>
             <p className="mt-2 max-w-4xl text-sm leading-6 text-zinc-300">
-              Onboarding is now its own section. Use it to create or update the next local sample workflow without mixing form entry into customer selection or run review.
+              Create or update the Northstar Client Implementation Launch sample without mixing intake, account selection, or run review.
             </p>
             <div className="mt-3 flex flex-wrap gap-2">
-              <StatusBadge icon={UserPlus} label="Local sample only" tone="sky" />
-              <StatusBadge icon={Workflow} label={activeWorkflow ? "Workflow selected" : "No active workflow"} tone={activeWorkflow ? "emerald" : "amber"} />
+              <StatusBadge icon={UserPlus} label="Synthetic sample only" tone="sky" />
+              <StatusBadge icon={Workflow} label={activeWorkflow ? "Operation selected" : "No active operation"} tone={activeWorkflow ? "emerald" : "amber"} />
+              <StatusBadge icon={ShieldCheck} label="No patient data / no PHI" tone="teal" />
               <StatusBadge icon={ShieldAlert} label="No secrets in browser" tone="amber" />
             </div>
           </div>
           <button
             className="inline-flex min-h-10 items-center justify-center gap-2 rounded-md bg-emerald-400 px-4 text-sm font-semibold text-zinc-950 transition hover:bg-emerald-300 disabled:cursor-not-allowed disabled:bg-zinc-600 disabled:text-zinc-300"
             disabled={busy}
-            onClick={onUseHarborSample}
+            onClick={onUseNorthstarSample}
             type="button"
           >
             {busy ? (
@@ -391,7 +392,7 @@ function OnboardingView({
             ) : (
               <Building2 className="h-4 w-4" aria-hidden="true" />
             )}
-            Load Harbor sample
+            Load Northstar sample
           </button>
         </div>
 
@@ -399,14 +400,14 @@ function OnboardingView({
           <MetricTile label="Invoice" tone="emerald" value={`$${draft.invoiceAmountUsd || "0"}`} />
           <MetricTile label="Spend cap" tone="sky" value={`$${draft.spendCapUsd || "0"}`} />
           <MetricTile label="Margin floor" tone="teal" value={`${draft.marginFloorPercent || "0"}%`} />
-          <MetricTile label="Blocked vendor" tone="rose" value={draft.blockedVendors || "Premium Automation Suite"} />
+          <MetricTile label="Blocked risk vendor" tone="rose" value={draft.blockedVendors || "Unapproved Data Broker Enrichment"} />
         </div>
       </Panel>
 
       <div className="grid gap-5 xl:grid-cols-[minmax(0,0.92fr)_minmax(420px,1fr)]">
         <Panel className="p-5">
           <SectionHeader
-            description="This left rail stays focused on the selected sample and current operating bounds."
+            description="This left rail stays focused on the selected sample account and current operating bounds."
             icon={Building2}
             title="Onboarding summary"
           />
@@ -414,18 +415,18 @@ function OnboardingView({
             <EvidenceCard
               description={draft.jobGoal}
               icon={Workflow}
-              title={draft.clientName || "Customer name pending"}
+              title={draft.clientName || "Account name pending"}
               tone="emerald"
             />
             <div className="grid gap-3 sm:grid-cols-2">
               <MetricTile label="Business type" tone="slate" value={draft.businessType || "Pending"} />
-              <MetricTile label="Job/campaign" tone="slate" value={draft.jobName || "Pending"} />
-              <MetricTile label="Approved vendors" tone="sky" value={draft.approvedVendors || "Pending"} />
-              <MetricTile label="Blocked vendors" tone="rose" value={draft.blockedVendors || "Pending"} />
+              <MetricTile label="Implementation/template" tone="slate" value={draft.jobName || "Pending"} />
+              <MetricTile label="Approved setup vendors" tone="sky" value={draft.approvedVendors || "Pending"} />
+              <MetricTile label="Blocked risk vendors" tone="rose" value={draft.blockedVendors || "Pending"} />
             </div>
             {activeWorkflow ? (
               <div className="rounded-lg border border-emerald-300/25 bg-emerald-300/10 p-4">
-                <p className="text-xs font-semibold uppercase text-emerald-100">Current selected workflow</p>
+                <p className="text-xs font-semibold uppercase text-emerald-100">Current selected operation</p>
                 <p className="mt-2 text-base font-semibold text-white">{activeWorkflow.client_name}</p>
                 <p className="mt-1 text-sm text-zinc-200">{activeWorkflow.job_name}</p>
               </div>
@@ -435,15 +436,15 @@ function OnboardingView({
 
         <Panel className="p-5">
           <SectionHeader
-            description="Saving updates SQLite and selects the workflow for the next run."
+            description="Saving updates SQLite and selects the client operation for the next run."
             icon={UserPlus}
-            title="Workflow intake form"
+            title="Operation intake form"
           />
 
           <form className="mt-4 space-y-4" onSubmit={onSubmit}>
             <div className="grid gap-4 sm:grid-cols-2">
               <FieldInput
-                label="Customer/business name"
+                label="Client/account name"
                 onChange={(value) => onDraftChange({ ...draft, clientName: value })}
                 value={draft.clientName}
               />
@@ -453,7 +454,7 @@ function OnboardingView({
                 value={draft.businessType}
               />
               <FieldInput
-                label="Job/campaign name"
+                label="Implementation/template name"
                 onChange={(value) => onDraftChange({ ...draft, jobName: value })}
                 value={draft.jobName}
               />
@@ -478,19 +479,19 @@ function OnboardingView({
             </div>
 
             <TextAreaField
-              label="Job goal"
+              label="Operation goal"
               onChange={(value) => onDraftChange({ ...draft, jobGoal: value })}
               value={draft.jobGoal}
             />
 
             <div className="grid gap-4 sm:grid-cols-2">
               <FieldInput
-                label="Approved vendors"
+                label="Approved setup vendors"
                 onChange={(value) => onDraftChange({ ...draft, approvedVendors: value })}
                 value={draft.approvedVendors}
               />
               <FieldInput
-                label="Blocked vendors"
+                label="Blocked risk vendors"
                 onChange={(value) => onDraftChange({ ...draft, blockedVendors: value })}
                 value={draft.blockedVendors}
               />
@@ -512,7 +513,7 @@ function OnboardingView({
               ) : (
                 <CheckCircle2 className="h-4 w-4" aria-hidden="true" />
               )}
-              Save and select workflow
+              Save and select operation
             </button>
           </form>
         </Panel>
@@ -544,16 +545,16 @@ function CustomersView({
           <div className="min-w-0">
             <Eyebrow>Customers</Eyebrow>
             <h1 className="mt-2 text-2xl font-semibold text-white lg:text-3xl">
-              Saved workflow records
+              Saved client operations
             </h1>
             <p className="mt-2 max-w-4xl text-sm leading-6 text-zinc-300">
-              Customers now focuses on saved workflow selection and lifecycle management. New intake happens in Onboarding, and the dashboard remains the landing surface.
+              Accounts focuses on saved client operation selection and lifecycle management. New intake happens in Onboarding, and the dashboard remains the landing surface.
             </p>
             <div className="mt-3 flex flex-wrap gap-2">
-              <StatusBadge icon={Users} label={`${workflows.length} saved workflows`} tone="slate" />
+              <StatusBadge icon={Users} label={`${workflows.length} saved operations`} tone="slate" />
               <StatusBadge
                 icon={Workflow}
-                label={activeWorkflow ? "Workflow selected" : "No active workflow"}
+                label={activeWorkflow ? "Operation selected" : "No active operation"}
                 tone={activeWorkflow ? "emerald" : "amber"}
               />
             </div>
@@ -569,7 +570,7 @@ function CustomersView({
         </div>
 
         <div className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-          <MetricTile label="Active workflow" tone={activeWorkflow ? "emerald" : "amber"} value={activeWorkflow?.client_name ?? "None selected"} />
+          <MetricTile label="Active account" tone={activeWorkflow ? "emerald" : "amber"} value={activeWorkflow?.client_name ?? "None selected"} />
           <MetricTile label="Invoice" tone="emerald" value={activeWorkflow ? formatCurrency(activeWorkflow.invoice_amount_cents) : "Pending"} />
           <MetricTile label="Spend cap" tone="sky" value={activeWorkflow ? formatCurrency(activeWorkflow.spend_cap_cents) : "Pending"} />
           <MetricTile label="Margin floor" tone="teal" value={activeWorkflow ? formatPercent(activeWorkflow.margin_floor_percent) : "Pending"} />
@@ -581,12 +582,12 @@ function CustomersView({
           <SectionHeader
             description="Select the next run seed or delete obsolete local samples."
             icon={Users}
-            title="Saved workflows"
+            title="Saved operations"
           />
 
           <div className="mt-5 space-y-3">
             {workflows.length === 0 ? (
-              <EmptyState>No saved local workflows yet. Open Onboarding to create the first one.</EmptyState>
+              <EmptyState>No saved local operations yet. Open Onboarding to create the Northstar sample.</EmptyState>
             ) : (
               workflows.map((workflow) => (
                 <article
@@ -642,9 +643,9 @@ function CustomersView({
 
         <Panel className="p-5">
           <SectionHeader
-            description="Selected workflow proof for the next run."
+            description="Selected account proof for the next run."
             icon={Building2}
-            title="Active customer"
+            title="Active account"
           />
           {activeWorkflow ? (
             <div className="mt-4 space-y-4">
@@ -656,16 +657,16 @@ function CustomersView({
               />
               <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-1">
                 <MetricTile label="Business type" tone="slate" value={activeWorkflow.business_type} />
-                <MetricTile label="Job" tone="slate" value={activeWorkflow.job_name} />
-                <MetricTile label="Workflow ID" tone="slate" value={activeWorkflow.id} />
+                <MetricTile label="Template" tone="slate" value={activeWorkflow.job_name} />
+                <MetricTile label="Operation ID" tone="slate" value={activeWorkflow.id} />
                 <MetricTile label="Updated" tone="slate" value={formatDateTime(activeWorkflow.updated_at)} />
               </div>
-              <InlineList items={activeWorkflow.approved_vendors} title="Approved vendors" tone="sky" />
-              <InlineList items={activeWorkflow.blocked_vendors} title="Blocked vendors" tone="rose" />
+              <InlineList items={activeWorkflow.approved_vendors} title="Approved setup vendors" tone="sky" />
+              <InlineList items={activeWorkflow.blocked_vendors} title="Blocked risk vendors" tone="rose" />
             </div>
           ) : (
             <EmptyState className="mt-4">
-              No customer is selected. Open Onboarding or choose a saved workflow from the left.
+              No account is selected. Open Onboarding or choose a saved operation from the left.
             </EmptyState>
           )}
         </Panel>
@@ -699,7 +700,7 @@ function RunsView({
               Persisted run history
             </h1>
             <p className="mt-2 max-w-4xl text-sm leading-6 text-zinc-300">
-              Review historical proof without leaving the product shell. The selected run should make current economics, orchestrated steps, and final report status immediately obvious.
+              Review historical proof without leaving the product shell. The selected run should make economics, orchestration steps, and final profit outcome status immediately obvious.
             </p>
           </div>
           <div className="grid gap-2 sm:grid-cols-3 xl:min-w-[26rem]">
@@ -713,13 +714,13 @@ function RunsView({
       <div className="grid gap-5 xl:grid-cols-[380px_minmax(0,1fr)]">
         <Panel className="p-5">
           <SectionHeader
-            description="Every workflow run remains inspectable after completion."
+            description="Every client operation run remains inspectable after completion."
             icon={ClipboardList}
             title="Run list"
           />
           <div className="mt-4 space-y-3">
             {runs.length === 0 ? (
-              <EmptyState>Run history appears after a workflow run starts.</EmptyState>
+              <EmptyState>Run history appears after a client operation run starts.</EmptyState>
             ) : (
               runs.map((run) => (
                 <button
@@ -769,17 +770,17 @@ function RunsView({
                 </div>
 
                 <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-                  <MetricTile label="Customer" tone="slate" value={selectedRun.client_name} />
-                  <MetricTile label="Job" tone="slate" value={selectedRun.job_name} />
-                  <MetricTile label="Workflow ID" tone="slate" value={selectedRun.workflow_id ?? "Detached"} />
+                  <MetricTile label="Account" tone="slate" value={selectedRun.client_name} />
+                  <MetricTile label="Template" tone="slate" value={selectedRun.job_name} />
+                  <MetricTile label="Operation ID" tone="slate" value={selectedRun.workflow_id ?? "Detached"} />
                   <MetricTile label="Updated" tone="slate" value={formatDateTime(selectedRun.updated_at)} />
                 </div>
 
                 <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
                   <MetricTile label="Revenue" tone="emerald" value={formatOptionalCurrency(money.revenueCents)} />
-                  <MetricTile label="Approved spend" tone="sky" value={formatOptionalCurrency(money.approvedSpendCents)} />
-                  <MetricTile label="Blocked spend" tone="rose" value={formatOptionalCurrency(money.blockedSpendCents)} />
-                  <MetricTile label="Gross profit" tone="teal" value={formatOptionalCurrency(money.grossProfitCents)} />
+                  <MetricTile label="Approved setup spend" tone="sky" value={formatOptionalCurrency(money.approvedSpendCents)} />
+                  <MetricTile label="Blocked risk" tone="rose" value={formatOptionalCurrency(money.blockedSpendCents)} />
+                  <MetricTile label="Protected profit" tone="teal" value={formatOptionalCurrency(money.grossProfitCents)} />
                   <MetricTile label="Margin" tone="amber" value={formatOptionalPercent(money.marginPercent)} />
                 </div>
               </>
@@ -794,15 +795,15 @@ function RunsView({
             </Panel>
             <Panel className="p-5">
               <SectionHeader
-                description="The final profitability proof remains loaded with the selected run."
+                description="The protected-profit proof remains loaded with the selected run."
                 icon={FileText}
-                title="Final report"
+                title="Profit outcome"
               />
               {reports.length > 0 ? (
                 <div className="mt-4 space-y-4">
                   <div className="grid gap-2 sm:grid-cols-2">
                     <MetricTile label="Revenue" tone="emerald" value={formatOptionalCurrency(money.revenueCents)} />
-                    <MetricTile label="Gross profit" tone="teal" value={formatOptionalCurrency(money.grossProfitCents)} />
+                    <MetricTile label="Protected profit" tone="teal" value={formatOptionalCurrency(money.grossProfitCents)} />
                   </div>
                   <MarkdownPreview markdown={reports[reports.length - 1].report_markdown} />
                 </div>
@@ -845,7 +846,7 @@ function AuditView({
               SQLite evidence trail
             </h1>
             <p className="mt-2 max-w-4xl text-sm leading-6 text-zinc-300">
-              Timeline, orchestration calls, ledger movement, Stripe records, and policy decisions stay organized here instead of spilling back into the main Workflow surface.
+              Timeline, orchestration calls, ledger movement, Stripe records, and policy decisions stay organized here instead of crowding the Function Studio.
             </p>
           </div>
           <div className="grid gap-2 sm:grid-cols-3 xl:min-w-[28rem]">
@@ -970,7 +971,7 @@ function IntegrationsView({
             <MetricTile label="Database path" tone="slate" value={state?.database.path ?? health?.database_path ?? "Pending"} />
             <MetricTile label="Audit rows" tone="teal" value={String(auditRows)} />
             <MetricTile label="Persisted runs" tone="sky" value={String(state?.runs.length ?? 0)} />
-            <MetricTile label="Workflows" tone="slate" value={String(state?.workflows.length ?? 0)} />
+            <MetricTile label="Operations" tone="slate" value={String(state?.workflows.length ?? 0)} />
             <MetricTile label="Selected run" tone="emerald" value={state?.selected_run_id ?? "None"} />
             <MetricTile label="API mode" tone="slate" value={health?.mode ?? state?.mode ?? "local"} />
           </div>
@@ -1023,7 +1024,7 @@ function SettingsView({
               Local operator boundaries
             </h1>
             <p className="mt-2 max-w-4xl text-sm leading-6 text-zinc-300">
-              Prototype auth, runtime status, selected workflow/run references, and hard safety boundaries remain visible here without exposing secrets or pretending this is production identity.
+              Prototype auth, runtime status, selected operation/run references, and hard safety boundaries remain visible here without exposing secrets or pretending this is production identity.
             </p>
           </div>
           <div className="flex flex-wrap gap-2">
@@ -1051,7 +1052,7 @@ function SettingsView({
           <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
             <MetricTile label="Prototype auth" tone={auth?.authenticated ? "emerald" : auth?.auth_enabled ? "amber" : "slate"} value={auth?.auth_enabled ? auth?.authenticated ? "Signed in" : "Enabled" : "Disabled"} />
             <MetricTile label="API mode" tone="slate" value={health?.mode ?? state?.mode ?? "local"} />
-            <MetricTile label="Workflow" tone={state?.workflow ? "teal" : "amber"} value={state?.workflow?.client_name ?? "None selected"} />
+            <MetricTile label="Operation" tone={state?.workflow ? "teal" : "amber"} value={state?.workflow?.client_name ?? "None selected"} />
             <MetricTile label="Selected run" tone={state?.selected_run_id ? "emerald" : "slate"} value={state?.selected_run_id ?? "None"} />
           </div>
 
@@ -1069,13 +1070,13 @@ function SettingsView({
               tone={health?.database_exists ? "teal" : "amber"}
             />
             <EvidenceCard
-              description={state?.workflow ? state.workflow.job_name : "Create or select a workflow before starting a run."}
+              description={state?.workflow ? state.workflow.job_name : "Create or select a client operation before starting a run."}
               icon={Workflow}
-              title="Active workflow"
+              title="Active operation"
               tone={state?.workflow ? "teal" : "amber"}
             />
             <EvidenceCard
-              description={`${state?.runs.length ?? 0} persisted runs; ${state?.workflows.length ?? 0} saved workflows; SQLite path ${state?.database.path ?? health?.database_path ?? "pending"}.`}
+              description={`${state?.runs.length ?? 0} persisted runs; ${state?.workflows.length ?? 0} saved operations; SQLite path ${state?.database.path ?? health?.database_path ?? "pending"}.`}
               icon={ClipboardList}
               title="Stored records"
               tone="slate"
@@ -1109,7 +1110,7 @@ function SettingsView({
               tone="violet"
             />
             <EvidenceCard
-              description="Synthetic/sample workflow data only. Harbor Fleet Services remains the single product sample client."
+              description="Synthetic Northstar Dental Group account only for B2B implementation operations. No patient data, no PHI, and no healthcare compliance claim."
               icon={Building2}
               title="Sample-only data"
               tone="sky"
@@ -1439,7 +1440,7 @@ function LedgerPanel({
       {totals ? (
         <div className="mt-4 grid gap-2 sm:grid-cols-3">
           <MetricTile label="Revenue" tone="emerald" value={formatCurrency(totals.revenue_cents)} />
-          <MetricTile label="Approved spend" tone="sky" value={formatCurrency(totals.approved_spend_cents)} />
+          <MetricTile label="Approved setup spend" tone="sky" value={formatCurrency(totals.approved_spend_cents)} />
           <MetricTile label="Remaining cap" tone="amber" value={formatCurrency(totals.remaining_spend_cap_cents)} />
         </div>
       ) : null}

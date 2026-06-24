@@ -32,7 +32,7 @@ def test_schema_initialization_creates_expected_tables(tmp_path) -> None:
     assert all(count == 0 for count in counts.values())
 
 
-def test_seed_loading_creates_harbor_fleet_job_and_event(tmp_path) -> None:
+def test_seed_loading_creates_northstar_implementation_job_and_event(tmp_path) -> None:
     db_path = tmp_path / "scalex.db"
     initialize_database(db_path)
 
@@ -42,10 +42,10 @@ def test_seed_loading_creates_harbor_fleet_job_and_event(tmp_path) -> None:
         current_job = get_demo_job(connection)
 
     assert current_job is not None
-    assert current_job["client_name"] == "Harbor Fleet Services"
-    assert current_job["job_name"] == "30-day fleet brake inspection campaign"
-    assert current_job["invoice_amount_cents"] == 120000
-    assert current_job["spend_cap_cents"] == 30000
+    assert current_job["client_name"] == "Northstar Dental Group"
+    assert current_job["job_name"] == "Client Implementation Launch"
+    assert current_job["invoice_amount_cents"] == 850000
+    assert current_job["spend_cap_cents"] == 115000
     assert events[0]["type"] == "job_intake"
 
 
@@ -70,17 +70,17 @@ def test_demo_reset_seed_and_state_endpoints(tmp_path, monkeypatch) -> None:
     assert seed_response["status"] == "seeded"
     seeded_state = seed_response["state"]
 
-    assert seeded_state["job"]["client_name"] == "Harbor Fleet Services"
-    assert seeded_state["ledger"]["totals"]["projected_profit_cents"] == 90000
-    assert seeded_state["ledger"]["totals"]["projected_margin_percent"] == 75.0
-    assert seeded_state["policy"]["summary"]["max_job_spend_usd"] == 300
+    assert seeded_state["job"]["client_name"] == "Northstar Dental Group"
+    assert seeded_state["ledger"]["totals"]["projected_profit_cents"] == 735000
+    assert seeded_state["ledger"]["totals"]["projected_margin_percent"] == 86.5
+    assert seeded_state["policy"]["summary"]["max_job_spend_usd"] == 1150
     assert seeded_state["events"][0]["type"] == "job_intake"
     assert seeded_state["policy_checks"] == []
     assert seeded_state["agent_outputs"] == []
     assert seeded_state["report"] is None
 
     state = demo_state()
-    assert state["job"]["job_name"] == "30-day fleet brake inspection campaign"
+    assert state["job"]["job_name"] == "Client Implementation Launch"
     assert state["database"]["exists"] is True
 
 
@@ -126,28 +126,29 @@ def test_onboarding_endpoint_saves_and_selects_local_workflow(tmp_path, monkeypa
 
     response = onboard_demo_customer(
         OnboardingRequest(
-            client_name="Sample HVAC Co",
-            business_type="Commercial HVAC service provider",
-            job_name="30-day tune-up campaign",
-            job_goal="Prepare a local sample HVAC tune-up campaign.",
+            client_name="Sample Implementation Co",
+            business_type="B2B implementation services team",
+            job_name="Client onboarding sprint",
+            job_goal="Prepare a local sample client onboarding sprint.",
             invoice_amount_usd=1600,
             spend_cap_usd=350,
             margin_floor_percent=55,
-            approved_vendors=["SMS Campaign Tool", "Email Campaign Tool"],
+            approved_vendors=["Secure Workspace Pack", "Data Migration Sandbox", "Launch Asset Kit"],
             blocked_vendors=["Unknown SaaS Vendor"],
         )
     )
 
     assert response["status"] == "onboarded"
     assert response["state"]["job"] is None
-    assert response["state"]["workflow"]["client_name"] == "Sample HVAC Co"
+    assert response["state"]["workflow"]["client_name"] == "Sample Implementation Co"
     assert response["state"]["workflow"]["invoice_amount_cents"] == 160000
     assert response["state"]["workflow"]["spend_cap_cents"] == 35000
     assert response["state"]["workflow"]["margin_floor_percent"] == 55
     assert response["state"]["workflows"][0]["is_active"] is True
     assert response["state"]["onboarding"]["config_json"]["approvedVendors"] == [
-        "SMS Campaign Tool",
-        "Email Campaign Tool",
+        "Secure Workspace Pack",
+        "Data Migration Sandbox",
+        "Launch Asset Kit",
     ]
 
 
@@ -156,14 +157,14 @@ def test_selected_workflow_drives_run_and_custom_invoice_amount(tmp_path, monkey
 
     onboard_demo_customer(
         OnboardingRequest(
-            client_name="Sample HVAC Co",
-            business_type="Commercial HVAC service provider",
-            job_name="30-day tune-up campaign",
-            job_goal="Prepare a local sample HVAC tune-up campaign.",
-            invoice_amount_usd=2000,
-            spend_cap_usd=400,
-            margin_floor_percent=55,
-            approved_vendors=["SMS Campaign Tool", "Email Campaign Tool"],
+            client_name="Sample Implementation Co",
+            business_type="B2B implementation services team",
+            job_name="Client onboarding sprint",
+            job_goal="Prepare a local sample client onboarding sprint.",
+            invoice_amount_usd=10000,
+            spend_cap_usd=1500,
+            margin_floor_percent=50,
+            approved_vendors=["Secure Workspace Pack", "Data Migration Sandbox", "Launch Asset Kit"],
             blocked_vendors=["Unknown SaaS Vendor"],
         )
     )
@@ -171,60 +172,60 @@ def test_selected_workflow_drives_run_and_custom_invoice_amount(tmp_path, monkey
     state = response["state"]
 
     assert response["status"] == "completed"
-    assert state["workflow"]["client_name"] == "Sample HVAC Co"
-    assert state["job"]["client_name"] == "Sample HVAC Co"
-    assert state["job"]["invoice_amount_cents"] == 200000
-    assert state["stripe_events"][1]["amount_cents"] == 200000
-    assert state["stripe_events"][-1]["amount_cents"] == 200000
-    assert state["ledger"]["totals"]["revenue_cents"] == 200000
-    assert state["ledger"]["totals"]["approved_spend_cents"] == 18700
-    assert state["ledger"]["totals"]["gross_profit_cents"] == 181300
-    assert state["ledger"]["totals"]["actual_margin_percent"] == 90.6
-    assert state["report"]["gross_profit_cents"] == 181300
-    assert state["report"]["actual_margin_percent"] == 90.6
+    assert state["workflow"]["client_name"] == "Sample Implementation Co"
+    assert state["job"]["client_name"] == "Sample Implementation Co"
+    assert state["job"]["invoice_amount_cents"] == 1000000
+    assert state["stripe_events"][1]["amount_cents"] == 1000000
+    assert state["stripe_events"][-1]["amount_cents"] == 1000000
+    assert state["ledger"]["totals"]["revenue_cents"] == 1000000
+    assert state["ledger"]["totals"]["approved_spend_cents"] == 115000
+    assert state["ledger"]["totals"]["gross_profit_cents"] == 885000
+    assert state["ledger"]["totals"]["actual_margin_percent"] == 88.5
+    assert state["report"]["gross_profit_cents"] == 885000
+    assert state["report"]["actual_margin_percent"] == 88.5
 
 
 def test_saved_workflow_can_be_selected_for_next_run(tmp_path, monkeypatch) -> None:
     monkeypatch.setenv("DATABASE_PATH", str(tmp_path / "scalex.db"))
 
-    harbor = onboard_demo_customer(
+    northstar = onboard_demo_customer(
         OnboardingRequest(
-            client_name="Harbor Fleet Services",
-            business_type="Regional fleet maintenance provider",
-            job_name="30-day fleet brake inspection campaign",
-            job_goal="Generate Harbor sample.",
-            invoice_amount_usd=1200,
-            spend_cap_usd=300,
+            client_name="Northstar Dental Group",
+            business_type="Multi-location healthcare services group",
+            job_name="Client Implementation Launch",
+            job_goal="Launch a synthetic B2B client implementation operation with no patient data and no PHI.",
+            invoice_amount_usd=8500,
+            spend_cap_usd=1150,
             margin_floor_percent=50,
-            approved_vendors=["Local Ads API", "Design Asset Pack"],
-            blocked_vendors=["Premium Automation Suite"],
+            approved_vendors=["Secure Workspace Pack", "Data Migration Sandbox", "Launch Asset Kit"],
+            blocked_vendors=["Unapproved Data Broker Enrichment"],
         )
     )
     onboard_demo_customer(
         OnboardingRequest(
-            client_name="Sample HVAC Co",
-            business_type="Commercial HVAC service provider",
-            job_name="30-day tune-up campaign",
-            job_goal="Prepare a local sample HVAC tune-up campaign.",
+            client_name="Sample Implementation Co",
+            business_type="B2B implementation services team",
+            job_name="Client onboarding sprint",
+            job_goal="Prepare a local sample client onboarding sprint.",
             invoice_amount_usd=2000,
             spend_cap_usd=400,
             margin_floor_percent=55,
-            approved_vendors=["SMS Campaign Tool", "Email Campaign Tool"],
+            approved_vendors=["Secure Workspace Pack", "Data Migration Sandbox", "Launch Asset Kit"],
             blocked_vendors=["Unknown SaaS Vendor"],
         )
     )
-    harbor_id = next(
+    northstar_id = next(
         workflow["id"]
-        for workflow in harbor["state"]["workflows"]
-        if workflow["client_name"] == "Harbor Fleet Services"
+        for workflow in northstar["state"]["workflows"]
+        if workflow["client_name"] == "Northstar Dental Group"
     )
 
-    selected = select_demo_workflow(harbor_id)
+    selected = select_demo_workflow(northstar_id)
     response = _call_post_demo_run_route()
 
     assert selected["status"] == "workflow_selected"
-    assert response["state"]["job"]["client_name"] == "Harbor Fleet Services"
-    assert response["state"]["job"]["invoice_amount_cents"] == 120000
+    assert response["state"]["job"]["client_name"] == "Northstar Dental Group"
+    assert response["state"]["job"]["invoice_amount_cents"] == 850000
 
 
 def test_spend_check_endpoint_blocks_before_payment(tmp_path, monkeypatch) -> None:
@@ -233,7 +234,7 @@ def test_spend_check_endpoint_blocks_before_payment(tmp_path, monkeypatch) -> No
     reset_demo()
     seed_demo()
     response = demo_spend_check(
-        SpendCheckRequest(**{"vendor": "Local Ads API", "amount_cents": 8900})
+        SpendCheckRequest(**{"vendor": "Secure Workspace Pack", "amount_cents": 35000})
     )
 
     assert response["status"] == "spend_blocked"
@@ -256,7 +257,7 @@ def test_mark_paid_endpoint_records_revenue_once(tmp_path, monkeypatch) -> None:
 
     assert first_response["status"] == "paid"
     assert second_response["status"] == "paid"
-    assert second_response["state"]["ledger"]["totals"]["revenue_cents"] == 120000
+    assert second_response["state"]["ledger"]["totals"]["revenue_cents"] == 850000
     revenue_entries = [
         entry
         for entry in second_response["state"]["ledger"]["entries"]
@@ -271,35 +272,39 @@ def test_spend_check_endpoint_approves_and_blocks_demo_requests(tmp_path, monkey
     reset_demo()
     seed_demo()
     prepayment_response = demo_spend_check(
-        SpendCheckRequest(**{"vendor": "Local Ads API", "amount_cents": 8900})
+        SpendCheckRequest(**{"vendor": "Secure Workspace Pack", "amount_cents": 35000})
     )
     mark_demo_paid()
-    local_ads_response = demo_spend_check(
-        SpendCheckRequest(**{"vendor": "Local Ads API", "amount_cents": 8900})
+    workspace_response = demo_spend_check(
+        SpendCheckRequest(**{"vendor": "Secure Workspace Pack", "amount_cents": 35000})
     )
-    design_response = demo_spend_check(
-        SpendCheckRequest(**{"vendor": "Design Asset Pack", "amount_cents": 9800})
+    sandbox_response = demo_spend_check(
+        SpendCheckRequest(**{"vendor": "Data Migration Sandbox", "amount_cents": 50000})
+    )
+    launch_response = demo_spend_check(
+        SpendCheckRequest(**{"vendor": "Launch Asset Kit", "amount_cents": 30000})
     )
     blocked_response = demo_spend_check(
-        SpendCheckRequest(**{"vendor": "Premium Automation Suite", "amount_cents": 75000})
+        SpendCheckRequest(**{"vendor": "Unapproved Data Broker Enrichment", "amount_cents": 320000})
     )
     state = demo_state()
 
     assert prepayment_response["status"] == "spend_blocked"
     assert prepayment_response["state"]["ledger"]["totals"]["blocked_spend_cents"] == 0
-    assert local_ads_response["status"] == "spend_approved"
-    assert design_response["status"] == "spend_approved"
+    assert workspace_response["status"] == "spend_approved"
+    assert sandbox_response["status"] == "spend_approved"
+    assert launch_response["status"] == "spend_approved"
     assert blocked_response["status"] == "spend_blocked"
-    assert state["ledger"]["totals"]["revenue_cents"] == 120000
-    assert state["ledger"]["totals"]["approved_spend_cents"] == 18700
-    assert state["ledger"]["totals"]["blocked_spend_cents"] == 75000
-    assert state["ledger"]["totals"]["remaining_spend_cap_cents"] == 11300
-    assert state["ledger"]["totals"]["gross_profit_cents"] == 101300
-    assert state["ledger"]["totals"]["actual_margin_percent"] == 84.4
-    assert len(state["policy_checks"]) == 4
-    assert [check["approved"] for check in state["policy_checks"]] == [0, 1, 1, 0]
+    assert state["ledger"]["totals"]["revenue_cents"] == 850000
+    assert state["ledger"]["totals"]["approved_spend_cents"] == 115000
+    assert state["ledger"]["totals"]["blocked_spend_cents"] == 320000
+    assert state["ledger"]["totals"]["remaining_spend_cap_cents"] == 0
+    assert state["ledger"]["totals"]["gross_profit_cents"] == 735000
+    assert state["ledger"]["totals"]["actual_margin_percent"] == 86.5
+    assert len(state["policy_checks"]) == 5
+    assert [check["approved"] for check in state["policy_checks"]] == [0, 1, 1, 1, 0]
     ledger_types = [entry["entry_type"] for entry in state["ledger"]["entries"]]
-    assert ledger_types == ["revenue", "spend", "spend"]
+    assert ledger_types == ["revenue", "spend", "spend", "spend"]
 
 
 def test_spend_check_endpoint_rejects_missing_or_zero_amount_cents(tmp_path, monkeypatch) -> None:
@@ -309,10 +314,10 @@ def test_spend_check_endpoint_rejects_missing_or_zero_amount_cents(tmp_path, mon
     seed_demo()
 
     with pytest.raises(HTTPException) as missing_error:
-        demo_spend_check(SpendCheckRequest(**{"vendor": "Local Ads API"}))
+        demo_spend_check(SpendCheckRequest(**{"vendor": "Secure Workspace Pack"}))
 
     with pytest.raises(HTTPException) as zero_error:
-        demo_spend_check(SpendCheckRequest(**{"vendor": "Local Ads API", "amount_cents": 0}))
+        demo_spend_check(SpendCheckRequest(**{"vendor": "Secure Workspace Pack", "amount_cents": 0}))
 
     assert missing_error.value.status_code == 400
     assert missing_error.value.detail == "Spend check amount_cents must be greater than zero."
@@ -326,10 +331,10 @@ def test_spend_check_endpoint_accepts_requested_amount_cents_alias(tmp_path, mon
     reset_demo()
     seed_demo()
     response = demo_spend_check(
-        SpendCheckRequest(**{"vendor": "Local Ads API", "requested_amount_cents": 8900})
+        SpendCheckRequest(**{"vendor": "Secure Workspace Pack", "requested_amount_cents": 35000})
     )
 
-    assert response["decision"]["requested_amount_cents"] == 8900
+    assert response["decision"]["requested_amount_cents"] == 35000
 
 
 def test_demo_run_endpoint_executes_complete_local_lifecycle(tmp_path, monkeypatch) -> None:
@@ -357,13 +362,13 @@ def test_demo_run_endpoint_persists_history_on_repeated_runs(tmp_path, monkeypat
     assert len(second_state["jobs"]) == 2
     assert len({job["id"] for job in second_state["jobs"]}) == 2
     assert second_state["selected_run_id"] == second_state["job"]["id"]
-    assert len(second_state["ledger"]["entries"]) == 3
-    assert len(second_state["policy_checks"]) == 3
+    assert len(second_state["ledger"]["entries"]) == 4
+    assert len(second_state["policy_checks"]) == 4
     assert len(second_state["stripe_events"]) == 4
     assert len(second_state["agent_outputs"]) == 4
     assert len(second_state["reports"]) == 1
     assert len(second_state["planning_runs"]) == 1
-    assert len(second_state["orchestration_calls"]) == 17
+    assert len(second_state["orchestration_calls"]) == 19
 
 
 def test_state_endpoint_can_inspect_previous_run(tmp_path, monkeypatch) -> None:
@@ -379,7 +384,7 @@ def test_state_endpoint_can_inspect_previous_run(tmp_path, monkeypatch) -> None:
     assert inspected["selected_run_id"] == first_run_id
     assert inspected["job"]["id"] == first_run_id
     assert len(inspected["jobs"]) == 2
-    assert inspected["report"]["gross_profit_cents"] == 101300
+    assert inspected["report"]["gross_profit_cents"] == 735000
 
 
 def test_protected_http_endpoints_require_auth_when_enabled(tmp_path, monkeypatch) -> None:
@@ -432,7 +437,7 @@ def test_demo_run_records_planning_and_orchestration_calls(tmp_path, monkeypatch
     assert state["hermes"]["toolsets_used"] == ["skills"]
 
     calls = state["orchestration_calls"]
-    assert [call["sequence"] for call in calls] == list(range(1, 18))
+    assert [call["sequence"] for call in calls] == list(range(1, 20))
     assert [call["tool_name"] for call in calls] == [
         "job.create",
         "planning.generate_operating_plan",
@@ -441,6 +446,8 @@ def test_demo_run_records_planning_and_orchestration_calls(tmp_path, monkeypatch
         "stripe.prepare_payment_url",
         "stripe.confirm_payment_status",
         "ledger.record_revenue",
+        "policy.check_spend",
+        "ledger.record_spend",
         "policy.check_spend",
         "ledger.record_spend",
         "policy.check_spend",
@@ -468,10 +475,10 @@ def test_policy_enforcement_is_independent_of_hermes_output(tmp_path, monkeypatc
 
     _assert_complete_demo_state(state)
     blocked_check = state["policy_checks"][-1]
-    assert blocked_check["vendor"] == "Premium Automation Suite"
+    assert blocked_check["vendor"] == "Unapproved Data Broker Enrichment"
     assert blocked_check["approved"] == 0
-    assert state["ledger"]["totals"]["approved_spend_cents"] == 18700
-    assert state["ledger"]["totals"]["blocked_spend_cents"] == 75000
+    assert state["ledger"]["totals"]["approved_spend_cents"] == 115000
+    assert state["ledger"]["totals"]["blocked_spend_cents"] == 320000
 
 
 def test_product_mode_stripe_failure_is_visible_and_not_test_double(tmp_path, monkeypatch) -> None:
@@ -494,8 +501,8 @@ def test_product_mode_stripe_failure_is_visible_and_not_test_double(tmp_path, mo
 
 
 def _assert_complete_demo_state(state: dict) -> None:
-    assert state["job"]["client_name"] == "Harbor Fleet Services"
-    assert state["job"]["job_name"] == "30-day fleet brake inspection campaign"
+    assert state["job"]["client_name"] == "Northstar Dental Group"
+    assert state["job"]["job_name"] == "Client Implementation Launch"
     assert state["job"]["status"] == "complete"
     assert state["job"]["id"] in {job["id"] for job in state["jobs"]}
 
@@ -521,28 +528,29 @@ def _assert_complete_demo_state(state: dict) -> None:
     assert all(event["livemode"] is False for event in stripe_events)
     assert state["stripe"]["stripe_mode"] == "test_double"
     assert state["stripe"]["used_real_stripe"] is False
-    assert state["stripe"]["invoice_id"] == "in_test_double_harbor_brake_1200"
+    assert state["stripe"]["invoice_id"] == "in_test_double_northstar_launch_8500"
     assert state["stripe"]["paid"] is False
 
     ledger_entries = state["ledger"]["entries"]
-    assert [entry["entry_type"] for entry in ledger_entries] == ["revenue", "spend", "spend"]
-    assert [entry["amount_cents"] for entry in ledger_entries] == [120000, 8900, 9800]
+    assert [entry["entry_type"] for entry in ledger_entries] == ["revenue", "spend", "spend", "spend"]
+    assert [entry["amount_cents"] for entry in ledger_entries] == [850000, 35000, 50000, 30000]
 
     totals = state["ledger"]["totals"]
-    assert totals["revenue_cents"] == 120000
-    assert totals["approved_spend_cents"] == 18700
-    assert totals["blocked_spend_cents"] == 75000
-    assert totals["gross_profit_cents"] == 101300
-    assert totals["actual_margin_percent"] == 84.4
+    assert totals["revenue_cents"] == 850000
+    assert totals["approved_spend_cents"] == 115000
+    assert totals["blocked_spend_cents"] == 320000
+    assert totals["gross_profit_cents"] == 735000
+    assert totals["actual_margin_percent"] == 86.5
 
     policy_checks = state["policy_checks"]
     assert [check["vendor"] for check in policy_checks] == [
-        "Local Ads API",
-        "Design Asset Pack",
-        "Premium Automation Suite",
+        "Secure Workspace Pack",
+        "Data Migration Sandbox",
+        "Launch Asset Kit",
+        "Unapproved Data Broker Enrichment",
     ]
-    assert [check["approved"] for check in policy_checks] == [1, 1, 0]
-    assert [check["requested_amount_cents"] for check in policy_checks] == [8900, 9800, 75000]
+    assert [check["approved"] for check in policy_checks] == [1, 1, 1, 0]
+    assert [check["requested_amount_cents"] for check in policy_checks] == [35000, 50000, 30000, 320000]
 
     agent_outputs = state["agent_outputs"]
     assert [output["agent_name"] for output in agent_outputs] == ["Finance", "Marketing", "Research", "Ops"]
@@ -550,13 +558,13 @@ def _assert_complete_demo_state(state: dict) -> None:
 
     report = state["report"]
     assert report is not None
-    assert report["revenue_cents"] == 120000
-    assert report["approved_spend_cents"] == 18700
-    assert report["blocked_spend_cents"] == 75000
-    assert report["gross_profit_cents"] == 101300
-    assert report["actual_margin_percent"] == 84.4
+    assert report["revenue_cents"] == 850000
+    assert report["approved_spend_cents"] == 115000
+    assert report["blocked_spend_cents"] == 320000
+    assert report["gross_profit_cents"] == 735000
+    assert report["actual_margin_percent"] == 86.5
     assert report["policy_violations"] == 0
-    assert "Renew campaign" in report["recommendation"]
+    assert "Proceed with implementation launch" in report["recommendation"]
 
 
 def _unsafe_hermes_plan(job: dict) -> dict:

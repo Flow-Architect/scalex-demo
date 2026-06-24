@@ -1,32 +1,39 @@
-# AGENTS.md — ScaleX Codex Rules
+# AGENTS.md - ScaleX Codex Rules
 
 These rules apply to all Codex work in this repo.
 
-## Project identity
+## Project Identity
 
-Product: ScaleX
-Submission title: ScaleX: Profit-Aware Agent Operations for Service Workflows
-Repo path: /home/ascabrya/dev/scalex-demo
+Product: ScaleX ClientOps Autopilot
 
-ScaleX is a live working product-style prototype for turning repeatable enterprise functions
-into autonomous, governed workflows. Product mode is real-integration-first in the appropriate
-environment; test doubles are for automated tests, CI, offline development, or explicitly
-labeled diagnostics.
+Category: Enterprise Function Accelerator
 
-## Core product loop
+Submission title: ScaleX ClientOps Autopilot: Enterprise Function Accelerator for Revenue-Backed Client Operations
 
-Job Intake
-→ Hermes/GPT-5.5 Planning
-→ Stripe Test Invoice / Payment Flow
-→ NeMo Guardrail Gate / Local Policy Guardrails
-→ SQLite Ledger / Audit Records
-→ Agent Work
-→ Profit Report
+Repo path: `/home/ascabrya/dev/scalex-demo`
 
-## Non-negotiable safety rules
+ScaleX helps B2B teams turn repeatable client operations into autonomous, revenue-backed,
+policy-governed runs with finance proof, guardrail enforcement, and audit evidence. Product mode
+is real-integration-first in the appropriate environment; test doubles are for automated tests,
+CI, offline development, or explicitly labeled diagnostics.
+
+## Core Product Loop
+
+```text
+Client operation intake
+-> Hermes/GPT-5.5 planning and routing
+-> Stripe test invoice/payment-state proof
+-> ScaleX business-rule enforcement
+-> local policy guardrails now / NeMo Guardrails planned
+-> SQLite evidence ledger
+-> agent work
+-> Profit Outcome
+```
+
+## Non-Negotiable Safety Rules
 
 - Do not touch files outside this repo.
-- For Goal 7, do not use live Stripe keys and do not create live-money payments.
+- For Goal 7 work, do not use live Stripe keys and do not create live-money payments.
 - Future live-money Stripe work is allowed only through a documented Verified Live Mode.
 - Do not use real client data.
 - Do not connect to Prometheus production data.
@@ -34,9 +41,9 @@ Job Intake
 - Do not connect to homelab OpenClaw.
 - Do not connect to Recall memory.
 - Do not commit secrets.
-- Do not commit .env, SQLite .db files, recordings, logs, node_modules, venvs, or build artifacts.
+- Do not commit `.env`, SQLite `.db` files, recordings, logs, node_modules, venvs, or build artifacts.
 
-## Integration truthfulness
+## Integration Truthfulness
 
 Only claim what is actually implemented.
 
@@ -46,6 +53,7 @@ Allowed wording before an integration is wired:
 - Hermes-style orchestration adapter
 - Stripe test-double event for tests/diagnostics
 - sandbox product prototype
+- NeMo Guardrails planned/not wired
 
 Do not claim:
 
@@ -56,65 +64,75 @@ Do not claim:
 
 unless that integration is actually wired, tested, and documented.
 
-## Build rules
+## Build Rules
 
 - Working product-mode integration proof beats architectural perfection.
 - Keep scope small.
-- One client: Harbor Fleet Services.
-- One job: 30-day fleet brake inspection campaign.
-- One invoice: $1,200.
-- Approved spend: $89 and $98.
-- Blocked spend: $750.
-- Margin floor: 50%.
-- Final report should show $1,200 revenue, $187 approved spend, $1,013 gross profit, and about 84.4% margin.
+- Current implemented sample: Northstar Dental Group / Client Implementation Launch.
+- Current sample is synthetic B2B implementation operations only: no patient data, no PHI, no
+  healthcare compliance claim, and no HIPAA support claim.
+- Current implemented invoice: $8,500.
+- Current implemented approved setup spend: $350, $500, and $300.
+- Current implemented blocked risk: $3,200.
+- Current implemented margin floor: 50%.
+- Current implemented profit outcome should show $8,500 revenue, $1,150 approved setup spend,
+  $3,200 blocked risk, $7,350 protected gross profit, and 86.5% protected margin.
+- Harbor Fleet Services is historical only and is no longer the current implemented sample.
 
-## Preferred stack
+## Preferred Stack
 
 Frontend:
+
 - Vite
 - React
 - TypeScript
 - Tailwind
 
 Backend:
+
 - FastAPI
 - Python sqlite3
 
 Database:
-- SQLite at data/scalex.db
-- schema in data/schema.sql
+
+- SQLite at `data/scalex.db`
+- schema in `data/schema.sql`
 
 Guardrails:
+
+- local policy engine is active now
 - NVIDIA NeMo Guardrails or NeMo-compatible safety layer target for Goal 8
-- local policy engine is active now and may support tests/diagnostics until Goal 8 wires a verified adapter
 
 AI planning:
+
 - GPT-5.5 Auth through isolated Hermes in product mode
 - deterministic test-double planning required for automated tests
 
 Stripe:
+
 - real Stripe test-mode API path is the Goal 7 product path
 - Stripe test-double mode is for tests/CI/explicit diagnostics only
 
-## Product-mode integration rules
+## Product-Mode Integration Rules
 
 - Do not propose fallback-first implementation goals.
-- Do not say "the product loop must work when an integration is unavailable" unless the
-  behavior is a visible integration error or an explicitly configured test/diagnostic mode.
+- Do not say the product loop must work when an integration is unavailable unless the behavior is
+  a visible integration error or an explicitly configured test/diagnostic mode.
 - Product acceptance criteria should prove real integration usage.
 - Future Stripe work must distinguish:
   - Stripe test mode: real Stripe API calls with test keys and no live-money movement.
   - Stripe live-money mode: real Stripe live API capability.
   - Verified Live Mode: the only allowed future path for live-money actions.
-- Hermes may plan and propose payment steps, but ScaleX code and guardrails must enforce
-  keys, modes, caps, allowlists, confirmations, and audit records.
+- Hermes may plan and propose payment steps, but ScaleX code and guardrails must enforce keys,
+  modes, caps, allowlists, confirmations, and audit records.
 
 Hermes:
-- use the ScaleX-isolated laptop Hermes install
-- code: /home/ascabrya/.scalex-hermes/hermes-agent
-- home/config/auth: /home/ascabrya/.scalex-hermes/home
 
-## Documentation rules
+- use the ScaleX-isolated laptop Hermes install
+- code: `/home/ascabrya/.scalex-hermes/hermes-agent`
+- home/config/auth: `/home/ascabrya/.scalex-hermes/home`
+
+## Documentation Rules
 
 ROADMAP.md is the long-term plan.
 STATUS.md is verified current state.
@@ -124,9 +142,9 @@ CHANGELOG.md records completed changes.
 
 Update STATUS.md, TASKS.md, and CHANGELOG.md before session closeout.
 
-## Goal closeout rule
+## Goal Closeout Rule
 
-At the end of every Codex /goal, update the project handoff docs.
+At the end of every Codex `/goal`, update the project handoff docs.
 
 Required:
 

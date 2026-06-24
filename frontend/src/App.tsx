@@ -47,17 +47,17 @@ import type {
   WorkflowConfig,
 } from "./types";
 
-const HARBOR_ONBOARDING_DRAFT: OnboardingDraft = {
-  clientName: "Harbor Fleet Services",
-  businessType: "Regional fleet maintenance provider",
-  jobName: "30-day fleet brake inspection campaign",
+const NORTHSTAR_ONBOARDING_DRAFT: OnboardingDraft = {
+  clientName: "Northstar Dental Group",
+  businessType: "Multi-location healthcare services group",
+  jobName: "Client Implementation Launch",
   jobGoal:
-    "Generate a client-ready fleet brake inspection package, including campaign copy, operations handoff notes, landing page copy, follow-up messages, and a final profitability report.",
-  invoiceAmountUsd: "1200",
-  spendCapUsd: "300",
+    "Launch a synthetic B2B client implementation operation for a multi-location account, including onboarding kickoff, secure workspace setup, data migration sandbox coordination, launch asset kit preparation, stakeholder handoff, evidence summary, and a final protected-profit outcome. This sample uses no patient data and no PHI.",
+  invoiceAmountUsd: "8500",
+  spendCapUsd: "1150",
   marginFloorPercent: "50",
-  approvedVendors: "Local Ads API, Design Asset Pack",
-  blockedVendors: "Premium Automation Suite",
+  approvedVendors: "Secure Workspace Pack, Data Migration Sandbox, Launch Asset Kit",
+  blockedVendors: "Unapproved Data Broker Enrichment",
 };
 
 export default function App() {
@@ -65,7 +65,7 @@ export default function App() {
   const [authError, setAuthError] = useState<string | null>(null);
   const [loginForm, setLoginForm] = useState({ username: "", password: "" });
   const [activeView, setActiveView] = useState<AppView>("dashboard");
-  const [onboardingDraft, setOnboardingDraft] = useState<OnboardingDraft>(HARBOR_ONBOARDING_DRAFT);
+  const [onboardingDraft, setOnboardingDraft] = useState<OnboardingDraft>(NORTHSTAR_ONBOARDING_DRAFT);
   const [onboardingError, setOnboardingError] = useState<string | null>(null);
   const [health, setHealth] = useState<HealthResponse | null>(null);
   const [state, setState] = useState<DemoState | null>(null);
@@ -207,7 +207,7 @@ export default function App() {
       ]);
       setHealth(healthResponse);
       setState(stateResponse);
-      setNotice("Command center refreshed from the local backend.");
+      setNotice("ClientOps Autopilot refreshed from the local backend.");
     } catch (caught) {
       setError(errorMessage(caught));
     } finally {
@@ -227,7 +227,7 @@ export default function App() {
       if (response.status === "completed") {
         setPlaybackIndex(WORKFLOW_NODE_ORDER.length - 1);
         setRunCompletedMoment(true);
-        setNotice("Workflow run completed with API proof loaded.");
+        setNotice("Client implementation run completed with API proof loaded.");
       } else {
         setError(String(response.decision?.error ?? `Run ended with status ${response.status}.`));
       }
@@ -265,7 +265,7 @@ export default function App() {
       setState(response.state);
       setHealth(await getHealth());
       setActiveView("dashboard");
-      setNotice("Local workflow saved and selected. It is ready to run.");
+      setNotice("Local client operation saved and selected. It is ready to run.");
     } catch (caught) {
       setOnboardingError(errorMessage(caught));
     } finally {
@@ -273,17 +273,17 @@ export default function App() {
     }
   }
 
-  async function handleUseHarborSample() {
-    setOnboardingDraft(HARBOR_ONBOARDING_DRAFT);
+  async function handleUseNorthstarSample() {
+    setOnboardingDraft(NORTHSTAR_ONBOARDING_DRAFT);
     setBusyAction("reset");
     setOnboardingError(null);
     setError(null);
     try {
-      const response = await saveOnboarding(onboardingRequestFromDraft(HARBOR_ONBOARDING_DRAFT));
+      const response = await saveOnboarding(onboardingRequestFromDraft(NORTHSTAR_ONBOARDING_DRAFT));
       setState(response.state);
       setHealth(await getHealth());
       setActiveView("dashboard");
-      setNotice("Harbor Fleet Services sample loaded.");
+      setNotice("Northstar Dental Group sample loaded.");
     } catch (caught) {
       setOnboardingError(errorMessage(caught));
     } finally {
@@ -301,7 +301,7 @@ export default function App() {
       setHealth(await getHealth());
       setActiveView("dashboard");
       setSelectedNodeKey("summary");
-      setNotice("Workflow selected. The next run will use this customer and economics.");
+      setNotice("Client operation selected. The next run will use this account and economics.");
     } catch (caught) {
       setError(errorMessage(caught));
     } finally {
@@ -433,7 +433,7 @@ export default function App() {
           onInspectRun={handleInspectRun}
           onSaveWorkflow={handleSaveOnboarding}
           onSelectWorkflow={handleSelectWorkflow}
-          onUseHarborSample={handleUseHarborSample}
+          onUseNorthstarSample={handleUseNorthstarSample}
           onboardingBusy={busyAction === "reset"}
           onboardingDraft={onboardingDraft}
           onboardingError={onboardingError}
@@ -453,8 +453,8 @@ function LoadingScreen() {
             <Workflow className="h-5 w-5 animate-pulse" aria-hidden="true" />
           </span>
           <div>
-            <p className="text-lg font-semibold">ScaleX</p>
-            <p className="text-sm text-zinc-300">Loading local operator console</p>
+            <p className="text-lg font-semibold">ScaleX ClientOps Autopilot</p>
+            <p className="text-sm text-zinc-300">Loading local operation console</p>
           </div>
         </div>
       </div>
@@ -484,17 +484,17 @@ function LoginScreen({
               <ShieldCheck className="h-5 w-5" aria-hidden="true" />
             </span>
             <div>
-              <p className="text-xl font-semibold">ScaleX</p>
-              <p className="text-sm text-zinc-400">Profit-aware agent operations</p>
+              <p className="text-xl font-semibold">ScaleX ClientOps Autopilot</p>
+              <p className="text-sm text-zinc-400">Enterprise Function Accelerator</p>
             </div>
           </div>
 
           <div className="max-w-3xl">
             <p className="text-sm font-semibold uppercase text-emerald-200">
-              Secure Operator Console
+              Secure ClientOps Console
             </p>
             <h1 className="mt-3 text-4xl font-semibold leading-tight lg:text-6xl">
-              Access the autonomous workflow control room.
+              Access the governed client operation console.
             </h1>
             <p className="mt-5 max-w-2xl text-base leading-7 text-zinc-300">
               Local prototype auth gates the demo API and product shell with a signed
@@ -519,7 +519,7 @@ function LoginScreen({
                 <KeyRound className="h-5 w-5" aria-hidden="true" />
               </span>
               <div>
-                <h2 className="text-lg font-semibold">Operator login</h2>
+                <h2 className="text-lg font-semibold">ClientOps login</h2>
                 <p className="text-sm text-zinc-300">Prototype local auth</p>
               </div>
             </div>
@@ -561,7 +561,7 @@ function LoginScreen({
               ) : (
                 <LockKeyhole className="h-4 w-4" aria-hidden="true" />
               )}
-              Enter console
+              Enter ClientOps Autopilot
             </button>
           </form>
         </section>
@@ -588,8 +588,8 @@ function draftFromJob(job: DemoJob): OnboardingDraft {
     invoiceAmountUsd: String(job.invoice_amount_cents / 100),
     spendCapUsd: String(job.spend_cap_cents / 100),
     marginFloorPercent: String(job.margin_floor_percent),
-    approvedVendors: HARBOR_ONBOARDING_DRAFT.approvedVendors,
-    blockedVendors: HARBOR_ONBOARDING_DRAFT.blockedVendors,
+    approvedVendors: NORTHSTAR_ONBOARDING_DRAFT.approvedVendors,
+    blockedVendors: NORTHSTAR_ONBOARDING_DRAFT.blockedVendors,
   };
 }
 

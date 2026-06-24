@@ -91,11 +91,11 @@ def reset_demo() -> dict:
 def seed_demo() -> dict:
     initialize_database()
     with closing(get_connection()) as connection:
-        seed_config = _harbor_seed_config()
+        seed_config = _sample_seed_config()
         workflow = repository.create_workflow(
             connection,
             seed_config,
-            workflow_id=repository.HARBOR_WORKFLOW_ID,
+            workflow_id=repository.NORTHSTAR_WORKFLOW_ID,
             activate=True,
         )
         repository.upsert_onboarding_config(connection, seed_config)
@@ -231,9 +231,9 @@ def _save_workflow_from_request(request: OnboardingRequest, *, status: str) -> d
     initialize_database()
     with closing(get_connection()) as connection:
         workflow_id = (
-            repository.HARBOR_WORKFLOW_ID
-            if seed_config["clientName"] == "Harbor Fleet Services"
-            and seed_config["jobName"] == "30-day fleet brake inspection campaign"
+            repository.NORTHSTAR_WORKFLOW_ID
+            if seed_config["clientName"] == "Northstar Dental Group"
+            and seed_config["jobName"] == "Client Implementation Launch"
             else None
         )
         repository.create_workflow(
@@ -247,15 +247,15 @@ def _save_workflow_from_request(request: OnboardingRequest, *, status: str) -> d
     return {"status": status, "state": _current_state()}
 
 
-def _harbor_seed_config() -> dict:
+def _sample_seed_config() -> dict:
     return load_seed_config()
 
 
 def _onboarding_seed_config(request: OnboardingRequest) -> dict:
     client_name = _clean_text(request.client_name, "customer/business name", max_length=120)
     business_type = _clean_text(request.business_type, "business type", max_length=120)
-    job_name = _clean_text(request.job_name, "job/campaign name", max_length=160)
-    job_goal = _clean_text(request.job_goal, "job goal", max_length=1200)
+    job_name = _clean_text(request.job_name, "implementation/template name", max_length=160)
+    job_goal = _clean_text(request.job_goal, "operation goal", max_length=1200)
     if request.invoice_amount_usd <= 0:
         raise ValueError("Invoice amount must be greater than zero.")
     if request.spend_cap_usd <= 0:
@@ -265,8 +265,12 @@ def _onboarding_seed_config(request: OnboardingRequest) -> dict:
 
     approved_vendors = _vendor_list(request.approved_vendors)
     blocked_vendors = _vendor_list(request.blocked_vendors)
-    approved_spend_vendors = approved_vendors[:2] or ["Local Ads API", "Design Asset Pack"]
-    blocked_spend_vendor = blocked_vendors[0] if blocked_vendors else "Premium Automation Suite"
+    approved_spend_vendors = approved_vendors[:3] or [
+        "Secure Workspace Pack",
+        "Data Migration Sandbox",
+        "Launch Asset Kit",
+    ]
+    blocked_spend_vendor = blocked_vendors[0] if blocked_vendors else "Unapproved Data Broker Enrichment"
 
     return {
         "clientName": client_name,
@@ -281,20 +285,25 @@ def _onboarding_seed_config(request: OnboardingRequest) -> dict:
         "approvedSpendRequests": [
             {
                 "vendor": approved_spend_vendors[0],
-                "amountUsd": 89,
-                "purpose": "Local sample approved vendor spend.",
+                "amountUsd": 350,
+                "purpose": "Local sample approved workspace setup spend.",
             },
             {
-                "vendor": approved_spend_vendors[1] if len(approved_spend_vendors) > 1 else "Design Asset Pack",
-                "amountUsd": 98,
-                "purpose": "Local sample approved creative spend.",
+                "vendor": approved_spend_vendors[1] if len(approved_spend_vendors) > 1 else "Data Migration Sandbox",
+                "amountUsd": 500,
+                "purpose": "Local sample approved non-PHI data migration sandbox spend.",
+            },
+            {
+                "vendor": approved_spend_vendors[2] if len(approved_spend_vendors) > 2 else "Launch Asset Kit",
+                "amountUsd": 300,
+                "purpose": "Local sample approved launch asset spend.",
             },
         ],
         "blockedSpendRequests": [
             {
                 "vendor": blocked_spend_vendor,
-                "amountUsd": 750,
-                "purpose": "Local sample unsafe spend request.",
+                "amountUsd": 3200,
+                "purpose": "Local sample risky enrichment request outside approved scope.",
             }
         ],
     }

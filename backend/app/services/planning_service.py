@@ -11,7 +11,7 @@ from .ledger_service import usd_to_cents
 from .seed_service import load_seed_config
 
 
-PROMPT_VERSION = "scalex_hermes_operating_plan_v1"
+PROMPT_VERSION = "scalex_clientops_operating_plan_v2"
 REQUIRED_PLAN_KEYS = {
     "operating_plan",
     "agent_task_list",
@@ -151,8 +151,12 @@ def build_planning_prompt(job: dict[str, Any], seed_config: dict[str, Any]) -> s
     ]
 
     prompt_payload = {
-        "product": "ScaleX",
+        "product": "ScaleX ClientOps Autopilot",
         "prototype_boundary": "local sandbox product prototype",
+        "sample_boundary": (
+            "Synthetic B2B client implementation sample only. Do not include patient data, PHI, "
+            "healthcare compliance claims, or HIPAA support claims."
+        ),
         "job": {
             "id": job["id"],
             "client_name": job["client_name"],
@@ -179,14 +183,14 @@ def build_planning_prompt(job: dict[str, Any], seed_config: dict[str, Any]) -> s
     }
 
     return (
-        "You are the ScaleX-isolated Hermes planning brain for a sandbox product run.\n"
+        "You are the ScaleX-isolated Hermes planning brain for a sandbox ClientOps Autopilot run.\n"
         "Use the preloaded scalex-operator skill instructions for the planning boundary.\n"
         "Return strict JSON only. Do not wrap it in markdown. Do not include commentary.\n"
         "The JSON object must contain exactly these top-level keys: operating_plan, "
         "agent_task_list, campaign_strategy, executive_summary, proposed_tool_sequence.\n"
-        "operating_plan should describe the safe service workflow phases.\n"
+        "operating_plan should describe the safe client implementation launch phases.\n"
         "agent_task_list should assign Finance, Marketing, Research, and Ops tasks.\n"
-        "campaign_strategy should describe the customer-facing campaign approach.\n"
+        "campaign_strategy should describe the implementation launch approach.\n"
         "executive_summary should be one concise paragraph.\n"
         "proposed_tool_sequence should be an ordered list of the allowed ScaleX tool names.\n"
         "Do not approve or reject spend; mention that policy decisions are made by ScaleX code.\n"
@@ -291,34 +295,35 @@ def deterministic_test_plan(job: dict[str, Any], seed_config: dict[str, Any] | N
     return {
         "operating_plan": {
             "objective": (
-                f"Run {job['client_name']} {job['job_name']} from intake through "
-                f"profit report while preserving the {margin_floor}% margin floor."
+                f"Run {job['client_name']} {job['job_name']} from package intake through "
+                f"profit outcome while preserving the {margin_floor}% margin floor."
             ),
             "phases": [
-                f"Confirm the ${invoice_amount:,.0f} job and create Stripe test-mode invoice records.",
-                "Record revenue before any vendor spend is evaluated.",
-                "Submit vendor spend requests to ScaleX policy code.",
-                "Coordinate Finance, Marketing, Research, and Ops deliverables.",
-                "Generate the final profit report from SQLite ledger totals.",
+                f"Intake the ${invoice_amount:,.0f} implementation package and create Stripe test-mode invoice records.",
+                "Record revenue before approved setup spend is evaluated.",
+                "Submit workspace, data migration sandbox, launch asset, and enrichment requests to ScaleX policy code.",
+                "Coordinate Finance, Marketing, Research, and Ops implementation work units.",
+                "Generate the final profit outcome from SQLite ledger totals.",
             ],
             "policy_boundary": "ScaleX policy code approves or blocks spend; Hermes only plans.",
+            "data_boundary": "Synthetic account only; no patient data and no PHI.",
         },
         "agent_task_list": [
             {
                 "agent": "Finance",
-                "task": "Reconcile revenue, approved spend, blocked spend, and gross profit.",
+                "task": "Reconcile implementation package revenue, approved setup spend, blocked risk, and protected gross profit.",
             },
             {
                 "agent": "Marketing",
-                "task": "Prepare campaign copy for the fleet brake inspection offer.",
+                "task": "Prepare launch asset kit messaging and stakeholder kickoff copy.",
             },
             {
                 "agent": "Research",
-                "task": "Summarize regional fleet maintenance positioning and buyer concerns.",
+                "task": "Summarize implementation risks, vendor boundaries, and non-PHI sandbox assumptions.",
             },
             {
                 "agent": "Ops",
-                "task": "Prepare handoff notes for inspection scheduling and follow-up.",
+                "task": "Prepare onboarding timeline, workspace setup checklist, and stakeholder handoff notes.",
             },
         ],
         "campaign_strategy": {
@@ -330,7 +335,7 @@ def deterministic_test_plan(job: dict[str, Any], seed_config: dict[str, Any] | N
             "blocked_spend_candidates": seed_config["blockedSpendRequests"],
         },
         "executive_summary": (
-            f"Plan the {job['client_name']} workflow as a revenue-backed service workflow: "
+            f"Plan the {job['client_name']} implementation launch as a revenue-backed client operation: "
             "confirm sandbox payment, let ScaleX policy code govern spend, coordinate the "
             f"four local agents, and report the final ${projected_profit / 100:,.0f} "
             f"gross profit target at about {projected_margin}% margin."
@@ -348,6 +353,8 @@ def expected_tool_sequence() -> list[str]:
         "stripe.prepare_payment_url",
         "stripe.confirm_payment_status",
         "ledger.record_revenue",
+        "policy.check_spend",
+        "ledger.record_spend",
         "policy.check_spend",
         "ledger.record_spend",
         "policy.check_spend",

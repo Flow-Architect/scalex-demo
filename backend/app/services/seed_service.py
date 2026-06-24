@@ -26,14 +26,14 @@ def seed_demo_database(
         connection,
         job_id=job["id"],
         type="job_intake",
-        title=f"{seed_config['clientName']} job seeded",
+        title=f"{seed_config['clientName']} implementation launch seeded",
         detail=(
             f"{seed_config['jobName']} loaded with ${seed_config['invoiceAmountUsd']} "
-            f"invoice, ${seed_config['spendCapUsd']} spend cap, and "
+            f"implementation package revenue, ${seed_config['spendCapUsd']} setup spend cap, and "
             f"{seed_config['marginFloorPercent']}% margin floor."
         ),
         status="seeded",
-        event_id="evt_harbor_job_seeded" if deterministic_event_ids else None,
+        event_id="evt_northstar_implementation_seeded" if deterministic_event_ids else None,
     )
     connection.commit()
     return job

@@ -88,7 +88,7 @@ def build_demo_state(connection: sqlite3.Connection, run_id: str | None = None) 
                 usd_to_cents(seed_config["invoiceAmountUsd"]) - _approved_spend_cents(seed_config)
             ),
             "expected_margin_percent": _expected_margin_percent(seed_config),
-            "recommendation": "Renew campaign for another 30 days",
+            "recommendation": "Proceed with implementation launch while preserving setup spend guardrails.",
         },
     }
 

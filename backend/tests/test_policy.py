@@ -20,10 +20,10 @@ def test_policy_config_summary_uses_local_rules() -> None:
 
     assert summary["engine"] == "local policy engine"
     assert summary["stripe_live_mode"] is False
-    assert summary["max_job_spend_usd"] == 300
+    assert summary["max_job_spend_usd"] == 1150
     assert summary["margin_floor_percent"] == 50
-    assert "Local Ads API" in summary["approved_vendors"]
-    assert "Premium Automation Suite" in summary["blocked_vendors"]
+    assert "Secure Workspace Pack" in summary["approved_vendors"]
+    assert "Unapproved Data Broker Enrichment" in summary["blocked_vendors"]
 
 
 def test_policy_check_persistence(tmp_path) -> None:
@@ -36,20 +36,20 @@ def test_policy_check_persistence(tmp_path) -> None:
             connection,
             job_id=job["id"],
             request_type="vendor_spend",
-            vendor="Premium Automation Suite",
-            requested_amount_cents=usd_to_cents(750),
+            vendor="Unapproved Data Broker Enrichment",
+            requested_amount_cents=usd_to_cents(3200),
             approved=False,
             reason="Vendor blocked and spend exceeds cap.",
-            margin_after_spend_percent=37.5,
+            margin_after_spend_percent=62.4,
             required_action="blocked",
         )
         connection.commit()
         checks = list_policy_checks(connection, job["id"])
 
     assert len(checks) == 1
-    assert checks[0]["vendor"] == "Premium Automation Suite"
+    assert checks[0]["vendor"] == "Unapproved Data Broker Enrichment"
     assert checks[0]["approved"] == 0
-    assert checks[0]["requested_amount_cents"] == 75000
+    assert checks[0]["requested_amount_cents"] == 320000
 
 
 def test_spend_is_blocked_before_payment_when_required(tmp_path) -> None:
@@ -61,8 +61,8 @@ def test_spend_is_blocked_before_payment_when_required(tmp_path) -> None:
         result = apply_spend_request(
             connection,
             job=job,
-            vendor="Local Ads API",
-            requested_amount_cents=usd_to_cents(89),
+            vendor="Secure Workspace Pack",
+            requested_amount_cents=usd_to_cents(350),
         )
         events = list_events(connection, job["id"])
         ledger_entries = list_ledger_entries(connection, job["id"])
@@ -89,15 +89,15 @@ def test_approved_vendor_under_cap_is_approved_after_payment(tmp_path) -> None:
         result = apply_spend_request(
             connection,
             job=job,
-            vendor="Local Ads API",
-            requested_amount_cents=usd_to_cents(89),
+            vendor="Secure Workspace Pack",
+            requested_amount_cents=usd_to_cents(350),
         )
         ledger_entries = list_ledger_entries(connection, job["id"])
         checks = list_policy_checks(connection, job["id"])
 
     assert result["decision"]["approved"] is True
     assert result["ledger_entry"] is not None
-    assert approved_spend_total(ledger_entries) == 8900
+    assert approved_spend_total(ledger_entries) == 35000
     assert len(checks) == 1
     assert checks[0]["approved"] == 1
 
@@ -112,8 +112,8 @@ def test_blocked_vendor_is_blocked_and_does_not_create_spend_entry(tmp_path) -> 
         result = apply_spend_request(
             connection,
             job=job,
-            vendor="Premium Automation Suite",
-            requested_amount_cents=usd_to_cents(750),
+            vendor="Unapproved Data Broker Enrichment",
+            requested_amount_cents=usd_to_cents(3200),
             human_approved=True,
         )
         ledger_entries = list_ledger_entries(connection, job["id"])
@@ -123,7 +123,7 @@ def test_blocked_vendor_is_blocked_and_does_not_create_spend_entry(tmp_path) -> 
     assert "blocked by local policy" in result["decision"]["reason"]
     assert result["ledger_entry"] is None
     assert approved_spend_total(ledger_entries) == 0
-    assert blocked_spend_total(checks) == 75000
+    assert blocked_spend_total(checks) == 320000
 
 
 def test_spend_over_cap_is_blocked(tmp_path) -> None:
@@ -136,8 +136,8 @@ def test_spend_over_cap_is_blocked(tmp_path) -> None:
         result = apply_spend_request(
             connection,
             job=job,
-            vendor="Local Ads API",
-            requested_amount_cents=usd_to_cents(350),
+            vendor="Secure Workspace Pack",
+            requested_amount_cents=usd_to_cents(1250),
             human_approved=True,
         )
         ledger_entries = list_ledger_entries(connection, job["id"])
@@ -146,7 +146,7 @@ def test_spend_over_cap_is_blocked(tmp_path) -> None:
     assert result["decision"]["approved"] is False
     assert "spend cap" in result["decision"]["reason"]
     assert approved_spend_total(ledger_entries) == 0
-    assert blocked_spend_total(checks) == 35000
+    assert blocked_spend_total(checks) == 125000
 
 
 def test_human_approval_threshold_block_counts_as_blocked_spend(tmp_path) -> None:
@@ -159,8 +159,8 @@ def test_human_approval_threshold_block_counts_as_blocked_spend(tmp_path) -> Non
         result = apply_spend_request(
             connection,
             job=job,
-            vendor="Local Ads API",
-            requested_amount_cents=usd_to_cents(275),
+            vendor="Secure Workspace Pack",
+            requested_amount_cents=usd_to_cents(1050),
         )
         ledger_entries = list_ledger_entries(connection, job["id"])
         checks = list_policy_checks(connection, job["id"])
@@ -168,17 +168,17 @@ def test_human_approval_threshold_block_counts_as_blocked_spend(tmp_path) -> Non
     assert result["decision"]["approved"] is False
     assert "human approval threshold" in result["decision"]["reason"]
     assert approved_spend_total(ledger_entries) == 0
-    assert blocked_spend_total(checks) == 27500
+    assert blocked_spend_total(checks) == 105000
 
 
 def test_margin_floor_violation_is_blocked(tmp_path) -> None:
     db_path = tmp_path / "scalex.db"
     initialize_database(db_path)
     seed = deepcopy(load_seed_config())
-    seed["spendCapUsd"] = 1000
+    seed["spendCapUsd"] = 5000
     policy_config = deepcopy(load_policy_config())
-    policy_config["rules"]["max_job_spend_usd"] = 1000
-    policy_config["rules"]["require_human_approval_above_usd"] = 1000
+    policy_config["rules"]["max_job_spend_usd"] = 5000
+    policy_config["rules"]["require_human_approval_above_usd"] = 5000
 
     with closing(get_connection(db_path)) as connection:
         job = create_job(connection, seed)
@@ -186,18 +186,18 @@ def test_margin_floor_violation_is_blocked(tmp_path) -> None:
         result = apply_spend_request(
             connection,
             job=job,
-            vendor="Local Ads API",
-            requested_amount_cents=usd_to_cents(650),
+            vendor="Secure Workspace Pack",
+            requested_amount_cents=usd_to_cents(4300),
             policy_config=policy_config,
         )
         ledger_entries = list_ledger_entries(connection, job["id"])
         checks = list_policy_checks(connection, job["id"])
 
     assert result["decision"]["approved"] is False
-    assert result["decision"]["margin_after_spend_percent"] == 45.8
+    assert result["decision"]["margin_after_spend_percent"] == 49.4
     assert "below the 50% floor" in result["decision"]["reason"]
     assert approved_spend_total(ledger_entries) == 0
-    assert blocked_spend_total(checks) == 65000
+    assert blocked_spend_total(checks) == 430000
 
 
 def test_policy_checks_persist_for_approved_and_blocked_decisions(tmp_path) -> None:
@@ -210,20 +210,23 @@ def test_policy_checks_persist_for_approved_and_blocked_decisions(tmp_path) -> N
         apply_spend_request(
             connection,
             job=job,
-            vendor="Local Ads API",
-            requested_amount_cents=usd_to_cents(89),
+            vendor="Secure Workspace Pack",
+            requested_amount_cents=usd_to_cents(350),
         )
         apply_spend_request(
             connection,
             job=job,
-            vendor="Premium Automation Suite",
-            requested_amount_cents=usd_to_cents(750),
+            vendor="Unapproved Data Broker Enrichment",
+            requested_amount_cents=usd_to_cents(3200),
             human_approved=True,
         )
         checks = list_policy_checks(connection, job["id"])
         ledger_entries = list_ledger_entries(connection, job["id"])
 
     assert [check["approved"] for check in checks] == [1, 0]
-    assert [check["vendor"] for check in checks] == ["Local Ads API", "Premium Automation Suite"]
-    assert approved_spend_total(ledger_entries) == 8900
-    assert blocked_spend_total(checks) == 75000
+    assert [check["vendor"] for check in checks] == [
+        "Secure Workspace Pack",
+        "Unapproved Data Broker Enrichment",
+    ]
+    assert approved_spend_total(ledger_entries) == 35000
+    assert blocked_spend_total(checks) == 320000
