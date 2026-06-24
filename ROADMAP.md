@@ -2,8 +2,8 @@
 
 > **Project path:** `/home/ascabrya/dev/scalex-demo/`
 > **Purpose:** Build a live working product-style prototype with real integrations in the appropriate mode.
-> **Product:** **ScaleX — Profit-Aware Agent Operations for Service Workflows**
-> **Core product loop:** job intake → Hermes/GPT-5.5 planning → Stripe test invoice/payment flow → policy/NemoClaw-style spend approval → SQLite ledger/audit records → agent work → profit report.
+> **Product:** **ScaleX — Governed Enterprise Function Workflows**
+> **Core product loop:** enterprise function intake → Hermes/GPT-5.5 planning → Stripe test invoice/payment flow → NeMo Guardrail Gate / local policy guardrails → SQLite ledger/audit records → agent work → profit report.
 
 ---
 
@@ -19,7 +19,7 @@ Codex must follow these rules for the entire repo.
 - **Do not commit secrets.** `.env`, `.env.local`, SQLite `.db` files, recordings, and logs must stay ignored.
 - **Use sample workflow data only.** The sample client is `Harbor Fleet Services`.
 - **No autonomous real-world payments.** Goal 7 uses Stripe test mode only; future live-money actions must pass Verified Live Mode.
-- **Do not claim real NemoClaw/Hermes/Stripe integration unless it is actually wired.** If test-double or diagnostic-only, label it clearly.
+- **Do not claim real NeMo Guardrails/NemoClaw/Hermes/Stripe integration unless it is actually wired.** If test-double or diagnostic-only, label it clearly.
 - **Product mode is real-integration-first.** If a real integration is unavailable in product mode, surface a visible integration error instead of silently falling back.
 
 ### Scope Rules
@@ -52,17 +52,17 @@ Codex must follow these rules for the entire repo.
 
 ### One-Sentence Pitch
 
-> ScaleX is a profit-aware agent operations framework for service workflows. It lets agents confirm revenue, spend only inside policy, coordinate work, and produce an auditable profit report.
+> ScaleX turns repeatable enterprise functions into autonomous, governed workflows. It lets agents confirm revenue, route work through Hermes, execute finance primitives through Stripe test mode, enforce guardrails, coordinate work, and produce an auditable profit report.
 
 ### Product Thesis
 
-Most autonomous agent demos focus on whether an agent can spend money. ScaleX focuses on whether a business can trust an agent to plan, invoice, spend, execute, and report profit **only while protecting margin**.
+Most autonomous agent demos focus on whether an agent can spend money. ScaleX focuses on whether a business can trust an agent to run repeatable enterprise functions **only while protecting margin and policy boundaries**.
 
 ### Differentiation
 
 - SOLVENT-style agents protect an agent treasury.
-- **ScaleX protects profitability on revenue-backed service jobs.**
-- Core object is not a treasury; core object is a **customer job ledger**.
+- **ScaleX protects profitability on governed enterprise workflows.**
+- Core object is not a treasury; core object is an **enterprise function ledger**.
 
 ---
 
@@ -77,7 +77,7 @@ Database: SQLite file in ./data/scalex.db
 Hermes brain: real ScaleX-isolated laptop Hermes install in product mode
 AI planning: GPT-5.5 Auth through Hermes, with deterministic test-double planning for tests only
 Stripe: real Stripe test-mode objects through the orchestration layer for Goal 7
-Policy: NemoClaw or NemoClaw-style safety adapter target, with local policy support for tests/diagnostics
+Guardrails: NVIDIA NeMo Guardrails or NeMo-compatible adapter target, with local policy active now and deterministic support for tests/diagnostics
 ```
 
 ### Why SQLite?
@@ -229,10 +229,16 @@ SCALEX_LIVE_MAX_AMOUNT_CENTS=0
 SCALEX_LIVE_ALLOWED_CUSTOMER_EMAILS=
 SCALEX_LIVE_CONFIRMATION_PHRASE=LIVE_MONEY_APPROVED
 
-# Policy / NemoClaw; current product path uses local policy until Goal 8 safely wires a real adapter
+# Guardrails / policy; current product path uses local policy until Goal 8 safely wires a verified adapter
 POLICY_ENGINE=local
 NEMOCLAW_BASE_URL=
 NEMOCLAW_API_KEY=
+GUARDRAIL_ENGINE=local_policy
+NEMO_GUARDRAILS_CONFIG_PATH=
+NEMO_GUARDRAILS_SERVER_URL=
+NEMO_GUARDRAILS_API_KEY=
+GUARDRAILS_FAIL_CLOSED=true
+GUARDRAILS_RECORD_EVALUATIONS=true
 
 # Product prototype guardrails
 DEFAULT_INVOICE_AMOUNT_USD=1200
@@ -760,14 +766,23 @@ ledger, agent work, and reports.
 
 ---
 
-## 14. NemoClaw / Policy Layer
+## 14. Governed Autonomy Layer / NeMo Guardrails Target
 
-ScaleX should use NemoClaw or a NemoClaw-style policy safety adapter for product-mode spend
-governance. The local policy engine remains deterministic safety/test support until Goal 8.
+ScaleX should use NVIDIA NeMo Guardrails, or a NeMo-compatible local adapter, for product-mode
+governed autonomy when it is safely available. The local policy engine is active now and remains
+deterministic safety/test support until Goal 8 verifies and wires a real guardrail adapter.
 
-Goal 8 should make the policy layer presentation clear and, if safely available, wire a real
-NemoClaw-compatible adapter without touching production or homelab services. If a real adapter
-is not safely available, product mode must label the local safety layer honestly.
+Goal 8 should make the governed-autonomy layer clear:
+
+- Hermes plans and routes autonomous work.
+- Stripe executes finance/invoice/payment primitives in test mode now.
+- NVIDIA NeMo Guardrails or a NeMo-compatible local adapter validates autonomous workflow actions.
+- SQLite records guardrail proof and audit evidence.
+- Policy/profit rules enforce safe business outcomes.
+
+Do not claim real NeMo Guardrails or real NemoClaw unless it is installed, wired, tested, and
+documented. Until then, product copy should say "local policy active" or "NeMo-compatible
+guardrail adapter planned."
 
 ### Local Policy Engine Must Show
 
@@ -1274,36 +1289,86 @@ git add .
 git commit -m "Add Verified Live Mode payment safeguards"
 ```
 
-### Milestone 8 — NemoClaw / Policy Safety Integration and Presentation
+### Milestone 8 — Governed Autonomy Layer with NVIDIA NeMo Guardrails
 
-Goal: after Goal 7.9, make spend governance legible and wire a real NemoClaw-compatible
-policy safety layer if it is safe and available.
+Goal: after Goal 7.9, make ScaleX's governed-autonomy stack explicit and safely add a
+guardrail layer centered on NVIDIA NeMo Guardrails concepts.
 
-Tasks:
+Stack identity:
 
-- Show policy checks as policy/NemoClaw-style guardrails.
-- Keep the local policy engine as deterministic test/diagnostic support.
-- Add a NemoClaw adapter only if it can be configured safely without production or homelab access.
-- Add clear labels:
-  - `Hermes Orchestrator`
-  - `Stripe Skill`
-  - `Policy Guardrail`
-  - `Local Policy Engine`
-- If real NemoClaw is integrated, label accurately.
-- If only the local safety layer is available, label it honestly and do not claim real NemoClaw.
+- Hermes plans and routes autonomous work.
+- Stripe executes finance/invoice/payment primitives in test mode now.
+- NVIDIA NeMo Guardrails or a NeMo-compatible local adapter validates the autonomous workflow.
+- SQLite records guardrail proof and audit evidence.
+- Policy/profit rules enforce safe business outcomes.
+
+Do not claim real NeMo Guardrails unless it is installed, wired, tested, and documented.
+Until then, say "local policy active" or "NeMo-compatible guardrail adapter planned."
+
+#### Goal 8A — NeMo Guardrails Preflight / Architecture Audit
+
+- Read-only.
+- Inspect whether `nemoguardrails`, `nemoclaw`, `openclaw`, Docker, and NVIDIA tooling are locally available.
+- Inspect current local policy engine.
+- Decide whether real NeMo Guardrails is safely available.
+- Produce exact 8B implementation prompt.
+
+#### Goal 8B — Guardrail Adapter + Schema/API
+
+- Add a guardrail adapter boundary with modes:
+  - `local_policy`
+  - `nemo_guardrails`
+  - `nemo_compatible`
+- Add guardrail evaluation persistence if needed.
+- Add API state for guardrail mode/status/proof.
+- Keep local policy deterministic for tests.
+
+#### Goal 8C — Guardrail Execution Rails in Run Lifecycle
+
+- Add pre-action guardrail checks around onboarding/workflow input, Hermes plan/tool sequence,
+  Stripe finance action request, spend approval/block, and agent deliverables/final report.
+- Map to NeMo-style rails:
+  - input rail
+  - planning/dialog rail
+  - execution rail
+  - output rail
+- Fail closed on guardrail errors in product mode.
+
+#### Goal 8D — Guardrail Proof UI in Workflow Canvas
+
+- Add or enhance nodes/inspector proof for:
+  - NeMo Guardrail Gate
+  - local policy fallback/test support
+  - fail-closed status
+  - blocked action proof
+  - rule evidence
+- Do not claim real NeMo unless verified.
+
+#### Goal 8E — Enterprise Function Template Positioning + Recording Proof
+
+- Make the product story show ScaleX as an enterprise function framework.
+- Keep Service Campaign Launch as implemented.
+- Present future templates honestly:
+  - Invoice-to-Cash
+  - Vendor Spend Approval
+  - Client Onboarding
+  - Research-to-Report
+  - Ops Handoff
+  - Renewal Recommendation
+- Update demo/submission docs and browser recording path.
 
 Done when:
 
-- Judges can see the agent orchestration and safety layer in the UI.
-- The UI clearly shows why the $750 request was blocked.
-- No production Hermes is touched.
-- No homelab/OpenClaw dependency is touched.
+- Goal 8A has determined whether real NeMo Guardrails is safely available before implementation.
+- Later Goal 8 work shows the guardrail layer as a governed-autonomy gate, not just a spend panel.
+- The UI clearly shows why unsafe actions, including the $750 request, were blocked.
+- No production Hermes, homelab/OpenClaw, production Prometheus, Recall, or real client data is touched.
 
-Suggested commit:
+Suggested commit after the full Goal 8 sequence:
 
 ```bash
 git add .
-git commit -m "Add policy safety presentation"
+git commit -m "Add governed autonomy guardrails"
 ```
 
 ---
@@ -1669,33 +1734,44 @@ Constraints:
 Acceptance criteria:
 - Recording path works: login, select/create workflow, start run, watch graph progress, click Hermes, Stripe, blocked spend, and Profit Report nodes, open Runs, Audit, Integrations, and logout.
 - Demo script and submission docs are updated.
-- Goal 8 remains next after Goal 7.9.
+- Goal 8A remains next after Goal 7.9.
 ```
 
-### `/goal` 8 — NemoClaw / Policy Safety Integration and Presentation
+### `/goal` 8A — NeMo Guardrails Preflight / Architecture Audit
 
 ```text
 /goal
 Repo: /home/ascabrya/dev/scalex-demo
 
 Objective:
-Make spend governance clear and, if safe, wire a real NemoClaw-compatible policy safety layer while keeping the local policy engine for tests/diagnostics.
+Run Goal 8A - NeMo Guardrails Preflight / Architecture Audit.
+
+Decide, read-only, whether real NVIDIA NeMo Guardrails or a NeMo-compatible adapter is safely
+available for Goal 8 implementation, and produce the exact Goal 8B prompt.
 
 Constraints:
+- Read-only.
+- Do not implement code.
+- Do not install anything.
 - Do not connect to production Hermes.
 - Do not connect to homelab/OpenClaw.
+- Do not connect to production Prometheus, xScaleOS, Recall, or real client files.
+- Do not run Stripe API calls.
+- Do not run Hermes model calls.
 - Do not use real client data.
-- Do not claim real NemoClaw unless actually integrated.
+- Do not claim real NeMo Guardrails or real NemoClaw unless actually installed, wired, tested, and documented.
 
 Deliverables:
-- NemoClaw/policy adapter if safe, otherwise explicitly labeled local policy safety layer
-- Policy guardrail panel with spend cap, margin floor, vendor allowlist, blocked vendor, payment-before-spend rule
-- UI labels for Hermes Orchestrator, Stripe Skill, Policy Guardrail, Agent Work
+- Inventory of local availability for `nemoguardrails`, `nemoclaw`, `openclaw`, Docker, and NVIDIA tooling.
+- Read-only audit of the current local policy engine and SQLite audit schema.
+- Decision on whether Goal 8B should use `nemo_guardrails`, `nemo_compatible`, or `local_policy` first.
+- Exact Goal 8B implementation prompt for Guardrail Adapter + Schema/API.
+- Docs updated if the plan changes.
 
 Acceptance criteria:
-- Timeline and policy panel make the stack legible to judges.
-- Policy panel clearly explains why $750 was blocked.
-- No production endpoints are required.
+- No code implementation is done.
+- Goal 8A output clearly distinguishes local policy active now from real NeMo planned/not wired.
+- Goal 8B is ready to run as the next implementation step.
 ```
 
 ### `/goal` 9 — Final Polish + Submission Prep
@@ -1775,11 +1851,11 @@ Target length: 1:30–2:30.
 
 ### 0:00–0:10
 
-> Service teams do not need an AI CEO. They need an AI operator that can turn workflows into revenue without losing margin.
+> Enterprise teams do not need an AI CEO. They need governed AI operators that can turn repeatable functions into revenue without losing margin.
 
 ### 0:10–0:20
 
-> This is ScaleX: profit-aware agent operations for service workflows.
+> This is ScaleX: autonomous, governed workflows for repeatable enterprise functions.
 
 ### 0:20–0:35
 
@@ -1905,7 +1981,11 @@ Goal 7.9B - Design System + App Shell Foundation
 Goal 7.9C - Workflow Canvas + Selected-Node Inspector
 Goal 7.9D - Customers / Runs / Audit / Integrations Cleanup
 Goal 7.9E - Recording Readiness / Browser-Only Demo QA
-Goal 8 - NemoClaw / policy safety integration and presentation
+Goal 8A - NeMo Guardrails Preflight / Architecture Audit
+Goal 8B - Guardrail Adapter + Schema/API
+Goal 8C - Guardrail Execution Rails in Run Lifecycle
+Goal 8D - Guardrail Proof UI in Workflow Canvas
+Goal 8E - Enterprise Function Template Positioning + Recording Proof
 Goal 9 - Final polish and submission assets
 Goal 7B / Production Hardening - Verified Live Mode for future live-money payments
 ```
@@ -1943,7 +2023,7 @@ The winning demo is:
 A service job comes in.
 Hermes/GPT-5.5 plans the work.
 ScaleX creates a real Stripe test-mode invoice and records payment status honestly.
-ScaleX protects margin with policy/NemoClaw-style governance.
+ScaleX protects margin with local policy now and a planned NeMo Guardrail Gate.
 ScaleX records audit-backed execution in SQLite.
 ScaleX coordinates agent work.
 ScaleX delivers work.

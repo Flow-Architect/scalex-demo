@@ -10,6 +10,35 @@ Use:
 
 ---
 
+## 2026-06-23 - Goal 8 planning: Governed Autonomy Layer with NVIDIA NeMo Guardrails
+
+Completed:
+- Reframed Goal 8 as `Goal 8 - Governed Autonomy Layer with NVIDIA NeMo Guardrails`.
+- Split Goal 8 into:
+  - `Goal 8A - NeMo Guardrails Preflight / Architecture Audit`
+  - `Goal 8B - Guardrail Adapter + Schema/API`
+  - `Goal 8C - Guardrail Execution Rails in Run Lifecycle`
+  - `Goal 8D - Guardrail Proof UI in Workflow Canvas`
+  - `Goal 8E - Enterprise Function Template Positioning + Recording Proof`
+- Updated roadmap, handoff, product, architecture, demo, submission, and environment-example docs so Goal 8A is the next task.
+- Clarified current guardrail reality: local policy is active now; real NVIDIA NeMo Guardrails is not wired yet and must not be claimed as real.
+- Preserved Goal 9 as final polish/submission prep and Goal 7B as future Verified Live Mode hardening.
+- Kept this as a docs-only planning update with no code implementation.
+
+Verified:
+- `git diff --check` passed.
+- Value-shaped tracked-file secret scan returned no matches.
+- No `CODEX_GOALS.md` or `GOAL_LOG.md` file exists.
+- `git status --short` showed only intended docs and `.env.example` comment/placeholder edits.
+
+Suggested commit message:
+Plan Goal 8 governed autonomy guardrails
+
+Next:
+- Goal 8A - NeMo Guardrails Preflight / Architecture Audit.
+
+---
+
 ## 2026-06-23 - Goal 7.9E: Recording readiness and browser-only demo QA
 
 Completed:

@@ -8,16 +8,17 @@ Product: ScaleX
 Submission title: ScaleX: Profit-Aware Agent Operations for Service Workflows
 Repo path: /home/ascabrya/dev/scalex-demo
 
-ScaleX is a live working product-style prototype. Product mode is real-integration-first in
-the appropriate environment; test doubles are for automated tests, CI, offline development,
-or explicitly labeled diagnostics.
+ScaleX is a live working product-style prototype for turning repeatable enterprise functions
+into autonomous, governed workflows. Product mode is real-integration-first in the appropriate
+environment; test doubles are for automated tests, CI, offline development, or explicitly
+labeled diagnostics.
 
 ## Core product loop
 
 Job Intake
 → Hermes/GPT-5.5 Planning
 → Stripe Test Invoice / Payment Flow
-→ Policy/NemoClaw-Style Spend Approval
+→ NeMo Guardrail Gate / Local Policy Guardrails
 → SQLite Ledger / Audit Records
 → Agent Work
 → Profit Report
@@ -48,7 +49,7 @@ Allowed wording before an integration is wired:
 
 Do not claim:
 
-- real NemoClaw integration
+- real NeMo Guardrails or NemoClaw integration
 - real Hermes production integration
 - live Stripe money movement outside Verified Live Mode
 - real customer workflow
@@ -83,9 +84,9 @@ Database:
 - SQLite at data/scalex.db
 - schema in data/schema.sql
 
-Policy:
-- NemoClaw or policy safety layer target
-- local policy engine may support tests/diagnostics until Goal 8 wires a real safety adapter
+Guardrails:
+- NVIDIA NeMo Guardrails or NeMo-compatible safety layer target for Goal 8
+- local policy engine is active now and may support tests/diagnostics until Goal 8 wires a verified adapter
 
 AI planning:
 - GPT-5.5 Auth through isolated Hermes in product mode
@@ -105,8 +106,8 @@ Stripe:
   - Stripe test mode: real Stripe API calls with test keys and no live-money movement.
   - Stripe live-money mode: real Stripe live API capability.
   - Verified Live Mode: the only allowed future path for live-money actions.
-- Hermes may plan and propose payment steps, but ScaleX code must enforce keys, modes,
-  caps, allowlists, confirmations, and audit records.
+- Hermes may plan and propose payment steps, but ScaleX code and guardrails must enforce
+  keys, modes, caps, allowlists, confirmations, and audit records.
 
 Hermes:
 - use the ScaleX-isolated laptop Hermes install

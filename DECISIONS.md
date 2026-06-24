@@ -4,7 +4,7 @@
 
 - Product name: ScaleX.
 - Product type: functional product prototype.
-- Target user: service teams running revenue-backed service workflows.
+- Target user: enterprise operators turning repeatable functions into governed autonomous workflows.
 - Sample workflow client: Harbor Fleet Services.
 - Sample workflow business type: regional fleet maintenance provider.
 - Sample workflow job: 30-day fleet brake inspection campaign.
@@ -16,7 +16,7 @@
 - Final target numbers: $1,200 revenue, $187 approved spend, $1,013 gross profit, about 84.4% margin.
 - Main goal: live working product-style prototype with real integrations in the appropriate mode.
 - Product mode uses real integrations first: isolated Hermes Agent, Stripe test mode for Goal 7,
-  real policy safety integration when safe, and SQLite audit records.
+  real guardrail integration when safe, and SQLite audit records.
 - Goal 7.8 product shell is the current functional walkthrough surface: local prototype auth,
   local/sample workflow management, selected-workflow runs, clickable workflow graph proof,
   persisted run history, audit, and integrations views.
@@ -62,8 +62,13 @@
 - ScaleX code enforces verification, mode checks, caps, allowlists, confirmations, and audit records.
 - Stripe test mode through the orchestration layer is the Goal 7 payment proof; test doubles are not product mode.
 - Goal 7 rejects live Stripe keys and any non-`sk_test_` key for Stripe test mode.
-- NemoClaw or a NemoClaw-style policy safety adapter is the Goal 8 spend-governance target.
-- The local policy engine remains deterministic safety/test support until Goal 8, but is not the final product target if a real safety adapter is safely available.
+- Goal 8 is the Governed Autonomy Layer with NVIDIA NeMo Guardrails.
+- Goal 8A is the next read-only preflight to decide whether real NeMo Guardrails, NemoClaw,
+  or a NeMo-compatible adapter is safely available.
+- The local policy engine remains active, deterministic safety/test support until Goal 8
+  safely wires a verified guardrail adapter.
+- ScaleX must not claim real NeMo Guardrails or real NemoClaw until it is installed, wired,
+  tested, and documented.
 - No secrets are committed.
 - Hosted judge demo mode must not expose secrets to the browser.
 - Local full-proof mode may use ignored `.env` values for real isolated Hermes and Stripe test mode.

@@ -1,12 +1,12 @@
 # ScaleX Product Spec
 
-ScaleX is a live working product-style prototype for profit-aware agent operations in service workflows.
+ScaleX is a live working product-style prototype for turning repeatable enterprise functions into autonomous, governed workflows.
 
 ## Product Standard
 
-ScaleX proves a real business operating loop: intake a revenue-backed service workflow, plan the work,
-confirm payment through the appropriate real integration mode, approve only margin-safe spend,
-coordinate agent work, and produce an audit-backed profit report.
+ScaleX proves a real enterprise-function operating loop: intake a repeatable workflow, route the
+work through Hermes, execute finance primitives through the appropriate Stripe test-mode path,
+approve only margin-safe spend, coordinate agent work, and produce an audit-backed profit report.
 
 Product mode is real-integration-first. Test doubles are for automated tests, CI, offline
 development, or explicitly labeled diagnostics. Product-mode integration failures must become
@@ -19,7 +19,7 @@ The Harbor Fleet Services fleet brake inspection campaign is the sample run, not
 - Local FastAPI backend and Vite React product shell.
 - Local prototype auth gate for the operator console.
 - SQLite-backed local/sample customer and workflow management with Harbor Fleet Services defaults.
-- Product navigation for Workflow, Customers, Runs, Audit, Integrations, and Settings.
+- Product navigation for Dashboard, Workflow, Onboarding, Customers, Runs, Audit, Integrations, and Settings.
 - Connected Workflow canvas for the autonomous run, with approved/proceed and blocked spend branches.
 - Right selected-node inspector for Run Summary, Customer Intake, Hermes, Stripe, Payment Status, Policy, Spend, Agent Work, SQLite Audit, and Profit Report proof.
 - Selected workflow runs where customer, job, invoice amount, spend cap, margin floor, and vendor lists drive Stripe amount, policy math, ledger totals, and final report.
@@ -31,7 +31,7 @@ The Harbor Fleet Services fleet brake inspection campaign is the sample run, not
 - Real Stripe test-mode customer and finalized invoice records through orchestration for Goal 7, with `invoice_status` and `paid` displayed honestly.
 - Stripe test-double payment records for tests and diagnostics.
 - Deterministic Finance, Marketing, Research, and Ops outputs for reliability.
-- Goal 7.9C Workflow page with connected canvas, selected-node inspector, compact proof access, Stripe open/unpaid honesty, and NemoClaw Goal 8 next/not real yet labeling.
+- Goal 7.9 complete product UX with connected canvas, selected-node inspector, compact proof access, aligned secondary views, browser QA, Stripe open/unpaid honesty, and local-policy/NeMo-not-wired honesty.
 
 The intended recording flow is product usage rather than a passive proof-panel tour: open ScaleX,
 log in, create or select a local sample workflow, review workflow and money rules, start the
@@ -40,26 +40,33 @@ review blocked spend, inspect Audit, and return to Runs history.
 
 ## Goal 7.9 UX State
 
-Goal 7.9 is the Workflow Canvas Product UX Redesign before Goal 8. Goal 7.9A completed
-the UX blueprint, Goal 7.9B completed the app shell foundation, and Goal 7.9C replaced the
-main Workflow page with the target canvas and inspector. The product model is:
+Goal 7.9 is complete as the Workflow Canvas Product UX Redesign before Goal 8. Goal 7.9A
+completed the UX blueprint, Goal 7.9B completed the app shell foundation, Goal 7.9C replaced
+the main Workflow page with the target canvas and inspector, Goal 7.9D aligned the secondary
+views, and Goal 7.9E verified the browser-only recording path. The product model is:
 
 - left navigation
 - top command bar
 - central workflow canvas
 - right selected-node inspector
+- Dashboard and Onboarding views
 - separate Customers, Runs, Audit, Integrations, and Settings views
 
 The Workflow page now serves as the product center for a business operations workflow
 automation tool. The canvas shows Customer Intake, Hermes Brain, Stripe Test Invoice,
 Payment Status, Policy Gate, Approved Spend, Blocked Spend, Agent Work, SQLite Audit, and
 Profit Report. The inspector shows real proof for the selected node without requiring
-terminal output or hidden context. Goal 7.9D remains for Customers, Runs, Audit,
-Integrations, and Settings cleanup, and Goal 7.9E remains for browser-only recording QA.
+terminal output or hidden context.
 
 ## Target Integrations
 
-- NemoClaw or a NemoClaw-style policy safety adapter for spend governance in Goal 8, after Goal 7.9, with the current local policy engine as deterministic test/diagnostic support.
+- Goal 8 - Governed Autonomy Layer with NVIDIA NeMo Guardrails:
+  - Goal 8A read-only preflight / architecture audit.
+  - Goal 8B guardrail adapter plus schema/API.
+  - Goal 8C guardrail execution rails in the run lifecycle.
+  - Goal 8D guardrail proof UI in the Workflow canvas.
+  - Goal 8E enterprise-function template positioning and recording proof.
+- NVIDIA NeMo Guardrails or a NeMo-compatible adapter is planned, not wired. Local policy remains active and deterministic for tests until a real adapter is verified.
 - Future Verified Live Mode for live-money Stripe capability.
 
 ## Boundaries

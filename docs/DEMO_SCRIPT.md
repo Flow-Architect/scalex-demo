@@ -19,7 +19,7 @@ Target recording after Goal 7.9E:
 15. Click Profit Report and show the final economics. For Harbor, show $1,200 revenue, $187 approved spend, $750 blocked unsafe spend, $1,013 gross profit, and about 84.4% margin.
 16. Open Runs and show the selected-run summary, execution feed, and final report proof.
 17. Open Audit and show the organized SQLite timeline, orchestration calls, ledger rows, Stripe records, and policy checks.
-18. Open Integrations and show Hermes status, Stripe test mode/open-unpaid honesty, SQLite ledger, local policy engine, and NemoClaw as Goal 8 next/not real yet.
+18. Open Integrations and show Hermes status, Stripe test mode/open-unpaid honesty, SQLite ledger, local policy engine, and NeMo Guardrails as Goal 8 planned/not wired yet.
 19. Open Settings and show prototype auth, local API/database status, selected workflow/run records, and no-live-money safety boundaries.
 20. Log out from the visible top-bar or sidebar control.
 
@@ -34,4 +34,6 @@ Current state after Goal 7.9E: the product now lands on Dashboard, separates Onb
 from Customers, keeps the Workflow page on the central connected canvas with repositionable
 nodes on a fixed background and a right selected-node inspector, keeps the secondary views
 on the darker command-center styling, and has a verified browser-only route from login
-through logout. Goal 8 is now next.
+through logout. Goal 8 is now planned as the Governed Autonomy Layer with NVIDIA NeMo
+Guardrails; Goal 8A is the next read-only preflight. Local policy is active now, and real
+NeMo Guardrails is not wired yet.

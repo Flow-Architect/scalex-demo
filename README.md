@@ -1,12 +1,12 @@
 # ScaleX
 
-ScaleX is a live working product-style prototype for profit-aware agent operations in service workflows.
+ScaleX is a live working product-style prototype for turning repeatable enterprise functions into autonomous, governed workflows.
 
 Submission title: **ScaleX: Profit-Aware Agent Operations for Service Workflows**
 
-ScaleX is a profit-aware agent operations framework for service workflows. It lets an operator confirm revenue, plan work, spend only inside policy, coordinate agent outputs, and produce an auditable profit report.
+ScaleX turns repeatable enterprise functions into autonomous, governed workflows. It lets an operator confirm revenue, route work through Hermes, execute finance primitives through Stripe test mode, enforce policy/profit guardrails, coordinate agent outputs, and produce an auditable profit report.
 
-The product thesis is simple: a service team should be able to give an AI operator a revenue-backed service job, a budget, and a margin floor, then see the operator invoice, control spend, coordinate work, and report profit with real integrations in the appropriate environment.
+The product thesis is simple: an enterprise operator should be able to give ScaleX a repeatable function, revenue rules, budget limits, and a margin floor, then see autonomous work governed by real integrations in the appropriate environment.
 
 ## Sample Workflow
 
@@ -33,7 +33,7 @@ integration must run in the appropriate environment.
 - No production Hermes, Prometheus, OpenClaw, Recall, or xScaleOS connections.
 - Stripe test doubles are for automated tests, CI, local offline development, or explicitly labeled diagnostics.
 - Product-mode integration failures must surface visible errors.
-- Policy enforcement currently runs through a local policy engine until Goal 8 wires a real safety adapter if safely available.
+- Policy enforcement currently runs through a local policy engine. Goal 8 plans an NVIDIA NeMo Guardrails or NeMo-compatible governed-autonomy layer if safely available.
 - Hermes planning uses the ScaleX-isolated laptop install, not production Hermes.
 - Stripe test invoices are labeled honestly as open/unpaid unless Stripe reports `paid=true`.
 
@@ -50,23 +50,31 @@ Implemented today:
 - Real Stripe test-mode invoice flow through the orchestration layer.
 - Stripe test-double records are available for automated tests, CI, offline development, and diagnostics.
 - Deterministic Finance, Marketing, Research, and Ops outputs.
-- Vite React product shell with a local prototype auth gate, functional Customers workflow management, selected-workflow run controls, connected Workflow canvas, right selected-node inspector, persisted run history, audit, integrations, and settings views.
+- Vite React product shell with a local prototype auth gate, Dashboard, Onboarding, functional Customers workflow management, selected-workflow run controls, connected Workflow canvas, right selected-node inspector, persisted run history, Audit, Integrations, and Settings views.
 - Goal 7.8 browser product workflow: create/select/delete saved local workflows, load Harbor Fleet Services as the sample, start a run for the active workflow, inspect proof nodes, and return later to run history.
-- Goal 7.9C Workflow page redesign: connected enterprise workflow canvas, visible approved/blocked branches, selected-node inspector, and compact proof access without stacked Workflow proof panels.
+- Goal 7.9 complete product UX: connected enterprise workflow canvas, visible approved/blocked branches, selected-node inspector, compact proof access without stacked Workflow proof panels, aligned secondary views, browser QA, and visible logout.
 - Harbor Fleet Services sample run with the locked final report numbers, plus custom synthetic/sample workflows whose invoice amount and economics drive the run.
 
 Next targets:
 
-- Goal 7.9D: clean up Customers, Runs, Audit, Integrations, and Settings so the secondary views match the new Workflow canvas product shell.
-- Goal 7.9E: browser-only recording readiness and demo QA.
-- Goal 8: add NemoClaw or a NemoClaw-style policy safety adapter if it can be done safely.
+- Goal 8A: read-only NeMo Guardrails Preflight / Architecture Audit.
+- Goal 8: Governed Autonomy Layer with NVIDIA NeMo Guardrails, split into Goals 8A-8E before implementation.
 - Add future Verified Live Mode before any live-money Stripe capability.
 
-The product shell calls the local backend to run the complete compressed lifecycle and display job intake, Hermes planning, orchestration/tool calls, payment state, policy decisions, agent work, ledger entries, and the final profit report. The walkthrough is intended to be recorded as browser-only product usage: log in, open Customers, use Harbor or create a synthetic workflow, start the selected workflow run, watch the connected Workflow canvas move, click proof nodes, review Audit, open Runs, and log out.
+The product shell calls the local backend to run the complete compressed lifecycle and display job intake, Hermes planning, orchestration/tool calls, payment state, policy decisions, agent work, ledger entries, and the final profit report. The walkthrough is intended to be recorded as browser-only product usage: log in, land on Dashboard, use Onboarding or Customers to select Harbor or create a synthetic workflow, start the selected workflow run, watch the connected Workflow canvas move, click proof nodes, review Runs/Audit/Integrations/Settings, and log out.
 
-Goal 7.8 made ScaleX a functional product prototype with browser-usable workflow operations. Goal 7.9C now makes the main Workflow page feel like a control-room app with a connected canvas and selected-node inspector instead of stacked proof cards. Local workflow/customer management is real SQLite-backed prototype behavior, but it is not production enterprise auth or full multi-tenant SaaS. No live-money Stripe support was added.
+Goal 7.8 made ScaleX a functional product prototype with browser-usable workflow operations. Goal 7.9 made the product shell feel like an operator console with Dashboard, Onboarding, Customers, Workflow, Runs, Audit, Integrations, Settings, a connected canvas, and selected-node inspector instead of stacked proof cards. Local workflow/customer management is real SQLite-backed prototype behavior, but it is not production enterprise auth or full multi-tenant SaaS. No live-money Stripe support was added.
 
 ## Demo Modes
+
+Judges should see:
+
+- enterprise function workflow
+- Hermes orchestrator
+- Stripe finance skill in test mode
+- NeMo Guardrail Gate target with local policy active until wired
+- SQLite audit ledger
+- profit report
 
 ### Hosted Judge Demo Mode
 
@@ -114,8 +122,8 @@ SCALEX_SESSION_SECRET=
 The login gate uses a signed local session cookie. Leave auth disabled in tests or
 set test-only credentials; never commit real credentials.
 
-After login, open Customers. Load the Harbor Fleet Services sample or create another
-synthetic/sample workflow. Select the workflow, then open Workflow and click `Start Run`
+After login, land on Dashboard. Open Onboarding or Customers, load the Harbor Fleet Services sample or create another
+synthetic/sample workflow, select it, then open Workflow and click `Start Run`
 to call `POST /api/demo/run`. The run uses the active workflow values and appends a
 new run record instead of overwriting prior history.
 In product mode, Stripe requires a local `.env` `sk_test_...` key and returns
@@ -176,7 +184,8 @@ These commands must not use live Stripe mode or production service credentials f
 
 - Real now: isolated Hermes planning through `scalex-operator`, real Stripe test-mode invoice creation/finalization, SQLite audit ledger, local policy enforcement, local prototype auth, SQLite-backed local/sample workflows, selected-workflow runs, persisted run history, connected Workflow canvas, selected-node inspector, clickable proof nodes, and the product shell workflow experience.
 - Test/diagnostic only: deterministic Hermes planning and Stripe test doubles in automated tests, CI, offline development, or explicitly labeled diagnostics.
-- Future: Goal 7.9D/E secondary-view cleanup and recording readiness, NemoClaw-compatible safety integration in Goal 8, and Verified Live Mode before any live-money Stripe actions.
+- Planned next: Goal 8A read-only NeMo Guardrails preflight. Real NeMo Guardrails is not wired yet; local policy is active now.
+- Future: Goal 8 Governed Autonomy Layer with NVIDIA NeMo Guardrails or a NeMo-compatible adapter, Goal 9 final submission prep, and Verified Live Mode before any live-money Stripe actions.
 
 ## Core Product Loop
 
@@ -184,7 +193,7 @@ These commands must not use live Stripe mode or production service credentials f
 Job Intake
 -> Hermes/GPT-5.5 Planning
 -> Stripe Test Invoice / Payment Flow
--> Policy/NemoClaw-Style Spend Approval
+-> NeMo Guardrail Gate / Local Policy Guardrails
 -> SQLite Ledger / Audit Records
 -> Agent Work
 -> Profit Report

@@ -4,9 +4,9 @@ You are working in:
 
 /home/ascabrya/dev/scalex-demo
 
-ScaleX is a live working product-style prototype for profit-aware agent operations in service
-workflows. Product mode is real-integration-first; test doubles are for automated tests,
-CI, offline development, or explicitly labeled diagnostics.
+ScaleX is a live working product-style prototype for turning repeatable enterprise functions
+into autonomous, governed workflows. Product mode is real-integration-first; test doubles are
+for automated tests, CI, offline development, or explicitly labeled diagnostics.
 
 Do not assume previous chat context. The repo files are the source of truth.
 
@@ -35,7 +35,7 @@ Secure Operator Console
 → Job Intake
 → Hermes/GPT-5.5 Planning
 → Stripe Test Invoice / Payment Flow
-→ Policy/NemoClaw-Style Spend Approval
+→ NeMo Guardrail Gate / Local Policy Guardrails
 → SQLite Ledger / Audit Records
 → Agent Work
 → Profit Report
@@ -51,7 +51,7 @@ Secure Operator Console
 - No real Recall memory.
 - Must run locally from this Fedora laptop repo.
 - Keep repo clean and GitHub-ready.
-- Do not claim real Hermes, NemoClaw, or Stripe integration unless it is actually wired and working.
+- Do not claim real Hermes, NeMo Guardrails/NemoClaw, or Stripe integration unless it is actually wired and working.
 - Do not propose fallback-first implementation goals.
 - Do not say product mode must work when an integration is unavailable unless that means a visible
   integration error or an explicitly configured test/diagnostic path.
@@ -73,7 +73,7 @@ At the start of a new Codex session:
 4. Recommend the next /goal.
 5. Wait for approval before editing.
 
-Current next recommended /goal: Goal 8 - NemoClaw / policy safety integration and presentation.
+Current next recommended /goal: Goal 8A - NeMo Guardrails Preflight / Architecture Audit.
 
 Goal 7.9 is a workflow canvas product UX redesign milestone before Goal 8. Goal 7.9A
 completed the no-code UX blueprint, Goal 7.9B completed the app shell foundation, and
@@ -82,7 +82,10 @@ inspector. Goal 7.9D cleaned up the secondary views and aligned the product IA s
 Onboarding, Customers, Workflow, Runs, Audit, Integrations, and Settings are now distinct
 operator surfaces. Goal 7.9E then verified the browser-only recording flow across that IA
 and fixed local-only CORS for alternate QA ports.
-Goal 8 remains NemoClaw / policy safety integration and presentation after Goal 7.9.
+Goal 8 is now planned as the Governed Autonomy Layer with NVIDIA NeMo Guardrails. Goal 8A
+is read-only and should audit whether real NeMo Guardrails or a NeMo-compatible adapter is
+safely available before any implementation. Local policy is active now; real NeMo is not
+wired yet and must not be claimed as real until installed, wired, tested, and documented.
 
 ## Session closeout requirement
 

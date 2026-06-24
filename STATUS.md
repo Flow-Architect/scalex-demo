@@ -5,12 +5,12 @@ Last updated: 2026-06-23
 ## Verified current state
 
 - Project folder exists at /home/ascabrya/dev/scalex-demo.
-- Latest committed baseline before this goal: `6d6daa8 Clean up secondary product views for Goal 7.9D`.
+- Latest committed baseline before this goal: `f89f4c8 Finish Goal 7.9E browser QA and local auth port fixes`.
 - Last completed implementation goal in this working tree: Goal 7.9E - Recording readiness / browser-only demo QA.
 - Last completed documentation/audit goal in this working tree: Goal 7.9A - UX Blueprint / Product IA Audit.
-- Current planned goal: Goal 8 - NemoClaw / policy safety integration and presentation.
-- Current next task: Goal 8 - NemoClaw / policy safety integration and presentation.
-- ScaleX is now a functional browser-usable product prototype for profit-aware agent operations in service workflows.
+- Current planned goal: Goal 8 - Governed Autonomy Layer with NVIDIA NeMo Guardrails.
+- Current next task: Goal 8A - NeMo Guardrails Preflight / Architecture Audit.
+- ScaleX is now a functional browser-usable product prototype for turning repeatable enterprise functions into autonomous, governed workflows.
 - The main Workflow page now centers on a connected enterprise workflow canvas with a right selected-node inspector before Goal 8.
 - The Workflow canvas now behaves like a workflow workspace rather than a static diagram:
   - fixed command-center background
@@ -21,7 +21,7 @@ Last updated: 2026-06-23
   - real isolated Hermes Agent for planning/orchestration proposals
   - real Stripe test-mode API calls for Goal 7 payment/invoice records
   - SQLite as the audit ledger
-  - local policy engine until Goal 8 wires a real NemoClaw/NemoClaw-style safety adapter if safely available
+  - local policy engine until Goal 8 safely wires NVIDIA NeMo Guardrails or a NeMo-compatible adapter
 - Mock/fallback/test-double paths are for automated tests, CI, offline development, or explicitly labeled diagnostics only.
 - Product-mode real integration failures surface visible error states instead of silently falling back.
 - The frontend now opens as a product shell with local prototype auth, a Dashboard landing view, separate Onboarding and Customers sections, selected-workflow run controls, connected Workflow canvas, right selected-node inspector, run history, audit, distinct Integrations and Settings views, and a shared shell-level command bar.
@@ -35,7 +35,28 @@ Last updated: 2026-06-23
   - Logout is now visible both in the sidebar footer and the top command bar.
   - Local-only CORS now accepts localhost and `127.0.0.1` on alternate ports so auth-enabled QA instances can be verified without editing origin lists.
   - Headless browser QA verified login, Dashboard, Onboarding, Harbor sample save, Customers, Workflow, Start Run, Hermes inspector, Stripe inspector, Blocked Spend inspector, Profit Report inspector, Runs, Audit, Integrations, Settings, and logout on a temp-port auth-enabled instance.
-- Goal 8 remains next for NemoClaw / policy safety integration and presentation.
+- Goal 8A is next as a read-only preflight before any governed-autonomy implementation.
+- Current guardrail reality:
+  - local policy is active now
+  - real NVIDIA NeMo Guardrails is not wired yet
+  - no real NeMo/NemoClaw claim should be made yet
+  - Goal 8 target is governed autonomy with NeMo-style input, planning/dialog, execution, and output rails
+
+## Verified on 2026-06-23 for Goal 8 planning docs
+
+- Goal 8 was reframed as the Governed Autonomy Layer with NVIDIA NeMo Guardrails.
+- Goal 8 was split into Goal 8A through Goal 8E before implementation.
+- Goal 8A - NeMo Guardrails Preflight / Architecture Audit is now the next recommended task.
+- ROADMAP.md, TASKS.md, STATUS.md, CHANGELOG.md, README.md, START_HERE.md, AGENTS.md,
+  DECISIONS.md, docs/ARCHITECTURE.md, docs/PRODUCT_SPEC.md, docs/DEMO_SCRIPT.md,
+  docs/SUBMISSION_WRITEUP.md, and .env.example comments/placeholders were aligned.
+- Local policy is documented as active now; real NeMo Guardrails is documented as planned/not wired.
+- Goal 9 remains final polish/submission prep.
+- Goal 7B remains future Verified Live Mode hardening.
+- `git diff --check` passed.
+- Value-shaped tracked-file secret scan returned no matches.
+- No `CODEX_GOALS.md` or `GOAL_LOG.md` file exists.
+- No code implementation, install, `.env` edit, SQLite `.db` edit, Stripe API call, or Hermes model call was made.
 
 ## Goal 6 state
 
@@ -282,13 +303,13 @@ Last updated: 2026-06-23
   - Customers: create/select/delete workflows and load Harbor sample
   - Runs: persisted run list and selected run summary/proof
   - Audit: ledger, timeline, orchestration feed, Stripe proof, policy decisions
-  - Settings / Integrations: auth, Hermes, Stripe mode, SQLite path/counts, local policy engine, and NemoClaw next/not real yet
+  - Settings / Integrations: auth, Hermes, Stripe mode, SQLite path/counts, local policy engine, and NeMo Guardrails planned/not wired yet
 - Integration honesty is preserved:
   - real Hermes proof remains `used_real_hermes=true` when configured
   - real Stripe test-mode proof remains `used_real_stripe=true`, `stripe_test`, `livemode=false`, customer ID, invoice ID, hosted invoice URL, `invoice_status=open`, and `paid=false` when configured
   - Stripe test-double remains for tests/CI/explicit diagnostics only
   - the UI does not claim Stripe invoices are paid unless Stripe reports `paid=true`
-  - NemoClaw is still not real yet
+  - real NeMo Guardrails/NemoClaw is still not wired yet
   - no live-money support was added
 
 ## Goal 7.9 state
@@ -298,7 +319,8 @@ Last updated: 2026-06-23
 - Goal 7.9A is complete as a read-only UX blueprint and Product IA audit.
 - Goal 7.9B is complete for app shell extraction, navigation cleanup, shared selector helpers, and a distinct Settings view.
 - Goal 7.9C is complete for the main Workflow page redesign: connected workflow canvas, selected-node inspector, compact node proof, and duplicate Workflow proof-panel cleanup.
-- Goal 7.9D is the next active task for Customers, Runs, Audit, Integrations, and Settings cleanup.
+- Goal 7.9D is complete for Customers, Runs, Audit, Integrations, and Settings cleanup.
+- Goal 7.9E is complete for recording readiness, browser-only QA, Dashboard/Onboarding alignment, and logout visibility.
 - Goal 7.9A audited the current UI, duplicate proof panels, clutter, weak hierarchy, and recording-flow gaps.
 - Goal 7.9A output implementation prompts for:
   - Goal 7.9B - Design System + App Shell Foundation
@@ -307,14 +329,14 @@ Last updated: 2026-06-23
   - Goal 7.9E - Recording Readiness / Browser-Only Demo QA
 - Goal 7.9B cleaned the dark command-center visual foundation before moving nodes around.
 - Goal 7.9C made the Workflow page the product center with a connected canvas and right inspector.
-- Goal 7.9D should make Customers, Runs, Audit, Integrations, and Settings real product views with no placeholder-only tabs.
-- Goal 7.9E should verify a browser-only recording path: login, select/create workflow, start run, watch graph progress, inspect Hermes, Stripe, blocked spend, and Profit Report nodes, open Runs, Audit, Integrations, and logout.
+- Goal 7.9D made Customers, Runs, Audit, Integrations, and Settings real product views with no placeholder-only tabs.
+- Goal 7.9E verified a browser-only recording path: login, select/create workflow, start run, watch graph progress, inspect Hermes, Stripe, blocked spend, and Profit Report nodes, open Runs, Audit, Integrations, Settings, and logout.
 - Goal 7.9 must preserve all current proof boundaries:
   - real isolated Hermes is wired
   - real Stripe test mode is wired
   - SQLite is the audit ledger
   - local policy is active now
-  - NemoClaw is not real yet
+  - real NeMo Guardrails/NemoClaw is not wired yet
   - Verified Live Mode is future live-money hardening
   - auth is local prototype auth
   - Stripe invoices are not paid unless Stripe returns `paid=true`
@@ -333,8 +355,8 @@ Last updated: 2026-06-23
   - `frontend/src/components/ui/statusStyles.ts`
 - Shared state selectors/helpers moved to `frontend/src/lib/demoSelectors.ts`, including money snapshot, audit row count, run status labels, Stripe/Hermes status helpers, latest-record helpers, plan/task helpers, and optional formatting helpers.
 - Navigation now has distinct entries for Workflow, Customers, Runs, Audit, Integrations, and Settings.
-- Integrations now focuses on Hermes, Stripe test mode, SQLite, product records, local policy, and NemoClaw Goal 8 next/not real yet.
-- Settings now separately shows prototype auth, local API/database state, active workflow/run records, SQLite path, no-live-money boundary, and NemoClaw not-real-yet boundary.
+- Integrations now focuses on Hermes, Stripe test mode, SQLite, product records, local policy, and Goal 8 guardrails planned/not wired yet.
+- Settings now separately shows prototype auth, local API/database state, active workflow/run records, SQLite path, no-live-money boundary, and guardrails planned/not-wired boundary.
 - The current Workflow page content, workflow map, proof panels, run controls, and clickable node drawer were intentionally preserved for Goal 7.9C.
 - Real Hermes proof fields, real Stripe test-mode proof fields, Stripe open/unpaid honesty, SQLite audit proof, local policy proof, local prototype auth, onboarding, Customers, Runs, and Audit behavior were preserved.
 
@@ -627,7 +649,7 @@ The locked sample workflow remains unchanged:
 
 - Goal 7.9A through Goal 7.9E were added to roadmap/tracking docs as planned UX work.
 - Goal 7.9A is the next active task.
-- Goal 8 remains after Goal 7.9.
+- Goal 8 remains after Goal 7.9 and is now planned as the Governed Autonomy Layer with NVIDIA NeMo Guardrails.
 - Goal 9 remains final polish and submission prep.
 - Goal 7B remains future Verified Live Mode hardening.
 - `git diff --check` passed.
@@ -676,7 +698,7 @@ The locked sample workflow remains unchanged:
 - The inspector defaults to Run Summary and switches on node click.
 - Inspector proof remains accessible for Hermes, Stripe test invoice, payment status, local policy, approved/blocked spend, agent outputs, SQLite counts, and final profit report.
 - Stripe open/unpaid honesty is preserved: the Payment inspector does not claim Stripe-paid revenue unless `paid=true`, and labels local compressed-run confirmation separately.
-- NemoClaw remains labeled as Goal 8 next/not real yet; the active policy engine is still local.
+- NeMo Guardrails remains labeled as planned/not wired yet; the active policy engine is still local.
 - `App.tsx` now delegates the Workflow route to `WorkflowPage` and passes active workflow, run status, selected node state, progress state, errors/notices, loading state, and run/reset/refresh/customer navigation handlers.
 - Customers, Runs, Audit, Integrations, and Settings remain reachable and are intentionally left for Goal 7.9D cleanup.
 - `npm run build` passed for the frontend after the Workflow feature extraction.
@@ -696,14 +718,14 @@ The locked sample workflow remains unchanged:
 
 ## Not yet built
 
-- Goal 7.9D Customers / Runs / Audit / Integrations / Settings cleanup.
-- NemoClaw or external policy safety adapter.
+- Goal 8A read-only NeMo Guardrails preflight / architecture audit.
+- NVIDIA NeMo Guardrails or NeMo-compatible guardrail adapter.
 - Verified Live Mode live-money execution.
 - Demo recording and final submission assets.
 
 ## Deferred / revisit
 
-- Local policy engine remains the spend authority until Goal 8.
+- Local policy engine remains the spend authority until Goal 8 safely wires a verified NeMo Guardrails or NeMo-compatible adapter.
 - Stripe webhooks are deferred.
 - Checkout Session and Payment Link flows are deferred; Goal 7 uses invoice-first Stripe test mode.
 - Live-money payments are deferred to Verified Live Mode and are not implemented in Goal 7.
@@ -712,4 +734,4 @@ The locked sample workflow remains unchanged:
 
 ## Current priority
 
-Goal 7.9D - Customers / Runs / Audit / Integrations cleanup.
+Goal 8A - NeMo Guardrails Preflight / Architecture Audit.
