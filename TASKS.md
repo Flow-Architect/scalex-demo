@@ -2,11 +2,11 @@
 
 ## Current Priority
 
-Goal 7.12 - Make Start Run a Real Product Execution.
+Goal 8A - NeMo Guardrails Preflight / Architecture Audit.
 
-Goal 7.11D is complete after the final demo polish / visual consistency pass. Goal 7.12 is the
-next functionality/demo-proof pass before Goal 8A. Goal 8A remains intact and should run after
-Goal 7.12 unless the plan changes.
+Goal 7.12 is complete after making Start Run visibly execute the Northstar client operation in
+honest Demo proof mode and preserving Full Proof Mode. Goal 8A remains intact and should run next
+unless the plan changes.
 
 ## Goal 7.11A Gate Result
 
@@ -57,70 +57,35 @@ the sample implementation pass.
 
 ## Next Recommended Goal
 
-Run Codex `/goal` 7.12:
+Run Codex `/goal` 8A:
 
-- Make `Start Run` visibly execute the Northstar Dental Group / Client Implementation Launch from
-  run started through Hermes planning, Stripe finance proof, guardrail review, approved setup
-  spend, blocked risk, work execution, evidence ledger, and profit outcome.
-- Add or verify visible running/loading state, step progression, Function Map state highlights,
-  meaningful Evidence Drawer updates, Runs history creation, Evidence Ledger proof creation,
-  Dashboard latest-run status, count changes, and actionable failure states.
-- Support Judge Demo Mode without secrets using deterministic local proof/test-double paths that
-  create local SQLite records and clearly label demo/sandbox proof.
-- Preserve Full Proof Mode for safely configured real isolated Hermes and real Stripe test mode.
-- Do not implement Goal 8, install or wire NeMo, change Northstar economics, add live-money
-  support, or claim production auth. Real-adapter checks belong only in explicit Full Proof Mode
-  verification with safe local configuration.
+- Perform the read-only NeMo Guardrails Preflight / Architecture Audit.
+- Inspect whether `nemoguardrails`, `nemoclaw`, `openclaw`, Docker, and NVIDIA tooling are locally
+  available without installing or wiring them.
+- Inspect the current local policy engine and SQLite audit schema.
+- Decide whether real NeMo Guardrails or a NeMo-compatible layer is safely available.
+- Produce the exact Goal 8B implementation prompt.
+- Preserve product-mode truthfulness: local policy is active now and real NeMo is not wired yet.
 
-## Goal 7.12 Planned Gate
+## Goal 7.12 Gate Result
 
-Goal 7.12 - Make Start Run a Real Product Execution is planned as the next implementation pass.
-It is not implemented yet.
+Goal 7.12 - Make Start Run a Real Product Execution is complete.
 
-Required visible execution sequence:
+Completed:
 
-- Run started.
-- Hermes planning step.
-- Stripe finance proof step.
-- Guardrail review step.
-- Approved setup spend step.
-- Blocked risk step.
-- Work execution step.
-- Evidence ledger step.
-- Profit outcome step.
-- Run completed, or clearly failed with an actionable reason.
-
-Required product outcomes:
-
-- `Start Run` shows a visible running/loading state.
-- Function Studio shows step progression.
-- Function Map highlights pending, running, complete, and blocked states.
-- Evidence Drawer updates with meaningful proof.
-- Runs gets a new execution.
-- Evidence Ledger gets timeline, orchestration, ledger, Stripe, and policy proof.
-- Dashboard reflects latest run status.
-- Counts change from zero when a run completes.
-- Failure states are visible and actionable.
-
-Execution modes to preserve:
-
-- Judge Demo Mode works without secrets, uses deterministic local proof/test-double paths, creates
-  local SQLite records, populates Runs and Evidence Ledger, labels output as demo/sandbox proof,
-  and does not claim real Stripe or real Hermes unless real adapters were used.
-- Full Proof Mode uses real isolated Hermes and real Stripe test mode when local ignored `.env`
-  values are safely configured, keeps Stripe `livemode=false`, shows hosted invoice URLs only when
-  available, never labels `paid=false` as paid, and shows visible integration errors if configured
-  incorrectly.
-
-Truthfulness boundaries:
-
-- Northstar is synthetic.
-- No patient data, no PHI, no HIPAA claim.
-- Local policy is active now.
-- NeMo Guardrails remains planned/not wired.
-- No live-money support.
-- No production auth claim.
-- Demo mode must not pretend to be real integration mode.
+- `Start Run` visibly changes to `Running...` and plays through the Function Studio execution path.
+- Judge Demo Mode is the default safe local mode and works without real secrets.
+- Demo mode records deterministic Hermes planning proof, Stripe test-double/sandbox finance proof,
+  local policy decisions, ledger entries, agent outputs, and final profit outcome in SQLite.
+- Full Proof Mode remains available through `SCALEX_EXECUTION_MODE=full_proof` for configured real
+  isolated Hermes and real Stripe test mode, with visible integration errors when misconfigured.
+- Runs, Evidence Ledger, Integrations, Dashboard, and Function Studio all reflect the latest run.
+- Evidence Drawer proof covers Hermes Plan, Stripe Finance Proof, Guardrail Review, Blocked Risk,
+  Evidence Ledger, and Profit Outcome.
+- Stripe `paid=false` is still not shown as paid, and demo/test-double output is not claimed as
+  real Stripe or real Hermes.
+- Northstar remains synthetic with no patient data, no PHI, no HIPAA claim, local policy active
+  now, NeMo Guardrails planned/not wired, no live-money support, and no production auth claim.
 
 ## Goal 7.11D Gate Result
 
@@ -182,9 +147,8 @@ the old card-dashboard shell with a ClientOps product workspace.
 
 ## Goal 8 Sequence
 
-Goal 8 remains planned as the governed autonomy layer after Goal 7.12. Do not start Goal 8A,
-8B, 8C, 8D, or 8E before Goal 7.12 is complete. Do not start Goal 8B, 8C, 8D, or 8E before
-Goal 8A is complete.
+Goal 8 remains planned as the governed autonomy layer after Goal 7.12. Goal 8A is now the next
+recommended goal. Do not start Goal 8B, 8C, 8D, or 8E before Goal 8A is complete.
 
 ### Goal 8A - NeMo Guardrails Preflight / Architecture Audit
 
@@ -257,7 +221,6 @@ ScaleX code must enforce every safeguard and execute any allowed action.
 
 ## Do Not Work On Yet
 
-- Goal 8A before Goal 7.12 is complete.
 - Goal 8B, 8C, 8D, or 8E implementation before Goal 8A is complete.
 - Live-money Stripe execution.
 - Real client data.

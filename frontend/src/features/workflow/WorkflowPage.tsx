@@ -34,11 +34,13 @@ export function WorkflowPage({
   money,
   notice,
   onOpenCustomers,
+  onOpenAudit,
   onRefresh,
   onReset,
   onRun,
   onSelectNode,
   playbackIndex,
+  runCompletedMoment,
   runStatus,
   selectedNodeKey,
   state,
@@ -54,11 +56,13 @@ export function WorkflowPage({
   money: MoneySnapshot;
   notice: string | null;
   onOpenCustomers: () => void;
+  onOpenAudit: () => void;
   onRefresh: () => void;
   onReset: () => void;
   onRun: () => void;
   onSelectNode: (key: WorkflowInspectorKey) => void;
   playbackIndex: number;
+  runCompletedMoment: boolean;
   runStatus: string;
   selectedNodeKey: WorkflowInspectorKey;
   state: DemoState | null;
@@ -83,6 +87,7 @@ export function WorkflowPage({
             displayJob={displayJob}
             isBusy={isBusy}
             money={money}
+            runCompletedMoment={runCompletedMoment}
             onOpenCustomers={onOpenCustomers}
             onRefresh={onRefresh}
             onReset={onReset}
@@ -99,7 +104,7 @@ export function WorkflowPage({
             <div className="flex items-start gap-3 border border-rose-200 bg-rose-50 p-4 text-sm text-rose-900">
               <AlertTriangle className="mt-0.5 h-4 w-4 flex-none" aria-hidden="true" />
               <div>
-                <p className="font-semibold">API request failed</p>
+                <p className="font-semibold">Run failed</p>
                 <p className="mt-1">{error}</p>
               </div>
             </div>
@@ -128,11 +133,12 @@ export function WorkflowPage({
                 selectedKey={selectedNodeKey}
               />
             </div>
-            <NodeInspector
+          <NodeInspector
               activeWorkflow={activeWorkflow}
               health={health}
               model={model}
               money={money}
+              onOpenAudit={onOpenAudit}
               onSelect={onSelectNode}
               runStatus={runStatus}
               selectedKey={selectedNodeKey}
@@ -154,6 +160,7 @@ function WorkflowHeader({
   displayJob,
   isBusy,
   money,
+  runCompletedMoment,
   onOpenCustomers,
   onRefresh,
   onReset,
@@ -166,6 +173,7 @@ function WorkflowHeader({
   displayJob: string;
   isBusy: boolean;
   money: MoneySnapshot;
+  runCompletedMoment: boolean;
   onOpenCustomers: () => void;
   onRefresh: () => void;
   onReset: () => void;
@@ -186,6 +194,22 @@ function WorkflowHeader({
             Launch and inspect the {displayJob} function for {displayCustomer}.
           </p>
           <StudioFactStrip displayCustomer={displayCustomer} displayJob={displayJob} money={money} runStatus={runStatus} />
+          {busyAction === "run" || runCompletedMoment ? (
+            <div className={`mt-4 border p-3 text-sm ${
+              busyAction === "run"
+                ? "border-amber-200 bg-amber-50 text-amber-900"
+                : "border-emerald-200 bg-emerald-50 text-emerald-900"
+            }`}>
+              <p className="font-semibold">
+                {busyAction === "run" ? "Run in progress" : "Run complete"}
+              </p>
+              <p className="mt-1">
+                {busyAction === "run"
+                  ? "Function Studio is executing the client operation step by step."
+                  : `Protected profit ${formatOptionalCurrency(money.grossProfitCents)}, blocked risk ${formatOptionalCurrency(money.blockedSpendCents)}.`}
+              </p>
+            </div>
+          ) : null}
         </div>
 
         <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap xl:justify-end">
@@ -196,7 +220,7 @@ function WorkflowHeader({
             type="button"
           >
             {busyAction === "run" ? <RefreshCw className="h-4 w-4 animate-spin" aria-hidden="true" /> : <Play className="h-4 w-4" aria-hidden="true" />}
-            Start Run
+            {busyAction === "run" ? "Running..." : "Start Run"}
           </button>
           <button className="inline-flex min-h-11 items-center justify-center gap-2 rounded-md border border-zinc-300 bg-white px-4 text-sm font-semibold text-zinc-900 transition hover:bg-zinc-50 disabled:cursor-not-allowed disabled:text-zinc-400" disabled={isBusy} onClick={onRefresh} type="button">
             <RefreshCw className={`h-4 w-4 ${busyAction === "refresh" ? "animate-spin" : ""}`} aria-hidden="true" />

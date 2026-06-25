@@ -65,7 +65,7 @@ export function TopCommandBar({
             ) : (
               <Play className="h-4 w-4" aria-hidden="true" />
             )}
-            Start Run
+            {busyAction === "run" ? "Running..." : "Start Run"}
           </button>
           <button
             className="inline-flex min-h-11 items-center justify-center gap-2 rounded-md border border-zinc-300 bg-white px-4 py-3 text-sm font-semibold text-zinc-900 transition hover:bg-zinc-50 disabled:cursor-not-allowed disabled:text-zinc-400"

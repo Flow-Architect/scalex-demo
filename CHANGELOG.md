@@ -10,6 +10,55 @@ Use:
 
 ---
 
+## 2026-06-25 - Goal 7.12: Make Start Run a real product execution
+
+Completed:
+- Diagnosed the dead-feeling Start Run behavior: the frontend waited on one blocking
+  `POST /api/demo/run`, only swapped in the completed state after the response, and kept the
+  visible button label as `Start Run`.
+- Added explicit execution modes with `SCALEX_EXECUTION_MODE=demo` as the default Judge Demo Mode
+  and `SCALEX_EXECUTION_MODE=full_proof` for safely configured real isolated Hermes plus real
+  Stripe test mode.
+- Added API execution proof labels for Demo proof mode, deterministic Hermes plan,
+  Stripe test-double/sandbox proof, local policy active, and real-adapter flags.
+- Added a run-started event and kept SQLite evidence populated with timeline, planning,
+  orchestration, Stripe proof, policy checks, ledger entries, agent outputs, and profit outcome.
+- Updated Function Studio so `Start Run` changes to `Running...`, the Function Map steps through
+  execution, and the Evidence Drawer auto-selects the active proof step.
+- Improved proof surfaces for Hermes Plan, Stripe Finance Proof, Guardrail Review, Blocked Risk,
+  Evidence Ledger, Profit Outcome, Runs, Evidence Ledger, Integrations, and Settings.
+- Updated demo payment wording so Stripe test-double/sandbox proof is not described as a real
+  Stripe test-mode invoice.
+- Preserved Northstar economics: $8,500 revenue, $1,150 approved setup spend, $3,200 blocked risk,
+  $7,350 protected gross profit, and 86.5% protected margin.
+- Preserved safety boundaries: no Goal 8 implementation, no real NeMo wiring, no live-money
+  support, no real client data, no `.env` edits, no `data/*.db` edits, no extra goal logs, and
+  no commit.
+
+Verified:
+- `./scripts/test.sh` passed with 49 backend tests and a successful Vite production build.
+- Final auth-enabled browser QA passed on backend `8787` and frontend `5174`, using
+  `/tmp/scalex-goal712-qa3.db`, `SCALEX_EXECUTION_MODE=demo`, `STRIPE_SECRET_KEY` unset,
+  `SCALEX_AUTH_ENABLED=true`, and local prototype credentials.
+- Browser QA confirmed login, zero pre-run counts, Northstar selection, Function Studio,
+  `Running...` state, run completion, Hermes/Stripe/Guardrail/Blocked Risk/Profit proof,
+  Runs, Evidence Ledger, Integrations, logout, and no browser console issues.
+- Final QA state recorded 1 run, 14 timeline events, 1 planning run, 19 orchestration calls,
+  4 Stripe test-double proof records, 4 policy checks, 4 ledger entries, 4 agent outputs, and
+  1 profit report.
+- `git diff --check` passed.
+- Strict added-lines secret scan returned no matches.
+- No `.env`, SQLite `.db`, `data/backups`, `frontend/dist`, `CODEX_GOALS.md`, or `GOAL_LOG.md`
+  file was staged.
+
+Suggested commit message:
+Make Start Run execute ClientOps demo
+
+Next:
+- Goal 8A - NeMo Guardrails Preflight / Architecture Audit.
+
+---
+
 ## 2026-06-25 - Goal 7.12 planning docs update
 
 Completed:

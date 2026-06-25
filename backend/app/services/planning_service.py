@@ -5,7 +5,7 @@ from __future__ import annotations
 import json
 from typing import Any
 
-from ..config import Settings, get_settings
+from ..config import Settings, get_settings, normalized_execution_mode
 from .hermes_adapter import run_hermes_oneshot, sanitize_text
 from .ledger_service import usd_to_cents
 from .seed_service import load_seed_config
@@ -32,10 +32,11 @@ def generate_operating_plan(
 
     if settings.hermes_test_mode:
         plan = deterministic_test_plan(job, seed_config)
+        demo_mode = normalized_execution_mode(settings.scalex_execution_mode) == "demo"
         return _planning_payload(
             settings=settings,
             status="completed",
-            source="deterministic_test",
+            source="deterministic_demo" if demo_mode else "deterministic_test",
             prompt_text=prompt,
             result_json=plan,
             summary=plan["executive_summary"],
@@ -49,7 +50,10 @@ def generate_operating_plan(
                 "failure_reason": None,
                 "duration_ms": 0,
                 "command_safety_summary": (
-                    "HERMES_TEST_MODE=true; deterministic planning output was used for tests."
+                    "Demo proof mode; deterministic local planning output was used. "
+                    "No Hermes subprocess was invoked."
+                    if demo_mode
+                    else "HERMES_TEST_MODE=true; deterministic planning output was used for tests."
                 ),
                 "skill_name": settings.hermes_skill_name,
                 "toolsets_used": _toolsets(settings),

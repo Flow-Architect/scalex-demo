@@ -288,7 +288,8 @@ def record_stripe_lifecycle_note(
     if settings.stripe_test_double_mode:
         title = "Stripe test-double lifecycle recorded"
         detail = (
-            "Created Stripe test-double records for automated tests/diagnostics. "
+            "Created Stripe test-double sandbox finance proof records for Demo proof mode, "
+            "automated tests, or diagnostics. "
             "No Stripe SDK call was performed."
         )
         status = "test_double"
@@ -335,6 +336,19 @@ def payment_ledger_metadata(payment_status_event: dict[str, Any], job: dict[str,
                 "No live-money payment was processed."
             ),
             "event_status": "paid",
+        }
+
+    if (payment_status_event.get("mode") or payment_status_event.get("provider_mode")) == TEST_DOUBLE_MODE:
+        return {
+            "ledger_source": "local_test_confirmation_after_sandbox_finance_proof",
+            "ledger_label": f"{job['client_name']} local test confirmation",
+            "event_title": "Local test revenue confirmation recorded",
+            "event_detail": (
+                f"Recorded revenue for the compressed ScaleX run for {job['client_name']} after "
+                "creating Stripe test-double sandbox finance proof. No Stripe SDK call was "
+                "performed, and this is not a Stripe-paid invoice."
+            ),
+            "event_status": "local_test_confirmed",
         }
 
     return {
@@ -436,7 +450,10 @@ def _test_double_step(
     )
     common = {
         "currency": settings.stripe_currency,
-        "diagnostic_reason": "STRIPE_TEST_DOUBLE_MODE=true for automated tests or diagnostics.",
+        "diagnostic_reason": (
+            "Demo proof mode / Stripe test-double sandbox proof. "
+            "No Stripe SDK call was performed."
+        ),
     }
     events = {
         "customer": {

@@ -13,9 +13,9 @@ export function StatusBadge({
   tone?: Tone;
 }) {
   return (
-    <span className={`inline-flex items-center gap-2 rounded-md border px-3 py-1.5 text-sm font-semibold ${softToneClass(tone)}`}>
+    <span className={`inline-flex max-w-full items-center gap-2 rounded-md border px-3 py-1.5 text-sm font-semibold ${softToneClass(tone)}`}>
       {Icon ? <Icon className="h-4 w-4" aria-hidden="true" /> : null}
-      {label}
+      <span className="min-w-0 break-words">{label}</span>
     </span>
   );
 }

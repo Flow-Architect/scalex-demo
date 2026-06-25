@@ -5,6 +5,20 @@ export interface HealthResponse {
   database_exists: boolean;
 }
 
+export interface ExecutionSummary {
+  mode: "demo" | "full_proof";
+  label: string;
+  requested_full_proof: boolean;
+  planning_label: string;
+  finance_label: string;
+  policy_label: string;
+  used_real_hermes: boolean;
+  used_real_stripe: boolean;
+  planning_source: string | null;
+  stripe_mode: string | null;
+  truthfulness_note: string;
+}
+
 export interface AuthStatus {
   auth_enabled: boolean;
   authenticated: boolean;
@@ -276,6 +290,7 @@ export interface OnboardingConfig {
 
 export interface DemoState {
   mode: string;
+  execution: ExecutionSummary;
   database: {
     initialized: boolean;
     path?: string;

@@ -5,11 +5,11 @@ Last updated: 2026-06-25
 ## Verified Current State
 
 - Project folder exists at `/home/ascabrya/dev/scalex-demo`.
-- Latest committed baseline before Goal 7.11C follow-up: `882567f Replace Harbor with Northstar ClientOps launch`.
-- Last completed goal: Goal 7.11D - Demo Polish / Visual Consistency Pass.
-- Last completed implementation/QA goal: Goal 7.11D - Demo Polish / Visual Consistency Pass.
-- Last completed documentation/tracking update: Goal 7.12 planning docs update.
-- Current priority: Goal 7.12 - Make Start Run a Real Product Execution.
+- Latest committed baseline before Goal 7.12: `92d278a Polish ClientOps demo visual consistency`.
+- Last completed goal: Goal 7.12 - Make Start Run a Real Product Execution.
+- Last completed implementation/QA goal: Goal 7.12 - Make Start Run a Real Product Execution.
+- Last completed documentation/tracking update: Goal 7.12 closeout docs update.
+- Current priority: Goal 8A - NeMo Guardrails Preflight / Architecture Audit.
 - Goal 7.11B replaced the legacy Harbor sample with Northstar Dental Group / Client Implementation Launch.
 - Goal 7.11C-followup replaced the remaining generated dashboard/card shell with a ClientOps
   operation-file workspace across Dashboard, Function Studio, Onboarding, Client Operations,
@@ -17,7 +17,7 @@ Last updated: 2026-06-25
 - Goal 7.11D unified the visual language across the light operation-file workspace, polished
   Function Studio into a more business-readable demo path, normalized primary proof labels, and
   verified the browser flow from login through logout.
-- Goal 7.12 is the next functionality/demo-proof task before Goal 8A.
+- Goal 7.12 made Start Run visibly execute the Northstar client operation end to end.
 - Goal 8A - NeMo Guardrails Preflight / Architecture Audit remains intact and planned after Goal 7.12.
 - Goal 9 remains final polish and submission assets.
 - Goal 7B remains future Verified Live Mode hardening.
@@ -78,54 +78,40 @@ Functional product surfaces remain:
 - Dashboard, Function Studio, Onboarding, Client Operations, Runs, Evidence Ledger,
   Integrations, and Settings
 - connected Function Studio page with proof nodes and selected-node inspector
+- Judge Demo Mode as the default local execution mode: deterministic Hermes plan,
+  Stripe test-double/sandbox finance proof, local policy active, and SQLite evidence records
+- Full Proof Mode through `SCALEX_EXECUTION_MODE=full_proof` for configured real isolated Hermes
+  and real Stripe test mode, with visible integration errors when misconfigured
 - isolated Hermes planning in product mode
 - real Stripe test-mode invoice path when configured with `sk_test_...`
 - deterministic test-double paths for tests/CI/diagnostics only
 - local policy engine for current guardrail enforcement
 
-## Planned Next: Goal 7.12
+## Verified For Goal 7.12
 
-Goal 7.12 - Make Start Run a Real Product Execution is planned next. It is not implemented yet.
-It is a functionality and demo-proof pass, not a visual redesign.
-
-Required behavior for Goal 7.12:
-
-- `Start Run` shows a visible running/loading state.
-- Function Studio shows step progression.
-- Function Map highlights pending, running, complete, and blocked states.
-- Evidence Drawer updates with meaningful proof.
-- Runs gets a new execution.
-- Evidence Ledger gets timeline, orchestration, ledger, Stripe, and policy proof.
-- Dashboard reflects latest run status.
-- Counts change from zero when a run completes.
-- Failure states are visible and actionable.
-
-Required execution sequence:
-
-- Run started.
-- Hermes planning step.
-- Stripe finance proof step.
-- Guardrail review step.
-- Approved setup spend step.
-- Blocked risk step.
-- Work execution step.
-- Evidence ledger step.
-- Profit outcome step.
-- Run completed, or clearly failed with an actionable reason.
-
-Execution modes to preserve:
-
-- Judge Demo Mode works without secrets, uses deterministic local proof/test-double paths, creates
-  local SQLite records, populates Runs and Evidence Ledger, labels output as demo/sandbox proof,
-  and does not claim real Stripe or real Hermes unless real adapters were used.
-- Full Proof Mode uses real isolated Hermes and real Stripe test mode when local ignored `.env`
-  values are safely configured, keeps Stripe `livemode=false`, shows hosted invoice URLs only when
-  available, never labels `paid=false` as paid, and shows visible integration errors if configured
-  incorrectly.
-
-Truthfulness boundaries remain: Northstar is synthetic, no patient data, no PHI, no HIPAA claim,
-local policy active now, NeMo Guardrails planned/not wired, no live-money support, no production
-auth claim, and demo mode must not pretend to be real integration mode.
+- Root cause found: Start Run relied on one blocking `POST /api/demo/run` and only replaced state
+  after completion; the button label stayed `Start Run`, so fast deterministic runs collapsed into
+  static cards and slower integration runs offered little visible product motion.
+- Added explicit execution modes:
+  - `SCALEX_EXECUTION_MODE=demo` is the default Judge Demo Mode and works without real secrets.
+  - `SCALEX_EXECUTION_MODE=full_proof` preserves real isolated Hermes and real Stripe test-mode
+    behavior when safely configured, and keeps visible errors when credentials are missing.
+- Added an execution summary to API state with Demo proof mode, deterministic Hermes plan,
+  Stripe test-double/sandbox proof, local policy active, and real-adapter flags.
+- Added a `run_started` event and kept Runs, timeline events, planning runs, orchestration calls,
+  Stripe proof records, policy checks, ledger entries, agent outputs, and profit reports populated
+  in SQLite after a successful run.
+- Updated Function Studio so `Start Run` changes to `Running...`, the Function Map plays through
+  Run Started, Hermes Plan, Stripe Finance Proof, Revenue Gate, Guardrail Review, Approved
+  Resources, Blocked Risk, Work Execution, Evidence Ledger, and Profit Outcome, and the Evidence
+  Drawer auto-selects the active step.
+- Updated evidence proof for Hermes, Stripe, Guardrail Review, Blocked Risk, Profit Outcome, and
+  Evidence Ledger; Runs and Evidence Ledger now expose the completed execution and grouped proof.
+- Preserved Northstar economics: $8,500 revenue, $1,150 approved setup spend, $3,200 blocked risk,
+  $7,350 protected gross profit, and 86.5% protected margin.
+- Preserved truthfulness: demo mode does not claim real Hermes or real Stripe; Stripe `paid=false`
+  is not shown as paid; local policy active now; real NeMo Guardrails planned/not wired; no
+  live-money support; no production auth claim; no patient data and no PHI.
 
 ## Verified For Goal 7.11D
 
@@ -233,6 +219,21 @@ Research-to-Report, Ops Handoff, and Renewal Recommendation.
 
 ## Verification Commands
 
+- For Goal 7.12, `./scripts/test.sh` passed: 49 backend tests and Vite production build.
+- For Goal 7.12, final auth-enabled browser QA passed on backend `8787` and frontend `5174`,
+  using `/tmp/scalex-goal712-qa3.db`, `SCALEX_EXECUTION_MODE=demo`, `STRIPE_SECRET_KEY` unset,
+  `SCALEX_AUTH_ENABLED=true`, `SCALEX_DEMO_USERNAME=<local-demo-username>`,
+  `SCALEX_DEMO_PASSWORD=<local-demo-password>`, and `SCALEX_SESSION_SECRET=<local-session-secret>`.
+- Browser QA confirmed login, zero pre-run counts, Northstar selection, Function Studio,
+  `Running...` state, run completion, Hermes/Stripe/Guardrail/Blocked Risk/Profit proof,
+  Runs, Evidence Ledger, Integrations, logout, and no browser console issues.
+- Final QA state recorded 1 run, 14 timeline events, 1 planning run, 19 orchestration calls,
+  4 Stripe test-double proof records, 4 policy checks, 4 ledger entries, 4 agent outputs, and
+  1 profit report.
+- For Goal 7.12, `git diff --check` passed.
+- For Goal 7.12, strict added-lines secret scan returned no matches.
+- For Goal 7.12, no `.env`, SQLite `.db`, `data/backups`, `frontend/dist`, `CODEX_GOALS.md`, or
+  `GOAL_LOG.md` file was staged.
 - For Goal 7.12 planning docs update, `git diff --check` passed.
 - For Goal 7.12 planning docs update, strict added-lines secret scan returned no matches.
 - For Goal 7.12 planning docs update, `git status --short` was reviewed.

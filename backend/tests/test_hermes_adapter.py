@@ -48,6 +48,7 @@ def test_real_hermes_command_uses_isolated_home_cli_skill_and_oneshot(tmp_path, 
 
     settings = Settings(
         app_env="test",
+        scalex_execution_mode="full_proof",
         database_path=str(tmp_path / "scalex.db"),
         stripe_live_mode=False,
         policy_engine="local",
@@ -99,6 +100,7 @@ def test_hermes_test_mode_does_not_invoke_subprocess(tmp_path, monkeypatch) -> N
     monkeypatch.setattr("app.services.hermes_adapter.subprocess.run", fake_run)
     settings = Settings(
         app_env="test",
+        scalex_execution_mode="demo",
         database_path=str(tmp_path / "scalex.db"),
         stripe_live_mode=False,
         policy_engine="local",
@@ -152,6 +154,7 @@ def test_real_hermes_stdout_api_failure_marks_result_failed(tmp_path, monkeypatc
 
     settings = Settings(
         app_env="test",
+        scalex_execution_mode="full_proof",
         database_path=str(tmp_path / "scalex.db"),
         stripe_live_mode=False,
         policy_engine="local",

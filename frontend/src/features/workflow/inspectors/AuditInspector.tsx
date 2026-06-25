@@ -7,10 +7,12 @@ import { Fact, FactGrid, InspectorSection, StatusPill } from "./inspectorUi";
 export function AuditInspector({
   counts,
   health,
+  onOpenAudit,
   state,
 }: {
   counts: WorkflowAuditCounts;
   health: HealthResponse | null;
+  onOpenAudit: () => void;
   state: DemoState | null;
 }) {
   const databasePath = state?.database.path ?? health?.database_path ?? "Path not recorded";
@@ -36,6 +38,13 @@ export function AuditInspector({
             tone={databaseExists ? "teal" : "amber"}
           />
         </div>
+        <button
+          className="mt-4 inline-flex min-h-10 items-center justify-center rounded-md bg-zinc-950 px-3 text-sm font-semibold text-white transition hover:bg-zinc-800"
+          onClick={onOpenAudit}
+          type="button"
+        >
+          Open Evidence Ledger
+        </button>
       </InspectorSection>
 
       <InspectorSection title="Record counts">

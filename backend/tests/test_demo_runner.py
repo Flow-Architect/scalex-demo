@@ -371,6 +371,10 @@ def test_demo_run_endpoint_executes_complete_local_lifecycle(tmp_path, monkeypat
 
     assert response["status"] == "completed"
     _assert_complete_demo_state(response["state"])
+    assert response["state"]["execution"]["mode"] == "demo"
+    assert response["state"]["execution"]["label"] == "Demo proof mode"
+    assert response["state"]["execution"]["planning_label"] == "Deterministic Hermes plan"
+    assert response["state"]["execution"]["finance_label"] == "Stripe test-double/sandbox proof"
     assert response["state"]["planning_run"] is not None
     assert response["state"]["orchestration_calls"]
     assert response["state"]["hermes"]["used_real_hermes"] is False
@@ -457,7 +461,7 @@ def test_demo_run_records_planning_and_orchestration_calls(tmp_path, monkeypatch
     state = response["state"]
 
     planning_run = state["planning_run"]
-    assert planning_run["source"] == "deterministic_test"
+    assert planning_run["source"] == "deterministic_demo"
     assert planning_run["status"] == "completed"
     assert planning_run["result_json"]["proposed_tool_sequence"]
     assert state["hermes"]["skill_name"] == "scalex-operator"
@@ -494,7 +498,7 @@ def test_policy_enforcement_is_independent_of_hermes_output(tmp_path, monkeypatc
     monkeypatch.setenv("DATABASE_PATH", str(tmp_path / "scalex.db"))
     monkeypatch.setattr(
         "app.demo_runner.generate_operating_plan",
-        lambda job, seed_config: _unsafe_hermes_plan(job),
+        lambda job, seed_config, settings=None: _unsafe_hermes_plan(job),
     )
 
     response = _call_post_demo_run_route()
@@ -510,6 +514,7 @@ def test_policy_enforcement_is_independent_of_hermes_output(tmp_path, monkeypatc
 
 def test_product_mode_stripe_failure_is_visible_and_not_test_double(tmp_path, monkeypatch) -> None:
     monkeypatch.setenv("DATABASE_PATH", str(tmp_path / "scalex.db"))
+    monkeypatch.setenv("SCALEX_EXECUTION_MODE", "full_proof")
     monkeypatch.setenv("STRIPE_TEST_DOUBLE_MODE", "false")
     monkeypatch.delenv("STRIPE_SECRET_KEY", raising=False)
 
@@ -517,6 +522,8 @@ def test_product_mode_stripe_failure_is_visible_and_not_test_double(tmp_path, mo
     state = response["state"]
 
     assert response["status"] == "stripe_failed"
+    assert state["execution"]["mode"] == "full_proof"
+    assert state["execution"]["label"] == "Full Proof Mode"
     assert "STRIPE_SECRET_KEY is required" in response["decision"]["error"]
     assert state["job"]["status"] == "stripe_error"
     assert state["stripe"]["used_real_stripe"] is False
@@ -536,6 +543,7 @@ def _assert_complete_demo_state(state: dict) -> None:
     assert state["timeline_events"] == state["events"]
     event_types = [event["type"] for event in state["events"]]
     assert "job_intake" in event_types
+    assert "run_started" in event_types
     assert "hermes_planning" in event_types
     assert "margin_plan" in event_types
     assert "stripe_test_double" in event_types

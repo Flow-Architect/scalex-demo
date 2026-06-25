@@ -9,6 +9,7 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 @dataclass(frozen=True)
 class Settings:
     app_env: str
+    scalex_execution_mode: str
     database_path: str
     stripe_live_mode: bool
     policy_engine: str
@@ -47,6 +48,9 @@ class Settings:
 def get_settings() -> Settings:
     return Settings(
         app_env=os.getenv("APP_ENV", "development"),
+        scalex_execution_mode=normalized_execution_mode(
+            os.getenv("SCALEX_EXECUTION_MODE", "demo")
+        ),
         database_path=os.getenv("DATABASE_PATH", "./data/scalex.db"),
         stripe_live_mode=_bool_env("STRIPE_LIVE_MODE", False),
         policy_engine=os.getenv("POLICY_ENGINE", "local"),
@@ -90,6 +94,27 @@ def get_settings() -> Settings:
         scalex_demo_password=os.getenv("SCALEX_DEMO_PASSWORD", ""),
         scalex_session_secret=os.getenv("SCALEX_SESSION_SECRET", ""),
     )
+
+
+def normalized_execution_mode(value: str | None) -> str:
+    normalized = (value or "demo").strip().lower().replace("-", "_")
+    aliases = {
+        "judge": "demo",
+        "judge_demo": "demo",
+        "sandbox": "demo",
+        "sandbox_demo": "demo",
+        "demo_proof": "demo",
+        "full": "full_proof",
+        "proof": "full_proof",
+        "product": "full_proof",
+        "product_mode": "full_proof",
+    }
+    normalized = aliases.get(normalized, normalized)
+    if normalized not in {"demo", "full_proof"}:
+        raise ValueError(
+            "SCALEX_EXECUTION_MODE must be demo or full_proof for Goal 7."
+        )
+    return normalized
 
 
 def resolve_repo_path(path_value: str | Path) -> Path:

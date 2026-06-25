@@ -77,9 +77,9 @@ export function StatusPill({
   tone: Tone;
 }) {
   return (
-    <span className={`inline-flex w-fit items-center gap-2 rounded-md border px-2 py-1 text-xs font-semibold ${softToneClass(tone)}`}>
+    <span className={`inline-flex max-w-full items-center gap-2 rounded-md border px-2 py-1 text-xs font-semibold ${softToneClass(tone)}`}>
       {Icon ? <Icon className="h-3.5 w-3.5" aria-hidden="true" /> : null}
-      {label}
+      <span className="min-w-0 break-words">{label}</span>
     </span>
   );
 }

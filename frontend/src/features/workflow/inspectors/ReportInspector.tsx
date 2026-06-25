@@ -47,6 +47,11 @@ export function ReportInspector({
             value={report ? formatCurrency(report.gross_profit_cents) : formatOptionalCurrency(money.grossProfitCents)}
           />
           <Metric
+            label="Blocked risk"
+            tone="rose"
+            value={report ? formatCurrency(report.blocked_spend_cents) : formatOptionalCurrency(money.blockedSpendCents)}
+          />
+          <Metric
             label="Margin"
             tone="amber"
             value={report ? formatPercent(report.actual_margin_percent) : formatOptionalPercent(money.marginPercent)}

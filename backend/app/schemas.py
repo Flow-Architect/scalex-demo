@@ -53,6 +53,7 @@ class OnboardingRequest(BaseModel):
 
 class DemoStateResponse(BaseModel):
     mode: str
+    execution: dict[str, Any]
     database: dict[str, Any]
     workflow: dict[str, Any] | None
     workflows: list[dict[str, Any]]

@@ -18,6 +18,7 @@ export function RunSummaryInspector({
   state: DemoState | null;
 }) {
   const source = activeWorkflow ?? state?.job ?? null;
+  const execution = state?.execution ?? null;
 
   return (
     <div className="space-y-4">
@@ -51,9 +52,11 @@ export function RunSummaryInspector({
           <Fact label="Current run status" value={runStatus} />
           <Fact label="Selected run ID" value={state?.selected_run_id ?? state?.job?.id ?? "None"} />
           <Fact label="Job status" value={humanize(state?.job?.status ?? null)} />
+          <Fact label="Execution mode" value={execution?.label ?? "Not recorded"} />
+          <Fact label="Proof path" value={execution ? `${execution.planning_label} / ${execution.finance_label}` : "Not recorded"} />
         </FactGrid>
         <div className="mt-3 flex flex-wrap gap-2">
-          <StatusPill icon={CircleDollarSign} label="Stripe test invoice proof in inspector" tone="sky" />
+          <StatusPill icon={CircleDollarSign} label={execution?.finance_label ?? "Finance proof in inspector"} tone="sky" />
           <StatusPill icon={WalletCards} label="Local policy setup spend gate" tone="emerald" />
           <StatusPill icon={TrendingUp} label={money.actual ? "API-backed economics" : "Awaiting run proof"} tone={money.actual ? "teal" : "amber"} />
         </div>

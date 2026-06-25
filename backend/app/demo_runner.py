@@ -8,10 +8,12 @@ payment-shaped, policy, ledger, agent, and report steps locally.
 from __future__ import annotations
 
 from contextlib import closing
+from dataclasses import replace
 import time
 from typing import Any
 
 from . import repository
+from .config import Settings, get_settings
 from .db import database_path, get_connection, initialize_database
 from .services.agent_service import create_demo_agent_output, record_demo_agent_work_complete
 from .services.hermes_adapter import sanitize_text
@@ -35,6 +37,8 @@ from .services.stripe_service import (
 FINAL_RECOMMENDATION = "Proceed with implementation launch while preserving setup spend guardrails"
 def run_demo() -> dict[str, Any]:
     initialize_database()
+    settings = get_settings()
+    execution_settings = _settings_for_execution(settings)
 
     with closing(get_connection()) as connection:
         sequence = 0
@@ -48,6 +52,7 @@ def run_demo() -> dict[str, Any]:
             workflow_id=workflow["id"],
             deterministic_event_ids=False,
         )
+        _record_run_started(connection, job, settings)
         repository.upsert_onboarding_config(connection, seed_config)
         sequence = _record_orchestration_call(
             connection,
@@ -66,7 +71,7 @@ def run_demo() -> dict[str, Any]:
         )
 
         planning_started_at = time.monotonic()
-        planning_result = generate_operating_plan(job, seed_config)
+        planning_result = generate_operating_plan(job, seed_config, settings=execution_settings)
         planning_run = repository.create_planning_run(
             connection,
             job_id=job["id"],
@@ -124,7 +129,13 @@ def run_demo() -> dict[str, Any]:
         _record_payment_gate_note(connection, job)
 
         try:
-            sequence, payment_status = _run_stripe_sequence(connection, job, sequence, planning_run_id)
+            sequence, payment_status = _run_stripe_sequence(
+                connection,
+                job,
+                sequence,
+                planning_run_id,
+                execution_settings,
+            )
         except StripeIntegrationError as exc:
             _record_stripe_error(connection, job, exc)
             repository.update_job_status(connection, job["id"], "stripe_error")
@@ -199,6 +210,7 @@ def _run_stripe_sequence(
     job: dict[str, Any],
     sequence: int,
     planning_run_id: str,
+    settings: Settings,
 ) -> tuple[int, dict[str, Any]]:
     sequence, customer = _execute_tool(
         connection,
@@ -207,7 +219,7 @@ def _run_stripe_sequence(
         planning_run_id=planning_run_id,
         tool_name="stripe.create_customer",
         tool_input_json={"job_id": job["id"], "client_name": job["client_name"]},
-        operation=lambda: create_stripe_customer(connection, job),
+        operation=lambda: create_stripe_customer(connection, job, settings=settings),
     )
     sequence, invoice_result = _execute_tool(
         connection,
@@ -220,7 +232,7 @@ def _run_stripe_sequence(
             "customer_id": customer.get("customer_id"),
             "amount_cents": int(job["invoice_amount_cents"]),
         },
-        operation=lambda: create_stripe_invoice(connection, job, customer),
+        operation=lambda: create_stripe_invoice(connection, job, customer, settings=settings),
     )
     sequence, invoice = _execute_tool(
         connection,
@@ -232,7 +244,12 @@ def _run_stripe_sequence(
             "job_id": job["id"],
             "invoice_id": invoice_result.get("invoice_id"),
         },
-        operation=lambda: prepare_stripe_payment_url(connection, job, invoice_result),
+        operation=lambda: prepare_stripe_payment_url(
+            connection,
+            job,
+            invoice_result,
+            settings=settings,
+        ),
     )
     sequence, payment_status = _execute_tool(
         connection,
@@ -244,10 +261,45 @@ def _run_stripe_sequence(
             "job_id": job["id"],
             "invoice_id": invoice.get("invoice_id"),
         },
-        operation=lambda: confirm_stripe_payment_status(connection, job, invoice),
+        operation=lambda: confirm_stripe_payment_status(connection, job, invoice, settings=settings),
     )
-    record_stripe_lifecycle_note(connection, job, payment_status)
+    record_stripe_lifecycle_note(connection, job, payment_status, settings=settings)
     return sequence, payment_status
+
+
+def _settings_for_execution(settings: Settings) -> Settings:
+    if settings.scalex_execution_mode == "demo":
+        return replace(
+            settings,
+            hermes_test_mode=True,
+            hermes_require_real=False,
+            stripe_test_double_mode=True,
+        )
+    return settings
+
+
+def _record_run_started(connection, job: dict[str, Any], settings: Settings) -> dict[str, Any]:
+    demo_mode = settings.scalex_execution_mode == "demo"
+    detail = (
+        "Run started in Demo proof mode with deterministic local planning, "
+        "Stripe test-double sandbox finance proof, and local policy enforcement."
+        if demo_mode
+        else (
+            "Run started in Full Proof Mode with the configured isolated Hermes "
+            "and Stripe test-mode paths. Missing credentials will stop the run with "
+            "a visible integration error."
+        )
+    )
+    event = repository.create_event(
+        connection,
+        job_id=job["id"],
+        type="run_started",
+        title=f"{job['client_name']} client operation run started",
+        detail=detail,
+        status="started",
+    )
+    connection.commit()
+    return event
 
 
 def _record_margin_plan(connection, job: dict[str, Any]) -> None:

@@ -15,6 +15,7 @@ import {
   FileText,
   Layers3,
   LockKeyhole,
+  Play,
   ReceiptText,
   RefreshCw,
   Settings,
@@ -53,6 +54,7 @@ import {
   type MoneySnapshot,
 } from "../../lib/demoSelectors";
 import type { AppView } from "../../layout/navigation";
+import type { BusyAction } from "../../lib/demoSelectors";
 import type {
   AgentOutput,
   AuthStatus,
@@ -97,6 +99,8 @@ export function ProductView({
   onboardingBusy,
   onboardingDraft,
   onboardingError,
+  busyAction,
+  runStatus,
   state,
 }: {
   activeView: AppView;
@@ -114,13 +118,21 @@ export function ProductView({
   onboardingBusy: boolean;
   onboardingDraft: OnboardingDraft;
   onboardingError: string | null;
+  busyAction: BusyAction;
+  runStatus: string;
   state: DemoState | null;
 }) {
   return (
     <section className="min-h-screen bg-stone-100 text-zinc-950">
       <div className="w-full px-4 py-5 sm:px-6 lg:px-8">
         {activeView === "dashboard" ? (
-          <DashboardView money={money} onNavigate={onNavigate} state={state} />
+          <DashboardView
+            busyAction={busyAction}
+            money={money}
+            onNavigate={onNavigate}
+            runStatus={runStatus}
+            state={state}
+          />
         ) : null}
         {activeView === "onboarding" ? (
           <OnboardingView
@@ -160,12 +172,16 @@ export function ProductView({
 }
 
 function DashboardView({
+  busyAction,
   money,
   onNavigate,
+  runStatus,
   state,
 }: {
+  busyAction: BusyAction;
   money: MoneySnapshot;
   onNavigate: (view: AppView) => void;
+  runStatus: string;
   state: DemoState | null;
 }) {
   const activeWorkflow = state?.workflow ?? null;
@@ -183,10 +199,10 @@ function DashboardView({
   const grossProfitCents = money.grossProfitCents ?? revenueCents - approvedSpendCents;
   const marginPercent = money.marginPercent ?? (revenueCents > 0 ? (grossProfitCents / revenueCents) * 100 : null);
   const operationStates: OperationStateItem[] = [
+    { icon: Activity, label: "Run", value: busyAction === "run" ? "Run in progress" : runStatus, tone: busyAction === "run" ? "amber" : latestReport ? "emerald" : "slate" },
     { icon: Workflow, label: "Launch readiness", value: activeWorkflow ? "Ready for Studio" : "Select operation", tone: activeWorkflow ? "emerald" : "amber" },
     { icon: ShieldCheck, label: "Data boundary", value: "No patient data / no PHI", tone: "teal" },
     { icon: ShieldCheck, label: "Guardrails", value: "Local policy active", tone: "emerald" },
-    { icon: ShieldAlert, label: "Goal 8", value: "NeMo planned / not wired", tone: "violet" },
   ];
   const outcomeItems: RailItem[] = [
     { label: "Revenue", value: formatCurrency(revenueCents), tone: "emerald" },
@@ -703,6 +719,7 @@ function AuditView({
   const checks = state?.policy_checks ?? [];
   const summary = state?.policy.summary ?? null;
   const stripeEvents = state?.stripe_events ?? [];
+  const reports = state?.reports ?? [];
   const databasePath = state?.database.path ?? health?.database_path ?? null;
 
   return (
@@ -718,13 +735,20 @@ function AuditView({
           { label: "Finance proof", value: String(stripeEvents.length), tone: "sky" },
           { label: "Guardrails", value: String(checks.length), tone: "amber" },
           { label: "Ledger entries", value: String(entries.length), tone: "teal" },
-          { label: "Agent/Hermes calls", value: String(calls.length), tone: "emerald" },
+          { label: "Hermes/orchestration", value: String(calls.length), tone: "emerald" },
+          { label: "Profit outcome", value: String(reports.length), tone: "violet" },
         ]}
       />
 
       <div className="grid gap-8 xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
         <WorkspaceSection title="Timeline">
           <TimelinePanel events={events} />
+        </WorkspaceSection>
+        <WorkspaceSection title="Hermes/orchestration">
+          <PlanningEvidence state={state} />
+          <div className="mt-5">
+            <ExecutionFeed calls={calls} />
+          </div>
         </WorkspaceSection>
         <WorkspaceSection title="Finance proof">
           <StripeEvidence summary={state?.stripe ?? null} events={stripeEvents} />
@@ -735,8 +759,8 @@ function AuditView({
         <WorkspaceSection title="Ledger entries">
           <LedgerPanel auditRows={auditRows} databasePath={databasePath} entries={entries} totals={totals} />
         </WorkspaceSection>
-        <WorkspaceSection title="Agent/Hermes calls">
-          <ExecutionFeed calls={calls} />
+        <WorkspaceSection title="Profit outcome">
+          {reports.length > 0 ? <MarkdownPreview markdown={reports[reports.length - 1].report_markdown} /> : <EmptyWorkspaceState>Profit Outcome appears after the run completes.</EmptyWorkspaceState>}
         </WorkspaceSection>
       </div>
     </WorkspacePage>
@@ -754,12 +778,13 @@ function IntegrationsView({
 }) {
   const hermes = state?.hermes ?? null;
   const stripe = state?.stripe ?? null;
+  const execution = state?.execution ?? null;
 
   return (
     <WorkspacePage
       description="The operating stack behind a ClientOps run, with current proof and explicit integration boundaries."
       eyebrow="Operating stack"
-      meta={<p className="text-sm font-semibold text-zinc-600">{auditRows} evidence rows available in Evidence Ledger</p>}
+      meta={<p className="text-sm font-semibold text-zinc-600">{execution?.label ?? "Execution mode not recorded"} / {auditRows} evidence rows available in Evidence Ledger</p>}
       title="Operating Stack"
     >
       <PlainTable headers={["Component", "Role", "Current proof", "Boundary"]}>
@@ -767,14 +792,14 @@ function IntegrationsView({
           boundary="Product mode uses the isolated ScaleX Hermes path; test mode stays labeled."
           icon={BrainCircuit}
           name="Hermes"
-          proof={hermes?.used_real_hermes ? `${hermes.provider ?? "Hermes"} / ${hermes.model ?? "model recorded"}` : hermes?.failure_reason ?? hermes?.error ?? "Not run in this local state"}
+          proof={hermes?.used_real_hermes ? `${hermes.provider ?? "Hermes"} / ${hermes.model ?? "model recorded"}` : state?.planning_run ? execution?.planning_label ?? "Deterministic local plan" : hermes?.failure_reason ?? hermes?.error ?? "Not run in this local state"}
           role="Plans the client implementation operation."
         />
         <StackRow
           boundary="Stripe invoice is not shown as paid unless Stripe returns paid=true."
           icon={CreditCard}
           name="Stripe"
-          proof={stripe?.used_real_stripe ? "Real Stripe test mode" : humanize(stripe?.stripe_mode ?? "not configured")}
+          proof={execution?.finance_label ?? (stripe?.used_real_stripe ? "Real Stripe test mode" : humanize(stripe?.stripe_mode ?? "not configured"))}
           role="Provides finance proof through test-mode invoice records."
         />
         <StackRow
@@ -842,6 +867,11 @@ function SettingsView({
           area="Prototype auth"
           boundary="Local prototype auth only; no production identity claim."
           value={auth?.auth_enabled ? auth?.authenticated ? `Signed in as ${auth.username ?? "operator"}` : "Enabled" : "Disabled for this local run"}
+        />
+        <BoundaryRow
+          area="Execution mode"
+          boundary={state?.execution.truthfulness_note ?? "Demo proof and Full Proof Mode stay explicitly labeled."}
+          value={state?.execution.label ?? "Not recorded"}
         />
         <BoundaryRow
           area="Runtime"
@@ -970,6 +1000,48 @@ function EmptyState({
   return (
     <div className={`border border-dashed border-zinc-300 bg-white p-4 text-sm text-zinc-600 ${className}`}>
       {children}
+    </div>
+  );
+}
+
+function PlanningEvidence({ state }: { state: DemoState | null }) {
+  const planningRun = state?.planning_run ?? null;
+  const execution = state?.execution ?? null;
+  const toolSequence = planningRun?.result_json?.proposed_tool_sequence ?? [];
+
+  return (
+    <div>
+      <SectionHeader
+        description="Planning proof and proposed tool sequence for the selected execution."
+        icon={BrainCircuit}
+        title="Hermes planning"
+      />
+      {planningRun ? (
+        <div className="mt-4 space-y-3">
+          <div className="grid gap-3 sm:grid-cols-2">
+            <MetricTile label="Execution mode" tone="violet" value={execution?.label ?? "Not recorded"} />
+            <MetricTile label="Planning proof" tone={execution?.used_real_hermes ? "emerald" : "amber"} value={execution?.planning_label ?? "Not recorded"} />
+            <MetricTile label="Provider/model" tone="slate" value={`${planningRun.provider} / ${planningRun.model}`} />
+            <MetricTile label="Planning source" tone="slate" value={humanize(planningRun.source)} />
+          </div>
+          <div className="border border-zinc-200 bg-white p-3 text-sm leading-6 text-zinc-700">
+            {planningRun.summary ?? "Planning summary was not recorded."}
+          </div>
+          {toolSequence.length > 0 ? (
+            <div className="flex flex-wrap gap-2">
+              {toolSequence.slice(0, 10).map((toolName, index) => (
+                <StatusBadge
+                  key={`${toolName}-${index}`}
+                  label={`#${index + 1} ${toolName}`}
+                  tone="violet"
+                />
+              ))}
+            </div>
+          ) : null}
+        </div>
+      ) : (
+        <EmptyState className="mt-4">Hermes planning proof appears after the run executes.</EmptyState>
+      )}
     </div>
   );
 }
@@ -1150,7 +1222,7 @@ function StripeEvidence({
           summary?.used_real_stripe
             ? "Real Stripe test-mode customer and finalized invoice records."
             : summary?.stripe_mode === "test_double"
-              ? "Test-double Stripe proof is labeled for tests or diagnostics."
+              ? "Stripe test-double sandbox finance proof. No Stripe SDK call was performed."
               : "Stripe proof appears after the run."
         }
         icon={CreditCard}
@@ -1331,6 +1403,8 @@ function MarkdownPreview({ markdown }: { markdown: string }) {
 
 function iconForEvent(type: string): LucideIcon {
   switch (type) {
+    case "run_started":
+      return Play;
     case "margin_plan":
       return TrendingUp;
     case "policy_gate":

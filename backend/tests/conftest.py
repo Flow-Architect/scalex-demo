@@ -12,7 +12,9 @@ if str(BACKEND_ROOT) not in sys.path:
 
 @pytest.fixture(autouse=True)
 def default_hermes_test_mode(monkeypatch):
+    monkeypatch.setenv("SCALEX_EXECUTION_MODE", "demo")
     monkeypatch.setenv("HERMES_TEST_MODE", "true")
     monkeypatch.setenv("STRIPE_TEST_MODE", "true")
     monkeypatch.setenv("STRIPE_LIVE_MODE", "false")
     monkeypatch.setenv("STRIPE_TEST_DOUBLE_MODE", "true")
+    monkeypatch.delenv("STRIPE_SECRET_KEY", raising=False)

@@ -272,6 +272,7 @@ def test_real_stripe_api_errors_are_sanitized(tmp_path) -> None:
 def _settings(**overrides) -> Settings:
     values = {
         "app_env": "test",
+        "scalex_execution_mode": "full_proof",
         "database_path": ":memory:",
         "stripe_live_mode": False,
         "policy_engine": "local",

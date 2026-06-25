@@ -137,8 +137,8 @@ function planningBadgeLabel(source: string | null | undefined, usedRealHermes: b
   if (!source) {
     return "awaiting run";
   }
-  if (source === "deterministic_test" || source === "test_double") {
-    return "test planning proof";
+  if (source === "deterministic_demo" || source === "deterministic_test" || source === "test_double") {
+    return "deterministic local plan";
   }
   return humanize(source);
 }
@@ -153,7 +153,7 @@ function planningProofText(
   if (hermes?.used_real_hermes) {
     return `${hermes.provider ?? planningRun.provider} / ${hermes.model ?? planningRun.model}`;
   }
-  return "Local planning proof recorded for this client operation.";
+  return "Deterministic local planning proof recorded for this client operation.";
 }
 
 export function buildWorkflowModel({
@@ -231,11 +231,13 @@ function buildSettledNodes(
   const planningRun = state?.planning_run ?? null;
   const hermes = state?.hermes ?? null;
   const stripe = state?.stripe ?? null;
+  const execution = state?.execution ?? null;
   const checks = state?.policy_checks ?? [];
   const approvedChecks = approvedPolicyChecks(state);
   const blockedChecks = blockedPolicyChecks(state);
   const outputs = state?.agent_outputs ?? [];
   const report = state?.report ?? null;
+  const revenueEntry = revenueLedgerEntry(state);
   const events = state?.events ?? [];
   const latestStripeInvoice = latestWhere(state?.stripe_events ?? [], (event) =>
     Boolean(event.invoice_id),
@@ -246,18 +248,18 @@ function buildSettledNodes(
   return [
     {
       key: "customer",
-      title: "Client Intake",
-      eyebrow: "operation file",
+      title: "Run Started",
+      eyebrow: "client intake",
       proof: workflow
         ? `${workflow.client_name} - ${formatCurrency(workflow.invoice_amount_cents)} invoice`
         : job
           ? `${job.client_name} - ${formatCurrency(job.invoice_amount_cents)} invoice`
         : "Select or create a local client operation.",
-      badge: workflow ? "operation ready" : job ? "run loaded" : "needs operation",
+      badge: job ? "run started" : workflow ? "operation ready" : "needs operation",
       status: workflow || job ? "complete" : "pending",
       tone: "teal",
       icon: Target,
-      timestamp: workflow?.updated_at ?? job?.created_at ?? eventByType(events, "job_intake")?.created_at ?? null,
+      timestamp: eventByType(events, "run_started")?.created_at ?? job?.created_at ?? workflow?.updated_at ?? eventByType(events, "job_intake")?.created_at ?? null,
       position: NODE_POSITIONS.customer,
     },
     {
@@ -280,12 +282,16 @@ function buildSettledNodes(
     },
     {
       key: "stripe",
-      title: "Finance Proof",
-      eyebrow: "Stripe test mode",
+      title: "Stripe Finance Proof",
+      eyebrow: stripe?.used_real_stripe ? "Stripe test mode" : "sandbox finance",
       proof: stripe?.invoice_id
         ? `${stripe.customer_id ?? "customer not recorded"} / ${stripe.invoice_id}`
         : stripe?.error ?? "Stripe test invoice proof appears after launch.",
-      badge: stripeModeLabel(stripe),
+      badge: stripe?.used_real_stripe
+        ? "real Stripe test"
+        : stripe?.stripe_mode === "test_double"
+          ? "sandbox proof"
+          : stripeModeLabel(stripe),
       status: stripe?.error ? "error" : stripe?.invoice_id ? "complete" : "pending",
       tone: "sky",
       icon: CreditCard,
@@ -299,14 +305,18 @@ function buildSettledNodes(
       proof:
         stripe?.paid === true
           ? "Stripe reports paid=true."
+          : revenueEntry
+            ? "Stripe is open/unpaid; local test revenue confirmation is recorded separately."
           : stripe?.paid === false
             ? "Open/unpaid. Local confirmation is labeled separately."
             : "Finance proof awaiting run.",
-      badge: stripe?.paid === true ? "paid" : stripe?.paid === false ? "open/unpaid" : "awaiting proof",
+      badge: stripe?.paid === true ? "paid" : revenueEntry ? "local confirmed" : stripe?.paid === false ? "open/unpaid" : "awaiting proof",
       status: stripe?.error
         ? "error"
         : stripe?.paid === true
           ? "complete"
+          : revenueEntry
+            ? "complete"
           : stripe?.paid === false || stripe?.invoice_status === "open"
             ? "current"
             : "pending",
@@ -322,7 +332,7 @@ function buildSettledNodes(
       proof: state?.policy.summary
         ? `${state.policy.summary.engine}: cap ${formatCurrency(state.policy.summary.max_job_spend_usd * 100)}, floor ${formatPercent(state.policy.summary.margin_floor_percent)}`
         : "Policy configuration appears after setup.",
-      badge: state?.policy.summary ? "local policy" : "not configured",
+      badge: execution?.policy_label ?? (state?.policy.summary ? "local policy" : "not configured"),
       status: checks.length > 0 ? "complete" : state?.policy.summary ? "current" : "pending",
       tone: "violet",
       icon: ShieldCheck,
@@ -361,7 +371,7 @@ function buildSettledNodes(
     },
     {
       key: "agents",
-      title: "Launch Work",
+      title: "Work Execution",
       eyebrow: "deliverables",
       proof: outputs.length > 0 ? `${outputs.length} deliverables recorded` : "Launch work appears after execution.",
       badge: outputs.length > 0 ? `${outputs.length}/4 outputs` : "awaiting work",
@@ -377,7 +387,7 @@ function buildSettledNodes(
       eyebrow: "records",
       proof:
         auditRows > 0
-          ? `${auditRows} current-state records`
+          ? `${auditRows} timeline, orchestration, finance, policy, ledger, work, and report records`
           : health?.database_exists
             ? "SQLite database is present; run proof is not recorded yet."
             : "SQLite proof appears after launch.",

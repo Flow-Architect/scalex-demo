@@ -3,12 +3,14 @@ from typing import Any
 import json
 
 from .. import repository
+from ..config import Settings, get_settings, normalized_execution_mode
 from .ledger_service import ledger_totals, usd_to_cents
 from .policy_service import policy_config_for_seed, policy_summary
 from .seed_service import load_seed_config
 
 
 def build_demo_state(connection: sqlite3.Connection, run_id: str | None = None) -> dict[str, Any]:
+    settings = get_settings()
     workflows = repository.list_workflows(connection)
     active_workflow = repository.get_active_workflow(connection)
     jobs = repository.list_jobs(connection)
@@ -46,9 +48,11 @@ def build_demo_state(connection: sqlite3.Connection, run_id: str | None = None) 
         _decode_stripe_event(event)
         for event in (repository.list_stripe_events(connection, job_id) if job_id else [])
     ]
+    stripe_summary = _stripe_summary(stripe_events, events)
 
     return {
         "mode": "local_sqlite",
+        "execution": _execution_summary(settings, latest_planning_run, hermes_metadata, stripe_summary),
         "database": {
             "initialized": True,
             "table_counts": _table_counts(connection),
@@ -74,7 +78,7 @@ def build_demo_state(connection: sqlite3.Connection, run_id: str | None = None) 
         "planning_run": latest_planning_run,
         "orchestration_calls": orchestration_calls,
         "hermes": hermes_metadata,
-        "stripe": _stripe_summary(stripe_events, events),
+        "stripe": stripe_summary,
         "policy_checks": policy_checks,
         "stripe_events": stripe_events,
         "agent_outputs": repository.list_agent_outputs(connection, job_id) if job_id else [],
@@ -90,6 +94,54 @@ def build_demo_state(connection: sqlite3.Connection, run_id: str | None = None) 
             "expected_margin_percent": _expected_margin_percent(seed_config),
             "recommendation": "Proceed with implementation launch while preserving setup spend guardrails.",
         },
+    }
+
+
+def _execution_summary(
+    settings: Settings,
+    planning_run: dict[str, Any] | None,
+    hermes_metadata: dict[str, Any],
+    stripe_summary: dict[str, Any],
+) -> dict[str, Any]:
+    mode = normalized_execution_mode(settings.scalex_execution_mode)
+    demo_mode = mode == "demo"
+    used_real_hermes = bool(hermes_metadata.get("used_real_hermes"))
+    used_real_stripe = bool(stripe_summary.get("used_real_stripe"))
+    planning_source = planning_run.get("source") if planning_run else None
+    stripe_mode = stripe_summary.get("stripe_mode")
+
+    return {
+        "mode": mode,
+        "label": "Demo proof mode" if demo_mode else "Full Proof Mode",
+        "requested_full_proof": not demo_mode,
+        "planning_label": (
+            "Real isolated Hermes"
+            if used_real_hermes
+            else "Deterministic Hermes plan"
+            if planning_source
+            else "Planning proof pending"
+        ),
+        "finance_label": (
+            "Real Stripe test mode"
+            if used_real_stripe
+            else "Stripe test-double/sandbox proof"
+            if stripe_mode == "test_double"
+            else "Sandbox finance proof pending"
+        ),
+        "policy_label": "Local policy active",
+        "used_real_hermes": used_real_hermes,
+        "used_real_stripe": used_real_stripe,
+        "planning_source": planning_source,
+        "stripe_mode": stripe_mode,
+        "truthfulness_note": (
+            "Demo proof mode uses deterministic local planning and Stripe test-double sandbox "
+            "finance proof. It does not claim real Hermes or real Stripe usage."
+            if demo_mode
+            else (
+                "Full Proof Mode uses configured real isolated Hermes and real Stripe test-mode "
+                "adapters. Missing credentials remain visible integration errors."
+            )
+        ),
     }
 
 

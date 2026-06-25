@@ -59,6 +59,7 @@ const NORTHSTAR_ONBOARDING_DRAFT: OnboardingDraft = {
   approvedVendors: "Secure Workspace Pack, Data Migration Sandbox, Launch Asset Kit",
   blockedVendors: "Unapproved Data Broker Enrichment",
 };
+const RUN_STEP_MS = 620;
 
 export default function App() {
   const [auth, setAuth] = useState<AuthStatus | null>(null);
@@ -98,21 +99,6 @@ export default function App() {
       setOnboardingDraft(draftFromJob(state.job));
     }
   }, [state?.job, state?.workflow]);
-
-  useEffect(() => {
-    if (busyAction !== "run") {
-      return undefined;
-    }
-
-    setPlaybackIndex(0);
-    const timer = window.setInterval(() => {
-      setPlaybackIndex((current) =>
-        current >= WORKFLOW_NODE_ORDER.length - 1 ? current : current + 1,
-      );
-    }, 700);
-
-    return () => window.clearInterval(timer);
-  }, [busyAction]);
 
   useEffect(() => {
     if (!runCompletedMoment) {
@@ -220,21 +206,52 @@ export default function App() {
     setError(null);
     setNotice(null);
     setRunCompletedMoment(false);
+    setPlaybackIndex(0);
+    setSelectedNodeKey(WORKFLOW_NODE_ORDER[0]);
+    let cancelPlayback = false;
+    const playback = playRunProgress(() => cancelPlayback);
     try {
       const response = await runDemo();
       setState(response.state);
       setHealth(await getHealth());
       if (response.status === "completed") {
+        await playback;
         setPlaybackIndex(WORKFLOW_NODE_ORDER.length - 1);
+        setSelectedNodeKey("report");
         setRunCompletedMoment(true);
-        setNotice("Client implementation run completed with API proof loaded.");
+        setNotice(
+          `${response.state.execution.label} completed: protected profit ${formatCurrencyText(
+            response.state.report?.gross_profit_cents,
+          )}, blocked risk ${formatCurrencyText(
+            response.state.report?.blocked_spend_cents,
+          )}, evidence records ${auditRowCount(response.state)}.`,
+        );
       } else {
-        setError(String(response.decision?.error ?? `Run ended with status ${response.status}.`));
+        cancelPlayback = true;
+        const failureNode = failureNodeForStatus(response.status);
+        const failureIndex =
+          failureNode === "summary" ? 0 : WORKFLOW_NODE_ORDER.indexOf(failureNode);
+        setPlaybackIndex(Math.max(failureIndex, 0));
+        setSelectedNodeKey(failureNode);
+        setError(runFailureMessage(response.status, response.decision?.error));
       }
     } catch (caught) {
+      cancelPlayback = true;
       setError(errorMessage(caught));
     } finally {
+      cancelPlayback = true;
       setBusyAction(null);
+    }
+  }
+
+  async function playRunProgress(cancelled: () => boolean) {
+    for (let index = 0; index < WORKFLOW_NODE_ORDER.length; index += 1) {
+      if (cancelled()) {
+        return;
+      }
+      setPlaybackIndex(index);
+      setSelectedNodeKey(WORKFLOW_NODE_ORDER[index]);
+      await wait(RUN_STEP_MS);
     }
   }
 
@@ -414,8 +431,10 @@ export default function App() {
           onRefresh={refreshState}
           onReset={handleResetDemo}
           onRun={handleRunDemo}
+          onOpenAudit={() => setActiveView("audit")}
           onSelectNode={setSelectedNodeKey}
           playbackIndex={playbackIndex}
+          runCompletedMoment={runCompletedMoment}
           runStatus={runStatus}
           selectedNodeKey={selectedNodeKey}
           state={state}
@@ -437,6 +456,8 @@ export default function App() {
           onboardingBusy={busyAction === "reset"}
           onboardingDraft={onboardingDraft}
           onboardingError={onboardingError}
+          busyAction={busyAction}
+          runStatus={runStatus}
           state={state}
         />
       )}
@@ -619,6 +640,32 @@ function onboardingRequestFromDraft(draft: OnboardingDraft): OnboardingRequest {
     approved_vendors: splitVendors(draft.approvedVendors),
     blocked_vendors: splitVendors(draft.blockedVendors),
   };
+}
+
+function wait(ms: number) {
+  return new Promise((resolve) => window.setTimeout(resolve, ms));
+}
+
+function failureNodeForStatus(status: string): WorkflowInspectorKey {
+  if (status.includes("hermes")) {
+    return "hermes";
+  }
+  if (status.includes("stripe")) {
+    return "stripe";
+  }
+  return "summary";
+}
+
+function runFailureMessage(status: string, error: unknown): string {
+  const reason = error ? String(error) : `Run ended with status ${status}.`;
+  return `${reason} Next action: check the selected proof step, then switch to Demo proof mode or fix the Full Proof Mode configuration before retrying.`;
+}
+
+function formatCurrencyText(cents: number | null | undefined): string {
+  if (cents === null || cents === undefined) {
+    return "pending";
+  }
+  return `$${(cents / 100).toLocaleString(undefined, { maximumFractionDigits: 0 })}`;
 }
 
 function splitVendors(value: string): string[] {

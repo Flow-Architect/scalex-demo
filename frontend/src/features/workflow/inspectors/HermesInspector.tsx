@@ -18,6 +18,7 @@ import {
 export function HermesInspector({ state }: { state: DemoState | null }) {
   const hermes = state?.hermes ?? null;
   const planningRun = state?.planning_run ?? null;
+  const execution = state?.execution ?? null;
   const plan = planningRun?.result_json ?? null;
   const failed = hermesFailed(hermes, planningRun);
   const phases = operatingPlanPhases(plan);
@@ -37,6 +38,8 @@ export function HermesInspector({ state }: { state: DemoState | null }) {
       >
         <FactGrid>
           <Fact label="Real isolated Hermes" value={String(Boolean(hermes?.used_real_hermes))} />
+          <Fact label="Execution mode" value={execution?.label ?? "Not recorded"} />
+          <Fact label="Plan proof" value={execution?.planning_label ?? "Not recorded"} />
           <Fact label="Provider" value={hermes?.provider ?? planningRun?.provider ?? "Not recorded"} />
           <Fact label="Model" value={hermes?.model ?? planningRun?.model ?? "Not recorded"} />
           <Fact label="Skill" value={hermes?.skill_name ?? "Not recorded"} />
@@ -55,7 +58,7 @@ export function HermesInspector({ state }: { state: DemoState | null }) {
                 : hermes?.used_real_hermes
                   ? "Real isolated Hermes"
                   : planningRun
-                    ? "Planning proof recorded"
+                    ? execution?.planning_label ?? "Planning proof recorded"
                     : "Awaiting plan"
             }
             tone={failed ? "rose" : hermes?.used_real_hermes ? "emerald" : planningRun ? "teal" : "amber"}

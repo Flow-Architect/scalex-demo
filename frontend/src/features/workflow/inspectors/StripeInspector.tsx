@@ -14,6 +14,7 @@ import {
 
 export function StripeInspector({ state }: { state: DemoState | null }) {
   const stripe = state?.stripe ?? null;
+  const execution = state?.execution ?? null;
   const latestInvoice = latestWhere(state?.stripe_events ?? [], (event) => Boolean(event.invoice_id));
   const failed = Boolean(stripe?.error);
   const livemode =
@@ -25,9 +26,11 @@ export function StripeInspector({ state }: { state: DemoState | null }) {
       <InspectorSection
         description="Goal 7 product path uses Stripe test mode only. Live-money payments are not implemented."
         icon={CreditCard}
-        title="Stripe Test Invoice"
+        title="Stripe Finance Proof"
       >
         <FactGrid>
+          <Fact label="Execution mode" value={execution?.label ?? "Not recorded"} />
+          <Fact label="Finance proof" value={execution?.finance_label ?? "Not recorded"} />
           <Fact label="Real Stripe test path" value={String(Boolean(stripe?.used_real_stripe))} />
           <Fact label="Stripe mode" value={stripe?.stripe_mode ? humanize(stripe.stripe_mode) : "Not recorded"} />
           <Fact label="livemode" value={livemode} />
@@ -41,7 +44,7 @@ export function StripeInspector({ state }: { state: DemoState | null }) {
         <div className="mt-3 flex flex-wrap gap-2">
           <StatusPill
             icon={failed ? AlertTriangle : CreditCard}
-            label={failed ? "Stripe error" : stripe?.used_real_stripe ? "Real Stripe test mode" : stripe?.stripe_mode ? humanize(stripe.stripe_mode) : "Awaiting Stripe proof"}
+            label={failed ? "Stripe error" : execution?.finance_label ?? (stripe?.stripe_mode ? humanize(stripe.stripe_mode) : "Awaiting Stripe proof")}
             tone={failed ? "rose" : stripe?.used_real_stripe ? "sky" : "amber"}
           />
           <StatusPill label="No live money" tone="rose" />

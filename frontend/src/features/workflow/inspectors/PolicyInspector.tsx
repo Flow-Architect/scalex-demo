@@ -9,6 +9,7 @@ export function PolicyInspector({ state }: { state: DemoState | null }) {
   const summary = state?.policy.summary ?? null;
   const approvedChecks = approvedPolicyChecks(state);
   const blockedChecks = blockedPolicyChecks(state);
+  const execution = state?.execution ?? null;
 
   return (
     <div className="space-y-4">
@@ -21,6 +22,8 @@ export function PolicyInspector({ state }: { state: DemoState | null }) {
           <>
             <FactGrid>
               <Fact label="Policy engine" value={summary.engine} />
+              <Fact label="Execution mode" value={execution?.label ?? "Not recorded"} />
+              <Fact label="Guardrail proof" value={execution?.policy_label ?? "Local policy active"} />
               <Fact label="Spend cap" value={formatCurrency(summary.max_job_spend_usd * 100)} />
               <Fact label="Margin floor" value={formatPercent(summary.margin_floor_percent)} />
               <Fact label="Invoice before spend" value={summary.require_invoice_before_spend ? "Required" : "Not required"} />
@@ -43,13 +46,13 @@ export function PolicyInspector({ state }: { state: DemoState | null }) {
 
       <InspectorSection title="Decision summary">
         <div className="grid gap-3 sm:grid-cols-2">
-          <div className="rounded-lg border border-emerald-300/20 bg-emerald-300/10 p-3">
-            <p className="text-sm font-semibold text-emerald-100">{approvedChecks.length} approved</p>
-            <p className="mt-1 text-sm text-emerald-200">Policy-safe setup requests can create spend ledger rows.</p>
+          <div className="rounded-md border border-emerald-200 bg-emerald-50 p-3">
+            <p className="text-sm font-semibold text-emerald-900">{approvedChecks.length} approved</p>
+            <p className="mt-1 text-sm text-emerald-800">Policy-safe setup requests can create spend ledger rows.</p>
           </div>
-          <div className="rounded-lg border border-rose-300/20 bg-rose-300/10 p-3">
-            <p className="text-sm font-semibold text-rose-100">{blockedChecks.length} blocked</p>
-            <p className="mt-1 text-sm text-rose-200">Unsafe or unapproved requests are blocked before spend is recorded.</p>
+          <div className="rounded-md border border-rose-200 bg-rose-50 p-3">
+            <p className="text-sm font-semibold text-rose-900">{blockedChecks.length} blocked</p>
+            <p className="mt-1 text-sm text-rose-800">Unsafe or unapproved requests are blocked before spend is recorded.</p>
           </div>
         </div>
       </InspectorSection>

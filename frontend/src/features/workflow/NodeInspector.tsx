@@ -24,6 +24,7 @@ export function NodeInspector({
   health,
   model,
   money,
+  onOpenAudit,
   onSelect,
   runStatus,
   selectedKey,
@@ -33,6 +34,7 @@ export function NodeInspector({
   health: HealthResponse | null;
   model: WorkflowModel;
   money: MoneySnapshot;
+  onOpenAudit: () => void;
   onSelect: (key: WorkflowInspectorKey) => void;
   runStatus: string;
   selectedKey: WorkflowInspectorKey;
@@ -93,7 +95,7 @@ export function NodeInspector({
         {selectedKey === "blocked" ? <SpendInspector mode="blocked" state={state} /> : null}
         {selectedKey === "agents" ? <AgentWorkInspector state={state} /> : null}
         {selectedKey === "audit" ? (
-          <AuditInspector counts={model.counts} health={health} state={state} />
+          <AuditInspector counts={model.counts} health={health} onOpenAudit={onOpenAudit} state={state} />
         ) : null}
         {selectedKey === "report" ? <ReportInspector money={money} state={state} /> : null}
       </div>
