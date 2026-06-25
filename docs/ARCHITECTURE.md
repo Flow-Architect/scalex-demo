@@ -8,7 +8,7 @@ ScaleX ClientOps Autopilot is an Enterprise Function Accelerator for revenue-bac
 ScaleX UI
   -> local prototype auth gate
   -> SQLite-backed local/sample client operation records
-  -> product shell with Dashboard, Onboarding, Customers, Studio, Runs, Audit, Integrations, Settings
+  -> product shell with Dashboard, Function Studio, Onboarding, Client Operations, Runs, Evidence Ledger, Integrations, Settings
   -> FastAPI backend
   -> isolated Hermes planning and routing
   -> Stripe finance proof in test mode
@@ -34,8 +34,8 @@ ScaleX UI
 ## Implemented Today
 
 - Vite React TypeScript frontend.
-- Product shell with login, Dashboard, Studio, Onboarding, Customers, Runs, Audit, Integrations, and Settings views.
-- Studio route with connected proof nodes and right selected-node inspector.
+- Product shell with login, Dashboard, Function Studio, Onboarding, Client Operations, Runs, Evidence Ledger, Integrations, and Settings views.
+- Function Studio route with connected proof nodes and right selected-node inspector.
 - FastAPI backend.
 - SQLite evidence ledger at `data/scalex.db`.
 - Local prototype auth using an environment-configured username/password and signed HTTP-only session cookie.

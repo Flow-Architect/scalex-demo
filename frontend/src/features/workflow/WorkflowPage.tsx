@@ -107,14 +107,14 @@ export function WorkflowPage({
 
           {!activeWorkflow ? (
             <div className="flex flex-col gap-3 border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900 sm:flex-row sm:items-center sm:justify-between">
-              <span>Create or select a local client operation in Customers before starting a run.</span>
+              <span>Create or select a local client operation before starting a run.</span>
               <button
                 className="inline-flex min-h-10 items-center justify-center gap-2 rounded-md border border-amber-300 bg-white px-3 font-semibold text-zinc-950 transition hover:bg-amber-100"
                 onClick={onOpenCustomers}
                 type="button"
               >
                 <Users className="h-4 w-4" aria-hidden="true" />
-                Open Customers
+                Open Client Operations
               </button>
             </div>
           ) : null}
@@ -185,6 +185,7 @@ function WorkflowHeader({
           <p className="mt-2 max-w-4xl text-base leading-7 text-zinc-600">
             Launch and inspect the {displayJob} function for {displayCustomer}.
           </p>
+          <StudioFactStrip displayCustomer={displayCustomer} displayJob={displayJob} money={money} runStatus={runStatus} />
         </div>
 
         <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap xl:justify-end">
@@ -207,11 +208,43 @@ function WorkflowHeader({
           </button>
           <button className="inline-flex min-h-11 items-center justify-center gap-2 rounded-md border border-zinc-300 bg-white px-4 text-sm font-semibold text-zinc-900 transition hover:bg-zinc-50" onClick={onOpenCustomers} type="button">
             <Users className="h-4 w-4" aria-hidden="true" />
-            Client files
+            Client operations
           </button>
         </div>
       </div>
     </header>
+  );
+}
+
+function StudioFactStrip({
+  displayCustomer,
+  displayJob,
+  money,
+  runStatus,
+}: {
+  displayCustomer: string;
+  displayJob: string;
+  money: MoneySnapshot;
+  runStatus: string;
+}) {
+  const facts = [
+    { label: "Client", value: displayCustomer },
+    { label: "Function", value: displayJob },
+    { label: "Revenue", value: formatOptionalCurrency(money.revenueCents) },
+    { label: "Protected profit", value: formatOptionalCurrency(money.grossProfitCents) },
+    { label: "Guardrails", value: "Local policy active" },
+    { label: "Run", value: runStatus },
+  ];
+
+  return (
+    <dl className="mt-5 grid overflow-hidden rounded-md bg-white shadow-sm ring-1 ring-zinc-200 sm:grid-cols-2 xl:grid-cols-6">
+      {facts.map((fact) => (
+        <div className="border-b border-zinc-200 px-4 py-3 last:border-b-0 sm:border-r sm:last:border-r-0 xl:border-b-0" key={fact.label}>
+          <dt className="text-xs font-semibold uppercase text-zinc-500">{fact.label}</dt>
+          <dd className="mt-1 text-sm font-semibold text-zinc-950">{fact.value}</dd>
+        </div>
+      ))}
+    </dl>
   );
 }
 

@@ -22,11 +22,13 @@ governed AI operations layer that can run those functions safely.
 
 - Local FastAPI backend and Vite React product shell.
 - Local prototype auth gate.
-- SQLite-backed local/sample customer and operation management with Northstar Dental Group defaults.
-- Product navigation for Dashboard, Studio, Onboarding, Customers, Runs, Audit, Integrations, and Settings.
+- SQLite-backed local/sample client operation management with Northstar Dental Group defaults.
+- Product navigation for Dashboard, Function Studio, Onboarding, Client Operations, Runs,
+  Evidence Ledger, Integrations, and Settings.
 - Connected Function Studio page for the autonomous run, with approved setup spend and blocked risk branches.
-- Right selected-node inspector for Run Summary, Client Operation Intake, Hermes, Stripe, Payment
-  Status, Guardrail Review, Spend, Work Units, SQLite Audit, and Profit Outcome proof.
+- Right selected-node inspector for Run Summary, Client Intake, Hermes Plan, Finance Proof,
+  Revenue Gate, Guardrail Review, Approved Resources, Blocked Risk, Evidence Ledger, and Profit
+  Outcome proof.
 - Selected workflow runs where customer, job, invoice amount, spend cap, margin floor, and vendor
   lists drive Stripe amount, policy math, ledger totals, and final report.
 - Persisted run history with historical proof inspection by run ID.

@@ -1,19 +1,22 @@
 # STATUS - ScaleX ClientOps Autopilot
 
-Last updated: 2026-06-24
+Last updated: 2026-06-25
 
 ## Verified Current State
 
 - Project folder exists at `/home/ascabrya/dev/scalex-demo`.
 - Latest committed baseline before Goal 7.11C follow-up: `882567f Replace Harbor with Northstar ClientOps launch`.
-- Last completed goal: Goal 7.11C-followup - Replace Card Dashboard With ClientOps Product Workspace.
-- Last completed implementation/QA goal: Goal 7.11C-followup - Replace Card Dashboard With ClientOps Product Workspace.
+- Last completed goal: Goal 7.11D - Demo Polish / Visual Consistency Pass.
+- Last completed implementation/QA goal: Goal 7.11D - Demo Polish / Visual Consistency Pass.
 - Current priority: Goal 8A - NeMo Guardrails Preflight / Architecture Audit.
 - Goal 7.11B replaced the legacy Harbor sample with Northstar Dental Group / Client Implementation Launch.
 - Goal 7.11C-followup replaced the remaining generated dashboard/card shell with a ClientOps
-  operation-file workspace across Dashboard, Function Studio, Onboarding, Customers, Runs,
-  Audit, Integrations, and Settings.
-- Goal 8A - NeMo Guardrails Preflight / Architecture Audit remains intact and planned after the 7.11B/7.11C positioning pass.
+  operation-file workspace across Dashboard, Function Studio, Onboarding, Client Operations,
+  Runs, Evidence Ledger, Integrations, and Settings.
+- Goal 7.11D unified the visual language across the light operation-file workspace, polished
+  Function Studio into a more business-readable demo path, normalized primary proof labels, and
+  verified the browser flow from login through logout.
+- Goal 8A - NeMo Guardrails Preflight / Architecture Audit remains intact and planned after the 7.11D polish pass.
 - Goal 9 remains final polish and submission assets.
 - Goal 7B remains future Verified Live Mode hardening.
 
@@ -70,12 +73,33 @@ Functional product surfaces remain:
 - Vite React TypeScript frontend
 - SQLite evidence ledger
 - local prototype auth
-- Dashboard, Onboarding, Customers, Studio, Runs, Audit, Integrations, and Settings
+- Dashboard, Function Studio, Onboarding, Client Operations, Runs, Evidence Ledger,
+  Integrations, and Settings
 - connected Function Studio page with proof nodes and selected-node inspector
 - isolated Hermes planning in product mode
 - real Stripe test-mode invoice path when configured with `sk_test_...`
 - deterministic test-double paths for tests/CI/diagnostics only
 - local policy engine for current guardrail enforcement
+
+## Verified For Goal 7.11D
+
+- Unified the app around the lighter operation-file visual system so the shell, Dashboard,
+  Function Studio, and secondary pages no longer feel like separate products.
+- Kept Dashboard business-first with the Northstar operation brief, outcome rail, operating stack,
+  template shelf, technical proof route footer, and clear `Open Function Studio` path.
+- Strengthened Function Studio with a top operation fact strip, clearer business labels, readable
+  Function Map rows, proof-oriented Evidence Drawer copy, and normalized primary proof badges such
+  as `test planning proof` and `setup needed` instead of raw snake_case.
+- Polished navigation labels to Dashboard, Function Studio, Onboarding, Client Operations, Runs,
+  Evidence Ledger, Integrations, and Settings while preserving existing routes and state.
+- Lightly polished Onboarding, Client Operations, Runs, Evidence Ledger, Integrations, Settings,
+  login, and logout so the demo path is consistent without adding fake functionality.
+- Preserved Northstar economics and truthfulness: synthetic account only, no patient data, no PHI,
+  no HIPAA claim, local policy active now, NeMo planned/not wired, Stripe not paid unless
+  `paid=true`, no live-money support, and no production auth claim.
+- Did not implement Goal 8, install or wire NeMo, run Stripe API calls, run Hermes model calls,
+  edit `.env`, touch `data/*.db`, touch `data/backups`, create extra goal logs, commit, or change
+  Northstar economics.
 
 ## Verified For Goal 7.11C-followup
 
@@ -88,13 +112,14 @@ Functional product surfaces remain:
 - Kept Dashboard business-first: hero operation brief, outcome rail, operating stack timeline,
   template shelf, and small supporting routes only.
 - Removed Payment, Policy, SQLite, raw invoice IDs, database paths, and detailed counts from the
-  first Dashboard screen; they now live in Audit, Integrations, Settings, or the Studio Evidence Drawer.
+  first Dashboard screen; they now live in Evidence Ledger, Integrations, Settings, or the
+  Function Studio Evidence Drawer.
 - Reworked Function Studio into a business workspace with operation brief, readable Function Map,
   Evidence Drawer, and client activity timeline.
 - Reworked Onboarding into a Configure Client Implementation Launch operation setup document.
-- Reworked Customers into Client Operation Files and Runs into Execution History with a clear
+- Reworked Client Operations into Client Operation Files and Runs into Execution History with a clear
   no-execution empty state.
-- Reworked Audit into Evidence Ledger, Integrations into Operating Stack, and Settings into
+- Reworked Audit/Evidence Ledger into Evidence Ledger, Integrations into Operating Stack, and Settings into
   Boundaries & Runtime.
 - Preserved Northstar economics and truthfulness: synthetic account only, no patient data, no PHI,
   no HIPAA claim, local policy active now, NeMo planned/not wired, Stripe not paid unless `paid=true`,
@@ -162,12 +187,23 @@ Research-to-Report, Ops Handoff, and Renewal Recommendation.
 
 ## Verification Commands
 
+- For Goal 7.11D, `./scripts/test.sh` passed: 48 backend tests and Vite production build.
+- For Goal 7.11D, `npm run build` in `frontend/` passed after final proof-label polish.
+- Auth-enabled browser QA used `/tmp/scalex-goal711d-qa.db`,
+  `SCALEX_AUTH_ENABLED=true`, `SCALEX_DEMO_USERNAME=<local-demo-username>`,
+  `SCALEX_DEMO_PASSWORD=<local-demo-password>`, `SCALEX_SESSION_SECRET=<local-session-secret>`,
+  `HERMES_TEST_MODE=true`, `HERMES_REQUIRE_REAL=false`, and `STRIPE_TEST_DOUBLE_MODE=true`.
+- Browser QA ran on backend port `8787` and frontend port `5174`.
+- Browser QA confirmed login, Dashboard, Northstar operation selection, Function Studio, Start Run,
+  Hermes/Finance/Guardrail/Blocked Risk/Profit Outcome Evidence Drawer selections, Onboarding,
+  Client Operations, Runs, Evidence Ledger, Integrations, Settings, and logout.
+- Final QA screenshots were written to `/tmp/scalex-goal711d-final`.
 - For Goal 7.11C-followup, `./scripts/test.sh` passed: 48 backend tests and Vite production build.
 - For Goal 7.11C-followup, `npm run build` in `frontend/` passed before the full test script and
   after final visual fixes.
 - Auth-enabled browser QA used `/tmp/scalex-goal711c-followup.db`,
-  `SCALEX_AUTH_ENABLED=true`, `SCALEX_DEMO_USERNAME=operator`,
-  `SCALEX_DEMO_PASSWORD=local-password`, `SCALEX_SESSION_SECRET=local-test-session`,
+  `SCALEX_AUTH_ENABLED=true`, `SCALEX_DEMO_USERNAME=<local-demo-username>`,
+  `SCALEX_DEMO_PASSWORD=<local-demo-password>`, `SCALEX_SESSION_SECRET=<local-session-secret>`,
   `HERMES_TEST_MODE=true`, `HERMES_REQUIRE_REAL=false`, and `STRIPE_TEST_DOUBLE_MODE=true`.
 - Browser QA ran on backend port `8793` and frontend port `5180`.
 - Browser QA confirmed login, Dashboard operation file, Start Run in the test-double QA environment,

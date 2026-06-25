@@ -91,8 +91,8 @@ Implemented today:
 - Real Stripe test-mode invoice flow through the orchestration layer.
 - Stripe test-double records for automated tests, CI, offline development, and diagnostics.
 - Deterministic Finance, Marketing, Research, and Ops outputs.
-- Vite React product shell with local prototype auth, Dashboard, Onboarding, Customers, Studio,
-  Runs, Audit, Integrations, and Settings.
+- Vite React product shell with local prototype auth, Dashboard, Function Studio, Onboarding,
+  Client Operations, Runs, Evidence Ledger, Integrations, and Settings.
 - Connected Function Studio page with proof nodes, selected-node inspector, persisted run history, and
   historical run inspection.
 
@@ -126,8 +126,8 @@ SCALEX_DEMO_PASSWORD=
 SCALEX_SESSION_SECRET=
 ```
 
-After login, open Onboarding or Customers, load the Northstar Dental Group sample or create
-another synthetic/sample client operation, select it, then open Studio and click `Start Run`.
+After login, use Dashboard or Onboarding to load/select the Northstar Dental Group sample or create
+another synthetic/sample client operation, then open Function Studio and click `Start Run`.
 The run uses the active operation values and appends a new run record instead of
 overwriting prior history.
 
@@ -191,7 +191,6 @@ These commands must not use live Stripe mode or production service credentials.
   product flow.
 - Test/diagnostic only: deterministic Hermes planning and Stripe test doubles in automated tests,
   CI, offline development, or explicitly labeled diagnostics.
-- Planned next: Goal 7.11C aligns the ClientOps Function Studio visual story, then Goal 8A audits
-  NeMo Guardrails availability.
+- Planned next: Goal 8A audits NeMo Guardrails availability without wiring real NeMo yet.
 - Future: Goal 8 governed autonomy with NVIDIA NeMo Guardrails or a NeMo-compatible adapter, Goal
   9 final submission prep, and Verified Live Mode before any live-money Stripe actions.

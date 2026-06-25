@@ -42,15 +42,23 @@ export function HermesInspector({ state }: { state: DemoState | null }) {
           <Fact label="Skill" value={hermes?.skill_name ?? "Not recorded"} />
           <Fact label="Toolsets" value={hermes?.toolsets_used?.join(", ") || "None recorded"} />
           <Fact label="Planning status" value={humanize(planningRun?.status ?? null)} />
-          <Fact label="Planning source" value={planningRun?.source ?? "Not recorded"} />
+          <Fact label="Planning source" value={planningRun?.source ? humanize(planningRun.source) : "Not recorded"} />
           <Fact label="Completed" value={formatDateTime(planningRun?.completed_at)} />
         </FactGrid>
 
         <div className="mt-3 flex flex-wrap gap-2">
           <StatusPill
             icon={failed ? AlertTriangle : BrainCircuit}
-            label={failed ? "Hermes error" : hermes?.used_real_hermes ? "Real isolated Hermes" : "Awaiting plan"}
-            tone={failed ? "rose" : hermes?.used_real_hermes ? "emerald" : "amber"}
+            label={
+              failed
+                ? "Hermes error"
+                : hermes?.used_real_hermes
+                  ? "Real isolated Hermes"
+                  : planningRun
+                    ? "Planning proof recorded"
+                    : "Awaiting plan"
+            }
+            tone={failed ? "rose" : hermes?.used_real_hermes ? "emerald" : planningRun ? "teal" : "amber"}
           />
           <StatusPill icon={Layers3} label={`${state?.orchestration_calls.length ?? 0} orchestration calls`} tone="violet" />
         </div>

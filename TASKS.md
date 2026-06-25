@@ -4,7 +4,7 @@
 
 Goal 8A - NeMo Guardrails Preflight / Architecture Audit.
 
-Goal 7.11C is complete after the required follow-up product-workspace redesign. Goal 8A remains
+Goal 7.11D is complete after the final demo polish / visual consistency pass. Goal 8A remains
 intact and should run next unless the plan changes.
 
 ## Goal 7.11A Gate Result
@@ -65,6 +65,32 @@ Run Codex `/goal` 8A:
 - Produce the exact Goal 8B implementation prompt.
 - Preserve product-mode truthfulness: local policy is active now; real NeMo is not wired yet.
 
+## Goal 7.11D Gate Result
+
+Goal 7.11D - Demo Polish / Visual Consistency Pass is complete as the final pre-Goal-8 UI
+consistency pass.
+
+- Unified the shell, Dashboard, login, logout, Function Studio, and secondary pages around the
+  lighter ClientOps operation-file visual language.
+- Kept Dashboard business-first with the Northstar operation brief, outcome rail, operating stack,
+  template shelf, and small proof route footer.
+- Polished Function Studio without replacing the working map: added the operation fact strip,
+  clearer `Function Studio` / `Function Map` / `Evidence Drawer` language, readable step rows,
+  and business-readable proof labels.
+- Polished Onboarding, Client Operations, Runs, Evidence Ledger, Integrations, and Settings enough
+  for a smooth demo path without adding fake functionality.
+- Preserved login/logout, Northstar selection, onboarding save/select, Start Run, selected step
+  Evidence Drawer behavior, Runs, Evidence Ledger, Integrations, and Settings.
+- Preserved truthfulness: Northstar is synthetic, no patient data, no PHI, no HIPAA claim, local
+  policy active now, NeMo planned/not wired, Stripe is not paid unless `paid=true`, no live-money
+  support, and no production auth claim.
+- Did not implement Goal 8, wire real NeMo, run Stripe API calls, run Hermes model calls, edit
+  `.env`, touch `data/*.db`, touch `data/backups`, create extra goal logs, commit, or change
+  Northstar economics.
+- Verified with `./scripts/test.sh`, `npm run build` in `frontend/`, `git diff --check`, strict
+  tracked-file secret scan, staged-artifact checks, and auth-enabled browser QA including Start Run
+  on backend `8787` / frontend `5174`.
+
 ## Goal 7.11C Gate Result
 
 Goal 7.11C - ClientOps Function Studio Visual Pass is complete after the follow-up pass replaced
@@ -81,14 +107,14 @@ the old card-dashboard shell with a ClientOps product workspace.
   Invoice-to-Cash, Vendor Spend Approval, Client Onboarding, Research-to-Report, Ops Handoff,
   and Renewal Recommendation.
 - Moved payment state, policy state, SQLite state, raw invoice IDs, database paths, and detailed
-  counts lower or into Audit / Integrations.
+  counts lower or into Evidence Ledger / Integrations.
 - Added shared workspace primitives for operation pages, operation hero, outcome rail, operation
   timeline, template shelf, proof routes, empty workspace states, and plain tables.
 - Reworked Function Studio into a business-readable workspace with operation brief, Function Map,
   Evidence Drawer, and activity timeline.
-- Reworked Onboarding into Configure Client Implementation Launch, Customers into Client Operation
-  Files, Runs into Execution History, Audit into Evidence Ledger, Integrations into Operating
-  Stack, and Settings into Boundaries & Runtime.
+- Reworked Onboarding into Configure Client Implementation Launch, Client Operations into Client
+  Operation Files, Runs into Execution History, Evidence Ledger into grouped evidence,
+  Integrations into Operating Stack, and Settings into Boundaries & Runtime.
 - Preserved Stripe honesty: invoice is not paid unless `paid=true`.
 - Preserved local policy active now / real NeMo Guardrails planned and not wired.
 - Did not add fake live-money support, real customer workflow claims, real NeMo claims, live Stripe

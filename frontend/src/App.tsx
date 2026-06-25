@@ -446,15 +446,15 @@ export default function App() {
 
 function LoadingScreen() {
   return (
-    <main className="flex min-h-screen items-center justify-center bg-zinc-950 px-4 text-white">
-      <div className="w-full max-w-md rounded-lg border border-white/15 bg-white/10 p-6">
+    <main className="flex min-h-screen items-center justify-center bg-stone-100 px-4 text-zinc-950">
+      <div className="w-full max-w-md rounded-md bg-white p-6 shadow-sm ring-1 ring-zinc-200">
         <div className="flex items-center gap-3">
-          <span className="flex h-11 w-11 items-center justify-center rounded-lg border border-emerald-300/30 bg-emerald-300/10 text-emerald-100">
+          <span className="flex h-11 w-11 items-center justify-center rounded-md bg-zinc-950 text-white">
             <Workflow className="h-5 w-5 animate-pulse" aria-hidden="true" />
           </span>
           <div>
             <p className="text-lg font-semibold">ScaleX ClientOps Autopilot</p>
-            <p className="text-sm text-zinc-300">Loading local operation console</p>
+            <p className="text-sm text-zinc-600">Loading local operation workspace</p>
           </div>
         </div>
       </div>
@@ -476,33 +476,33 @@ function LoginScreen({
   onSubmit: (event: FormEvent<HTMLFormElement>) => void;
 }) {
   return (
-    <main className="min-h-screen bg-zinc-950 text-white">
+    <main className="min-h-screen bg-stone-100 text-zinc-950">
       <div className="grid min-h-screen lg:grid-cols-[minmax(0,0.95fr)_minmax(420px,0.7fr)]">
-        <section className="flex min-h-[22rem] flex-col justify-between border-b border-white/10 p-6 lg:border-b-0 lg:border-r lg:p-10">
+        <section className="flex min-h-[22rem] flex-col justify-between border-b border-zinc-200 bg-white p-6 lg:border-b-0 lg:border-r lg:p-10">
           <div className="flex items-center gap-3">
-            <span className="flex h-11 w-11 items-center justify-center rounded-lg border border-emerald-300/30 bg-emerald-300/10 text-emerald-100">
+            <span className="flex h-11 w-11 items-center justify-center rounded-md bg-zinc-950 text-white">
               <ShieldCheck className="h-5 w-5" aria-hidden="true" />
             </span>
             <div>
               <p className="text-xl font-semibold">ScaleX ClientOps Autopilot</p>
-              <p className="text-sm text-zinc-400">Enterprise Function Accelerator</p>
+              <p className="text-sm text-zinc-600">Enterprise Function Accelerator</p>
             </div>
           </div>
 
           <div className="max-w-3xl">
-            <p className="text-sm font-semibold uppercase text-emerald-200">
-              Secure ClientOps Console
+            <p className="text-sm font-semibold uppercase text-emerald-700">
+              ClientOps workspace
             </p>
             <h1 className="mt-3 text-4xl font-semibold leading-tight lg:text-6xl">
-              Access the governed client operation console.
+              Access the governed client operation workspace.
             </h1>
-            <p className="mt-5 max-w-2xl text-base leading-7 text-zinc-300">
+            <p className="mt-5 max-w-2xl text-base leading-7 text-zinc-600">
               Local prototype auth gates the demo API and product shell with a signed
               session cookie. It is not production enterprise identity.
             </p>
           </div>
 
-          <div className="grid gap-3 text-sm text-zinc-300 sm:grid-cols-3">
+          <div className="grid gap-3 text-sm text-zinc-700 sm:grid-cols-3">
             <LoginProof icon={LockKeyhole} label="Local session" />
             <LoginProof icon={BrainCircuit} label="Hermes proof preserved" />
             <LoginProof icon={CreditCard} label="Stripe test only" />
@@ -511,34 +511,34 @@ function LoginScreen({
 
         <section className="flex items-center justify-center p-6 lg:p-10">
           <form
-            className="w-full max-w-md rounded-lg border border-white/15 bg-white/10 p-5 shadow-2xl shadow-black/30"
+            className="w-full max-w-md rounded-md bg-white p-5 shadow-sm ring-1 ring-zinc-200"
             onSubmit={onSubmit}
           >
             <div className="flex items-center gap-3">
-              <span className="flex h-10 w-10 items-center justify-center rounded-lg border border-sky-300/30 bg-sky-300/10 text-sky-100">
+              <span className="flex h-10 w-10 items-center justify-center rounded-md border border-sky-200 bg-sky-50 text-sky-900">
                 <KeyRound className="h-5 w-5" aria-hidden="true" />
               </span>
               <div>
                 <h2 className="text-lg font-semibold">ClientOps login</h2>
-                <p className="text-sm text-zinc-300">Prototype local auth</p>
+                <p className="text-sm text-zinc-600">Prototype local auth</p>
               </div>
             </div>
 
-            <label className="mt-5 block text-sm font-semibold text-zinc-200">
+            <label className="mt-5 block text-sm font-semibold text-zinc-700">
               Username
               <input
                 autoComplete="username"
-                className="mt-2 min-h-11 w-full rounded-md border border-white/15 bg-zinc-950 px-3 text-white outline-none transition focus:border-emerald-300"
+                className="mt-2 min-h-11 w-full rounded-md border border-zinc-300 bg-white px-3 text-zinc-950 outline-none transition focus:border-emerald-600"
                 onChange={(event) => onChange({ ...form, username: event.target.value })}
                 type="text"
                 value={form.username}
               />
             </label>
-            <label className="mt-4 block text-sm font-semibold text-zinc-200">
+            <label className="mt-4 block text-sm font-semibold text-zinc-700">
               Password
               <input
                 autoComplete="current-password"
-                className="mt-2 min-h-11 w-full rounded-md border border-white/15 bg-zinc-950 px-3 text-white outline-none transition focus:border-emerald-300"
+                className="mt-2 min-h-11 w-full rounded-md border border-zinc-300 bg-white px-3 text-zinc-950 outline-none transition focus:border-emerald-600"
                 onChange={(event) => onChange({ ...form, password: event.target.value })}
                 type="password"
                 value={form.password}
@@ -546,7 +546,7 @@ function LoginScreen({
             </label>
 
             {error ? (
-              <div className="mt-4 rounded-lg border border-rose-300/40 bg-rose-300/10 p-3 text-sm text-rose-100">
+              <div className="mt-4 rounded-md border border-rose-200 bg-rose-50 p-3 text-sm text-rose-900">
                 {error}
               </div>
             ) : null}
@@ -572,8 +572,8 @@ function LoginScreen({
 
 function LoginProof({ icon: Icon, label }: { icon: LucideIcon; label: string }) {
   return (
-    <div className="flex items-center gap-2 rounded-lg border border-white/15 bg-white/10 p-3">
-      <Icon className="h-4 w-4 text-emerald-200" aria-hidden="true" />
+    <div className="flex items-center gap-2 rounded-md border border-zinc-200 bg-zinc-50 p-3">
+      <Icon className="h-4 w-4 text-emerald-700" aria-hidden="true" />
       <span>{label}</span>
     </div>
   );

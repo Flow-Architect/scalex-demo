@@ -151,7 +151,7 @@ export function WorkflowCanvas({
           {nodes.map((node, index) => (
             <li key={node.key}>
               <button
-                className={`grid w-full gap-4 rounded-md border bg-white p-4 text-left transition hover:border-zinc-500 lg:grid-cols-[3rem_minmax(0,1fr)_8rem] lg:items-center ${
+                className={`grid w-full gap-4 rounded-md border bg-white p-4 text-left shadow-sm transition hover:border-zinc-500 hover:shadow-md sm:grid-cols-[3rem_minmax(0,1fr)] ${
                   selectedKey === node.key ? "border-emerald-600 ring-2 ring-emerald-600 ring-offset-2 ring-offset-zinc-50" : stepBorderClass(node.tone)
                 }`}
                 onClick={() => handleNodeSelect(node.key)}
@@ -161,12 +161,16 @@ export function WorkflowCanvas({
                   {String(index + 1).padStart(2, "0")}
                 </span>
                 <span className="min-w-0">
-                  <span className="text-xs font-semibold uppercase text-zinc-500">{node.eyebrow}</span>
-                  <span className="mt-1 block text-lg font-semibold text-zinc-950">{node.title}</span>
+                  <span className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                    <span className="min-w-0">
+                      <span className="text-xs font-semibold uppercase text-zinc-500">{node.eyebrow}</span>
+                      <span className="mt-1 block text-lg font-semibold text-zinc-950">{node.title}</span>
+                    </span>
+                    <span className={`inline-flex w-fit items-center justify-center rounded-md px-2 py-1 text-xs font-semibold ${stepStatusClass(node.status)}`}>
+                      {node.badge}
+                    </span>
+                  </span>
                   <span className="mt-1 block text-sm leading-6 text-zinc-600">{node.proof}</span>
-                </span>
-                <span className={`inline-flex w-fit items-center justify-center rounded-md px-2 py-1 text-xs font-semibold lg:justify-self-end ${stepStatusClass(node.status)}`}>
-                  {node.badge}
                 </span>
               </button>
             </li>

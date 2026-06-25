@@ -12,7 +12,7 @@ import {
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
-import { formatCurrency, formatPercent } from "../../format";
+import { formatCurrency, formatPercent, humanize } from "../../format";
 import {
   eventByType,
   formatOptionalCurrency,
@@ -130,6 +130,32 @@ const NODE_POSITIONS: Record<WorkflowNodeKey, WorkflowNodePosition> = {
 export const WORKFLOW_CANVAS_WIDTH = 100;
 export const WORKFLOW_CANVAS_HEIGHT = 100;
 
+function planningBadgeLabel(source: string | null | undefined, usedRealHermes: boolean | undefined): string {
+  if (usedRealHermes) {
+    return "real Hermes";
+  }
+  if (!source) {
+    return "awaiting run";
+  }
+  if (source === "deterministic_test" || source === "test_double") {
+    return "test planning proof";
+  }
+  return humanize(source);
+}
+
+function planningProofText(
+  planningRun: DemoState["planning_run"] | null,
+  hermes: DemoState["hermes"] | null,
+): string {
+  if (!planningRun) {
+    return "Planning proof appears after a run.";
+  }
+  if (hermes?.used_real_hermes) {
+    return `${hermes.provider ?? planningRun.provider} / ${hermes.model ?? planningRun.model}`;
+  }
+  return "Local planning proof recorded for this client operation.";
+}
+
 export function buildWorkflowModel({
   auditRows,
   busy,
@@ -238,10 +264,8 @@ function buildSettledNodes(
       key: "hermes",
       title: "Hermes Plan",
       eyebrow: "planning",
-      proof: planningRun
-        ? `${hermes?.provider ?? planningRun.provider} / ${hermes?.model ?? planningRun.model}`
-        : "Planning proof appears after a run.",
-      badge: hermes?.used_real_hermes ? "real Hermes" : planningRun?.source ?? "awaiting run",
+      proof: planningProofText(planningRun, hermes),
+      badge: planningBadgeLabel(planningRun?.source, hermes?.used_real_hermes),
       status: hermesFailed(hermes, planningRun)
         ? "error"
         : planningRun?.status === "completed"

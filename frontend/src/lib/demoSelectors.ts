@@ -125,7 +125,7 @@ export function stripeBadgeValue(stripe: StripeSummary | null): string {
 
 export function stripeModeLabel(stripe: StripeSummary | null): string {
   if (!stripe) {
-    return "pending";
+    return "awaiting proof";
   }
   if (stripe.error) {
     return "integration error";
@@ -134,9 +134,12 @@ export function stripeModeLabel(stripe: StripeSummary | null): string {
     return "real Stripe test";
   }
   if (stripe.stripe_mode === "test_double") {
-    return "test-double";
+    return "test proof";
   }
-  return stripe.stripe_mode || "pending";
+  if (stripe.stripe_mode === "not_configured") {
+    return "setup needed";
+  }
+  return humanize(stripe.stripe_mode);
 }
 
 export function hermesFailed(

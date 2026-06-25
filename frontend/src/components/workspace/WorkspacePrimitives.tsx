@@ -41,7 +41,7 @@ export function WorkspacePage({
   title: string;
 }) {
   return (
-    <div className="mx-auto max-w-[94rem] space-y-8 text-zinc-950">
+    <div className="mx-auto max-w-[94rem] space-y-7 text-zinc-950">
       <header className="grid gap-5 border-b border-zinc-200 pb-6 xl:grid-cols-[minmax(0,1fr)_auto] xl:items-end">
         <div className="min-w-0">
           <p className="text-sm font-semibold uppercase text-emerald-700">{eyebrow}</p>
@@ -74,29 +74,29 @@ export function OperationHero({
   title: string;
 }) {
   return (
-    <section className="grid overflow-hidden bg-white shadow-sm ring-1 ring-zinc-200 xl:grid-cols-[minmax(0,1fr)_24rem]">
+    <section className="grid overflow-hidden rounded-md bg-white shadow-sm ring-1 ring-zinc-200 xl:grid-cols-[minmax(0,1fr)_24rem]">
       <div className="px-6 py-8 sm:px-8 lg:px-10">
         <p className="text-sm font-semibold uppercase text-zinc-500">{client}</p>
-        <h2 className="mt-3 max-w-4xl text-4xl font-semibold leading-tight text-zinc-950 lg:text-6xl">
+        <h2 className="mt-3 max-w-4xl text-4xl font-semibold leading-tight text-zinc-950 lg:text-5xl">
           {title}
         </h2>
         <p className="mt-5 max-w-3xl text-lg leading-8 text-zinc-700">{subtitle}</p>
         {children ? <div className="mt-5 max-w-3xl text-sm leading-6 text-zinc-600">{children}</div> : null}
         {actions ? <div className="mt-8 flex flex-col gap-3 sm:flex-row">{actions}</div> : null}
       </div>
-      <aside className="bg-zinc-950 px-6 py-7 text-white sm:px-8">
+      <aside className="border-t border-zinc-200 bg-zinc-50 px-6 py-7 sm:px-8 xl:border-l xl:border-t-0">
         <p className="text-sm font-semibold uppercase text-zinc-500">Operation file</p>
-        <div className="mt-5 divide-y divide-white/10">
+        <div className="mt-5 divide-y divide-zinc-200">
           {states.map((item) => {
             const Icon = item.icon ?? CheckCircle2;
             return (
               <div className="grid grid-cols-[2rem_1fr] gap-3 py-4 first:pt-0" key={item.label}>
-                <span className={`flex h-8 w-8 items-center justify-center rounded-md ${darkStateClass(item.tone ?? "slate")}`}>
+                <span className={`flex h-8 w-8 items-center justify-center rounded-md border ${softToneClass(item.tone ?? "slate")}`}>
                   <Icon className="h-4 w-4" aria-hidden="true" />
                 </span>
                 <div className="min-w-0">
                   <p className="text-xs font-semibold uppercase text-zinc-500">{item.label}</p>
-                  <p className="mt-1 break-words text-sm font-semibold text-white">{item.value}</p>
+                  <p className="mt-1 break-words text-sm font-semibold text-zinc-950">{item.value}</p>
                 </div>
               </div>
             );
@@ -109,11 +109,11 @@ export function OperationHero({
 
 export function OutcomeRail({ items }: { items: RailItem[] }) {
   return (
-    <section className="bg-zinc-950 text-white shadow-sm" aria-label="Outcome ledger">
-      <div className="grid divide-y divide-white/10 sm:grid-cols-2 sm:divide-x sm:divide-y-0 xl:grid-cols-5">
+    <section className="overflow-hidden rounded-md bg-white shadow-sm ring-1 ring-zinc-200" aria-label="Outcome ledger">
+      <div className="grid divide-y divide-zinc-200 sm:grid-cols-2 sm:divide-x sm:divide-y-0 xl:grid-cols-5">
         {items.map((item) => (
           <div className="px-5 py-5 sm:px-6" key={item.label}>
-            <p className="text-xs font-semibold uppercase text-zinc-400">{item.label}</p>
+            <p className="text-xs font-semibold uppercase text-zinc-500">{item.label}</p>
             <p className={`mt-2 text-3xl font-semibold leading-none ${valueClass(item.tone ?? "slate")}`}>
               {item.value}
             </p>
@@ -126,7 +126,7 @@ export function OutcomeRail({ items }: { items: RailItem[] }) {
 
 export function OperationTimeline({ steps }: { steps: TimelineStep[] }) {
   return (
-    <ol className="grid gap-0 overflow-hidden bg-white shadow-sm ring-1 ring-zinc-200 lg:grid-cols-6">
+    <ol className="grid gap-0 overflow-hidden rounded-md bg-white shadow-sm ring-1 ring-zinc-200 lg:grid-cols-6">
       {steps.map((step, index) => {
         const Icon = step.icon;
         return (
@@ -139,7 +139,7 @@ export function OperationTimeline({ steps }: { steps: TimelineStep[] }) {
                 {String(index + 1).padStart(2, "0")}
               </span>
               {Icon ? (
-                <span className="flex h-8 w-8 flex-none items-center justify-center rounded-md bg-zinc-950 text-white">
+                <span className="flex h-8 w-8 flex-none items-center justify-center rounded-md border border-zinc-200 bg-zinc-50 text-zinc-700">
                   <Icon className="h-4 w-4" aria-hidden="true" />
                 </span>
               ) : null}
@@ -188,7 +188,7 @@ export function TemplateShelf({
   planned: string[];
 }) {
   return (
-    <div className="grid gap-5 bg-white p-6 shadow-sm ring-1 ring-zinc-200 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)]">
+    <div className="grid gap-5 rounded-md bg-white p-6 shadow-sm ring-1 ring-zinc-200 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)]">
       <div>
         <p className="text-xs font-semibold uppercase text-emerald-700">Implemented</p>
         <p className="mt-2 text-xl font-semibold text-zinc-950">{implemented}</p>
@@ -250,7 +250,7 @@ export function PlainTable({
   headers: string[];
 }) {
   return (
-    <div className="overflow-hidden bg-white shadow-sm ring-1 ring-zinc-200">
+    <div className="overflow-hidden rounded-md bg-white shadow-sm ring-1 ring-zinc-200">
       <table className="min-w-full divide-y divide-zinc-200 text-sm">
         <thead className="bg-zinc-50 text-left text-xs uppercase text-zinc-500">
           <tr>
@@ -268,39 +268,19 @@ export function PlainTable({
 function valueClass(tone: Tone): string {
   switch (tone) {
     case "emerald":
-      return "text-emerald-300";
+      return "text-emerald-700";
     case "sky":
-      return "text-sky-300";
+      return "text-sky-700";
     case "amber":
-      return "text-amber-300";
+      return "text-amber-700";
     case "rose":
-      return "text-rose-300";
+      return "text-rose-700";
     case "teal":
-      return "text-teal-300";
+      return "text-teal-700";
     case "violet":
-      return "text-violet-300";
+      return "text-violet-700";
     case "slate":
     default:
-      return "text-zinc-100";
-  }
-}
-
-function darkStateClass(tone: Tone): string {
-  switch (tone) {
-    case "emerald":
-      return "bg-emerald-400/15 text-emerald-100";
-    case "sky":
-      return "bg-sky-400/15 text-sky-100";
-    case "amber":
-      return "bg-amber-400/15 text-amber-100";
-    case "rose":
-      return "bg-rose-400/15 text-rose-100";
-    case "teal":
-      return "bg-teal-400/15 text-teal-100";
-    case "violet":
-      return "bg-violet-400/15 text-violet-100";
-    case "slate":
-    default:
-      return "bg-white/10 text-zinc-100";
+      return "text-zinc-950";
   }
 }

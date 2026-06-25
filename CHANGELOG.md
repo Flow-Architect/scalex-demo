@@ -10,6 +10,52 @@ Use:
 
 ---
 
+## 2026-06-25 - Goal 7.11D: Demo polish and visual consistency pass
+
+Completed:
+- Unified the app around the light ClientOps operation-file visual language so the shell,
+  Dashboard, login, logout, Function Studio, and secondary pages feel like one product.
+- Polished Dashboard spacing, typography, CTA placement, outcome rail, operating stack,
+  template shelf, and proof route footer while preserving the business-first operation file.
+- Polished Function Studio without replacing the working map: added a stronger operation fact
+  strip, clearer `Function Studio` / `Function Map` / `Evidence Drawer` language, more readable
+  step rows, and proof labels that avoid raw snake_case in primary UI.
+- Polished Onboarding, Client Operations, Runs, Evidence Ledger, Integrations, and Settings for a
+  smoother demo path without adding fake functionality.
+- Kept the logout control visible in the authenticated UI.
+- Preserved Northstar economics: $8,500 revenue, $1,150 approved setup spend, $3,200 blocked
+  risk, $7,350 protected gross profit, and 86.5% protected margin.
+- Preserved truthfulness: Northstar is synthetic, no patient data, no PHI, no HIPAA claim, local
+  policy active now, NeMo planned/not wired, no Stripe paid claim unless `paid=true`, no live-money
+  support, and no production auth claim.
+- Did not implement Goal 8, install or wire NeMo, run Stripe API calls, run Hermes model calls,
+  edit `.env`, touch `data/*.db`, touch `data/backups`, create extra goal logs, commit, or change
+  backend business logic.
+
+Verified:
+- `npm run build` passed in `frontend/` after the final proof-label polish.
+- `./scripts/test.sh` passed with 48 backend tests and a successful Vite production build.
+- Auth-enabled browser QA passed on backend `8787` and frontend `5174`, using
+  `/tmp/scalex-goal711d-qa.db`, `SCALEX_DEMO_USERNAME=<local-demo-username>`, `SCALEX_DEMO_PASSWORD=<local-demo-password>`,
+  `HERMES_TEST_MODE=true`, `HERMES_REQUIRE_REAL=false`, and `STRIPE_TEST_DOUBLE_MODE=true`.
+- Browser QA confirmed login, Dashboard, Northstar operation selection, Function Studio, Start Run,
+  Hermes/Finance/Guardrail/Blocked Risk/Profit Outcome Evidence Drawer selections, Onboarding,
+  Client Operations, Runs, Evidence Ledger, Integrations, Settings, and logout.
+- Final screenshots were written to `/tmp/scalex-goal711d-final`.
+- `git diff --check` passed.
+- Strict tracked-file key-material scan returned no matches.
+- No `.env`, SQLite `.db`, `frontend/dist`, `data/backups`, `CODEX_GOALS.md`, or `GOAL_LOG.md`
+  file was staged.
+- `git status --short` was reviewed.
+
+Suggested commit message:
+Polish ClientOps demo visual consistency
+
+Next:
+- Goal 8A - NeMo Guardrails Preflight / Architecture Audit.
+
+---
+
 ## 2026-06-24 - Goal 7.11C-followup: Replace Card Dashboard with ClientOps product workspace
 
 Completed:

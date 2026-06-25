@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { LogOut } from "lucide-react";
 
 import type { AuthStatus } from "../types";
 import { Sidebar } from "./Sidebar";
@@ -36,6 +37,18 @@ export function AppShell({
           {children}
         </div>
       </div>
+      {auth?.auth_enabled || auth?.authenticated ? (
+        <button
+          aria-label="Logout"
+          className="fixed bottom-4 right-4 z-50 inline-flex min-h-11 items-center justify-center gap-2 rounded-md bg-zinc-950 px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-zinc-950/20 transition hover:bg-zinc-800 disabled:cursor-not-allowed disabled:bg-zinc-400"
+          disabled={busy}
+          onClick={onLogout}
+          type="button"
+        >
+          <LogOut className="h-4 w-4" aria-hidden="true" />
+          Logout
+        </button>
+      ) : null}
     </main>
   );
 }

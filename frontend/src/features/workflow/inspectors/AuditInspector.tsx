@@ -19,7 +19,7 @@ export function AuditInspector({
   return (
     <div className="space-y-4">
       <InspectorSection
-        description="Client operation proof is persisted in local SQLite. Full timelines and tables remain in the Audit tab."
+        description="Client operation proof is persisted in local SQLite. Full timelines and tables remain in the Evidence Ledger."
         icon={Database}
         title="SQLite Audit"
       >

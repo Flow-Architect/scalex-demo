@@ -17,7 +17,7 @@ export function CustomerIntakeInspector({
   if (!source) {
     return (
       <InspectorSection icon={Target} title="Client Operation Intake">
-        <EmptyState>Create or select a local client operation in Customers before starting a run.</EmptyState>
+        <EmptyState>Create or select a local client operation in Client Operations before starting a run.</EmptyState>
       </InspectorSection>
     );
   }

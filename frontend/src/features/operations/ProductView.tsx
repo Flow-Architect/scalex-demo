@@ -216,12 +216,23 @@ function DashboardView({
     <WorkspacePage
       description={`${clientName} is the current synthetic account for the implemented ${operationName} function.`}
       eyebrow="ClientOps operation file"
+      meta={
+        <p className="text-sm font-semibold text-zinc-600">
+          {activeWorkflow
+            ? "Demo path: open Function Studio, start the run, then review Evidence Ledger and Integrations."
+            : "Demo path: configure the Northstar sample, open Function Studio, then start the run."}
+        </p>
+      }
       title="Revenue-backed implementation launch"
     >
       <OperationHero
         actions={
           <>
-            <PrimaryButton icon={Workflow} label="Open Function Studio" onClick={() => onNavigate("workflow")} />
+            <PrimaryButton
+              icon={activeWorkflow ? Workflow : Building2}
+              label={activeWorkflow ? "Open Function Studio" : "Configure Northstar sample"}
+              onClick={() => onNavigate(activeWorkflow ? "workflow" : "onboarding")}
+            />
             <SecondaryButton icon={BookOpenCheck} label="Review Evidence Ledger" onClick={() => onNavigate("audit")} />
           </>
         }
@@ -236,25 +247,25 @@ function DashboardView({
       <OutcomeRail items={outcomeItems} />
 
       <WorkspaceSection
-        description="The launch reads from left to right as an operation file, not a developer graph."
-        title="Operating stack timeline"
+        description="The launch reads from left to right as a governed business process."
+        title="Operating stack"
       >
         <OperationTimeline steps={stackSteps} />
       </WorkspaceSection>
 
       <WorkspaceSection
         description="One implemented function is available today. Additional ClientOps functions remain planned."
-        title="Function template shelf"
+        title="Function templates"
       >
         <TemplateShelf implemented="Client Implementation Launch" planned={plannedTemplates} />
       </WorkspaceSection>
 
       <WorkspaceSection
-        description="Detailed finance, guardrail, and record evidence is kept in the supporting workspaces."
-        title="Supporting workspaces"
+        description="Detailed finance, guardrail, and record evidence is kept outside the first business screen."
+        title="Demo proof path"
       >
         <div className="grid gap-3 lg:grid-cols-3">
-          <button onClick={() => onNavigate("integrations")} type="button">
+          <button className="text-left" onClick={() => onNavigate("integrations")} type="button">
             <ProofRoute
               description="Hermes, Stripe test mode, local policy, SQLite, prototype auth, and Goal 8 boundaries."
               icon={Layers3}
@@ -262,15 +273,15 @@ function DashboardView({
               tone="sky"
             />
           </button>
-          <button onClick={() => onNavigate("audit")} type="button">
+          <button className="text-left" onClick={() => onNavigate("audit")} type="button">
             <ProofRoute
               description={`${state?.policy_checks.length ?? 0} guardrail decisions, ${state?.ledger.entries.length ?? 0} ledger rows, and finance evidence after launch.`}
               icon={BookOpenCheck}
-              label="Audit"
+              label="Evidence Ledger"
               tone="teal"
             />
           </button>
-          <button onClick={() => onNavigate("runs")} type="button">
+          <button className="text-left" onClick={() => onNavigate("runs")} type="button">
             <ProofRoute
               description={latestRun ? `${humanize(latestRun.status)} execution is available for review.` : "No execution has been launched for this client operation yet."}
               icon={ClipboardList}
@@ -448,7 +459,7 @@ function OnboardingView({
       }
       title="Configure Client Implementation Launch"
     >
-      <form className="bg-white shadow-sm ring-1 ring-zinc-200" onSubmit={onSubmit}>
+      <form className="overflow-hidden rounded-md bg-white shadow-sm ring-1 ring-zinc-200" onSubmit={onSubmit}>
         <FormSection description="Name the synthetic account and the function template." title="Client profile">
           <div className="grid gap-5 xl:grid-cols-2">
             <FieldInput label="Client/account name" onChange={(value) => onDraftChange({ ...draft, clientName: value })} value={draft.clientName} />
@@ -644,7 +655,7 @@ function RunsView({
           <div className="space-y-8">
             <WorkspaceSection description="Selected execution economics and operation metadata." title="Selected execution">
               {selectedRun ? (
-                <div className="bg-white p-5 shadow-sm ring-1 ring-zinc-200">
+                <div className="rounded-md bg-white p-5 shadow-sm ring-1 ring-zinc-200">
                   <p className="text-xl font-semibold text-zinc-950">{selectedRun.client_name}</p>
                   <p className="mt-1 text-sm text-zinc-600">{selectedRun.job_name}</p>
                   <OutcomeRail
@@ -748,7 +759,7 @@ function IntegrationsView({
     <WorkspacePage
       description="The operating stack behind a ClientOps run, with current proof and explicit integration boundaries."
       eyebrow="Operating stack"
-      meta={<p className="text-sm font-semibold text-zinc-600">{auditRows} evidence rows available in Audit</p>}
+      meta={<p className="text-sm font-semibold text-zinc-600">{auditRows} evidence rows available in Evidence Ledger</p>}
       title="Operating Stack"
     >
       <PlainTable headers={["Component", "Role", "Current proof", "Boundary"]}>

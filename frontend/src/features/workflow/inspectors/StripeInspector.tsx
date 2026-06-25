@@ -29,7 +29,7 @@ export function StripeInspector({ state }: { state: DemoState | null }) {
       >
         <FactGrid>
           <Fact label="Real Stripe test path" value={String(Boolean(stripe?.used_real_stripe))} />
-          <Fact label="Stripe mode" value={stripe?.stripe_mode ?? "Not recorded"} />
+          <Fact label="Stripe mode" value={stripe?.stripe_mode ? humanize(stripe.stripe_mode) : "Not recorded"} />
           <Fact label="livemode" value={livemode} />
           <Fact label="Customer ID" value={stripe?.customer_id ?? "Not recorded"} />
           <Fact label="Invoice ID" value={stripe?.invoice_id ?? "Not recorded"} />
