@@ -8,7 +8,8 @@ Last updated: 2026-06-25
 - Latest committed baseline before Goal 7.11C follow-up: `882567f Replace Harbor with Northstar ClientOps launch`.
 - Last completed goal: Goal 7.11D - Demo Polish / Visual Consistency Pass.
 - Last completed implementation/QA goal: Goal 7.11D - Demo Polish / Visual Consistency Pass.
-- Current priority: Goal 8A - NeMo Guardrails Preflight / Architecture Audit.
+- Last completed documentation/tracking update: Goal 7.12 planning docs update.
+- Current priority: Goal 7.12 - Make Start Run a Real Product Execution.
 - Goal 7.11B replaced the legacy Harbor sample with Northstar Dental Group / Client Implementation Launch.
 - Goal 7.11C-followup replaced the remaining generated dashboard/card shell with a ClientOps
   operation-file workspace across Dashboard, Function Studio, Onboarding, Client Operations,
@@ -16,7 +17,8 @@ Last updated: 2026-06-25
 - Goal 7.11D unified the visual language across the light operation-file workspace, polished
   Function Studio into a more business-readable demo path, normalized primary proof labels, and
   verified the browser flow from login through logout.
-- Goal 8A - NeMo Guardrails Preflight / Architecture Audit remains intact and planned after the 7.11D polish pass.
+- Goal 7.12 is the next functionality/demo-proof task before Goal 8A.
+- Goal 8A - NeMo Guardrails Preflight / Architecture Audit remains intact and planned after Goal 7.12.
 - Goal 9 remains final polish and submission assets.
 - Goal 7B remains future Verified Live Mode hardening.
 
@@ -80,6 +82,50 @@ Functional product surfaces remain:
 - real Stripe test-mode invoice path when configured with `sk_test_...`
 - deterministic test-double paths for tests/CI/diagnostics only
 - local policy engine for current guardrail enforcement
+
+## Planned Next: Goal 7.12
+
+Goal 7.12 - Make Start Run a Real Product Execution is planned next. It is not implemented yet.
+It is a functionality and demo-proof pass, not a visual redesign.
+
+Required behavior for Goal 7.12:
+
+- `Start Run` shows a visible running/loading state.
+- Function Studio shows step progression.
+- Function Map highlights pending, running, complete, and blocked states.
+- Evidence Drawer updates with meaningful proof.
+- Runs gets a new execution.
+- Evidence Ledger gets timeline, orchestration, ledger, Stripe, and policy proof.
+- Dashboard reflects latest run status.
+- Counts change from zero when a run completes.
+- Failure states are visible and actionable.
+
+Required execution sequence:
+
+- Run started.
+- Hermes planning step.
+- Stripe finance proof step.
+- Guardrail review step.
+- Approved setup spend step.
+- Blocked risk step.
+- Work execution step.
+- Evidence ledger step.
+- Profit outcome step.
+- Run completed, or clearly failed with an actionable reason.
+
+Execution modes to preserve:
+
+- Judge Demo Mode works without secrets, uses deterministic local proof/test-double paths, creates
+  local SQLite records, populates Runs and Evidence Ledger, labels output as demo/sandbox proof,
+  and does not claim real Stripe or real Hermes unless real adapters were used.
+- Full Proof Mode uses real isolated Hermes and real Stripe test mode when local ignored `.env`
+  values are safely configured, keeps Stripe `livemode=false`, shows hosted invoice URLs only when
+  available, never labels `paid=false` as paid, and shows visible integration errors if configured
+  incorrectly.
+
+Truthfulness boundaries remain: Northstar is synthetic, no patient data, no PHI, no HIPAA claim,
+local policy active now, NeMo Guardrails planned/not wired, no live-money support, no production
+auth claim, and demo mode must not pretend to be real integration mode.
 
 ## Verified For Goal 7.11D
 
@@ -187,6 +233,9 @@ Research-to-Report, Ops Handoff, and Renewal Recommendation.
 
 ## Verification Commands
 
+- For Goal 7.12 planning docs update, `git diff --check` passed.
+- For Goal 7.12 planning docs update, strict added-lines secret scan returned no matches.
+- For Goal 7.12 planning docs update, `git status --short` was reviewed.
 - For Goal 7.11D, `./scripts/test.sh` passed: 48 backend tests and Vite production build.
 - For Goal 7.11D, `npm run build` in `frontend/` passed after final proof-label polish.
 - Auth-enabled browser QA used `/tmp/scalex-goal711d-qa.db`,
@@ -229,6 +278,7 @@ Research-to-Report, Ops Handoff, and Renewal Recommendation.
 
 ## Incomplete Items
 
+- Goal 7.12 has not been implemented yet.
 - Goal 8A read-only NeMo Guardrails preflight has not run yet.
 - Real NVIDIA NeMo Guardrails is not wired yet.
 - Verified Live Mode live-money execution is not implemented.
@@ -244,4 +294,6 @@ Research-to-Report, Ops Handoff, and Renewal Recommendation.
 
 ## Current Priority
 
-Goal 8A - NeMo Guardrails Preflight / Architecture Audit.
+Goal 7.12 - Make Start Run a Real Product Execution.
+
+Goal 8A - NeMo Guardrails Preflight / Architecture Audit remains next after Goal 7.12.

@@ -140,10 +140,12 @@ Completed baseline:
 - Goal 7.10 - Product Functionality Readiness / Browser Demo Gate
 - Goal 7.11A - ClientOps Autopilot Product Pivot Docs
 - Goal 7.11B - Replace Harbor Sample with Northstar Client Implementation Launch
+- Goal 7.11C - ClientOps Function Studio Visual Pass
+- Goal 7.11D - Demo Polish / Visual Consistency Pass
 
 Suggested next sequence:
 
-1. Goal 7.11C - ClientOps Function Studio Visual Pass.
+1. Goal 7.12 - Make Start Run a Real Product Execution.
 2. Goal 8A - NeMo Guardrails Preflight / Architecture Audit.
 3. Goal 8B - Guardrail Adapter + Schema/API.
 4. Goal 8C - Guardrail Execution Rails in Run Lifecycle.
@@ -152,8 +154,8 @@ Suggested next sequence:
 7. Goal 9 - Final polish and submission assets.
 8. Goal 7B / Production Hardening - Verified Live Mode for future live-money payments.
 
-Goal 8A, Goal 9, and Goal 7B remain intact. Goal 7.11C is the next sample-presentation step
-before the read-only NeMo preflight.
+Goal 8A, Goal 9, and Goal 7B remain intact. Goal 7.12 is the next functionality/demo-proof
+step before the read-only NeMo preflight.
 
 ## Goal 7.11B - Replace Harbor Sample with Northstar Client Implementation Launch
 
@@ -203,9 +205,71 @@ Constraints:
 - No live-money support.
 - No real customer workflow claims.
 
+## Goal 7.12 - Make Start Run a Real Product Execution
+
+Objective:
+
+Make `Start Run` feel like a real working product execution for the Northstar Dental Group /
+Client Implementation Launch demo before Goal 8A begins. This is a functionality and demo-proof
+pass, not another visual redesign.
+
+Required behavior:
+
+- `Start Run` shows a visible running/loading state.
+- Function Studio shows step progression from run start through completion or failure.
+- Function Map highlights pending, running, complete, and blocked states in a readable way.
+- Evidence Drawer updates with meaningful proof at each major step.
+- Runs gets a new execution record.
+- Evidence Ledger gets timeline, orchestration, ledger, Stripe, and policy proof.
+- Dashboard reflects latest run status.
+- Counts change from zero when a run completes.
+- Failure states are visible and actionable.
+
+Required execution sequence:
+
+1. Run started.
+2. Hermes planning step.
+3. Stripe finance proof step.
+4. Guardrail review step.
+5. Approved setup spend step.
+6. Blocked risk step.
+7. Work execution step.
+8. Evidence ledger step.
+9. Profit outcome step.
+10. Run completed, or clearly failed with an actionable reason.
+
+Execution modes to preserve:
+
+- Judge Demo Mode works without secrets, uses deterministic local proof/test-double paths, creates
+  local SQLite records, populates Runs and Evidence Ledger, labels output as demo/sandbox proof,
+  and does not claim real Stripe or real Hermes unless real adapters were used.
+- Full Proof Mode uses real isolated Hermes and real Stripe test mode when local ignored `.env`
+  values are safely configured. It preserves `livemode=false`, shows hosted invoice URLs only when
+  available, never labels `paid=false` as paid, and surfaces visible errors when misconfigured.
+
+Truthfulness boundaries:
+
+- Northstar is synthetic.
+- No patient data, no PHI, no HIPAA claim.
+- Local policy is active now.
+- NeMo Guardrails remains planned/not wired.
+- No live-money support.
+- No production auth claim.
+- Demo mode must not pretend to be real integration mode.
+- Full Proof Mode must show visible errors if configured incorrectly.
+
+Constraints:
+
+- Do not implement Goal 8.
+- Do not install or wire real NeMo Guardrails.
+- Do not run live Stripe or Hermes model calls during planning.
+- Do not change Northstar economics.
+- Do not add live-money support.
+
 ## Goal 8 - Governed Autonomy Layer With NVIDIA NeMo Guardrails
 
-Goal 8 remains planned. It must start with read-only Goal 8A before any adapter or UI work.
+Goal 8 remains planned after Goal 7.12. It must start with read-only Goal 8A before any adapter
+or UI work.
 
 Stack identity for Goal 8:
 

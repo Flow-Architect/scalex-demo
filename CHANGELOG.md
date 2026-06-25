@@ -10,6 +10,41 @@ Use:
 
 ---
 
+## 2026-06-25 - Goal 7.12 planning docs update
+
+Completed:
+- Added Goal 7.12 - Make Start Run a Real Product Execution as the next planned task before
+  Goal 8A.
+- Defined Goal 7.12 as a functionality/demo-proof pass, not a visual redesign.
+- Documented the required visible `Start Run` execution sequence: run started, Hermes planning,
+  Stripe finance proof, guardrail review, approved setup spend, blocked risk, work execution,
+  evidence ledger, profit outcome, and completion or actionable failure.
+- Documented required behavior for visible loading state, Function Studio progression, Function
+  Map state highlights, Evidence Drawer proof updates, Runs history creation, Evidence Ledger
+  proof creation, Dashboard latest-run status, count changes, and actionable failure states.
+- Documented Judge Demo Mode and Full Proof Mode boundaries.
+- Preserved truthfulness: Northstar is synthetic, no patient data, no PHI, no HIPAA claim, local
+  policy active now, NeMo planned/not wired, no live-money support, no production auth claim, and
+  demo mode must not pretend to be real integration mode.
+- Preserved Goal 8A, Goal 8B-8E, Goal 9, and Goal 7B / Verified Live Mode.
+- Did not implement Goal 7.12 behavior, Goal 8, real NeMo Guardrails, live-money support,
+  frontend behavior, backend behavior, Stripe API calls, Hermes model calls, `.env` edits,
+  `data/*.db` changes, or extra goal logs.
+
+Verified:
+- `git diff --check` passed.
+- Strict added-lines secret scan returned no matches.
+- `git status --short` was reviewed.
+
+Suggested commit message:
+Document Goal 7.12 Start Run execution plan
+
+Next:
+- Goal 7.12 - Make Start Run a Real Product Execution.
+- Goal 8A - NeMo Guardrails Preflight / Architecture Audit remains next after Goal 7.12.
+
+---
+
 ## 2026-06-25 - Goal 7.11D: Demo polish and visual consistency pass
 
 Completed:
@@ -52,7 +87,7 @@ Suggested commit message:
 Polish ClientOps demo visual consistency
 
 Next:
-- Goal 8A - NeMo Guardrails Preflight / Architecture Audit.
+- Goal 7.12 - Make Start Run a Real Product Execution.
 
 ---
 

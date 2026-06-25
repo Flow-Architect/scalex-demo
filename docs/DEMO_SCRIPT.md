@@ -20,6 +20,11 @@ Implemented template:
 
 ## Recording Path
 
+Goal 7.12 should make the `Start Run` portion of this path visibly execute before final
+recording. The expected product motion is: run started, Hermes planning, Stripe finance proof,
+guardrail review, approved setup spend, blocked risk, work execution, evidence ledger, profit
+outcome, and then run completed or a clearly actionable failure.
+
 1. Open ScaleX ClientOps Autopilot.
 2. Log in through the local prototype auth gate.
 3. Land on Dashboard and confirm Northstar Dental Group / Client Implementation Launch is selected.
@@ -56,3 +61,43 @@ Implemented template:
 No terminal output should be needed in the video. Hosted judge demo mode must not expose secrets.
 Local full-proof mode can use ignored `.env` values for real isolated Hermes and real Stripe
 test-mode invoice proof.
+
+## Goal 7.12 Demo Acceptance
+
+Before moving to Goal 8A, the demo should show:
+
+- `Start Run` has an obvious running/loading state.
+- Function Studio shows step progression.
+- Function Map highlights pending, running, complete, and blocked states.
+- Evidence Drawer updates with meaningful proof for Hermes, Finance Proof, Guardrail Review,
+  Blocked Risk, Evidence Ledger, and Profit Outcome.
+- Runs receives a new execution.
+- Evidence Ledger receives timeline, orchestration, ledger, Stripe, and policy proof.
+- Dashboard reflects latest run status.
+- Counts change from zero when the run completes.
+- Failure states are visible and actionable.
+
+## Execution Modes
+
+Judge Demo Mode:
+
+- Works without secrets.
+- Uses deterministic local proof/test-double paths.
+- Creates local SQLite records.
+- Populates Runs and Evidence Ledger.
+- Labels output as demo/sandbox proof.
+- Does not claim real Stripe or real Hermes unless real adapters were used.
+
+Full Proof Mode:
+
+- Uses real isolated Hermes and real Stripe test mode when ignored local `.env` values are
+  configured safely.
+- Preserves existing real proof behavior.
+- Keeps Stripe `livemode=false`.
+- Shows hosted invoice URL only when available.
+- Does not show `paid=false` as paid.
+- Shows visible errors if configured incorrectly.
+
+Truthfulness boundaries remain: Northstar is synthetic; no patient data; no PHI; no HIPAA claim;
+local policy active now; NeMo Guardrails planned/not wired; no live-money support; no production
+auth claim.

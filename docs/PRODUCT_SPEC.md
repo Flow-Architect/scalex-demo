@@ -65,6 +65,53 @@ Future templates, not implemented:
 - Ops Handoff
 - Renewal Recommendation
 
+## Planned Goal 7.12 Execution Pass
+
+Goal 7.12 - Make Start Run a Real Product Execution is the next planned implementation task before
+Goal 8A. It is not implemented yet. It is a functionality and demo-proof pass, not a visual
+redesign.
+
+Goal 7.12 should make `Start Run` visibly execute the Northstar Client Implementation Launch from
+start to finish:
+
+- Run started.
+- Hermes planning step.
+- Stripe finance proof step.
+- Guardrail review step.
+- Approved setup spend step.
+- Blocked risk step.
+- Work execution step.
+- Evidence ledger step.
+- Profit outcome step.
+- Run completed, or clearly failed with an actionable reason.
+
+Product behavior required:
+
+- `Start Run` shows a visible running/loading state.
+- Function Studio shows step progression.
+- Function Map highlights pending, running, complete, and blocked states.
+- Evidence Drawer updates with meaningful proof.
+- Runs gets a new execution.
+- Evidence Ledger gets timeline, orchestration, ledger, Stripe, and policy proof.
+- Dashboard reflects latest run status.
+- Counts change from zero when a run completes.
+- Failure states are visible and actionable.
+
+Execution modes:
+
+- Judge Demo Mode works without secrets, uses deterministic local proof/test-double paths, creates
+  local SQLite records, populates Runs and Evidence Ledger, labels output as demo/sandbox proof,
+  and does not claim real Stripe or real Hermes unless real adapters were used.
+- Full Proof Mode uses real isolated Hermes and real Stripe test mode when local ignored `.env`
+  values are safely configured, keeps Stripe `livemode=false`, shows hosted invoice URLs only when
+  available, never labels `paid=false` as paid, and shows visible integration errors if configured
+  incorrectly.
+
+Goal 7.12 must preserve the current truthfulness boundaries: Northstar is synthetic, no patient
+data, no PHI, no HIPAA claim, local policy active now, NeMo Guardrails planned/not wired, no
+live-money support, no production auth claim, and demo mode must not pretend to be real
+integration mode.
+
 ## Target Integrations
 
 - Hermes = planning and routing the client operation.

@@ -41,6 +41,9 @@ Client operation intake
 -> Profit Outcome
 ```
 
+The next product goal is Goal 7.12: make `Start Run` visibly execute the Northstar Client
+Implementation Launch from run start through proof, evidence, and profit outcome before Goal 8A.
+
 ## Current Sample State
 
 Implemented today:
@@ -75,13 +78,19 @@ Harbor Fleet Services is historical only and is no longer the current implemente
 
 ## Current Next Goals
 
-1. Goal 7.11C - ClientOps Function Studio Visual Pass.
-2. Goal 8A - NeMo Guardrails Preflight / Architecture Audit.
+1. Goal 7.12 - Make Start Run a Real Product Execution.
+2. Goal 8A - NeMo Guardrails Preflight / Architecture Audit after Goal 7.12.
 3. Goal 8B - Guardrail Adapter + Schema/API after Goal 8A.
 
+Goal 7.12 is a functionality/demo-proof pass, not another visual redesign. It should make
+`Start Run` show visible execution, step progression, meaningful Evidence Drawer proof, Runs
+history, Evidence Ledger records, Dashboard latest-run status, count changes, and actionable
+failure states. It must preserve Judge Demo Mode without secrets and Full Proof Mode with real
+isolated Hermes / Stripe test mode when safely configured.
+
 Goal 8A is read-only and should audit whether real NeMo Guardrails or a NeMo-compatible adapter
-is safely available before any implementation. Local policy is active now; real NeMo is not wired
-yet and must not be claimed as real until installed, wired, tested, and documented.
+is safely available after Goal 7.12. Local policy is active now; real NeMo is not wired yet and
+must not be claimed as real until installed, wired, tested, and documented.
 
 ## Session Closeout Requirement
 

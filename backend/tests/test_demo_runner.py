@@ -2,7 +2,7 @@ from contextlib import closing
 from types import SimpleNamespace
 
 import pytest
-from fastapi import HTTPException
+from fastapi import HTTPException, Response
 
 from app.db import TABLE_NAMES, get_connection, initialize_database, table_counts
 from app.main import (
@@ -18,7 +18,7 @@ from app.main import (
 )
 from app.repository import get_demo_job, list_events
 from app.schemas import OnboardingRequest, SpendCheckRequest
-from app.services.auth_service import auth_status, require_local_session, sign_session_token
+from app.services.auth_service import auth_status, logout, require_local_session, sign_session_token
 from app.services.seed_service import seed_demo_database
 
 
@@ -119,6 +119,33 @@ def test_auth_enabled_requires_login_for_demo_endpoints(tmp_path, monkeypatch) -
     assert status["auth_enabled"] is True
     assert status["authenticated"] is True
     assert status["username"] == "operator"
+
+
+def test_logout_clears_enabled_session_and_preserves_disabled_auth(monkeypatch) -> None:
+    monkeypatch.setenv("SCALEX_AUTH_ENABLED", "true")
+    monkeypatch.setenv("SCALEX_SESSION_SECRET", "test-session-secret")
+
+    enabled_response = Response()
+    enabled_status = logout(enabled_response)
+    enabled_cookie = enabled_response.headers.get("set-cookie", "")
+
+    assert enabled_status["auth_enabled"] is True
+    assert enabled_status["authenticated"] is False
+    assert "scalex_session=" in enabled_cookie
+    assert "Max-Age=0" in enabled_cookie
+    assert "Path=/" in enabled_cookie
+
+    monkeypatch.setenv("SCALEX_AUTH_ENABLED", "false")
+
+    disabled_response = Response()
+    disabled_status = logout(disabled_response)
+
+    assert disabled_status == {
+        "auth_enabled": False,
+        "authenticated": True,
+        "username": "local-prototype",
+        "prototype_auth": "disabled",
+    }
 
 
 def test_onboarding_endpoint_saves_and_selects_local_workflow(tmp_path, monkeypatch) -> None:

@@ -31,6 +31,17 @@ Current implementation note:
   gross profit, and 86.5% protected margin.
 - Harbor Fleet Services is historical only and is no longer the current implemented sample.
 
+Demo-readiness note:
+
+- Goal 7.12 is planned before Goal 8A to make `Start Run` visibly execute the Northstar Client
+  Implementation Launch from run start through planning, finance proof, guardrail review, spend
+  decisions, work execution, evidence ledger, and profit outcome.
+- Judge Demo Mode should work without secrets using deterministic local proof/test-double records
+  and must clearly label demo/sandbox proof.
+- Full Proof Mode should preserve real isolated Hermes and real Stripe test-mode proof when local
+  ignored `.env` values are safely configured.
+- Goal 7.12 is not Goal 8 and does not wire real NeMo Guardrails.
+
 Demo story:
 
 Northstar Dental Group is a multi-location client that purchased an implementation package.

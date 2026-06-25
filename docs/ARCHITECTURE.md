@@ -86,12 +86,31 @@ Stripe reports `paid=true`.
 Tests and CI may use Stripe test doubles. Product mode must surface a visible Stripe integration
 error instead of silently using test doubles.
 
+## Goal 7.12 Execution Modes
+
+Goal 7.12 is planned before Goal 8A to make `Start Run` visibly execute the Northstar Client
+Implementation Launch. It is not implemented yet.
+
+Judge Demo Mode should work without secrets by using deterministic local proof/test-double paths.
+It must create local SQLite records, populate Runs and Evidence Ledger, label output as
+demo/sandbox proof, and avoid claiming real Stripe or real Hermes unless real adapters were used.
+
+Full Proof Mode should continue to use real isolated Hermes and real Stripe test mode when local
+ignored `.env` values are safely configured. It must keep Stripe `livemode=false`, show hosted
+invoice URLs only when available, never label `paid=false` as paid, and surface visible
+integration errors when misconfigured.
+
+The visible execution path should record run started, Hermes planning, Stripe finance proof,
+guardrail review, approved setup spend, blocked risk, work execution, evidence ledger, and profit
+outcome proof before reporting completion or an actionable failure.
+
 ## Governed Autonomy / Guardrails
 
 The local policy engine is currently active for spend cap, payment-before-spend, margin, vendor
-allowlist, and blocked-vendor checks. Goal 8A is the read-only preflight to decide whether real
-NeMo Guardrails or a NeMo-compatible adapter is safely available. Later Goal 8 work should add a
-guardrail adapter boundary, NeMo-style input/planning/execution/output rails, and guardrail proof.
+allowlist, and blocked-vendor checks. Goal 8A remains after Goal 7.12 as the read-only preflight
+to decide whether real NeMo Guardrails or a NeMo-compatible adapter is safely available. Later
+Goal 8 work should add a guardrail adapter boundary, NeMo-style input/planning/execution/output
+rails, and guardrail proof.
 
 ScaleX does not yet claim real NeMo Guardrails or real NemoClaw.
 

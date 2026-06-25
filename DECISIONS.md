@@ -80,3 +80,8 @@
 - No secrets are committed.
 - Hosted judge demo mode must not expose secrets to the browser.
 - Local full-proof mode may use ignored `.env` values for real isolated Hermes and Stripe test mode.
+- Goal 7.12 should formalize two demo-safe execution modes:
+  - Judge Demo Mode works without secrets by using deterministic local proof/test-double paths,
+    creating local SQLite records, and clearly labeling demo/sandbox proof.
+  - Full Proof Mode preserves real isolated Hermes and real Stripe test mode when local ignored
+    `.env` values are safely configured, and surfaces visible errors when misconfigured.

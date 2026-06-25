@@ -65,6 +65,7 @@ def login(
         key=SESSION_COOKIE_NAME,
         value=token,
         max_age=SESSION_TTL_SECONDS,
+        path="/",
         httponly=True,
         secure=False,
         samesite="lax",
@@ -77,10 +78,25 @@ def login(
     }
 
 
-def logout(response: Response) -> dict[str, Any]:
-    response.delete_cookie(key=SESSION_COOKIE_NAME, httponly=True, secure=False, samesite="lax")
+def logout(response: Response, settings: Settings | None = None) -> dict[str, Any]:
+    settings = settings or get_settings()
+    if not settings.scalex_auth_enabled:
+        return {
+            "auth_enabled": False,
+            "authenticated": True,
+            "username": "local-prototype",
+            "prototype_auth": "disabled",
+        }
+
+    response.delete_cookie(
+        key=SESSION_COOKIE_NAME,
+        path="/",
+        httponly=True,
+        secure=False,
+        samesite="lax",
+    )
     return {
-        "auth_enabled": get_settings().scalex_auth_enabled,
+        "auth_enabled": True,
         "authenticated": False,
         "username": None,
         "prototype_auth": "local-cookie",

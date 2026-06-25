@@ -131,6 +131,12 @@ another synthetic/sample client operation, then open Function Studio and click `
 The run uses the active operation values and appends a new run record instead of
 overwriting prior history.
 
+Goal 7.12 is the planned next demo-proof pass before Goal 8A. It should make `Start Run` visibly
+execute from run start through Hermes planning, Stripe finance proof, guardrail review, approved
+setup spend, blocked risk, work execution, evidence ledger, and profit outcome. It should support
+Judge Demo Mode without secrets through deterministic local proof/test-double records, while
+preserving Full Proof Mode for safely configured real isolated Hermes and Stripe test mode.
+
 In product mode, Stripe requires a local `.env` `sk_test_...` key and returns a visible Stripe
 integration error if test mode is not configured. Automated tests and CI use
 `STRIPE_TEST_DOUBLE_MODE=true`.
@@ -191,6 +197,7 @@ These commands must not use live Stripe mode or production service credentials.
   product flow.
 - Test/diagnostic only: deterministic Hermes planning and Stripe test doubles in automated tests,
   CI, offline development, or explicitly labeled diagnostics.
-- Planned next: Goal 8A audits NeMo Guardrails availability without wiring real NeMo yet.
+- Planned next: Goal 7.12 makes `Start Run` visibly execute and populate Runs/Evidence Ledger.
+- After Goal 7.12: Goal 8A audits NeMo Guardrails availability without wiring real NeMo yet.
 - Future: Goal 8 governed autonomy with NVIDIA NeMo Guardrails or a NeMo-compatible adapter, Goal
   9 final submission prep, and Verified Live Mode before any live-money Stripe actions.

@@ -37,7 +37,7 @@ export function AppShell({
           {children}
         </div>
       </div>
-      {auth?.auth_enabled || auth?.authenticated ? (
+      {auth?.auth_enabled ? (
         <button
           aria-label="Logout"
           className="fixed bottom-4 right-4 z-50 inline-flex min-h-11 items-center justify-center gap-2 rounded-md bg-zinc-950 px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-zinc-950/20 transition hover:bg-zinc-800 disabled:cursor-not-allowed disabled:bg-zinc-400"
