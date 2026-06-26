@@ -64,6 +64,8 @@ class DemoStateResponse(BaseModel):
     onboarding: dict[str, Any] | None
     ledger: dict[str, Any]
     policy: dict[str, Any]
+    guardrails: dict[str, Any]
+    guardrail_evaluations: list[dict[str, Any]]
     events: list[dict[str, Any]]
     timeline_events: list[dict[str, Any]]
     planning_runs: list[dict[str, Any]]

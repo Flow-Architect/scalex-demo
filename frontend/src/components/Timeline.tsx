@@ -83,6 +83,7 @@ function iconForEvent(type: string) {
       return BadgeCheck;
     case "policy_gate":
     case "policy_check":
+    case "guardrail_fail_closed":
       return ShieldCheck;
     case "stripe_mock":
     case "stripe_test":

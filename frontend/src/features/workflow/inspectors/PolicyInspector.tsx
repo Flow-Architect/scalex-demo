@@ -10,11 +10,12 @@ export function PolicyInspector({ state }: { state: DemoState | null }) {
   const approvedChecks = approvedPolicyChecks(state);
   const blockedChecks = blockedPolicyChecks(state);
   const execution = state?.execution ?? null;
+  const guardrails = state?.guardrails ?? null;
 
   return (
     <div className="space-y-4">
       <InspectorSection
-        description="ScaleX code currently runs the policy engine locally. Goal 8 remains the NeMo Guardrails or NeMo-compatible adapter integration step."
+        description="ScaleX records adapter proof separately from deterministic business-rule enforcement. Local policy remains active for spend, margin, vendor, and payment-before-spend decisions."
         icon={ShieldCheck}
         title="Guardrail Review"
       >
@@ -23,7 +24,12 @@ export function PolicyInspector({ state }: { state: DemoState | null }) {
             <FactGrid>
               <Fact label="Policy engine" value={summary.engine} />
               <Fact label="Execution mode" value={execution?.label ?? "Not recorded"} />
-              <Fact label="Guardrail proof" value={execution?.policy_label ?? "Local policy active"} />
+              <Fact label="Guardrail mode" value={guardrails?.mode ?? execution?.guardrail_mode ?? "local_policy"} />
+              <Fact label="Adapter status" value={guardrails?.adapter_status ?? execution?.guardrail_adapter_status ?? "Not recorded"} />
+              <Fact label="Guardrail proof" value={execution?.guardrail_label ?? execution?.policy_label ?? "Local policy active"} />
+              <Fact label="used_real_nemo" value={String(Boolean(guardrails?.used_real_nemo ?? execution?.used_real_nemo))} />
+              <Fact label="fail_closed" value={String(Boolean(guardrails?.fail_closed ?? execution?.guardrails_fail_closed))} />
+              <Fact label="Local policy active" value={String(Boolean(guardrails?.local_policy_active ?? true))} />
               <Fact label="Spend cap" value={formatCurrency(summary.max_job_spend_usd * 100)} />
               <Fact label="Margin floor" value={formatPercent(summary.margin_floor_percent)} />
               <Fact label="Invoice before spend" value={summary.require_invoice_before_spend ? "Required" : "Not required"} />
@@ -36,8 +42,23 @@ export function PolicyInspector({ state }: { state: DemoState | null }) {
               <StatusPill icon={Gauge} label="Spend cap enforced" tone="sky" />
               <StatusPill icon={TrendingUp} label="Margin floor enforced" tone="teal" />
               <StatusPill icon={LockKeyhole} label="Payment-before-spend checked" tone="amber" />
-              <StatusPill icon={ShieldAlert} label="NeMo Goal 8 planned - not wired yet" tone="violet" />
+              <StatusPill
+                icon={ShieldAlert}
+                label={guardrails?.used_real_nemo ? "Real NeMo runtime verified" : "No real NeMo claim"}
+                tone={guardrails?.used_real_nemo ? "emerald" : "violet"}
+              />
             </div>
+            {guardrails ? (
+              <div className="mt-4 grid gap-2 sm:grid-cols-2">
+                {guardrails.evaluation_stages.map((stage) => (
+                  <div className="rounded-md border border-zinc-200 bg-zinc-50 p-3" key={stage.stage}>
+                    <p className="text-xs font-semibold uppercase text-zinc-500">{stage.label}</p>
+                    <p className="mt-1 text-sm font-semibold text-zinc-950">{stage.status}</p>
+                    <p className="mt-1 text-xs leading-5 text-zinc-600">{stage.summary}</p>
+                  </div>
+                ))}
+              </div>
+            ) : null}
           </>
         ) : (
           <EmptyState>Policy summary appears after backend state loads.</EmptyState>

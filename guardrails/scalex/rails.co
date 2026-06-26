@@ -1,0 +1,7 @@
+define subflow scalex input rail
+  """ScaleX maps input checks in the Python adapter: synthetic boundary, amount sanity, vendors, no PHI, no real-client data, and no live-money intent."""
+  stop
+
+define subflow scalex output rail
+  """ScaleX maps output checks in the Python adapter: final report honesty, Stripe paid-state truthfulness, evidence summary, and protected profit outcome."""
+  stop

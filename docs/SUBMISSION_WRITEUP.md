@@ -88,10 +88,9 @@ Truthfulness boundaries:
 - The login gate is local prototype auth, not production enterprise auth.
 - Workflow management is local/sample workflow management, not full multi-tenant SaaS.
 - The active spend authority is the local policy engine.
-- Real NVIDIA NeMo Guardrails is the Goal 8 target and is not wired yet.
-- A NeMo-compatible/local fallback is allowed only if Goal 8A proves real NeMo cannot be safely
-  wired before submission; the submission must then describe the blocker and must not claim real
-  NeMo is active.
+- Real NVIDIA NeMo Guardrails is optional through `nemo_guardrails` mode only when
+  `SCALEX_NEMO_PYTHON` runtime verification passes.
+- `nemo_compatible` is a labeled fallback and must not claim real NeMo.
 - MCP is planned and not implemented yet.
 - Stripe payment status is labeled honestly; invoices are not called paid unless Stripe reports `paid=true`.
 - Test doubles stay clearly labeled and are not product-mode integrations.

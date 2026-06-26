@@ -10,6 +10,48 @@ Use:
 
 ---
 
+## 2026-06-26 - Goal 8B: Real-NeMo-Ready Guardrail Adapter + Schema/API
+
+Completed:
+- Added guardrail mode config with `local_policy` as the default, plus optional
+  `nemo_guardrails` and `nemo_compatible` modes.
+- Added `backend/app/services/guardrails_service.py` as the adapter boundary. Real NeMo probing
+  runs through a configured subprocess Python path; the main backend process does not import
+  `nemoguardrails`.
+- Added fail-closed behavior when `nemo_guardrails` is selected but `SCALEX_NEMO_PYTHON` is
+  unavailable, broken, or misconfigured.
+- Added credential-free `guardrails/scalex` config for `RailsConfig.from_path` probing.
+- Added `guardrail_evaluations` schema, table counts, repository helpers, API state fields, and
+  run lifecycle records for input, planning, execution, and output stages.
+- Added UI proof for guardrail mode, adapter status, `used_real_nemo`, `fail_closed`, local policy
+  active status, and evaluation stages across Dashboard, Function Studio, Evidence Ledger,
+  Integrations, Settings, and workflow inspectors.
+- Added `requirements-nemo.txt`, `scripts/setup-nemo.sh`, and `scripts/check-nemo.sh`.
+- Preserved Judge Demo Mode as deterministic, secret-free, and independent of NeMo. Local policy
+  remains the active business-rule gate for spend, vendors, payment-before-spend, cap, margin
+  floor, and blocked risk behavior.
+
+Verified:
+- `backend/.venv/bin/python -m pytest backend/tests` passed with 55 tests.
+- `npm run build` in `frontend/` passed.
+- `./scripts/test.sh` passed with 55 backend tests and a successful Vite production build.
+- `scripts/check-nemo.sh` passed against `/home/ascabrya/.venvs/scalex-nemo/bin/python`, reported
+  NeMo 0.21.0, imported `LLMRails` and `RailsConfig`, and loaded `guardrails/scalex`.
+- A `/tmp` smoke run with `SCALEX_GUARDRAIL_MODE=nemo_guardrails` completed with
+  `adapter_status=runtime_verified`, `used_real_nemo=true`, `fail_closed=false`, four guardrail
+  evaluations, and Stripe still in `test_double` mode.
+- No live Stripe keys, live-money calls, real Stripe API calls, Hermes production calls, real
+  client data, `.env` edits, SQLite `.db` files, data backups, local venv files, CODEX goal logs,
+  or secrets were added.
+
+Suggested commit message:
+Add real-NeMo-ready guardrail adapter
+
+Next:
+- Goal 8C - Guardrail Execution Rails in Run Lifecycle.
+
+---
+
 ## 2026-06-26 - Open Source Checkout Cleanup
 
 Completed:

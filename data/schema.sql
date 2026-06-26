@@ -118,6 +118,26 @@ CREATE TABLE IF NOT EXISTS policy_checks (
   FOREIGN KEY(job_id) REFERENCES jobs(id) ON DELETE CASCADE
 );
 
+CREATE TABLE IF NOT EXISTS guardrail_evaluations (
+  id TEXT PRIMARY KEY,
+  job_id TEXT NOT NULL,
+  stage TEXT NOT NULL CHECK(stage IN ('input', 'planning', 'execution', 'output')),
+  mode TEXT NOT NULL,
+  adapter TEXT NOT NULL,
+  status TEXT NOT NULL,
+  used_real_nemo INTEGER NOT NULL DEFAULT 0,
+  fail_closed INTEGER NOT NULL DEFAULT 0,
+  label TEXT NOT NULL,
+  summary TEXT NOT NULL,
+  details_json TEXT,
+  error TEXT,
+  created_at TEXT NOT NULL,
+  FOREIGN KEY(job_id) REFERENCES jobs(id) ON DELETE CASCADE
+);
+
+CREATE INDEX IF NOT EXISTS idx_guardrail_evaluations_job_created
+  ON guardrail_evaluations(job_id, created_at);
+
 CREATE TABLE IF NOT EXISTS stripe_events (
   id TEXT PRIMARY KEY,
   job_id TEXT NOT NULL,

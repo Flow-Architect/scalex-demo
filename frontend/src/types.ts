@@ -12,6 +12,12 @@ export interface ExecutionSummary {
   planning_label: string;
   finance_label: string;
   policy_label: string;
+  guardrail_mode: GuardrailMode;
+  guardrail_adapter_status: string;
+  guardrail_label: string;
+  used_real_nemo: boolean;
+  guardrails_fail_closed: boolean;
+  guardrail_evaluation_stages: GuardrailStageSummary[];
   used_real_hermes: boolean;
   used_real_stripe: boolean;
   planning_source: string | null;
@@ -142,6 +148,51 @@ export interface PolicyCheck {
   reason: string;
   margin_after_spend_percent: number;
   required_action: string;
+  created_at: string;
+}
+
+export type GuardrailMode = "local_policy" | "nemo_guardrails" | "nemo_compatible";
+
+export interface GuardrailStageSummary {
+  stage: "input" | "planning" | "execution" | "output";
+  label: string;
+  purpose: string;
+  status: string;
+  used_real_nemo: boolean;
+  fail_closed: boolean;
+  summary: string;
+  created_at: string | null;
+}
+
+export interface GuardrailSummary {
+  mode: GuardrailMode;
+  adapter: string;
+  adapter_status: string;
+  status: string;
+  used_real_nemo: boolean;
+  fail_closed: boolean;
+  local_policy_active: boolean;
+  record_evaluations: boolean;
+  evaluation_stages: GuardrailStageSummary[];
+  nemo_python_configured: boolean;
+  nemo_config_path: string;
+  latest_error: string | null;
+  truthfulness_note: string;
+}
+
+export interface GuardrailEvaluation {
+  id: string;
+  job_id: string;
+  stage: GuardrailStageSummary["stage"];
+  mode: GuardrailMode;
+  adapter: string;
+  status: string;
+  used_real_nemo: boolean;
+  fail_closed: boolean;
+  label: string;
+  summary: string;
+  details_json: unknown;
+  error: string | null;
   created_at: string;
 }
 
@@ -312,6 +363,8 @@ export interface DemoState {
     config: Record<string, unknown>;
     summary: PolicySummary;
   };
+  guardrails: GuardrailSummary;
+  guardrail_evaluations: GuardrailEvaluation[];
   events: DemoEvent[];
   timeline_events: DemoEvent[];
   planning_runs: PlanningRun[];

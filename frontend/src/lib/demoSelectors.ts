@@ -74,7 +74,8 @@ export function auditRowCount(state: DemoState | null): number {
     state.agent_outputs.length +
     state.reports.length +
     state.planning_runs.length +
-    state.orchestration_calls.length
+    state.orchestration_calls.length +
+    state.guardrail_evaluations.length
   );
 }
 

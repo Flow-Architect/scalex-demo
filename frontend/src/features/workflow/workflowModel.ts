@@ -87,6 +87,7 @@ export interface WorkflowAuditCounts {
   orchestrationCalls: number;
   stripeEvents: number;
   policyChecks: number;
+  guardrailEvaluations: number;
   ledgerEntries: number;
   reports: number;
   planningRuns: number;
@@ -232,6 +233,7 @@ function buildSettledNodes(
   const hermes = state?.hermes ?? null;
   const stripe = state?.stripe ?? null;
   const execution = state?.execution ?? null;
+  const guardrails = state?.guardrails ?? null;
   const checks = state?.policy_checks ?? [];
   const approvedChecks = approvedPolicyChecks(state);
   const blockedChecks = blockedPolicyChecks(state);
@@ -328,12 +330,24 @@ function buildSettledNodes(
     {
       key: "policy",
       title: "Guardrail Review",
-      eyebrow: "local guardrails",
-      proof: state?.policy.summary
-        ? `${state.policy.summary.engine}: cap ${formatCurrency(state.policy.summary.max_job_spend_usd * 100)}, floor ${formatPercent(state.policy.summary.margin_floor_percent)}`
+      eyebrow: guardrails?.mode ? humanize(guardrails.mode) : "local guardrails",
+      proof: guardrails
+        ? `${execution?.guardrail_label ?? guardrails.adapter_status}; local policy active=${String(guardrails.local_policy_active)}`
+        : state?.policy.summary
+          ? `${state.policy.summary.engine}: cap ${formatCurrency(state.policy.summary.max_job_spend_usd * 100)}, floor ${formatPercent(state.policy.summary.margin_floor_percent)}`
         : "Policy configuration appears after setup.",
-      badge: execution?.policy_label ?? (state?.policy.summary ? "local policy" : "not configured"),
-      status: checks.length > 0 ? "complete" : state?.policy.summary ? "current" : "pending",
+      badge: guardrails?.fail_closed
+        ? "fail closed"
+        : guardrails?.used_real_nemo
+          ? "real NeMo verified"
+          : execution?.guardrail_label ?? execution?.policy_label ?? (state?.policy.summary ? "local policy" : "not configured"),
+      status: guardrails?.fail_closed
+        ? "error"
+        : checks.length > 0 || (state?.guardrail_evaluations.length ?? 0) > 0
+          ? "complete"
+          : state?.policy.summary
+            ? "current"
+            : "pending",
       tone: "violet",
       icon: ShieldCheck,
       timestamp: eventByType(events, "policy_gate")?.created_at ?? latestPolicyCheck?.created_at ?? null,
@@ -400,6 +414,7 @@ function buildSettledNodes(
         ...(state?.ledger.entries ?? []),
         ...(state?.stripe_events ?? []),
         ...(state?.policy_checks ?? []),
+        ...(state?.guardrail_evaluations ?? []),
         ...(state?.agent_outputs ?? []),
         ...(state?.orchestration_calls ?? []),
         ...(state?.reports ?? []),
@@ -447,6 +462,7 @@ function auditCounts(state: DemoState | null, fallbackTotal: number): WorkflowAu
   const orchestrationCalls = state?.orchestration_calls.length ?? 0;
   const stripeEvents = state?.stripe_events.length ?? 0;
   const policyChecks = state?.policy_checks.length ?? 0;
+  const guardrailEvaluations = state?.guardrail_evaluations.length ?? 0;
   const ledgerEntries = state?.ledger.entries.length ?? 0;
   const reports = state?.reports.length ?? 0;
   const planningRuns = state?.planning_runs.length ?? 0;
@@ -456,6 +472,7 @@ function auditCounts(state: DemoState | null, fallbackTotal: number): WorkflowAu
     orchestrationCalls +
     stripeEvents +
     policyChecks +
+    guardrailEvaluations +
     ledgerEntries +
     reports +
     planningRuns +
@@ -466,6 +483,7 @@ function auditCounts(state: DemoState | null, fallbackTotal: number): WorkflowAu
     orchestrationCalls,
     stripeEvents,
     policyChecks,
+    guardrailEvaluations,
     ledgerEntries,
     reports,
     planningRuns,

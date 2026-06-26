@@ -39,8 +39,8 @@ actionable failure.
    `used_real_hermes=true` for Full Proof Mode or deterministic local plan proof for Demo proof mode.
 7. Click Stripe Finance Proof and show either real Stripe test-mode proof with `livemode=false`
    and `paid=false` unless Stripe reports paid, or Stripe test-double/sandbox proof in Demo proof mode.
-8. Click Guardrail Review and show local policy active now, with real NVIDIA NeMo Guardrails
-   targeted in Goal 8 and not wired yet.
+8. Click Guardrail Review and show guardrail mode/status, `used_real_nemo`, `fail_closed`, input /
+   planning / execution / output evaluations, and local policy active now.
 9. Click Blocked Risk and show why the $3,200 Unapproved Data Broker Enrichment request was
    blocked and that no spend ledger row was created for it.
 10. Click Profit Outcome and show $8,500 revenue, $1,150 approved setup spend, $3,200 blocked
@@ -48,8 +48,9 @@ actionable failure.
 11. Open Runs and show the new execution, selected-run summary, execution feed, and profit outcome proof.
 12. Open Evidence Ledger and show grouped timeline, Hermes/orchestration, Stripe finance proof,
     guardrail/local policy decisions, ledger entries, and profit outcome.
-13. Open Integrations and show Demo proof mode or Full Proof Mode labels, Stripe honesty,
-    local policy active, SQLite ledger, prototype auth, and NeMo Guardrails planned/not wired.
+13. Open Integrations and show Demo proof mode or Full Proof Mode labels, Stripe honesty, local
+    policy active, SQLite ledger, prototype auth, and the guardrail adapter status. In default
+    Judge Demo Mode, `used_real_nemo=false`.
     If Connection Hub UI exists in a future run, present it as the ClientOps operating boundary,
     not as a generic connector dashboard.
 14. Logout.
@@ -95,8 +96,8 @@ Full Proof Mode:
 - Shows visible errors if configured incorrectly.
 
 Truthfulness boundaries remain: Northstar is synthetic; no patient data; no PHI; no HIPAA claim;
-local policy active now; real NVIDIA NeMo Guardrails is the Goal 8 target and not wired yet; no
-live-money support; no production auth claim.
+local policy active now; real NeMo is optional through `nemo_guardrails` only when runtime
+verification passes; no live-money support; no production auth claim.
 
 ## Full Proof Mode Real-Tool Demo Plan
 
@@ -144,7 +145,6 @@ Connection Hub is planned as the ScaleX layer that declares allowed systems, con
 guardrails, blocked actions, missing configuration, and recorded evidence. It supports the
 ClientOps Autopilot story and should not become the demo centerpiece.
 
-MCP is a future access pattern only. Do not say ScaleX has an MCP server, external agent MCP
-access, or real NeMo Guardrails unless those pieces are implemented, tested, and documented.
-Real NeMo is the Goal 8 target; a compatible/local fallback is only allowed if Goal 8A proves real
-NeMo cannot be safely wired before submission, and the demo must not claim real NeMo is active.
+MCP is a future access pattern only. Do not say ScaleX has an MCP server or external agent MCP
+access. Do not say real NeMo is active unless `nemo_guardrails` runtime verification passes.
+`nemo_compatible` must be described as a fallback and not real NeMo.

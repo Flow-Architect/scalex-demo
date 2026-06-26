@@ -53,6 +53,7 @@ export function AuditInspector({
           <CountTile label="Orchestration calls" value={counts.orchestrationCalls} />
           <CountTile label="Stripe events" value={counts.stripeEvents} />
           <CountTile label="Policy checks" value={counts.policyChecks} />
+          <CountTile label="Guardrail evaluations" value={counts.guardrailEvaluations} />
           <CountTile label="Ledger entries" value={counts.ledgerEntries} />
           <CountTile label="Reports" value={counts.reports} />
           <CountTile label="Planning runs" value={counts.planningRuns} />

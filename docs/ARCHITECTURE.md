@@ -29,7 +29,9 @@ ScaleX UI
 - Stripe provides finance proof through test invoice/payment state.
 - ScaleX executes the operation and enforces business rules.
 - Local policy is active now for spend, margin, vendor, and payment-before-spend enforcement.
-- Real NVIDIA NeMo Guardrails is the Goal 8 governed autonomy target and is not wired yet.
+- Goal 8B adds an optional real-NeMo-ready guardrail adapter boundary. Default mode is
+  `local_policy`; `nemo_guardrails` verifies a configured external Python runtime and fails closed
+  if selected but unavailable.
 - SQLite records evidence for planning, orchestration, finance proof, policy checks, ledger rows,
   agent outputs, and final reports.
 - Profit Outcome reports protected profit and blocked risk.
@@ -234,20 +236,18 @@ Future MCP governance:
 ## Governed Autonomy / Guardrails
 
 The local policy engine is currently active for spend cap, payment-before-spend, margin, vendor
-allowlist, and blocked-vendor checks. Real NVIDIA NeMo Guardrails is the Goal 8 target governed
-autonomy layer, not an optional feature. Goal 8A remains after Goal 7.13A as the read-only
-preflight that determines the safest practical path to wire real NeMo Guardrails into this repo.
+allowlist, and blocked-vendor checks. Goal 8B adds a guardrail adapter boundary with
+`local_policy`, `nemo_guardrails`, and `nemo_compatible` modes plus `guardrail_evaluations`
+evidence for input, planning, execution, and output stages.
 
-If Goal 8A proves real NeMo cannot be safely wired before submission, a NeMo-compatible/local
-adapter is allowed only as a temporary fallback. The docs and UI must then state that real NeMo
-was targeted, what blocked it, what adapter is used instead, what remains to wire real NeMo later,
-and that real NeMo is not active.
+The main backend process does not import `nemoguardrails`. Real NeMo probing runs through the
+configured external `SCALEX_NEMO_PYTHON` subprocess and loads `SCALEX_NEMO_CONFIG_PATH`.
+`nemo_guardrails` may claim real NeMo only when runtime verification passes; if selected but
+unavailable, broken, or misconfigured, ScaleX fails closed. `nemo_compatible` is a labeled
+fallback only and must keep `used_real_nemo=false`.
 
-Later Goal 8 work should add a guardrail adapter boundary, NeMo-style
-input/planning/execution/output rails, and guardrail proof. The preferred path is real
-`nemo_guardrails`; `nemo_compatible` is only the documented fallback if real NeMo is blocked.
-
-ScaleX does not yet claim real NeMo Guardrails or real NemoClaw.
+Goal 8C should deepen pre-action rail execution around protected actions. ScaleX does not claim
+real NemoClaw.
 
 ## Verified Live Mode
 

@@ -579,6 +579,82 @@ def list_policy_checks(connection: sqlite3.Connection, job_id: str | None = None
     return rows_to_dicts(rows)
 
 
+def create_guardrail_evaluation(
+    connection: sqlite3.Connection,
+    *,
+    job_id: str,
+    stage: str,
+    mode: str,
+    adapter: str,
+    status: str,
+    used_real_nemo: bool,
+    fail_closed: bool,
+    label: str,
+    summary: str,
+    details_json: dict | list | str | int | float | bool | None = None,
+    error: str | None = None,
+    evaluation_id: str | None = None,
+) -> dict:
+    evaluation_id = evaluation_id or f"grd_{uuid4().hex}"
+    created_at = utc_now()
+    connection.execute(
+        """
+        INSERT INTO guardrail_evaluations (
+          id, job_id, stage, mode, adapter, status, used_real_nemo, fail_closed,
+          label, summary, details_json, error, created_at
+        )
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """,
+        (
+            evaluation_id,
+            job_id,
+            stage,
+            mode,
+            adapter,
+            status,
+            1 if used_real_nemo else 0,
+            1 if fail_closed else 0,
+            label,
+            summary,
+            _json_text(details_json),
+            error,
+            created_at,
+        ),
+    )
+    return get_guardrail_evaluation(connection, evaluation_id)
+
+
+def get_guardrail_evaluation(connection: sqlite3.Connection, evaluation_id: str) -> dict:
+    row = connection.execute(
+        "SELECT * FROM guardrail_evaluations WHERE id = ?",
+        (evaluation_id,),
+    ).fetchone()
+    evaluation = row_to_dict(row)
+    if evaluation is None:
+        raise LookupError(f"Guardrail evaluation not found: {evaluation_id}")
+    return evaluation
+
+
+def list_guardrail_evaluations(
+    connection: sqlite3.Connection,
+    job_id: str | None = None,
+) -> list[dict]:
+    if job_id is None:
+        rows = connection.execute(
+            "SELECT * FROM guardrail_evaluations ORDER BY created_at, rowid"
+        ).fetchall()
+    else:
+        rows = connection.execute(
+            """
+            SELECT * FROM guardrail_evaluations
+            WHERE job_id = ?
+            ORDER BY created_at, rowid
+            """,
+            (job_id,),
+        ).fetchall()
+    return rows_to_dicts(rows)
+
+
 def create_stripe_event(
     connection: sqlite3.Connection,
     *,

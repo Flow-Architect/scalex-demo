@@ -1,0 +1,7 @@
+rails:
+  input:
+    flows:
+      - scalex input rail
+  output:
+    flows:
+      - scalex output rail

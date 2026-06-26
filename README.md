@@ -75,7 +75,8 @@ must run in the appropriate environment.
 - Stripe test doubles are for automated tests, CI, local offline development, or explicitly labeled diagnostics.
 - Product-mode integration failures must surface visible errors.
 - Policy enforcement currently runs through a local policy engine.
-- Real NVIDIA NeMo Guardrails is the Goal 8 target and is not wired yet.
+- Guardrail mode defaults to `local_policy`; optional `nemo_guardrails` mode can verify a real
+  NeMo runtime through `SCALEX_NEMO_PYTHON` and fails closed if selected but unavailable.
 - Hermes planning uses the ScaleX-isolated laptop install, not production Hermes.
 - Stripe test invoices are labeled honestly as open/unpaid unless Stripe reports `paid=true`.
 
@@ -123,9 +124,9 @@ Planned connector concepts:
 - Calendar kickoff scheduling
 
 MCP is documented as a future access pattern only. ScaleX does not currently expose an MCP server,
-external agents cannot yet call ScaleX through MCP, and real NeMo Guardrails is not wired yet. A
-future ScaleX MCP server may expose safe tools/resources/prompts only after the guardrail and tool
-boundary is clear, without exposing secrets, bypassing policy, or enabling live-money actions.
+and external agents cannot yet call ScaleX through MCP. A future ScaleX MCP server may expose safe
+tools/resources/prompts only after the guardrail and tool boundary is clear, without exposing
+secrets, bypassing policy, or enabling live-money actions.
 
 ## Local Browser Demo
 
@@ -262,23 +263,23 @@ These commands must not use live Stripe mode or production service credentials.
 - Live-money Stripe execution is not implemented.
 - Northstar Dental Group is synthetic; no real client data, patient data, or PHI is used.
 - Connection Hub and MCP are planned only; no MCP server exists today.
-- Real NVIDIA NeMo Guardrails is the Goal 8 target and is not wired yet.
+- Real NeMo is optional through `nemo_guardrails` mode only when runtime verification passes; the
+  default Judge Demo Mode remains `local_policy` and does not require NeMo.
 - No `LICENSE` file is present yet. Select a license such as MIT or Apache-2.0 before public
   open-source submission.
 
 ## What Is Real, Test, And Future
 
 - Real now: isolated Hermes planning through `scalex-operator`, real Stripe test-mode invoice
-  creation/finalization, SQLite evidence ledger, local policy enforcement, local prototype auth,
-  SQLite-backed local/sample workflows, selected-workflow runs, persisted run history, and browser
-  product flow.
+  creation/finalization, SQLite evidence ledger, local policy enforcement, optional real-NeMo
+  runtime probing through `SCALEX_NEMO_PYTHON`, local prototype auth, SQLite-backed local/sample
+  workflows, selected-workflow runs, persisted run history, and browser product flow.
 - Judge Demo Mode: deterministic Hermes planning and Stripe test-double/sandbox proof for hosted
   judge-safe demos, automated tests, CI, offline development, or explicitly labeled diagnostics.
-- Planned now: Goal 8A audits the safest practical path to wire real NVIDIA NeMo Guardrails
-  without wiring real NeMo yet.
-- Planned after Goal 8A: Full Proof local validation with real isolated Hermes plus real Stripe
-  test mode if safe ignored local credentials are configured, then Connection Hub UI and later MCP
-  server prototype only after the guardrail/tool boundary is clear.
-- Future: Goal 8 governed autonomy targets real NVIDIA NeMo Guardrails. A NeMo-compatible/local
-  fallback is allowed only if Goal 8A proves real NeMo cannot be safely wired before submission;
-  Goal 9 final submission prep and Verified Live Mode remain later work.
+- Implemented now for Goal 8B: guardrail adapter modes `local_policy`, `nemo_guardrails`, and
+  `nemo_compatible`; `guardrail_evaluations` evidence; API/UI proof fields; and setup/check
+  scripts for an external NeMo venv.
+- Planned next: Goal 8C deepens pre-action guardrail execution rails, then Full Proof local
+  validation, Connection Hub UI, and later MCP server prototype only after the guardrail/tool
+  boundary is clear.
+- Future: Goal 9 final submission prep and Verified Live Mode remain later work.

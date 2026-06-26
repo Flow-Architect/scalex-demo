@@ -16,6 +16,10 @@ from . import repository
 from .config import Settings, get_settings
 from .db import database_path, get_connection, initialize_database
 from .services.agent_service import create_demo_agent_output, record_demo_agent_work_complete
+from .services.guardrails_service import (
+    GuardrailIntegrationError,
+    evaluate_and_record_guardrail_stage,
+)
 from .services.hermes_adapter import sanitize_text
 from .services.ledger_service import ledger_totals, usd_to_cents
 from .services.payment_service import mark_job_paid
@@ -69,6 +73,16 @@ def run_demo() -> dict[str, Any]:
             status="complete",
             duration_ms=_duration_ms(job_started_at),
         )
+        try:
+            evaluate_and_record_guardrail_stage(
+                connection,
+                job=job,
+                stage="input",
+                payload={"job": job, "seed_config": seed_config},
+                settings=execution_settings,
+            )
+        except GuardrailIntegrationError as exc:
+            return _guardrail_failed_response(connection, job, exc)
 
         planning_started_at = time.monotonic()
         planning_result = generate_operating_plan(job, seed_config, settings=execution_settings)
@@ -107,6 +121,16 @@ def run_demo() -> dict[str, Any]:
             planning_run_id=planning_run["id"],
         )
         _record_planning_event(connection, job, planning_result, planning_run)
+        try:
+            evaluate_and_record_guardrail_stage(
+                connection,
+                job=job,
+                stage="planning",
+                payload={"planning_result": planning_result},
+                settings=execution_settings,
+            )
+        except GuardrailIntegrationError as exc:
+            return _guardrail_failed_response(connection, job, exc)
 
         if planning_result["status"] != "completed":
             repository.update_job_status(connection, job["id"], "hermes_error")
@@ -163,6 +187,20 @@ def run_demo() -> dict[str, Any]:
             ),
         )
         sequence = _run_policy_spend_sequence(connection, job, sequence, planning_run_id, seed_config)
+        try:
+            evaluate_and_record_guardrail_stage(
+                connection,
+                job=job,
+                stage="execution",
+                payload={
+                    "policy_checks": repository.list_policy_checks(connection, job["id"]),
+                    "ledger_entries": repository.list_ledger_entries(connection, job["id"]),
+                    "stripe_summary": _stripe_summary_for_guardrail(payment_status),
+                },
+                settings=execution_settings,
+            )
+        except GuardrailIntegrationError as exc:
+            return _guardrail_failed_response(connection, job, exc)
 
         for agent_name in ("Finance", "Marketing", "Research", "Ops"):
             sequence, _agent_output = _execute_tool(
@@ -185,6 +223,24 @@ def run_demo() -> dict[str, Any]:
             tool_input_json={"job_id": job["id"]},
             operation=lambda: _create_final_report(connection, job),
         )
+        try:
+            evaluate_and_record_guardrail_stage(
+                connection,
+                job=job,
+                stage="output",
+                payload={
+                    "report": _report,
+                    "totals": ledger_totals(
+                        job,
+                        repository.list_ledger_entries(connection, job["id"]),
+                        repository.list_policy_checks(connection, job["id"]),
+                    ),
+                    "stripe_summary": _stripe_summary_for_guardrail(payment_status),
+                },
+                settings=execution_settings,
+            )
+        except GuardrailIntegrationError as exc:
+            return _guardrail_failed_response(connection, job, exc)
         repository.update_job_status(connection, job["id"], "complete")
         repository.create_event(
             connection,
@@ -276,6 +332,38 @@ def _settings_for_execution(settings: Settings) -> Settings:
             stripe_test_double_mode=True,
         )
     return settings
+
+
+def _guardrail_failed_response(
+    connection,
+    job: dict[str, Any],
+    exc: GuardrailIntegrationError,
+) -> dict[str, Any]:
+    result = exc.result
+    repository.update_job_status(connection, job["id"], "guardrail_error")
+    repository.create_event(
+        connection,
+        job_id=job["id"],
+        type="guardrail_fail_closed",
+        title="Guardrail adapter failed closed",
+        detail=sanitize_text(str(exc)),
+        status="failed",
+    )
+    connection.commit()
+    state = build_demo_state(connection)
+    state["database"]["path"] = str(database_path())
+    state["database"]["exists"] = database_path().exists()
+    return {
+        "status": "guardrail_failed",
+        "state": state,
+        "decision": {
+            "guardrail_mode": result.get("mode"),
+            "stage": result.get("stage"),
+            "fail_closed": True,
+            "used_real_nemo": bool(result.get("used_real_nemo")),
+            "error": result.get("error") or result.get("summary"),
+        },
+    }
 
 
 def _record_run_started(connection, job: dict[str, Any], settings: Settings) -> dict[str, Any]:
@@ -406,6 +494,16 @@ def _run_policy_spend_sequence(
                 planning_run_id=planning_run_id,
             )
     return sequence
+
+
+def _stripe_summary_for_guardrail(payment_status: dict[str, Any]) -> dict[str, Any]:
+    paid_value = payment_status.get("paid")
+    return {
+        "stripe_mode": payment_status.get("provider_mode") or payment_status.get("mode"),
+        "livemode": bool(payment_status.get("livemode")),
+        "invoice_status": payment_status.get("invoice_status"),
+        "paid": None if paid_value is None else bool(paid_value),
+    }
 
 
 def _create_final_report(connection, job: dict[str, Any]) -> dict[str, Any]:

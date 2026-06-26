@@ -2,10 +2,11 @@
 
 ## Current Priority
 
-Goal 8A - NeMo Guardrails Preflight / Architecture Audit.
+Goal 8C - Guardrail Execution Rails in Run Lifecycle.
 
-Open Source Checkout Cleanup is complete. Goal 7.13A remains the last roadmap/docs milestone, and
-Goal 8A remains intact and should run next unless the plan changes.
+Goal 8B is complete. The repo now has a guardrail adapter boundary, optional real-NeMo runtime
+probing, guardrail evaluation persistence, and UI/API proof fields. Goal 8C should deepen the
+runtime rail execution around protected actions.
 
 ## Goal 7.11A Gate Result
 
@@ -56,31 +57,62 @@ the sample implementation pass.
 
 ## Next Recommended Goal
 
-Run Codex `/goal` 8A:
+Run Codex `/goal` 8C:
 
-- Perform the read-only NeMo Guardrails Preflight / Architecture Audit.
-- Inspect whether `nemoguardrails`, `nemoclaw`, `openclaw`, Docker, and NVIDIA tooling are locally
-  available without installing or wiring them.
-- Inspect the current local policy engine and SQLite audit schema.
-- Determine the safest practical path to wire real NVIDIA NeMo Guardrails into this repo.
-- If real NeMo cannot be safely wired before submission, document the blocker, the temporary
-  NeMo-compatible/local fallback, and what remains to wire real NeMo later.
-- Produce the exact Goal 8B implementation prompt.
-- Preserve product-mode truthfulness: local policy is active now and real NeMo is not wired yet.
+- Add stronger pre-action guardrail checks around onboarding/input, Hermes plan/tool sequence,
+  Stripe finance action requests, spend approval/block decisions, agent deliverables, and final
+  report generation.
+- Keep `local_policy` as Judge Demo Mode default and the deterministic business-rule gate.
+- In `nemo_guardrails` mode, keep using `SCALEX_NEMO_PYTHON` subprocess probing and fail closed
+  when real NeMo is unavailable, broken, or misconfigured.
+- Keep `nemo_compatible` clearly labeled as a fallback and never set `used_real_nemo=true`.
+- Preserve the current Northstar economics and Start Run behavior.
 
-After Goal 8A, decide whether to run a small Full Proof local validation goal using safe ignored
-local credentials for real isolated Hermes plus real Stripe test mode, or to track that validation
-as Goal 7.14. Do not run that validation inside Goal 8A unless the prompt explicitly asks for it.
+Real NeMo is available locally outside the repo at `/home/ascabrya/.venvs/scalex-nemo/bin/python`
+and `scripts/check-nemo.sh` verifies NeMo 0.21.0 plus `RailsConfig.from_path` for
+`guardrails/scalex`. The local venv must remain uncommitted.
 
 Recommended sequence:
 
-1. Goal 8A - NeMo Guardrails Preflight / Architecture Audit.
-2. Full Proof local validation - verify real isolated Hermes plus real Stripe test mode if safe
+1. Goal 8C - Guardrail Execution Rails in Run Lifecycle.
+2. Goal 8D - Guardrail Proof UI in Workflow Canvas.
+3. Full Proof local validation - verify real isolated Hermes plus real Stripe test mode if safe
    ignored local credentials are configured.
-3. Goal 7.13B - Connection Hub UI.
-4. Goal 8B / 8C - Guardrail Adapter and Guardrail Execution Rails.
+4. Goal 7.13B - Connection Hub UI.
 5. Goal 7.13C - MCP Server Prototype if time allows and the guardrail/tool boundary is clear.
 6. Goal 9 - final recording/submission polish.
+
+## Goal 8B Gate Result
+
+Goal 8B - Real-NeMo-Ready Guardrail Adapter + Schema/API is complete.
+
+Completed:
+
+- Added guardrail modes:
+  - `local_policy` default, no secrets, no NeMo dependency.
+  - `nemo_guardrails` optional real NeMo target via `SCALEX_NEMO_PYTHON`.
+  - `nemo_compatible` labeled temporary fallback, not real NeMo.
+- Added subprocess-only real NeMo availability probing; the main backend process does not import
+  `nemoguardrails`.
+- Added `guardrails/scalex` credential-free NeMo config for `RailsConfig.from_path` checks.
+- Added `guardrail_evaluations` persistence and repository helpers.
+- Added API state fields for guardrail mode, adapter status, `used_real_nemo`, `fail_closed`,
+  local policy active, evaluation stages, and evaluation records.
+- Added frontend proof fields in Dashboard, Function Studio, Evidence Ledger, Integrations,
+  Settings, workflow audit counts, and policy/guardrail inspector.
+- Added `requirements-nemo.txt`, `scripts/setup-nemo.sh`, and `scripts/check-nemo.sh`.
+- Preserved Judge Demo Mode and Start Run behavior without NeMo or secrets.
+
+Verified:
+
+- `./scripts/test.sh` passed with 55 backend tests and a successful Vite production build.
+- `scripts/check-nemo.sh` passed against the external local venv and loaded `guardrails/scalex`.
+- Backend focused tests cover default local policy, selected-but-unavailable NeMo fail-closed,
+  successful NeMo availability probing, fallback labeling, persisted guardrail evaluations, and
+  unchanged Judge Demo Start Run behavior.
+
+Suggested commit message:
+Add real-NeMo-ready guardrail adapter
 
 ## Open Source Checkout Cleanup Result
 
@@ -217,30 +249,24 @@ the old card-dashboard shell with a ClientOps product workspace.
 
 ## Goal 8 Sequence
 
-Goal 8 remains planned as the governed autonomy layer after Goal 7.13A. Real NVIDIA NeMo
-Guardrails is the target, not an optional feature. Goal 8A is now the next recommended goal. Do
-not start Goal 8B, 8C, 8D, or 8E before Goal 8A is complete.
+Goal 8 is the governed autonomy layer. Goal 8A and Goal 8B are complete; Goal 8C is next.
 
 ### Goal 8A - NeMo Guardrails Preflight / Architecture Audit
 
-- Read-only.
+- Complete.
 - Inspect whether `nemoguardrails`, `nemoclaw`, `openclaw`, Docker, and NVIDIA tooling are locally available.
 - Inspect the current local policy engine and SQLite audit schema.
 - Determine the safest practical path to wire real NeMo Guardrails into this repo.
 - If real NeMo is blocked before submission, document the blocker, temporary fallback, and
   remaining real-NeMo work.
-- Produce the exact Goal 8B implementation prompt.
-- Preserve product-mode truthfulness: local policy is active now; real NeMo is not wired yet.
+- Produced the exact Goal 8B implementation prompt.
+- Preserved product-mode truthfulness: local policy is active now and real NeMo is optional only
+  after runtime verification.
 
 ### Goal 8B - Guardrail Adapter + Schema/API
 
-- Add a guardrail adapter boundary with modes:
-  - `local_policy`
-  - `nemo_guardrails`
-  - `nemo_compatible`
-- Add guardrail evaluation persistence if needed.
-- Add API state for guardrail mode/status/proof.
-- Keep local policy deterministic for tests.
+- Complete. Adapter boundary, modes, persistence, API state, UI proof, and setup/check scripts are
+  implemented.
 
 ### Goal 8C - Guardrail Execution Rails in Run Lifecycle
 
@@ -283,15 +309,15 @@ not start Goal 8B, 8C, 8D, or 8E before Goal 8A is complete.
 - ScaleX code remains the authority for guardrails, spend policy, payment actions, ledger writes, and reports.
 - SQLite remains the evidence ledger.
 - Local policy is active now.
-- Real NVIDIA NeMo Guardrails is the Goal 8 target and is not optional.
-- A NeMo-compatible/local fallback is allowed only if Goal 8A proves real NeMo cannot be safely
-  wired before submission, and the UI must not claim real NeMo is active.
-- Real NeMo Guardrails is not wired yet.
+- Guardrail mode defaults to `local_policy`; Judge Demo Mode does not require NeMo.
+- Real NVIDIA NeMo Guardrails is available only through optional `nemo_guardrails` mode when
+  `SCALEX_NEMO_PYTHON` runtime verification passes.
+- `nemo_compatible` is a labeled fallback only and must not claim real NeMo.
 - Stripe live-money execution is not implemented until a future Verified Live Mode milestone.
 
 ## Preserved Later Milestones
 
-Goal 7.13B - Connection Hub UI after Goal 8A unless a later planning pass explicitly justifies
+Goal 7.13B - Connection Hub UI after Goal 8C unless a later planning pass explicitly justifies
 doing it earlier as UI-only. The view must support ClientOps Autopilot, not become a generic
 connector dashboard.
 
@@ -310,8 +336,8 @@ ScaleX code must enforce every safeguard and execute any allowed action.
 
 ## Do Not Work On Yet
 
-- Goal 8B, 8C, 8D, or 8E implementation before Goal 8A is complete.
-- Goal 7.13B Connection Hub UI before Goal 8A unless explicitly approved as a UI-only reorder.
+- Goal 8D or Goal 8E before Goal 8C is complete.
+- Goal 7.13B Connection Hub UI before Goal 8C unless explicitly approved as a UI-only reorder.
 - Goal 7.13C MCP Server Prototype before the guardrail/tool-boundary plan is clear.
 - Live-money Stripe execution.
 - Real client data.

@@ -60,6 +60,8 @@ import type {
   AuthStatus,
   DemoEvent,
   DemoState,
+  GuardrailEvaluation,
+  GuardrailSummary,
   HealthResponse,
   LedgerEntry,
   LedgerTotals,
@@ -198,11 +200,19 @@ function DashboardView({
   const blockedSpendCents = money.blockedSpendCents ?? 320_000;
   const grossProfitCents = money.grossProfitCents ?? revenueCents - approvedSpendCents;
   const marginPercent = money.marginPercent ?? (revenueCents > 0 ? (grossProfitCents / revenueCents) * 100 : null);
+  const guardrailLabel = state?.execution.guardrail_label ?? "Local policy active";
+  const guardrailTone: Tone = state?.guardrails.fail_closed
+    ? "rose"
+    : state?.guardrails.used_real_nemo
+      ? "emerald"
+      : state?.guardrails.mode === "nemo_compatible"
+        ? "amber"
+        : "teal";
   const operationStates: OperationStateItem[] = [
     { icon: Activity, label: "Run", value: busyAction === "run" ? "Run in progress" : runStatus, tone: busyAction === "run" ? "amber" : latestReport ? "emerald" : "slate" },
     { icon: Workflow, label: "Launch readiness", value: activeWorkflow ? "Ready for Studio" : "Select operation", tone: activeWorkflow ? "emerald" : "amber" },
     { icon: ShieldCheck, label: "Data boundary", value: "No patient data / no PHI", tone: "teal" },
-    { icon: ShieldCheck, label: "Guardrails", value: "Local policy active", tone: "emerald" },
+    { icon: ShieldCheck, label: "Guardrails", value: guardrailLabel, tone: guardrailTone },
   ];
   const outcomeItems: RailItem[] = [
     { label: "Revenue", value: formatCurrency(revenueCents), tone: "emerald" },
@@ -291,7 +301,7 @@ function DashboardView({
           </button>
           <button className="text-left" onClick={() => onNavigate("audit")} type="button">
             <ProofRoute
-              description={`${state?.policy_checks.length ?? 0} guardrail decisions, ${state?.ledger.entries.length ?? 0} ledger rows, and finance evidence after launch.`}
+              description={`${state?.policy_checks.length ?? 0} policy decisions, ${state?.guardrail_evaluations.length ?? 0} guardrail evaluations, ${state?.ledger.entries.length ?? 0} ledger rows, and finance evidence after launch.`}
               icon={BookOpenCheck}
               label="Evidence Ledger"
               tone="teal"
@@ -718,6 +728,8 @@ function AuditView({
   const calls = state?.orchestration_calls ?? [];
   const checks = state?.policy_checks ?? [];
   const summary = state?.policy.summary ?? null;
+  const guardrails = state?.guardrails ?? null;
+  const guardrailEvaluations = state?.guardrail_evaluations ?? [];
   const stripeEvents = state?.stripe_events ?? [];
   const reports = state?.reports ?? [];
   const databasePath = state?.database.path ?? health?.database_path ?? null;
@@ -733,7 +745,7 @@ function AuditView({
         items={[
           { label: "Timeline", value: String(events.length), tone: "slate" },
           { label: "Finance proof", value: String(stripeEvents.length), tone: "sky" },
-          { label: "Guardrails", value: String(checks.length), tone: "amber" },
+          { label: "Guardrails", value: String(guardrailEvaluations.length), tone: "amber" },
           { label: "Ledger entries", value: String(entries.length), tone: "teal" },
           { label: "Hermes/orchestration", value: String(calls.length), tone: "emerald" },
           { label: "Profit outcome", value: String(reports.length), tone: "violet" },
@@ -754,7 +766,7 @@ function AuditView({
           <StripeEvidence summary={state?.stripe ?? null} events={stripeEvents} />
         </WorkspaceSection>
         <WorkspaceSection title="Guardrail decisions">
-          <PolicyEvidence checks={checks} summary={summary} />
+          <PolicyEvidence checks={checks} evaluations={guardrailEvaluations} guardrails={guardrails} summary={summary} />
         </WorkspaceSection>
         <WorkspaceSection title="Ledger entries">
           <LedgerPanel auditRows={auditRows} databasePath={databasePath} entries={entries} totals={totals} />
@@ -779,6 +791,7 @@ function IntegrationsView({
   const hermes = state?.hermes ?? null;
   const stripe = state?.stripe ?? null;
   const execution = state?.execution ?? null;
+  const guardrails = state?.guardrails ?? null;
 
   return (
     <WorkspacePage
@@ -810,11 +823,17 @@ function IntegrationsView({
           role="Controls setup spend, vendor risk, cap, and margin floor."
         />
         <StackRow
-          boundary="Goal 8A remains future/read-only. No real NeMo integration is wired."
+          boundary={
+            guardrails?.mode === "nemo_guardrails"
+              ? "Real NeMo is selected only when the configured Python runtime verifies successfully; otherwise ScaleX fails closed."
+              : guardrails?.mode === "nemo_compatible"
+                ? "Temporary fallback only. This is not real NeMo and must stay labeled."
+                : "Default Judge Demo Mode has no NeMo dependency."
+          }
           icon={ShieldAlert}
-          name="NeMo planned"
-          proof="Planned / not wired"
-          role="Future governed autonomy layer."
+          name="Guardrail adapter"
+          proof={guardrails ? `${guardrails.mode} / ${guardrails.adapter_status} / used_real_nemo=${String(guardrails.used_real_nemo)}` : "Not recorded"}
+          role="Records input, planning, execution, and output rail evidence."
         />
         <StackRow
           boundary="Local evidence ledger only; no production customer data."
@@ -837,7 +856,12 @@ function IntegrationsView({
           <StripeEvidence summary={stripe} events={state?.stripe_events ?? []} />
         </WorkspaceSection>
         <WorkspaceSection title="Guardrail boundary">
-          <PolicyEvidence checks={state?.policy_checks ?? []} summary={state?.policy.summary ?? null} />
+          <PolicyEvidence
+            checks={state?.policy_checks ?? []}
+            evaluations={state?.guardrail_evaluations ?? []}
+            guardrails={guardrails}
+            summary={state?.policy.summary ?? null}
+          />
         </WorkspaceSection>
       </div>
     </WorkspacePage>
@@ -895,8 +919,12 @@ function SettingsView({
         />
         <BoundaryRow
           area="Guardrails"
-          boundary="Local policy active now; real NeMo Guardrails is planned and not wired."
-          value="Local policy active"
+          boundary={state?.guardrails.truthfulness_note ?? "Local policy active now; real NeMo is optional and must be runtime verified before any claim."}
+          value={
+            state?.guardrails
+              ? `${state.guardrails.mode} / ${state.guardrails.adapter_status} / used_real_nemo=${String(state.guardrails.used_real_nemo)} / fail_closed=${String(state.guardrails.fail_closed)}`
+              : "Local policy active"
+          }
         />
         <BoundaryRow
           area="Records"
@@ -1298,9 +1326,13 @@ function StripeEvidence({
 
 function PolicyEvidence({
   checks,
+  evaluations,
+  guardrails,
   summary,
 }: {
   checks: PolicyCheck[];
+  evaluations: GuardrailEvaluation[];
+  guardrails: GuardrailSummary | null;
   summary: PolicySummary | null;
 }) {
   const approvedChecks = checks.filter(isApproved);
@@ -1309,10 +1341,20 @@ function PolicyEvidence({
   return (
     <div>
       <SectionHeader
-        description="Local policy decisions persisted for the selected run."
+        description="Guardrail adapter proof and local policy decisions persisted for the selected run."
         icon={ShieldCheck}
-        title="Policy checks"
+        title="Guardrail proof"
       />
+      {guardrails ? (
+        <div className="mt-4 grid gap-2 sm:grid-cols-2">
+          <MetricTile label="Mode" tone="violet" value={guardrails.mode} />
+          <MetricTile label="Adapter status" tone={guardrails.fail_closed ? "rose" : guardrails.used_real_nemo ? "emerald" : "amber"} value={guardrails.adapter_status} />
+          <MetricTile label="used_real_nemo" tone={guardrails.used_real_nemo ? "emerald" : "amber"} value={String(guardrails.used_real_nemo)} />
+          <MetricTile label="fail_closed" tone={guardrails.fail_closed ? "rose" : "teal"} value={String(guardrails.fail_closed)} />
+          <MetricTile label="Local policy active" tone="emerald" value={String(guardrails.local_policy_active)} />
+          <MetricTile label="Evaluation stages" tone="slate" value={String(evaluations.length)} />
+        </div>
+      ) : null}
       {summary ? (
         <div className="mt-4 grid gap-2 sm:grid-cols-2">
           <MetricTile label="Spend cap" tone="sky" value={formatCurrency(summary.max_job_spend_usd * 100)} />
@@ -1321,6 +1363,47 @@ function PolicyEvidence({
           <MetricTile label="Vendor list" tone="emerald" value={`${summary.approved_vendors.length} allowed / ${summary.blocked_vendors.length} blocked`} />
         </div>
       ) : null}
+
+      <div className="mt-4 space-y-3">
+        {evaluations.length === 0 ? (
+          <EmptyState>Guardrail adapter evaluations appear after the run executes.</EmptyState>
+        ) : (
+          evaluations.map((evaluation) => (
+            <article
+              className={`border p-3 ${
+                evaluation.fail_closed
+                  ? "border-rose-200 bg-rose-50"
+                  : evaluation.used_real_nemo
+                    ? "border-emerald-200 bg-emerald-50"
+                    : "border-zinc-200 bg-white"
+              }`}
+              key={evaluation.id}
+            >
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <p className="font-semibold text-zinc-950">{evaluation.label}</p>
+                  <p className="mt-1 text-xs font-semibold uppercase text-zinc-400">
+                    {humanize(evaluation.stage)} / {evaluation.adapter}
+                  </p>
+                </div>
+                <StatusBadge
+                  label={humanize(evaluation.status)}
+                  tone={evaluation.fail_closed ? "rose" : evaluation.used_real_nemo ? "emerald" : "amber"}
+                />
+              </div>
+              <p className="mt-2 text-sm leading-6 text-zinc-700">{evaluation.summary}</p>
+              {evaluation.error ? (
+                <p className="mt-2 text-xs leading-5 text-rose-700">{evaluation.error}</p>
+              ) : null}
+              <div className="mt-3 flex flex-wrap gap-2">
+                <StatusBadge label={`used_real_nemo=${String(evaluation.used_real_nemo)}`} tone={evaluation.used_real_nemo ? "emerald" : "amber"} />
+                <StatusBadge label={`fail_closed=${String(evaluation.fail_closed)}`} tone={evaluation.fail_closed ? "rose" : "teal"} />
+                <StatusBadge label={formatDateTime(evaluation.created_at)} tone="slate" />
+              </div>
+            </article>
+          ))
+        )}
+      </div>
 
       <div className="mt-4 space-y-3">
         {checks.length === 0 ? (
@@ -1409,6 +1492,7 @@ function iconForEvent(type: string): LucideIcon {
       return TrendingUp;
     case "policy_gate":
     case "policy_check":
+    case "guardrail_fail_closed":
       return ShieldCheck;
     case "stripe_test":
     case "stripe_test_double":

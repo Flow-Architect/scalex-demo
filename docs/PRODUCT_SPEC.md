@@ -109,10 +109,10 @@ Execution modes:
   available, never labels `paid=false` as paid, and shows visible integration errors if configured
   incorrectly.
 
-Goal 7.12 must preserve the current truthfulness boundaries: Northstar is synthetic, no patient
-data, no PHI, no HIPAA claim, local policy active now, NeMo Guardrails planned/not wired, no
-live-money support, no production auth claim, and demo mode must not pretend to be real
-integration mode.
+Truthfulness boundaries: Northstar is synthetic, no patient data, no PHI, no HIPAA claim, local
+policy active now, default guardrail mode is `local_policy`, optional real NeMo requires
+`nemo_guardrails` runtime verification, no live-money support, no production auth claim, and demo
+mode must not pretend to be real integration mode.
 
 ## Connection Hub Product Layer
 
@@ -207,8 +207,8 @@ Invoice lifecycle:
 MCP is not the main product story. It is a future access pattern that could let external agents
 call ScaleX safely through approved tools, resources, and prompts.
 
-ScaleX does not currently have an MCP server, external agents cannot yet call ScaleX through MCP,
-and NeMo Guardrails is not wired yet.
+ScaleX does not currently have an MCP server, and external agents cannot yet call ScaleX through
+MCP.
 
 Future MCP tools may include `scalex_list_operations`, `scalex_get_operation`,
 `scalex_start_run`, `scalex_get_run`, `scalex_get_evidence`, `scalex_get_connector_status`, and
@@ -232,7 +232,7 @@ configuration or policy is invalid.
 - Stripe = finance proof / invoice / payment state.
 - ScaleX = execution and policy authority.
 - Local policy now = spend, margin, vendor, and payment-before-spend enforcement.
-- Real NVIDIA NeMo Guardrails target = governed autonomy layer after Goal 8.
+- Real NVIDIA NeMo Guardrails = optional `nemo_guardrails` adapter mode after runtime verification.
 - SQLite = evidence ledger.
 - Profit Outcome = protected profit and blocked risk result.
 
@@ -242,7 +242,6 @@ Live-money payments, real client data, production Hermes, production Prometheus,
 homelab/OpenClaw, Recall memory, production auth, hosted secret exposure, and production SaaS
 features are out of scope. Local/sample workflow management demonstrates the product path;
 production multi-client onboarding is future work. Future live-money payments require Verified
-Live Mode. Real NVIDIA NeMo Guardrails is the Goal 8 target and is not wired yet. A
-NeMo-compatible/local fallback is allowed only if Goal 8A proves real NeMo cannot be safely wired
-before submission, and the product must not claim real NeMo is active unless it is installed,
-wired, tested, and documented.
+Live Mode. Real NVIDIA NeMo Guardrails is optional through `nemo_guardrails` mode only when the
+configured runtime verifies successfully. `nemo_compatible` is a labeled fallback and must not
+claim real NeMo.

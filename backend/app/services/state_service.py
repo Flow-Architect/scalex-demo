@@ -4,6 +4,7 @@ import json
 
 from .. import repository
 from ..config import Settings, get_settings, normalized_execution_mode
+from .guardrails_service import guardrail_summary
 from .ledger_service import ledger_totals, usd_to_cents
 from .policy_service import policy_config_for_seed, policy_summary
 from .seed_service import load_seed_config
@@ -21,6 +22,12 @@ def build_demo_state(connection: sqlite3.Connection, run_id: str | None = None) 
     policy_config = policy_config_for_seed(seed_config)
     ledger_entries = repository.list_ledger_entries(connection, job_id) if job_id else []
     policy_checks = repository.list_policy_checks(connection, job_id) if job_id else []
+    guardrail_evaluations = [
+        _decode_guardrail_evaluation(evaluation)
+        for evaluation in (
+            repository.list_guardrail_evaluations(connection, job_id) if job_id else []
+        )
+    ]
     totals = ledger_totals(job, ledger_entries, policy_checks)
     reports = [
         _enrich_report(report, totals)
@@ -52,7 +59,13 @@ def build_demo_state(connection: sqlite3.Connection, run_id: str | None = None) 
 
     return {
         "mode": "local_sqlite",
-        "execution": _execution_summary(settings, latest_planning_run, hermes_metadata, stripe_summary),
+        "execution": _execution_summary(
+            settings,
+            latest_planning_run,
+            hermes_metadata,
+            stripe_summary,
+            guardrail_evaluations,
+        ),
         "database": {
             "initialized": True,
             "table_counts": _table_counts(connection),
@@ -72,6 +85,8 @@ def build_demo_state(connection: sqlite3.Connection, run_id: str | None = None) 
             "config": policy_config,
             "summary": policy_summary(policy_config),
         },
+        "guardrails": guardrail_summary(settings=settings, evaluations=guardrail_evaluations),
+        "guardrail_evaluations": guardrail_evaluations,
         "events": events,
         "timeline_events": events,
         "planning_runs": planning_runs,
@@ -102,6 +117,7 @@ def _execution_summary(
     planning_run: dict[str, Any] | None,
     hermes_metadata: dict[str, Any],
     stripe_summary: dict[str, Any],
+    guardrail_evaluations: list[dict[str, Any]],
 ) -> dict[str, Any]:
     mode = normalized_execution_mode(settings.scalex_execution_mode)
     demo_mode = mode == "demo"
@@ -109,6 +125,7 @@ def _execution_summary(
     used_real_stripe = bool(stripe_summary.get("used_real_stripe"))
     planning_source = planning_run.get("source") if planning_run else None
     stripe_mode = stripe_summary.get("stripe_mode")
+    guardrails = guardrail_summary(settings=settings, evaluations=guardrail_evaluations)
 
     return {
         "mode": mode,
@@ -129,20 +146,39 @@ def _execution_summary(
             else "Sandbox finance proof pending"
         ),
         "policy_label": "Local policy active",
+        "guardrail_mode": guardrails["mode"],
+        "guardrail_adapter_status": guardrails["adapter_status"],
+        "guardrail_label": _guardrail_execution_label(guardrails),
+        "used_real_nemo": guardrails["used_real_nemo"],
+        "guardrails_fail_closed": guardrails["fail_closed"],
+        "guardrail_evaluation_stages": guardrails["evaluation_stages"],
         "used_real_hermes": used_real_hermes,
         "used_real_stripe": used_real_stripe,
         "planning_source": planning_source,
         "stripe_mode": stripe_mode,
         "truthfulness_note": (
             "Demo proof mode uses deterministic local planning and Stripe test-double sandbox "
-            "finance proof. It does not claim real Hermes or real Stripe usage."
+            "finance proof. It does not claim real Hermes, real Stripe, or real NeMo usage."
             if demo_mode
             else (
                 "Full Proof Mode uses configured real isolated Hermes and real Stripe test-mode "
-                "adapters. Missing credentials remain visible integration errors."
+                "adapters. Missing credentials or selected guardrail runtime failures remain "
+                "visible integration errors."
             )
         ),
     }
+
+
+def _guardrail_execution_label(guardrails: dict[str, Any]) -> str:
+    if guardrails["fail_closed"]:
+        return "Guardrails failed closed"
+    if guardrails["used_real_nemo"]:
+        return "Real NeMo runtime verified"
+    if guardrails["mode"] == "nemo_compatible":
+        return "NeMo-compatible fallback (not real NeMo)"
+    if guardrails["mode"] == "nemo_guardrails":
+        return "NeMo selected; runtime probe pending"
+    return "Local policy active"
 
 
 def _selected_job(
@@ -224,6 +260,7 @@ def _table_counts(connection: sqlite3.Connection) -> dict[str, int]:
         "stripe_events",
         "agent_outputs",
         "reports",
+        "guardrail_evaluations",
     ]
     return {
         table: int(connection.execute(f"SELECT COUNT(*) FROM {table}").fetchone()[0])
@@ -261,6 +298,14 @@ def _decode_stripe_event(event: dict[str, Any]) -> dict[str, Any]:
     if decoded.get("paid") is not None:
         decoded["paid"] = bool(decoded["paid"])
     decoded["livemode"] = bool(decoded.get("livemode"))
+    return decoded
+
+
+def _decode_guardrail_evaluation(evaluation: dict[str, Any]) -> dict[str, Any]:
+    decoded = dict(evaluation)
+    decoded["used_real_nemo"] = bool(decoded.get("used_real_nemo"))
+    decoded["fail_closed"] = bool(decoded.get("fail_closed"))
+    decoded["details_json"] = _decode_json(decoded.get("details_json"))
     return decoded
 
 

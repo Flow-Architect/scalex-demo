@@ -25,6 +25,12 @@ class Settings:
     hermes_skill_name: str
     hermes_skill_source_path: str
     hermes_toolsets: str
+    guardrail_mode: str = "local_policy"
+    nemo_python_path: str = ""
+    nemo_config_path: str = "./guardrails/scalex"
+    guardrails_fail_closed: bool = True
+    guardrails_record_evaluations: bool = True
+    guardrails_probe_timeout_seconds: int = 15
     stripe_mode: str = "test"
     stripe_secret_key: str = ""
     stripe_test_mode: bool = True
@@ -54,6 +60,20 @@ def get_settings() -> Settings:
         database_path=os.getenv("DATABASE_PATH", "./data/scalex.db"),
         stripe_live_mode=_bool_env("STRIPE_LIVE_MODE", False),
         policy_engine=os.getenv("POLICY_ENGINE", "local"),
+        guardrail_mode=normalized_guardrail_mode(
+            os.getenv("SCALEX_GUARDRAIL_MODE", os.getenv("GUARDRAIL_ENGINE", "local_policy"))
+        ),
+        nemo_python_path=os.getenv(
+            "SCALEX_NEMO_PYTHON",
+            os.getenv("NEMO_GUARDRAILS_PYTHON", ""),
+        ),
+        nemo_config_path=os.getenv(
+            "SCALEX_NEMO_CONFIG_PATH",
+            os.getenv("NEMO_GUARDRAILS_CONFIG_PATH", "./guardrails/scalex"),
+        ),
+        guardrails_fail_closed=_bool_env("GUARDRAILS_FAIL_CLOSED", True),
+        guardrails_record_evaluations=_bool_env("GUARDRAILS_RECORD_EVALUATIONS", True),
+        guardrails_probe_timeout_seconds=_int_env("GUARDRAILS_PROBE_TIMEOUT_SECONDS", 15),
         hermes_mode=os.getenv("HERMES_MODE", "isolated_cli"),
         hermes_cli_path=os.getenv(
             "HERMES_CLI_PATH",
@@ -113,6 +133,27 @@ def normalized_execution_mode(value: str | None) -> str:
     if normalized not in {"demo", "full_proof"}:
         raise ValueError(
             "SCALEX_EXECUTION_MODE must be demo or full_proof for Goal 7."
+        )
+    return normalized
+
+
+def normalized_guardrail_mode(value: str | None) -> str:
+    normalized = (value or "local_policy").strip().lower().replace("-", "_")
+    aliases = {
+        "local": "local_policy",
+        "policy": "local_policy",
+        "local_policy_engine": "local_policy",
+        "nemo": "nemo_guardrails",
+        "nemo_guardrail": "nemo_guardrails",
+        "nemo_guardrails_runtime": "nemo_guardrails",
+        "compatible": "nemo_compatible",
+        "nemo_fallback": "nemo_compatible",
+        "fallback": "nemo_compatible",
+    }
+    normalized = aliases.get(normalized, normalized)
+    if normalized not in {"local_policy", "nemo_guardrails", "nemo_compatible"}:
+        raise ValueError(
+            "SCALEX_GUARDRAIL_MODE must be local_policy, nemo_guardrails, or nemo_compatible."
         )
     return normalized
 

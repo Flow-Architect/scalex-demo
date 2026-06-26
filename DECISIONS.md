@@ -43,7 +43,10 @@
 - Stripe provides finance proof through test invoice/payment state.
 - ScaleX code executes and enforces business rules.
 - Local policy is active now for spend, margin, vendor, and payment-before-spend enforcement.
-- Real NVIDIA NeMo Guardrails is the Goal 8 target and is not wired yet.
+- Real NVIDIA NeMo Guardrails is optional through the Goal 8B guardrail adapter boundary when a
+  configured external `SCALEX_NEMO_PYTHON` runtime verifies successfully.
+- Judge Demo Mode defaults to `local_policy` and must not require NeMo or secrets.
+- `nemo_compatible` is a labeled temporary fallback only and must not claim real NeMo.
 - SQLite is the evidence ledger.
 - Profit Outcome is the business result.
 - MCP is a future access pattern only. ScaleX does not currently expose an MCP server, external
@@ -84,16 +87,17 @@
 - No mode should claim a real client was emailed unless an explicit send step exists and is
   verified.
 - Goal 8 is the governed autonomy layer targeting real NVIDIA NeMo Guardrails.
-- Goal 8A is the read-only preflight to determine the safest practical path to wire real NeMo
-  Guardrails into this repo without production-system access, secret leakage, demo breakage, or
-  false claims.
-- A NeMo-compatible/local adapter is allowed only as a temporary fallback if Goal 8A proves real
-  NeMo cannot be safely wired before submission.
-- If fallback is required, docs and UI must state that real NeMo was targeted, what blocked it,
-  what adapter is used instead, what remains to wire real NeMo later, and that real NeMo is not
-  active.
-- The local policy engine remains active until Goal 8 safely wires a verified guardrail adapter.
-- ScaleX must not claim real NeMo Guardrails or real NemoClaw until installed, wired, tested, and documented.
+- Goal 8A preflight is complete; local NeMo availability was verified outside the repo.
+- Goal 8B adds a real-NeMo-ready guardrail adapter boundary with modes `local_policy`,
+  `nemo_guardrails`, and `nemo_compatible`.
+- `nemo_guardrails` must verify real NeMo at runtime through `SCALEX_NEMO_PYTHON` and fail closed
+  if selected but unavailable, broken, or misconfigured.
+- The main backend process must not import `nemoguardrails`; real NeMo probing uses the configured
+  external Python subprocess.
+- The local policy engine remains the deterministic business-rule gate for Judge Demo Mode and
+  tests, including spend, margin, vendor, and payment-before-spend decisions.
+- ScaleX must not claim real NeMo Guardrails is active unless runtime verification passes.
+- ScaleX must not claim real NemoClaw integration.
 - No secrets are committed.
 - Hosted judge demo mode must not expose secrets to the browser.
 - Local full-proof mode may use ignored `.env` values for real isolated Hermes and Stripe test mode.

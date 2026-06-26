@@ -5,12 +5,12 @@ Last updated: 2026-06-26
 ## Verified Current State
 
 - Project folder exists at `/home/ascabrya/dev/scalex-demo`.
-- Latest committed baseline before Open Source Checkout Cleanup: `cb4bcdc Document Connection Hub and Full Proof demo plan`.
-- Last completed goal: Goal 7.13A - Connection Hub / MCP Architecture Docs with ClientOps Concept Lock, Full Proof Real-Tool Demo Plan, and Real NeMo Requirement.
+- Latest committed baseline before Goal 8B: `041751f Improve open-source checkout readiness`.
+- Last completed goal: Goal 8B - Real-NeMo-Ready Guardrail Adapter + Schema/API.
 - Last completed implementation/QA goal: Goal 7.12 - Make Start Run a Real Product Execution.
-- Last completed documentation/tracking update: Goal 7.13A - Connection Hub / MCP Architecture Docs and Real NeMo Requirement.
+- Last completed documentation/tracking update: Goal 8B - Real-NeMo-Ready Guardrail Adapter + Schema/API.
 - Last completed checkout cleanup: Open Source Checkout Cleanup for judge readiness.
-- Current priority: Goal 8A - NeMo Guardrails Preflight / Architecture Audit.
+- Current priority: Goal 8C - Guardrail Execution Rails in Run Lifecycle.
 - Goal 7.11B replaced the legacy Harbor sample with Northstar Dental Group / Client Implementation Launch.
 - Goal 7.11C-followup replaced the remaining generated dashboard/card shell with a ClientOps
   operation-file workspace across Dashboard, Function Studio, Onboarding, Client Operations,
@@ -24,7 +24,11 @@ Last updated: 2026-06-26
 - Open Source Checkout Cleanup made Judge Demo Mode the safe `.env.example` default, taught
   `scripts/dev.sh` to load `.env` quietly when present, added checkout run/test commands to
   START_HERE, and clarified README/demo/submission checkout language.
-- Goal 8A - NeMo Guardrails Preflight / Architecture Audit remains intact and planned after Goal 7.13A.
+- Goal 8A preflight is complete. Real NeMo is installed locally outside the repo at
+  `/home/ascabrya/.venvs/scalex-nemo/bin/python` and imports `nemoguardrails`, `LLMRails`, and
+  `RailsConfig`; observed version is 0.21.0.
+- Goal 8B added the guardrail adapter boundary, optional real-NeMo runtime probing, SQLite
+  guardrail evaluation persistence, API/UI proof fields, and setup/check scripts.
 - Goal 9 remains final polish and submission assets.
 - Goal 7B remains future Verified Live Mode hardening.
 
@@ -52,7 +56,11 @@ a governed AI operations layer that can run those functions safely.
 - Stripe provides finance proof through test invoice/payment state.
 - ScaleX executes and enforces business rules.
 - Local policy is active now for spend, margin, vendor, and payment-before-spend enforcement.
-- Real NVIDIA NeMo Guardrails is the Goal 8 target and is not wired yet.
+- Guardrail mode defaults to `local_policy`; Judge Demo Mode remains deterministic, secret-free,
+  and independent of NeMo.
+- Optional `nemo_guardrails` mode probes a configured external Python runtime through
+  `SCALEX_NEMO_PYTHON` and fails closed if selected but unavailable, broken, or misconfigured.
+- Optional `nemo_compatible` mode is a labeled fallback only and does not set `used_real_nemo=true`.
 - SQLite records evidence.
 - Profit Outcome reports protected profit and blocked risk.
 - MCP is documented as a future access pattern only. ScaleX does not currently expose an MCP
@@ -96,6 +104,41 @@ Functional product surfaces remain:
 - real Stripe test-mode invoice path when configured with `sk_test_...`
 - deterministic test-double paths for tests/CI/diagnostics only
 - local policy engine for current guardrail enforcement
+- guardrail adapter modes: `local_policy`, `nemo_guardrails`, and `nemo_compatible`
+- `guardrail_evaluations` SQLite records for input, planning, execution, and output rail proof
+- API/UI proof fields for guardrail mode, adapter status, `used_real_nemo`, `fail_closed`,
+  evaluation stages, and local policy active status
+
+## Verified For Goal 8B
+
+- Added guardrail config with default `SCALEX_GUARDRAIL_MODE=local_policy`.
+- Added optional real NeMo runtime settings:
+  - `SCALEX_NEMO_PYTHON`
+  - `SCALEX_NEMO_CONFIG_PATH=./guardrails/scalex`
+  - `GUARDRAILS_FAIL_CLOSED=true`
+  - `GUARDRAILS_RECORD_EVALUATIONS=true`
+- Added `backend/app/services/guardrails_service.py` with a subprocess-only NeMo probe. The main
+  Python 3.14 backend does not import `nemoguardrails`.
+- Added a credential-free `guardrails/scalex` config that `RailsConfig.from_path` can load.
+- Added `guardrail_evaluations` to `data/schema.sql`, repository helpers, state service output,
+  and table counts.
+- Added guardrail evaluations to the run lifecycle for input, planning, execution, and output
+  stages without changing the 19-step orchestration call sequence.
+- Preserved local policy as the active deterministic business-rule gate for payment-before-spend,
+  vendor allow/block lists, the $1,150 setup spend cap, 50% margin floor, human approval threshold,
+  and blocked Unapproved Data Broker Enrichment behavior.
+- Added frontend proof in Dashboard, Function Studio, Evidence Ledger, Integrations, Settings,
+  workflow audit counts, and the policy/guardrail inspector.
+- Added `requirements-nemo.txt`, `scripts/setup-nemo.sh`, and `scripts/check-nemo.sh`.
+- `scripts/check-nemo.sh` passed against `/home/ascabrya/.venvs/scalex-nemo/bin/python`, reported
+  NeMo 0.21.0, imported `LLMRails` and `RailsConfig`, and loaded `guardrails/scalex`.
+- A `/tmp` smoke run with `SCALEX_GUARDRAIL_MODE=nemo_guardrails` and
+  `SCALEX_NEMO_PYTHON=/home/ascabrya/.venvs/scalex-nemo/bin/python` completed with
+  `adapter_status=runtime_verified`, `used_real_nemo=true`, `fail_closed=false`, four guardrail
+  evaluations, and Stripe still in `test_double` mode.
+- Judge Demo Mode still works without secrets and with `used_real_nemo=false`.
+- No live Stripe keys, live money, Hermes production calls, production data, `.env` edits,
+  SQLite `.db` files, data backups, secrets, or local venv files were added.
 
 ## Verified For Open Source Checkout Cleanup
 
@@ -365,13 +408,13 @@ Research-to-Report, Ops Handoff, and Renewal Recommendation.
 
 ## Incomplete Items
 
-- Goal 8A read-only NeMo Guardrails preflight has not run yet; it must determine the safest
-  practical path to wire real NVIDIA NeMo Guardrails.
+- Goal 8C Guardrail Execution Rails has not run yet.
 - Full Proof local validation with real isolated Hermes plus real Stripe test mode has not been
   run after this docs update.
 - Goal 7.13B Connection Hub UI has not been implemented yet.
 - Goal 7.13C MCP Server Prototype has not been implemented yet.
-- Real NVIDIA NeMo Guardrails is not wired yet.
+- Real NeMo is not active by default; it is available only through optional `nemo_guardrails` mode
+  after runtime verification.
 - Verified Live Mode live-money execution is not implemented.
 - License has not been selected; no `LICENSE` file exists yet.
 - Final demo recording and final submission assets are not complete.
@@ -386,7 +429,7 @@ Research-to-Report, Ops Handoff, and Renewal Recommendation.
 
 ## Current Priority
 
-Goal 8A - NeMo Guardrails Preflight / Architecture Audit.
+Goal 8C - Guardrail Execution Rails in Run Lifecycle.
 
-Goal 7.13A is complete as a docs-only Connection Hub / MCP architecture update with the real NeMo
-Guardrails requirement documented. Goal 8A remains next and should stay read-only.
+Goal 8B is complete. Next work should deepen guardrail execution rails while preserving Judge Demo
+Mode as `local_policy` and `used_real_nemo=false` by default.

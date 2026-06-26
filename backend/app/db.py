@@ -13,6 +13,7 @@ TABLE_NAMES = (
     "orchestration_calls",
     "ledger_entries",
     "policy_checks",
+    "guardrail_evaluations",
     "stripe_events",
     "agent_outputs",
     "reports",

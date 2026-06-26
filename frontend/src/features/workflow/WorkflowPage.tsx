@@ -75,6 +75,7 @@ export function WorkflowPage({
     progressIndex: Math.min(playbackIndex, WORKFLOW_NODE_ORDER.length - 1),
     state,
   });
+  const guardrailLabel = state?.execution.guardrail_label ?? "Local policy active";
 
   return (
     <section className="min-h-screen bg-stone-100 text-zinc-950">
@@ -85,6 +86,7 @@ export function WorkflowPage({
             busyAction={busyAction}
             displayCustomer={displayCustomer}
             displayJob={displayJob}
+            guardrailLabel={guardrailLabel}
             isBusy={isBusy}
             money={money}
             runCompletedMoment={runCompletedMoment}
@@ -125,7 +127,7 @@ export function WorkflowPage({
           ) : null}
 
           <div className="grid gap-5 xl:grid-cols-[19rem_minmax(0,1fr)_24rem]">
-            <OperationBrief activeWorkflow={activeWorkflow} displayCustomer={displayCustomer} displayJob={displayJob} money={money} />
+            <OperationBrief activeWorkflow={activeWorkflow} displayCustomer={displayCustomer} displayJob={displayJob} guardrailLabel={guardrailLabel} money={money} />
             <div className="min-w-0">
               <WorkflowCanvas
                 model={model}
@@ -158,6 +160,7 @@ function WorkflowHeader({
   busyAction,
   displayCustomer,
   displayJob,
+  guardrailLabel,
   isBusy,
   money,
   runCompletedMoment,
@@ -171,6 +174,7 @@ function WorkflowHeader({
   busyAction: BusyAction;
   displayCustomer: string;
   displayJob: string;
+  guardrailLabel: string;
   isBusy: boolean;
   money: MoneySnapshot;
   runCompletedMoment: boolean;
@@ -193,7 +197,7 @@ function WorkflowHeader({
           <p className="mt-2 max-w-4xl text-base leading-7 text-zinc-600">
             Launch and inspect the {displayJob} function for {displayCustomer}.
           </p>
-          <StudioFactStrip displayCustomer={displayCustomer} displayJob={displayJob} money={money} runStatus={runStatus} />
+          <StudioFactStrip displayCustomer={displayCustomer} displayJob={displayJob} guardrailLabel={guardrailLabel} money={money} runStatus={runStatus} />
           {busyAction === "run" || runCompletedMoment ? (
             <div className={`mt-4 border p-3 text-sm ${
               busyAction === "run"
@@ -243,11 +247,13 @@ function WorkflowHeader({
 function StudioFactStrip({
   displayCustomer,
   displayJob,
+  guardrailLabel,
   money,
   runStatus,
 }: {
   displayCustomer: string;
   displayJob: string;
+  guardrailLabel: string;
   money: MoneySnapshot;
   runStatus: string;
 }) {
@@ -256,7 +262,7 @@ function StudioFactStrip({
     { label: "Function", value: displayJob },
     { label: "Revenue", value: formatOptionalCurrency(money.revenueCents) },
     { label: "Protected profit", value: formatOptionalCurrency(money.grossProfitCents) },
-    { label: "Guardrails", value: "Local policy active" },
+    { label: "Guardrails", value: guardrailLabel },
     { label: "Run", value: runStatus },
   ];
 
@@ -276,11 +282,13 @@ function OperationBrief({
   activeWorkflow,
   displayCustomer,
   displayJob,
+  guardrailLabel,
   money,
 }: {
   activeWorkflow: WorkflowConfig | null;
   displayCustomer: string;
   displayJob: string;
+  guardrailLabel: string;
   money: MoneySnapshot;
 }) {
   return (
@@ -290,7 +298,7 @@ function OperationBrief({
       <p className="mt-2 text-sm leading-6 text-zinc-600">{displayCustomer}</p>
       <div className="mt-5 space-y-3 text-sm">
         <BriefRow icon={Building2} label="Launch file" value={activeWorkflow ? "Selected" : "Needs selection"} />
-        <BriefRow icon={ShieldCheck} label="Guardrails" value="Local policy active" />
+        <BriefRow icon={ShieldCheck} label="Guardrails" value={guardrailLabel} />
         <BriefRow icon={BookOpenCheck} label="Evidence" value="SQLite ledger" />
         <BriefRow icon={TrendingUp} label="Margin" value={formatOptionalPercent(money.marginPercent)} />
       </div>
