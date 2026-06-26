@@ -2,12 +2,12 @@
 
 ## Current Priority
 
-Goal 8C - Guardrail Execution Rails in Run Lifecycle.
+Goal 7.13B - Connection Hub UI.
 
-Goal 7.14B Full Proof local validation passed after Goal 8B. The repo now has a guardrail adapter
-boundary, optional real-NeMo runtime probing, guardrail evaluation persistence, UI/API proof
-fields, and verified Full Proof evidence from a local-only configured environment. Goal 8C should
-deepen the runtime rail execution around protected actions.
+Goal 8C is complete. The repo now has guardrail rail decisions persisted around input, planning,
+protected execution actions, and output honesty, while preserving Judge Demo Mode and Full Proof
+compatibility. The next recommended product goal is Goal 7.13B - Connection Hub UI, unless a later
+guardrail review finds a blocker.
 
 ## Goal 7.11A Gate Result
 
@@ -58,19 +58,20 @@ the sample implementation pass.
 
 ## Next Recommended Goal
 
-Run Codex `/goal` 8C:
+Run Codex `/goal` 7.13B:
 
-- Add stronger pre-action guardrail checks around onboarding/input, Hermes plan/tool sequence,
-  Stripe finance action requests, spend approval/block decisions, agent deliverables, and final
-  report generation.
-- Keep `local_policy` as Judge Demo Mode default and the deterministic business-rule gate.
-- In `nemo_guardrails` mode, keep using `SCALEX_NEMO_PYTHON` subprocess probing and fail closed
-  when real NeMo is unavailable, broken, or misconfigured.
-- Keep `nemo_compatible` clearly labeled as a fallback and never set `used_real_nemo=true`.
-- Preserve the current Northstar economics and Start Run behavior.
-- Preserve Goal 7.14B Full Proof truthfulness: real isolated Hermes only when actually run, real
-  Stripe test mode only with `stripe_mode=stripe_test` and `livemode=false`, unpaid invoices not
-  represented as paid, real NeMo only after runtime verification, and local policy still active.
+- Build the Connection Hub UI as a ScaleX ClientOps product layer, not a generic connector
+  marketplace or MCP dashboard.
+- Show active systems and planned systems with truthful statuses: Hermes Planning, Stripe Finance
+  Proof, Local Policy, Guardrail Adapter, SQLite Evidence Ledger, Prototype Auth, and planned
+  Slack/Email, CRM, Docs/Notion, Calendar, MCP, and future NeMo proof surfaces as appropriate.
+- Surface connector mode, allowed actions, blocked actions, missing config, evidence duties, and
+  current run proof without claiming unsupported integrations.
+- Reuse Goal 8C guardrail evidence so Connection Hub can show rails, decisions, adapter status,
+  `used_real_nemo`, `fail_closed`, and blocked-spend ledger-row proof.
+- Preserve Judge Demo Mode determinism and Full Proof compatibility.
+- Do not implement an MCP server, live-money Stripe path, production Hermes access, production
+  connector calls, or real client data.
 
 Real NeMo is available locally outside the repo at `/home/ascabrya/.venvs/scalex-nemo/bin/python`
 and `scripts/check-nemo.sh` verifies NeMo 0.21.0 plus `RailsConfig.from_path` for
@@ -78,15 +79,48 @@ and `scripts/check-nemo.sh` verifies NeMo 0.21.0 plus `RailsConfig.from_path` fo
 
 Recommended sequence:
 
-1. Goal 8C - Guardrail Execution Rails in Run Lifecycle.
-2. Goal 8D - Guardrail Proof UI in Workflow Canvas.
-3. Goal 7.13B - Connection Hub UI after guardrail hardening unless explicitly reordered.
-4. Goal 7.13C - MCP Server Prototype if time allows and the guardrail/tool boundary is clear.
-5. Goal 8E - Enterprise Function Template Positioning + Recording Proof.
-6. Goal 9 - final recording/submission polish.
+1. Goal 7.13B - Connection Hub UI.
+2. Goal 8D - Guardrail Proof UI in Workflow Canvas, if the Connection Hub pass exposes a remaining
+   workflow-canvas proof gap.
+3. Goal 7.13C - MCP Server Prototype if time allows and the guardrail/tool boundary is clear.
+4. Goal 8E - Enterprise Function Template Positioning + Recording Proof.
+5. Goal 9 - final recording/submission polish.
+6. Goal 7B / Production Hardening - Verified Live Mode for future live-money payments.
 
 Goal 7.14B Full Proof local validation is complete. Rerun it only before final recording or after
 changes that touch Hermes, Stripe, NeMo, policy, guardrail, ledger, or run-proof behavior.
+
+## Goal 8C Gate Result
+
+Goal 8C - Guardrail Execution Rails in Run Lifecycle is complete.
+
+Completed:
+
+- Strengthened input rail validation for selected operation economics, synthetic/local boundary,
+  vendor safety, unsafe real data/email/live-money intent, and PHI/patient-data handling.
+- Strengthened planning rail validation for deterministic or Hermes plan JSON, expected tool
+  sequence, policy bypass, live-money intent, real client email, unsafe data, and unauthorized
+  connector/MCP intent.
+- Added execution rail pre-action guardrail evaluations before Stripe/test-double finance proof,
+  revenue ledger marking, each spend policy check, each approved spend ledger row, and final
+  blocked-spend consistency review.
+- Split run spend execution so blocked spend records policy/evidence but never creates a spend
+  ledger row, while approved spend writes the ledger row only after execution rail preflight.
+- Strengthened output rail validation for paid-state honesty, final report math, protected
+  profit/margin consistency, and unsafe output terms.
+- Updated API/UI proof to show rail stage, decision, source/mode, adapter status,
+  `used_real_nemo`, `fail_closed`, and blocked-spend ledger-row proof.
+
+Verified:
+
+- Focused backend guardrail/runner tests passed with 34 tests.
+- `./scripts/test.sh` passed with 61 backend tests and a successful frontend build.
+- `./scripts/check-nemo.sh` passed with real NeMo runtime available and `guardrails/scalex`
+  loaded.
+- Full Proof was not rerun.
+
+Suggested commit message:
+Add guardrail execution rails
 
 ## Goal 7.14B Gate Result
 
@@ -281,7 +315,8 @@ the old card-dashboard shell with a ClientOps product workspace.
 
 ## Goal 8 Sequence
 
-Goal 8 is the governed autonomy layer. Goal 8A and Goal 8B are complete; Goal 8C is next.
+Goal 8 is the governed autonomy layer. Goal 8A, Goal 8B, and Goal 8C are complete. Goal 7.13B
+Connection Hub UI is next.
 
 ### Goal 8A - NeMo Guardrails Preflight / Architecture Audit
 
@@ -302,10 +337,12 @@ Goal 8 is the governed autonomy layer. Goal 8A and Goal 8B are complete; Goal 8C
 
 ### Goal 8C - Guardrail Execution Rails in Run Lifecycle
 
-- Add pre-action guardrail checks around onboarding/input, Hermes plan/tool sequence, Stripe
-  finance action request, spend approval/block, agent deliverables, and final report.
-- Map checks to NeMo-style input, planning/dialog, execution, and output rails.
-- Fail closed on guardrail errors in product mode.
+- Complete. Added pre-action guardrail checks around input, Hermes/deterministic plan sequence,
+  Stripe finance requests, revenue and spend ledger actions, blocked-spend consistency, and final
+  report honesty.
+- Persisted NeMo-style input, planning, execution, and output rail decisions as `allow`, `warn`,
+  `block`, or `fail_closed`.
+- Preserved Judge Demo Mode and Full Proof compatibility.
 
 ### Goal 8D - Guardrail Proof UI in Workflow Canvas
 

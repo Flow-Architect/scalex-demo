@@ -494,7 +494,7 @@ def test_demo_run_records_planning_and_orchestration_calls(tmp_path, monkeypatch
     assert all(call["status"] in {"complete", "completed"} for call in calls)
 
 
-def test_policy_enforcement_is_independent_of_hermes_output(tmp_path, monkeypatch) -> None:
+def test_planning_guardrail_blocks_unsafe_hermes_output_before_finance_or_spend(tmp_path, monkeypatch) -> None:
     monkeypatch.setenv("DATABASE_PATH", str(tmp_path / "scalex.db"))
     monkeypatch.setattr(
         "app.demo_runner.generate_operating_plan",
@@ -504,12 +504,15 @@ def test_policy_enforcement_is_independent_of_hermes_output(tmp_path, monkeypatc
     response = _call_post_demo_run_route()
     state = response["state"]
 
-    _assert_complete_demo_state(state)
-    blocked_check = state["policy_checks"][-1]
-    assert blocked_check["vendor"] == "Unapproved Data Broker Enrichment"
-    assert blocked_check["approved"] == 0
-    assert state["ledger"]["totals"]["approved_spend_cents"] == 115000
-    assert state["ledger"]["totals"]["blocked_spend_cents"] == 320000
+    assert response["status"] == "guardrail_failed"
+    assert response["decision"]["stage"] == "planning"
+    assert response["decision"]["decision"] == "block"
+    assert state["job"]["status"] == "guardrail_error"
+    assert state["stripe_events"] == []
+    assert state["ledger"]["entries"] == []
+    assert state["policy_checks"] == []
+    assert [evaluation["stage"] for evaluation in state["guardrail_evaluations"]] == ["input", "planning"]
+    assert state["guardrail_evaluations"][-1]["status"] == "block"
 
 
 def test_product_mode_stripe_failure_is_visible_and_not_test_double(tmp_path, monkeypatch) -> None:
@@ -532,6 +535,9 @@ def test_product_mode_stripe_failure_is_visible_and_not_test_double(tmp_path, mo
     assert state["ledger"]["entries"] == []
     assert state["orchestration_calls"][-1]["tool_name"] == "stripe.create_customer"
     assert state["orchestration_calls"][-1]["status"] == "failed"
+    assert {"input", "planning", "execution"}.issubset(
+        {evaluation["stage"] for evaluation in state["guardrail_evaluations"]}
+    )
 
 
 def _assert_complete_demo_state(state: dict) -> None:
@@ -569,6 +575,7 @@ def _assert_complete_demo_state(state: dict) -> None:
     ledger_entries = state["ledger"]["entries"]
     assert [entry["entry_type"] for entry in ledger_entries] == ["revenue", "spend", "spend", "spend"]
     assert [entry["amount_cents"] for entry in ledger_entries] == [850000, 35000, 50000, 30000]
+    assert "Unapproved Data Broker Enrichment" not in {entry["label"] for entry in ledger_entries}
 
     totals = state["ledger"]["totals"]
     assert totals["revenue_cents"] == 850000
@@ -586,6 +593,10 @@ def _assert_complete_demo_state(state: dict) -> None:
     ]
     assert [check["approved"] for check in policy_checks] == [1, 1, 1, 0]
     assert [check["requested_amount_cents"] for check in policy_checks] == [35000, 50000, 30000, 320000]
+    assert not any(
+        entry["entry_type"] == "spend" and entry["label"] == policy_checks[-1]["vendor"]
+        for entry in ledger_entries
+    )
 
     agent_outputs = state["agent_outputs"]
     assert [output["agent_name"] for output in agent_outputs] == ["Finance", "Marketing", "Research", "Ops"]

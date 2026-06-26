@@ -259,23 +259,24 @@ Completed baseline:
 - Goal 8A - NeMo Guardrails Preflight / Architecture Audit
 - Goal 8B - Real-NeMo-Ready Guardrail Adapter + Schema/API
 - Goal 7.14B - Full Proof Local Validation With Configured Real Tools
+- Goal 8C - Guardrail Execution Rails in Run Lifecycle
 
 Suggested next sequence:
 
-1. Goal 8C - Guardrail Execution Rails in Run Lifecycle.
-2. Goal 8D - Guardrail Proof UI in Workflow Canvas.
-3. Goal 7.13B - Connection Hub UI after guardrail hardening unless explicitly reordered.
-4. Goal 7.13C - MCP Server Prototype if time allows and the guardrail/tool boundary is clear.
-5. Goal 8E - Enterprise Function Template Positioning + Recording Proof.
-6. Goal 9 - Final polish and submission assets.
-7. Goal 7B / Production Hardening - Verified Live Mode for future live-money payments.
+1. Goal 7.13B - Connection Hub UI.
+2. Goal 8D - Guardrail Proof UI in Workflow Canvas, if the Connection Hub pass exposes a remaining
+   workflow-canvas proof gap.
+3. Goal 7.13C - MCP Server Prototype if time allows and the guardrail/tool boundary is clear.
+4. Goal 8E - Enterprise Function Template Positioning + Recording Proof.
+5. Goal 9 - Final polish and submission assets.
+6. Goal 7B / Production Hardening - Verified Live Mode for future live-money payments.
 
 Goal 7.14B Full Proof local validation passed in a local-only configured environment. It verified
 real isolated Hermes, real Stripe test-mode invoice proof, real NeMo runtime verification, local
 policy as the business-rule gate, unpaid Stripe honesty, and synthetic Northstar data only. Rerun
 Full Proof validation only before final recording or after relevant integration changes.
 
-Goal 8A, Goal 9, and Goal 7B remain intact. Goal 7.13A was a docs-only architecture and handoff
+Goal 9 and Goal 7B remain intact. Goal 7.13A was a docs-only architecture and handoff
 update. It does not implement an MCP server, frontend UI, backend behavior, Stripe live-money
 support, production Hermes, production data, or real client workflows.
 
@@ -537,7 +538,8 @@ Final demo language:
 
 ## Goal 8 - Governed Autonomy Layer With NVIDIA NeMo Guardrails
 
-Goal 8A and Goal 8B are complete. Goal 8C is next.
+Goal 8A, Goal 8B, and Goal 8C are complete. Goal 7.13B Connection Hub UI is next unless a later
+guardrail review finds a hardening blocker.
 
 Stack identity for Goal 8:
 
@@ -584,14 +586,12 @@ for deterministic business-rule enforcement.
 
 ### Goal 8C - Guardrail Execution Rails in Run Lifecycle
 
-- Add pre-action guardrail checks around intake, Hermes plan/tool sequence, Stripe finance action
-  requests, spend approval/block, agent deliverables, and final report.
-- Map checks to NeMo-style rails:
-  - input rail
-  - planning/dialog rail
-  - execution rail
-  - output rail
-- Fail closed on guardrail errors in product mode.
+- Complete. Added input, planning, execution, and output rail checks around selected operation
+  intake, Hermes/deterministic plan JSON, Stripe/test-double finance requests, revenue and spend
+  ledger actions, blocked-spend consistency, and final report paid-state honesty.
+- Guardrail decisions are persisted as `allow`, `warn`, `block`, or `fail_closed`.
+- Blocked spend still records policy/evidence and does not create a spend ledger row.
+- Judge Demo Mode remains deterministic and Full Proof compatibility remains intact.
 
 ### Goal 8D - Guardrail Proof UI in Workflow Canvas
 
@@ -660,10 +660,10 @@ ScaleX is ready for the current Northstar sample state when:
 - Docs and app select Northstar Dental Group / Client Implementation Launch as the implemented template.
 - Docs preserve Harbor only as historical previous sample context.
 - Docs preserve local policy active now / optional real NeMo only after runtime verification.
-- Goal 8C remains next.
+- Goal 7.13B Connection Hub UI remains next.
 - Goal 9 remains intact.
 - Goal 7B remains intact.
-- Goal 8B adapter implementation is done; Goal 8C execution rails remain next.
+- Goal 8B adapter implementation and Goal 8C execution rails are done.
 - Goal 7.14B Full Proof local validation passed with real isolated Hermes, Stripe test mode,
   real NeMo runtime verification, local policy active, and unpaid Stripe honesty preserved.
 - No secrets are added.

@@ -9,6 +9,7 @@ from __future__ import annotations
 
 from pathlib import Path
 import json
+import re
 import sqlite3
 import subprocess
 from typing import Any
@@ -47,6 +48,38 @@ RAIL_DEFINITIONS: dict[str, dict[str, str]] = {
 }
 
 RAIL_STAGE_ORDER = ("input", "planning", "execution", "output")
+STOP_DECISIONS = {"block", "fail_closed"}
+
+_EMAIL_RE = re.compile(r"\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b", re.IGNORECASE)
+
+_UNSAFE_CONTEXT_PATTERNS: tuple[tuple[str, str], ...] = (
+    ("live-money intent", r"\b(sk_live|live money|live charge|live payment|real charge|production payment|live stripe)\b"),
+    ("real client data", r"\b(real client data|production client data|real customer data|production customer data)\b"),
+    (
+        "patient data or PHI handling",
+        r"\b(include|use|upload|send|process|handle|extract|email|share|import|export|collect)\s+"
+        r"(?:\w+\s+){0,5}(patient data|patient record|patient name|medical record|protected health information|phi)\b",
+    ),
+    ("patient identifier", r"\b(medical record number|patient ssn|patient social security|mrn)\b"),
+    (
+        "policy bypass intent",
+        r"\b(bypass|override|ignore|skip|disable)\s+(?:\w+\s+){0,5}(policy|guardrail|spend cap|margin floor|approval)\b",
+    ),
+    ("policy bypass intent", r"\bapprove\s+(all|every)\s+spend\b"),
+    (
+        "unsafe vendor intent",
+        r"\b(use|approve|pay|authorize|buy)\s+(?:\w+\s+){0,5}(blocked|unapproved|data broker|premium automation suite)\b",
+    ),
+    (
+        "unauthorized connector intent",
+        r"\b(gmail|sendgrid|real email|production email|external connector|mcp server|prometheus|recall|openclaw)\b",
+    ),
+)
+
+_OUTPUT_HEALTH_TERMS = re.compile(
+    r"\b(patient data|patient record|patient name|medical record|protected health information|phi|hipaa)\b",
+    re.IGNORECASE,
+)
 
 _NEMO_PROBE_SCRIPT = r"""
 from pathlib import Path
@@ -120,7 +153,7 @@ def evaluate_and_record_guardrail_stage(
         connection.commit()
         result["evaluation"] = evaluation
 
-    if result["fail_closed"]:
+    if result["decision"] in STOP_DECISIONS:
         raise GuardrailIntegrationError(result)
     return result
 
@@ -140,11 +173,12 @@ def evaluate_guardrail_stage(
         return _evaluate_nemo_guardrails_stage(stage, payload, settings)
     if mode == "nemo_compatible":
         validation = _run_stage_validators(stage, payload, settings)
+        decision = _decision_for_validation(validation)
         return _result(
             settings=settings,
             stage=stage,
             adapter="nemo_compatible",
-            status="warning" if validation["failures"] else "passed",
+            status=decision,
             used_real_nemo=False,
             fail_closed=False,
             label="NeMo-compatible fallback (not real NeMo)",
@@ -161,11 +195,12 @@ def evaluate_guardrail_stage(
         )
 
     validation = _run_stage_validators(stage, payload, settings)
+    decision = _decision_for_validation(validation)
     return _result(
         settings=settings,
         stage=stage,
         adapter="local_policy",
-        status="warning" if validation["failures"] else "passed",
+        status=decision,
         used_real_nemo=False,
         fail_closed=False,
         label="Local policy guardrail evidence",
@@ -295,6 +330,9 @@ def guardrail_summary(
                 "label": RAIL_DEFINITIONS[stage]["label"],
                 "purpose": RAIL_DEFINITIONS[stage]["purpose"],
                 "status": latest.get("status") if latest else "pending",
+                "decision": latest.get("status") if latest else "pending",
+                "mode": latest.get("mode") if latest else settings.guardrail_mode,
+                "adapter": latest.get("adapter") if latest else _adapter_name(settings.guardrail_mode),
                 "used_real_nemo": bool(latest.get("used_real_nemo")) if latest else False,
                 "fail_closed": bool(latest.get("fail_closed")) if latest else False,
                 "summary": latest.get("summary") if latest else "Evaluation pending.",
@@ -303,20 +341,22 @@ def guardrail_summary(
         )
 
     adapter_status = _adapter_status(settings.guardrail_mode, evaluations, used_real_nemo, fail_closed)
+    blocked = any(item.get("status") == "block" for item in evaluations)
     return {
         "mode": settings.guardrail_mode,
         "adapter": _adapter_name(settings.guardrail_mode),
         "adapter_status": adapter_status,
-        "status": "fail_closed" if fail_closed else "active" if evaluations else "pending",
+        "status": "fail_closed" if fail_closed else "blocked" if blocked else "active" if evaluations else "pending",
         "used_real_nemo": used_real_nemo,
         "fail_closed": fail_closed,
+        "blocked": blocked,
         "local_policy_active": True,
         "record_evaluations": settings.guardrails_record_evaluations,
         "evaluation_stages": stage_summaries,
         "nemo_python_configured": bool(settings.nemo_python_path.strip()),
         "nemo_config_path": settings.nemo_config_path,
         "latest_error": latest_error,
-        "truthfulness_note": _truthfulness_note(settings.guardrail_mode, used_real_nemo, fail_closed),
+        "truthfulness_note": _truthfulness_note(settings.guardrail_mode, used_real_nemo, fail_closed, blocked),
     }
 
 
@@ -331,7 +371,7 @@ def _evaluate_nemo_guardrails_stage(
             settings=settings,
             stage=stage,
             adapter="nemo_guardrails",
-            status="failed",
+            status="fail_closed",
             used_real_nemo=False,
             fail_closed=True,
             label="Real NeMo Guardrails unavailable - fail closed",
@@ -348,13 +388,15 @@ def _evaluate_nemo_guardrails_stage(
 
     validation = _run_stage_validators(stage, payload, settings)
     failed = bool(validation["failures"])
+    fail_closed = failed and settings.guardrails_fail_closed
+    decision = "fail_closed" if fail_closed else _decision_for_validation(validation)
     return _result(
         settings=settings,
         stage=stage,
         adapter="nemo_guardrails",
-        status="failed" if failed else "passed",
+        status=decision,
         used_real_nemo=True,
-        fail_closed=failed and settings.guardrails_fail_closed,
+        fail_closed=fail_closed,
         label="Real NeMo Guardrails runtime verified",
         summary=(
             "Real NeMo Guardrails imports and RailsConfig loaded through SCALEX_NEMO_PYTHON. "
@@ -389,6 +431,14 @@ def _run_stage_validators(
     }
 
 
+def _decision_for_validation(validation: dict[str, Any]) -> str:
+    if validation["failures"]:
+        return "block"
+    if validation["warnings"]:
+        return "warn"
+    return "allow"
+
+
 def _validate_input_stage(
     payload: dict[str, Any],
     _settings: Settings,
@@ -405,15 +455,36 @@ def _validate_input_stage(
         failures.append("Invoice amount must be greater than zero.")
     if spend_cap_cents <= 0:
         failures.append("Spend cap must be greater than zero.")
+    if invoice_amount_cents > 0 and spend_cap_cents >= invoice_amount_cents:
+        failures.append("Spend cap must remain below invoice revenue.")
     if margin_floor < 0 or margin_floor > 95:
         failures.append("Margin floor must be between 0 and 95.")
+    if invoice_amount_cents > 0 and spend_cap_cents > 0:
+        projected_margin = round(((invoice_amount_cents - spend_cap_cents) / invoice_amount_cents) * 100, 1)
+        if projected_margin < margin_floor:
+            failures.append("Configured spend cap would violate the margin floor.")
+    else:
+        projected_margin = 0.0
 
     approved_vendors = seed_config.get("approvedVendors") or []
     blocked_vendors = seed_config.get("blockedVendors") or []
+    approved_spend_total_cents = sum(
+        int(float(item.get("amountUsd") or 0) * 100)
+        for item in seed_config.get("approvedSpendRequests", [])
+    )
+    if spend_cap_cents > 0 and approved_spend_total_cents > spend_cap_cents:
+        failures.append("Approved setup spend requests exceed the configured spend cap.")
     if not approved_vendors:
         warnings.append("No approved vendors were configured for this operation.")
     if not blocked_vendors:
         warnings.append("No blocked vendors were configured for this operation.")
+    unsafe_approved_vendors = [
+        str(vendor)
+        for vendor in approved_vendors
+        if re.search(r"\b(data broker|premium automation suite|live money|sk_live)\b", str(vendor), re.IGNORECASE)
+    ]
+    if unsafe_approved_vendors:
+        failures.append("Approved vendor list contains unsafe vendor intent: " + ", ".join(unsafe_approved_vendors))
 
     text = " ".join(
         str(value)
@@ -425,27 +496,37 @@ def _validate_input_stage(
         ]
         if value
     ).lower()
-    forbidden_terms = [
-        "sk_live",
-        "live money",
-        "live charge",
-        "real client data",
-        "production customer",
-        "patient record",
-        "patient name",
-        "medical record",
-        "social security",
-    ]
-    matched_terms = [term for term in forbidden_terms if term in text]
+    seed_text = _flatten_text(seed_config).lower()
+    matched_terms = _unsafe_boundary_matches(f"{text} {seed_text}")
     if matched_terms:
         failures.append("Input contains unsafe boundary terms: " + ", ".join(matched_terms))
+    if "synthetic" not in text and "sample" not in text and "local" not in text:
+        warnings.append("Operation does not explicitly state its synthetic/local sample boundary.")
+
+    expected_job_fields = {
+        "client_name": "clientName",
+        "business_type": "businessType",
+        "job_name": "jobName",
+        "job_goal": "jobGoal",
+    }
+    mismatched_fields = [
+        job_key
+        for job_key, seed_key in expected_job_fields.items()
+        if seed_config.get(seed_key) and str(job.get(job_key) or "") != str(seed_config.get(seed_key))
+    ]
+    if mismatched_fields:
+        failures.append("Selected operation does not match seed config fields: " + ", ".join(mismatched_fields))
 
     return failures, warnings, {
         "invoice_amount_cents": invoice_amount_cents,
         "spend_cap_cents": spend_cap_cents,
         "margin_floor_percent": margin_floor,
+        "projected_margin_at_spend_cap_percent": projected_margin,
+        "approved_spend_request_total_cents": approved_spend_total_cents,
         "approved_vendor_count": len(approved_vendors),
         "blocked_vendor_count": len(blocked_vendors),
+        "unsafe_boundary_matches": matched_terms,
+        "unsafe_approved_vendors": unsafe_approved_vendors,
         "synthetic_boundary": "Northstar synthetic B2B sample; no patient data and no PHI claim.",
     }
 
@@ -462,7 +543,19 @@ def _validate_planning_stage(
     proposed_sequence = []
 
     if planning_result.get("status") != "completed":
-        failures.append(planning_result.get("error") or "Planning did not complete.")
+        warnings.append(planning_result.get("error") or "Planning did not complete.")
+    if planning_result.get("status") != "completed":
+        result_json = None
+
+    if result_json is None:
+        return failures, warnings, {
+            "expected_tool_sequence": expected_sequence,
+            "proposed_tool_sequence": proposed_sequence,
+            "planning_status": planning_result.get("status"),
+            "planning_source": planning_result.get("source"),
+            "unsafe_boundary_matches": [],
+        }
+
     if not isinstance(result_json, dict):
         failures.append("Planning result JSON was not recorded as an object.")
     else:
@@ -474,15 +567,16 @@ def _validate_planning_stage(
             if proposed_sequence != expected_sequence:
                 failures.append("Planning proposed tool sequence does not match the ScaleX allowed sequence.")
 
-        executive_summary = str(result_json.get("executive_summary") or "")
-        if "approve every spend" in executive_summary.lower():
-            failures.append("Planning summary attempted to bypass ScaleX spend policy.")
+        unsafe_matches = _unsafe_boundary_matches(_flatten_text(result_json))
+        if unsafe_matches:
+            failures.append("Planning result contains unsafe boundary terms: " + ", ".join(unsafe_matches))
 
     return failures, warnings, {
         "expected_tool_sequence": expected_sequence,
         "proposed_tool_sequence": proposed_sequence,
         "planning_status": planning_result.get("status"),
         "planning_source": planning_result.get("source"),
+        "unsafe_boundary_matches": unsafe_matches if isinstance(result_json, dict) else [],
     }
 
 
@@ -492,16 +586,73 @@ def _validate_execution_stage(
 ) -> tuple[list[str], list[str], dict[str, Any]]:
     failures: list[str] = []
     warnings: list[str] = []
+    phase = str(payload.get("phase") or "execution")
+    action_requests = payload.get("action_requests") or []
     policy_checks = payload.get("policy_checks") or []
     ledger_entries = payload.get("ledger_entries") or []
     stripe_summary = payload.get("stripe_summary") or {}
+    allowed_tools = set(expected_tool_sequence())
 
     if settings.stripe_live_mode or settings.stripe_live_money_enabled:
         failures.append("Live-money Stripe execution is not allowed in this product path.")
     if stripe_summary.get("livemode") is True:
         failures.append("Stripe returned livemode=true, which is blocked.")
-    if not policy_checks:
+    if phase == "post_execution_consistency" and not policy_checks:
         warnings.append("No policy checks were recorded before execution rail evidence.")
+    if not isinstance(action_requests, list):
+        failures.append("Execution action_requests must be a list.")
+        action_requests = []
+
+    for request in action_requests:
+        if not isinstance(request, dict):
+            failures.append("Execution action request must be an object.")
+            continue
+        tool_name = str(request.get("tool_name") or "")
+        if not tool_name:
+            failures.append("Execution action request did not include a tool_name.")
+            continue
+        if tool_name not in allowed_tools:
+            failures.append(f"Execution requested unauthorized tool: {tool_name}")
+        if _is_unauthorized_connector_tool(tool_name):
+            failures.append(f"Execution requested unauthorized connector/MCP action: {tool_name}")
+        request_text_matches = _unsafe_boundary_matches(_flatten_text(request))
+        if request_text_matches:
+            failures.append(
+                f"Execution request {tool_name} contains unsafe boundary terms: "
+                + ", ".join(request_text_matches)
+            )
+
+        if tool_name.startswith("stripe."):
+            if request.get("livemode") is True:
+                failures.append(f"Stripe action {tool_name} requested livemode=true.")
+            requested_mode = str(request.get("mode") or request.get("provider_mode") or "").lower()
+            if requested_mode in {"live", "stripe_live", "live_money"}:
+                failures.append(f"Stripe action {tool_name} requested live-money mode.")
+            amount_cents = request.get("amount_cents")
+            if amount_cents is not None and _safe_int(amount_cents) <= 0:
+                failures.append(f"Stripe action {tool_name} requested a non-positive amount.")
+
+        if tool_name == "policy.check_spend":
+            amount_cents = _safe_int(request.get("requested_amount_cents"))
+            if amount_cents <= 0:
+                failures.append("Spend policy check requested a non-positive amount.")
+
+        if tool_name == "ledger.record_spend":
+            policy_check = request.get("policy_check") or payload.get("policy_check") or {}
+            if not isinstance(policy_check, dict) or not bool(policy_check.get("approved")):
+                failures.append("Ledger spend row requested without an approved policy check.")
+            else:
+                if request.get("vendor") != policy_check.get("vendor"):
+                    failures.append("Ledger spend request vendor does not match the approved policy check.")
+                if _safe_int(request.get("amount_cents")) != _safe_int(policy_check.get("requested_amount_cents")):
+                    failures.append("Ledger spend request amount does not match the approved policy check.")
+
+        if tool_name == "ledger.record_revenue":
+            amount_cents = _safe_int(request.get("amount_cents"))
+            if amount_cents <= 0:
+                failures.append("Revenue ledger request amount must be greater than zero.")
+            if request.get("stripe_paid_claimed") is True and stripe_summary.get("paid") is not True:
+                failures.append("Revenue ledger request claimed Stripe paid=true while Stripe paid is false.")
 
     spend_ledger_labels = {
         entry.get("label")
@@ -520,6 +671,13 @@ def _validate_execution_stage(
         )
 
     return failures, warnings, {
+        "phase": phase,
+        "action_request_count": len(action_requests),
+        "action_tools": [
+            request.get("tool_name")
+            for request in action_requests
+            if isinstance(request, dict)
+        ],
         "policy_check_count": len(policy_checks),
         "ledger_entry_count": len(ledger_entries),
         "stripe_mode": stripe_summary.get("stripe_mode"),
@@ -553,6 +711,24 @@ def _validate_output_stage(
             failures.append(f"Report {report_key} does not match ledger totals.")
     if float(report.get("margin_percent") or 0) != float(totals.get("actual_margin_percent") or 0):
         failures.append("Report margin does not match ledger totals.")
+    if int(report.get("gross_profit_cents") or 0) != (
+        int(report.get("revenue_cents") or 0) - int(report.get("approved_spend_cents") or 0)
+    ):
+        failures.append("Report protected gross profit math is inconsistent.")
+
+    report_text = _flatten_text(
+        {
+            "recommendation": report.get("recommendation"),
+            "report_markdown": report.get("report_markdown"),
+        }
+    )
+    unsafe_matches = _unsafe_boundary_matches(report_text)
+    if _OUTPUT_HEALTH_TERMS.search(report_text):
+        unsafe_matches.append("patient data or PHI output term")
+    if unsafe_matches:
+        failures.append("Output contains unsafe boundary terms: " + ", ".join(dict.fromkeys(unsafe_matches)))
+    if stripe_summary.get("paid") is not True and _claims_stripe_paid(report_text):
+        failures.append("Output claims Stripe payment even though Stripe paid=false.")
     if stripe_summary.get("paid") is not True:
         warnings.append("Stripe paid=true was not claimed; local revenue confirmation remains separately labeled.")
 
@@ -565,6 +741,8 @@ def _validate_output_stage(
         "blocked_spend_cents": report.get("blocked_spend_cents"),
         "gross_profit_cents": report.get("gross_profit_cents"),
         "margin_percent": report.get("margin_percent"),
+        "unsafe_boundary_matches": unsafe_matches,
+        "paid_state_honesty_checked": True,
     }
 
 
@@ -581,11 +759,20 @@ def _result(
     details: dict[str, Any],
     error: str | None,
 ) -> dict[str, Any]:
+    details = {
+        **details,
+        "decision": status,
+        "mode": settings.guardrail_mode,
+        "adapter": adapter,
+        "used_real_nemo": used_real_nemo,
+        "fail_closed": fail_closed,
+    }
     return {
         "stage": stage,
         "mode": settings.guardrail_mode,
         "adapter": adapter,
         "status": status,
+        "decision": status,
         "used_real_nemo": used_real_nemo,
         "fail_closed": fail_closed,
         "label": label,
@@ -630,6 +817,72 @@ def _safe_probe_details(probe: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+def _flatten_text(value: Any) -> str:
+    if value is None:
+        return ""
+    if isinstance(value, str):
+        return value
+    if isinstance(value, dict):
+        return " ".join(_flatten_text(item) for item in value.values())
+    if isinstance(value, (list, tuple, set)):
+        return " ".join(_flatten_text(item) for item in value)
+    return str(value)
+
+
+def _unsafe_boundary_matches(text: str) -> list[str]:
+    normalized = " ".join(text.split())
+    matches = [
+        label
+        for label, pattern in _UNSAFE_CONTEXT_PATTERNS
+        if re.search(pattern, normalized, re.IGNORECASE)
+    ]
+    if _EMAIL_RE.search(normalized):
+        matches.append("real client email")
+    return list(dict.fromkeys(matches))
+
+
+def _claims_stripe_paid(text: str) -> bool:
+    normalized = " ".join(text.lower().split())
+    honest_negations = (
+        "not marked paid",
+        "not stripe-paid",
+        "not a stripe-paid invoice",
+        "not as a stripe-paid invoice",
+        "paid=false",
+    )
+    if any(phrase in normalized for phrase in honest_negations):
+        return False
+    paid_claim_patterns = (
+        r"\bstripe\s+(test\s+)?invoice\s+(is\s+)?paid\b",
+        r"\bstripe-paid\s+invoice\b",
+        r"\bpaid=true\b",
+        r"\bpayment\s+(complete|completed|succeeded|successful)\b",
+        r"\bcollected\s+by\s+stripe\b",
+    )
+    return any(re.search(pattern, normalized) for pattern in paid_claim_patterns)
+
+
+def _is_unauthorized_connector_tool(tool_name: str) -> bool:
+    lowered = tool_name.lower()
+    return (
+        lowered.startswith("connector.")
+        or lowered.startswith("mcp.")
+        or ".mcp." in lowered
+        or lowered.startswith("email.")
+        or lowered.startswith("gmail.")
+        or lowered.startswith("prometheus.")
+        or lowered.startswith("recall.")
+        or lowered.startswith("openclaw.")
+    )
+
+
+def _safe_int(value: Any) -> int:
+    try:
+        return int(value)
+    except (TypeError, ValueError):
+        return 0
+
+
 def _adapter_name(mode: str) -> str:
     if mode == "nemo_guardrails":
         return "nemo_guardrails"
@@ -646,6 +899,8 @@ def _adapter_status(
 ) -> str:
     if fail_closed:
         return "failed_closed"
+    if any(item.get("status") == "block" for item in evaluations):
+        return "blocked_by_guardrail"
     if mode == "nemo_guardrails":
         if used_real_nemo:
             return "runtime_verified"
@@ -655,9 +910,11 @@ def _adapter_status(
     return "local_policy_active"
 
 
-def _truthfulness_note(mode: str, used_real_nemo: bool, fail_closed: bool) -> str:
+def _truthfulness_note(mode: str, used_real_nemo: bool, fail_closed: bool, blocked: bool) -> str:
     if fail_closed:
         return "Guardrails failed closed before protected actions could continue."
+    if blocked:
+        return "Guardrails blocked unsafe run content before protected actions could continue."
     if mode == "nemo_guardrails" and used_real_nemo:
         return (
             "Real NeMo runtime was verified through the configured Python path for this run. "

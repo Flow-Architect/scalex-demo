@@ -167,6 +167,7 @@ def apply_spend_request(
     requested_amount_cents: int,
     human_approved: bool = False,
     policy_config: dict[str, Any] | None = None,
+    create_ledger_entry: bool = True,
 ) -> dict[str, Any]:
     ledger_entries = repository.list_ledger_entries(connection, job["id"])
     decision = evaluate_spend_request(
@@ -190,14 +191,12 @@ def apply_spend_request(
     )
 
     ledger_entry = None
-    if decision["approved"]:
-        ledger_entry = repository.create_ledger_entry(
+    if decision["approved"] and create_ledger_entry:
+        ledger_entry = record_approved_spend_ledger_entry(
             connection,
-            job_id=job["id"],
-            entry_type="spend",
-            label=vendor,
-            amount_cents=requested_amount_cents,
-            source=policy_engine_name(),
+            job=job,
+            vendor=vendor,
+            requested_amount_cents=requested_amount_cents,
         )
 
     status = "approved" if decision["approved"] else "blocked"
@@ -216,3 +215,21 @@ def apply_spend_request(
         "policy_check": policy_check,
         "ledger_entry": ledger_entry,
     }
+
+
+def record_approved_spend_ledger_entry(
+    connection: sqlite3.Connection,
+    *,
+    job: dict[str, Any],
+    vendor: str,
+    requested_amount_cents: int,
+) -> dict[str, Any]:
+    ledger_entry = repository.create_ledger_entry(
+        connection,
+        job_id=job["id"],
+        entry_type="spend",
+        label=vendor,
+        amount_cents=requested_amount_cents,
+        source=policy_engine_name(),
+    )
+    return ledger_entry

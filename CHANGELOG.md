@@ -10,6 +10,52 @@ Use:
 
 ---
 
+## 2026-06-26 - Goal 8C: Guardrail Execution Rails in Run Lifecycle
+
+Completed:
+- Strengthened guardrail decisions from passive rail records into lifecycle gates with
+  `allow`, `warn`, `block`, and `fail_closed` decisions.
+- Added input rail checks for selected operation economics, synthetic/local boundary, vendor
+  safety, unsafe real-data/email/live-money intent, and PHI/patient-data handling.
+- Added planning rail checks for plan JSON, expected tool sequence, policy bypass, live-money
+  intent, real client email, unsafe data terms, and unauthorized connector/MCP intent.
+- Added execution rail preflights before Stripe/test-double finance proof, revenue ledger marking,
+  each spend policy check, each approved spend ledger row, and final blocked-spend consistency.
+- Split run spend execution so blocked spend records policy/evidence but never creates a spend
+  ledger row; approved spend writes a ledger row only after the execution rail allows it.
+- Added output rail checks for final report math, protected profit/margin consistency, paid-state
+  honesty, no real client email, no PHI/patient data, and no live-money or Stripe-paid claim when
+  Stripe `paid=false`.
+- Updated Evidence Ledger, Integrations, and workflow policy proof UI to show rail/stage,
+  decision, source/mode, adapter status, `used_real_nemo`, `fail_closed`, and blocked-spend
+  ledger-row proof.
+- Preserved Judge Demo Mode as deterministic and secret-free with 19 orchestration calls and the
+  Northstar economics unchanged.
+- Preserved Full Proof compatibility and did not rerun Full Proof or call real Stripe.
+
+Verified:
+- `backend/.venv/bin/python -m pytest backend/tests/test_guardrails_service.py backend/tests/test_demo_runner.py`
+  passed with 34 tests.
+- `./scripts/test.sh` passed with 61 backend tests and a successful frontend build.
+- `./scripts/check-nemo.sh` passed with real NeMo runtime available and `guardrails/scalex`
+  loaded.
+- `git diff --check` passed.
+- Strict added-lines secret scan returned no matches.
+- `git status --short` was reviewed.
+
+Safety:
+- No live Stripe keys, live-money calls, real Stripe API calls, production Hermes calls,
+  production connector calls, real client data, patient data, PHI, `.env` edits, SQLite `.db`
+  files, data backups, CODEX goal logs, or secrets were added.
+
+Suggested commit message:
+Add guardrail execution rails
+
+Next:
+- Goal 7.13B - Connection Hub UI.
+
+---
+
 ## 2026-06-26 - Goal 7.14C: Document Full Proof Local Validation Result
 
 Completed:

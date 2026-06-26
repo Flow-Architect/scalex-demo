@@ -11,6 +11,12 @@ export function PolicyInspector({ state }: { state: DemoState | null }) {
   const blockedChecks = blockedPolicyChecks(state);
   const execution = state?.execution ?? null;
   const guardrails = state?.guardrails ?? null;
+  const ledgerSpendLabels = new Set(
+    (state?.ledger.entries ?? [])
+      .filter((entry) => entry.entry_type === "spend")
+      .map((entry) => entry.label),
+  );
+  const blockedSpendLedgerRows = blockedChecks.filter((check) => ledgerSpendLabels.has(check.vendor)).length;
 
   return (
     <div className="space-y-4">
@@ -30,6 +36,7 @@ export function PolicyInspector({ state }: { state: DemoState | null }) {
               <Fact label="used_real_nemo" value={String(Boolean(guardrails?.used_real_nemo ?? execution?.used_real_nemo))} />
               <Fact label="fail_closed" value={String(Boolean(guardrails?.fail_closed ?? execution?.guardrails_fail_closed))} />
               <Fact label="Local policy active" value={String(Boolean(guardrails?.local_policy_active ?? true))} />
+              <Fact label="Blocked spend ledger rows" value={String(blockedSpendLedgerRows)} />
               <Fact label="Spend cap" value={formatCurrency(summary.max_job_spend_usd * 100)} />
               <Fact label="Margin floor" value={formatPercent(summary.margin_floor_percent)} />
               <Fact label="Invoice before spend" value={summary.require_invoice_before_spend ? "Required" : "Not required"} />
@@ -53,8 +60,11 @@ export function PolicyInspector({ state }: { state: DemoState | null }) {
                 {guardrails.evaluation_stages.map((stage) => (
                   <div className="rounded-md border border-zinc-200 bg-zinc-50 p-3" key={stage.stage}>
                     <p className="text-xs font-semibold uppercase text-zinc-500">{stage.label}</p>
-                    <p className="mt-1 text-sm font-semibold text-zinc-950">{stage.status}</p>
+                    <p className="mt-1 text-sm font-semibold text-zinc-950">{stage.decision}</p>
                     <p className="mt-1 text-xs leading-5 text-zinc-600">{stage.summary}</p>
+                    <p className="mt-2 text-xs text-zinc-500">
+                      {stage.mode} / {stage.adapter} / used_real_nemo={String(stage.used_real_nemo)} / fail_closed={String(stage.fail_closed)}
+                    </p>
                   </div>
                 ))}
               </div>
@@ -73,7 +83,9 @@ export function PolicyInspector({ state }: { state: DemoState | null }) {
           </div>
           <div className="rounded-md border border-rose-200 bg-rose-50 p-3">
             <p className="text-sm font-semibold text-rose-900">{blockedChecks.length} blocked</p>
-            <p className="mt-1 text-sm text-rose-800">Unsafe or unapproved requests are blocked before spend is recorded.</p>
+            <p className="mt-1 text-sm text-rose-800">
+              Unsafe or unapproved requests are blocked before spend is recorded. Ledger spend rows: {blockedSpendLedgerRows}.
+            </p>
           </div>
         </div>
       </InspectorSection>

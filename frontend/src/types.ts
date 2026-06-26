@@ -158,6 +158,9 @@ export interface GuardrailStageSummary {
   label: string;
   purpose: string;
   status: string;
+  decision: string;
+  mode: GuardrailMode;
+  adapter: string;
   used_real_nemo: boolean;
   fail_closed: boolean;
   summary: string;
@@ -171,6 +174,7 @@ export interface GuardrailSummary {
   status: string;
   used_real_nemo: boolean;
   fail_closed: boolean;
+  blocked: boolean;
   local_policy_active: boolean;
   record_evaluations: boolean;
   evaluation_stages: GuardrailStageSummary[];

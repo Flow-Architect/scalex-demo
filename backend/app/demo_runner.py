@@ -24,7 +24,11 @@ from .services.hermes_adapter import sanitize_text
 from .services.ledger_service import ledger_totals, usd_to_cents
 from .services.payment_service import mark_job_paid
 from .services.planning_service import generate_operating_plan
-from .services.policy_service import apply_spend_request, policy_config_for_seed
+from .services.policy_service import (
+    apply_spend_request,
+    policy_config_for_seed,
+    record_approved_spend_ledger_entry,
+)
 from .services.seed_service import load_seed_config, seed_demo_database
 from .services.state_service import build_demo_state
 from .services.stripe_service import (
@@ -56,6 +60,16 @@ def run_demo() -> dict[str, Any]:
             workflow_id=workflow["id"],
             deterministic_event_ids=False,
         )
+        try:
+            evaluate_and_record_guardrail_stage(
+                connection,
+                job=job,
+                stage="input",
+                payload={"job": job, "seed_config": seed_config},
+                settings=execution_settings,
+            )
+        except GuardrailIntegrationError as exc:
+            return _guardrail_failed_response(connection, job, exc)
         _record_run_started(connection, job, settings)
         repository.upsert_onboarding_config(connection, seed_config)
         sequence = _record_orchestration_call(
@@ -73,16 +87,6 @@ def run_demo() -> dict[str, Any]:
             status="complete",
             duration_ms=_duration_ms(job_started_at),
         )
-        try:
-            evaluate_and_record_guardrail_stage(
-                connection,
-                job=job,
-                stage="input",
-                payload={"job": job, "seed_config": seed_config},
-                settings=execution_settings,
-            )
-        except GuardrailIntegrationError as exc:
-            return _guardrail_failed_response(connection, job, exc)
 
         planning_started_at = time.monotonic()
         planning_result = generate_operating_plan(job, seed_config, settings=execution_settings)
@@ -153,12 +157,56 @@ def run_demo() -> dict[str, Any]:
         _record_payment_gate_note(connection, job)
 
         try:
+            evaluate_and_record_guardrail_stage(
+                connection,
+                job=job,
+                stage="execution",
+                payload=_execution_guardrail_payload(
+                    connection,
+                    job,
+                    phase="pre_finance_action",
+                    action_requests=_stripe_action_requests(job, execution_settings),
+                    stripe_summary={
+                        "stripe_mode": (
+                            "test_double"
+                            if execution_settings.stripe_test_double_mode
+                            else "stripe_test"
+                        ),
+                        "livemode": execution_settings.stripe_live_mode,
+                    },
+                ),
+                settings=execution_settings,
+            )
             sequence, payment_status = _run_stripe_sequence(
                 connection,
                 job,
                 sequence,
                 planning_run_id,
                 execution_settings,
+            )
+            ledger_metadata = payment_ledger_metadata(payment_status, job)
+            evaluate_and_record_guardrail_stage(
+                connection,
+                job=job,
+                stage="execution",
+                payload=_execution_guardrail_payload(
+                    connection,
+                    job,
+                    phase="pre_revenue_ledger_action",
+                    action_requests=[
+                        {
+                            "tool_name": "ledger.record_revenue",
+                            "job_id": job["id"],
+                            "amount_cents": int(job["invoice_amount_cents"]),
+                            "ledger_source": ledger_metadata["ledger_source"],
+                            "ledger_label": ledger_metadata["ledger_label"],
+                            "stripe_paid_claimed": ledger_metadata["ledger_source"]
+                            == "stripe_test_invoice_paid",
+                        }
+                    ],
+                    stripe_summary=_stripe_summary_for_guardrail(payment_status),
+                ),
+                settings=execution_settings,
             )
         except StripeIntegrationError as exc:
             _record_stripe_error(connection, job, exc)
@@ -172,6 +220,8 @@ def run_demo() -> dict[str, Any]:
                 "state": state,
                 "decision": {"error": sanitize_text(str(exc))},
             }
+        except GuardrailIntegrationError as exc:
+            return _guardrail_failed_response(connection, job, exc)
 
         sequence, _revenue = _execute_tool(
             connection,
@@ -183,16 +233,27 @@ def run_demo() -> dict[str, Any]:
             operation=lambda: mark_job_paid(
                 connection,
                 job,
-                **payment_ledger_metadata(payment_status, job),
+                **ledger_metadata,
             ),
         )
-        sequence = _run_policy_spend_sequence(connection, job, sequence, planning_run_id, seed_config)
+        try:
+            sequence = _run_policy_spend_sequence(
+                connection,
+                job,
+                sequence,
+                planning_run_id,
+                seed_config,
+                execution_settings,
+            )
+        except GuardrailIntegrationError as exc:
+            return _guardrail_failed_response(connection, job, exc)
         try:
             evaluate_and_record_guardrail_stage(
                 connection,
                 job=job,
                 stage="execution",
                 payload={
+                    "phase": "post_execution_consistency",
                     "policy_checks": repository.list_policy_checks(connection, job["id"]),
                     "ledger_entries": repository.list_ledger_entries(connection, job["id"]),
                     "stripe_summary": _stripe_summary_for_guardrail(payment_status),
@@ -341,11 +402,13 @@ def _guardrail_failed_response(
 ) -> dict[str, Any]:
     result = exc.result
     repository.update_job_status(connection, job["id"], "guardrail_error")
+    fail_closed = bool(result.get("fail_closed"))
+    title = "Guardrail adapter failed closed" if fail_closed else "Guardrail blocked unsafe run content"
     repository.create_event(
         connection,
         job_id=job["id"],
-        type="guardrail_fail_closed",
-        title="Guardrail adapter failed closed",
+        type="guardrail_fail_closed" if fail_closed else "guardrail_blocked",
+        title=title,
         detail=sanitize_text(str(exc)),
         status="failed",
     )
@@ -359,7 +422,8 @@ def _guardrail_failed_response(
         "decision": {
             "guardrail_mode": result.get("mode"),
             "stage": result.get("stage"),
-            "fail_closed": True,
+            "decision": result.get("decision") or result.get("status"),
+            "fail_closed": fail_closed,
             "used_real_nemo": bool(result.get("used_real_nemo")),
             "error": result.get("error") or result.get("summary"),
         },
@@ -426,6 +490,59 @@ def _record_payment_gate_note(connection, job: dict[str, Any]) -> None:
     connection.commit()
 
 
+def _execution_guardrail_payload(
+    connection,
+    job: dict[str, Any],
+    *,
+    phase: str,
+    action_requests: list[dict[str, Any]] | None = None,
+    stripe_summary: dict[str, Any] | None = None,
+    policy_check: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    payload = {
+        "phase": phase,
+        "action_requests": action_requests or [],
+        "policy_checks": repository.list_policy_checks(connection, job["id"]),
+        "ledger_entries": repository.list_ledger_entries(connection, job["id"]),
+        "stripe_summary": stripe_summary or {},
+    }
+    if policy_check is not None:
+        payload["policy_check"] = policy_check
+    return payload
+
+
+def _stripe_action_requests(job: dict[str, Any], settings: Settings) -> list[dict[str, Any]]:
+    stripe_mode = "test_double" if settings.stripe_test_double_mode else "stripe_test"
+    return [
+        {
+            "tool_name": "stripe.create_customer",
+            "job_id": job["id"],
+            "client_name": job["client_name"],
+            "mode": stripe_mode,
+            "livemode": settings.stripe_live_mode,
+        },
+        {
+            "tool_name": "stripe.create_invoice",
+            "job_id": job["id"],
+            "amount_cents": int(job["invoice_amount_cents"]),
+            "mode": stripe_mode,
+            "livemode": settings.stripe_live_mode,
+        },
+        {
+            "tool_name": "stripe.prepare_payment_url",
+            "job_id": job["id"],
+            "mode": stripe_mode,
+            "livemode": settings.stripe_live_mode,
+        },
+        {
+            "tool_name": "stripe.confirm_payment_status",
+            "job_id": job["id"],
+            "mode": stripe_mode,
+            "livemode": settings.stripe_live_mode,
+        },
+    ]
+
+
 def _record_stripe_error(connection, job: dict[str, Any], exc: StripeIntegrationError) -> dict[str, Any]:
     event = repository.create_event(
         connection,
@@ -445,6 +562,7 @@ def _run_policy_spend_sequence(
     sequence: int,
     planning_run_id: str,
     seed_config: dict[str, Any],
+    settings: Settings,
 ) -> int:
     policy_config = _policy_config_for_seed(seed_config)
     spend_requests = [
@@ -456,6 +574,25 @@ def _run_policy_spend_sequence(
         for item in seed_config.get("blockedSpendRequests", [])
     )
     for vendor, amount_cents in spend_requests:
+        evaluate_and_record_guardrail_stage(
+            connection,
+            job=job,
+            stage="execution",
+            payload=_execution_guardrail_payload(
+                connection,
+                job,
+                phase="pre_spend_policy_action",
+                action_requests=[
+                    {
+                        "tool_name": "policy.check_spend",
+                        "job_id": job["id"],
+                        "vendor": vendor,
+                        "requested_amount_cents": amount_cents,
+                    }
+                ],
+            ),
+            settings=settings,
+        )
         sequence, result = _execute_tool(
             connection,
             job=job,
@@ -473,25 +610,53 @@ def _run_policy_spend_sequence(
                 vendor=vendor,
                 requested_amount_cents=amount_cents,
                 policy_config=policy_config,
+                create_ledger_entry=False,
             ),
         )
-        ledger_entry = result.get("ledger_entry")
-        if ledger_entry is not None:
-            sequence = _record_orchestration_call(
+        policy_check = result["policy_check"]
+        if bool(policy_check.get("approved")):
+            evaluate_and_record_guardrail_stage(
                 connection,
-                job_id=job["id"],
-                sequence=sequence + 1,
+                job=job,
+                stage="execution",
+                payload=_execution_guardrail_payload(
+                    connection,
+                    job,
+                    phase="pre_spend_ledger_action",
+                    action_requests=[
+                        {
+                            "tool_name": "ledger.record_spend",
+                            "job_id": job["id"],
+                            "policy_check_id": policy_check["id"],
+                            "policy_check": policy_check,
+                            "vendor": vendor,
+                            "amount_cents": amount_cents,
+                        }
+                    ],
+                    policy_check=policy_check,
+                ),
+                settings=settings,
+            )
+            sequence, _ledger_entry = _execute_tool(
+                connection,
+                job=job,
+                sequence=sequence,
+                planning_run_id=planning_run_id,
                 tool_name="ledger.record_spend",
                 tool_input_json={
                     "job_id": job["id"],
-                    "policy_check_id": result["policy_check"]["id"],
+                    "policy_check_id": policy_check["id"],
                     "vendor": vendor,
                     "amount_cents": amount_cents,
                 },
-                tool_output_json={"ledger_entry": ledger_entry},
-                status="complete",
-                duration_ms=0,
-                planning_run_id=planning_run_id,
+                operation=lambda vendor=vendor, amount_cents=amount_cents: {
+                    "ledger_entry": record_approved_spend_ledger_entry(
+                        connection,
+                        job=job,
+                        vendor=vendor,
+                        requested_amount_cents=amount_cents,
+                    )
+                },
             )
     return sequence
 

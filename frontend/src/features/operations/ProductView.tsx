@@ -766,7 +766,7 @@ function AuditView({
           <StripeEvidence summary={state?.stripe ?? null} events={stripeEvents} />
         </WorkspaceSection>
         <WorkspaceSection title="Guardrail decisions">
-          <PolicyEvidence checks={checks} evaluations={guardrailEvaluations} guardrails={guardrails} summary={summary} />
+          <PolicyEvidence checks={checks} evaluations={guardrailEvaluations} guardrails={guardrails} ledgerEntries={entries} summary={summary} />
         </WorkspaceSection>
         <WorkspaceSection title="Ledger entries">
           <LedgerPanel auditRows={auditRows} databasePath={databasePath} entries={entries} totals={totals} />
@@ -860,6 +860,7 @@ function IntegrationsView({
             checks={state?.policy_checks ?? []}
             evaluations={state?.guardrail_evaluations ?? []}
             guardrails={guardrails}
+            ledgerEntries={state?.ledger.entries ?? []}
             summary={state?.policy.summary ?? null}
           />
         </WorkspaceSection>
@@ -1328,15 +1329,23 @@ function PolicyEvidence({
   checks,
   evaluations,
   guardrails,
+  ledgerEntries,
   summary,
 }: {
   checks: PolicyCheck[];
   evaluations: GuardrailEvaluation[];
   guardrails: GuardrailSummary | null;
+  ledgerEntries: LedgerEntry[];
   summary: PolicySummary | null;
 }) {
   const approvedChecks = checks.filter(isApproved);
   const blockedChecks = checks.filter((check) => !isApproved(check));
+  const spendLedgerLabels = new Set(
+    ledgerEntries
+      .filter((entry) => entry.entry_type === "spend")
+      .map((entry) => entry.label),
+  );
+  const blockedSpendLedgerRows = blockedChecks.filter((check) => spendLedgerLabels.has(check.vendor));
 
   return (
     <div>
@@ -1353,6 +1362,11 @@ function PolicyEvidence({
           <MetricTile label="fail_closed" tone={guardrails.fail_closed ? "rose" : "teal"} value={String(guardrails.fail_closed)} />
           <MetricTile label="Local policy active" tone="emerald" value={String(guardrails.local_policy_active)} />
           <MetricTile label="Evaluation stages" tone="slate" value={String(evaluations.length)} />
+          <MetricTile
+            label="Blocked spend ledger rows"
+            tone={blockedSpendLedgerRows.length === 0 ? "emerald" : "rose"}
+            value={String(blockedSpendLedgerRows.length)}
+          />
         </div>
       ) : null}
       {summary ? (
@@ -1373,6 +1387,8 @@ function PolicyEvidence({
               className={`border p-3 ${
                 evaluation.fail_closed
                   ? "border-rose-200 bg-rose-50"
+                  : evaluation.status === "block"
+                    ? "border-rose-200 bg-rose-50"
                   : evaluation.used_real_nemo
                     ? "border-emerald-200 bg-emerald-50"
                     : "border-zinc-200 bg-white"
@@ -1383,12 +1399,12 @@ function PolicyEvidence({
                 <div>
                   <p className="font-semibold text-zinc-950">{evaluation.label}</p>
                   <p className="mt-1 text-xs font-semibold uppercase text-zinc-400">
-                    {humanize(evaluation.stage)} / {evaluation.adapter}
+                    {humanize(evaluation.stage)} / {evaluation.mode} / {evaluation.adapter}
                   </p>
                 </div>
                 <StatusBadge
                   label={humanize(evaluation.status)}
-                  tone={evaluation.fail_closed ? "rose" : evaluation.used_real_nemo ? "emerald" : "amber"}
+                  tone={evaluation.fail_closed || evaluation.status === "block" ? "rose" : evaluation.used_real_nemo ? "emerald" : "amber"}
                 />
               </div>
               <p className="mt-2 text-sm leading-6 text-zinc-700">{evaluation.summary}</p>
@@ -1398,6 +1414,7 @@ function PolicyEvidence({
               <div className="mt-3 flex flex-wrap gap-2">
                 <StatusBadge label={`used_real_nemo=${String(evaluation.used_real_nemo)}`} tone={evaluation.used_real_nemo ? "emerald" : "amber"} />
                 <StatusBadge label={`fail_closed=${String(evaluation.fail_closed)}`} tone={evaluation.fail_closed ? "rose" : "teal"} />
+                <StatusBadge label={`decision=${humanize(evaluation.status)}`} tone={evaluation.fail_closed ? "rose" : evaluation.status === "block" ? "rose" : "teal"} />
                 <StatusBadge label={formatDateTime(evaluation.created_at)} tone="slate" />
               </div>
             </article>
@@ -1431,6 +1448,12 @@ function PolicyEvidence({
                 <div className="mt-3 flex flex-wrap gap-2">
                   <StatusBadge label={`Margin after ${formatPercent(check.margin_after_spend_percent)}`} tone="teal" />
                   <StatusBadge label={`Action ${check.required_action}`} tone="slate" />
+                  {!approved ? (
+                    <StatusBadge
+                      label={spendLedgerLabels.has(check.vendor) ? "Spend ledger row present" : "No spend ledger row"}
+                      tone={spendLedgerLabels.has(check.vendor) ? "rose" : "emerald"}
+                    />
+                  ) : null}
                   <StatusBadge label={formatDateTime(check.created_at)} tone="slate" />
                 </div>
               </article>
@@ -1492,6 +1515,7 @@ function iconForEvent(type: string): LucideIcon {
       return TrendingUp;
     case "policy_gate":
     case "policy_check":
+    case "guardrail_blocked":
     case "guardrail_fail_closed":
       return ShieldCheck;
     case "stripe_test":

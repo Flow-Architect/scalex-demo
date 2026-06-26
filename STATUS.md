@@ -5,12 +5,12 @@ Last updated: 2026-06-26
 ## Verified Current State
 
 - Project folder exists at `/home/ascabrya/dev/scalex-demo`.
-- Latest committed baseline before Goal 7.14C docs update: `c0d2964 Add real-NeMo-ready guardrail adapter`.
-- Last completed goal: Goal 7.14B - Full Proof Local Validation With Configured Real Tools.
-- Last completed implementation/QA goal: Goal 7.14B - Full Proof Local Validation With Configured Real Tools.
-- Last completed documentation/tracking update: Goal 7.14C - Document Full Proof Local Validation Result.
+- Latest committed baseline before Goal 8C: `55f5adb Document Full Proof local validation result`.
+- Last completed goal: Goal 8C - Guardrail Execution Rails in Run Lifecycle.
+- Last completed implementation/QA goal: Goal 8C - Guardrail Execution Rails in Run Lifecycle.
+- Last completed documentation/tracking update: Goal 8C closeout docs.
 - Last completed checkout cleanup: Open Source Checkout Cleanup for judge readiness.
-- Current priority: Goal 8C - Guardrail Execution Rails in Run Lifecycle.
+- Current priority: Goal 7.13B - Connection Hub UI.
 - Goal 7.11B replaced the legacy Harbor sample with Northstar Dental Group / Client Implementation Launch.
 - Goal 7.11C-followup replaced the remaining generated dashboard/card shell with a ClientOps
   operation-file workspace across Dashboard, Function Studio, Onboarding, Client Operations,
@@ -29,6 +29,10 @@ Last updated: 2026-06-26
   `RailsConfig`; observed version is 0.21.0.
 - Goal 8B added the guardrail adapter boundary, optional real-NeMo runtime probing, SQLite
   guardrail evaluation persistence, API/UI proof fields, and setup/check scripts.
+- Goal 8C strengthened guardrail execution rails around input, planning, protected finance
+  requests, spend policy/ledger actions, and output honesty. Guardrail decisions are now recorded
+  as `allow`, `warn`, `block`, or `fail_closed`, and blocked unsafe content stops before protected
+  actions continue.
 - Goal 7.14B passed Full Proof local validation in a configured local-only environment with real
   isolated Hermes, real Stripe test-mode invoice proof, real NeMo runtime verification, local
   policy active, and synthetic Northstar data only.
@@ -108,9 +112,41 @@ Functional product surfaces remain:
 - deterministic test-double paths for tests/CI/diagnostics only
 - local policy engine for current guardrail enforcement
 - guardrail adapter modes: `local_policy`, `nemo_guardrails`, and `nemo_compatible`
-- `guardrail_evaluations` SQLite records for input, planning, execution, and output rail proof
-- API/UI proof fields for guardrail mode, adapter status, `used_real_nemo`, `fail_closed`,
-  evaluation stages, and local policy active status
+- `guardrail_evaluations` SQLite records for input, planning, execution, and output rail proof,
+  including pre-action execution gates before Stripe finance proof, revenue ledger marking, spend
+  policy checks, approved spend ledger rows, and post-execution blocked-spend consistency
+- API/UI proof fields for guardrail mode, adapter status, decision, `used_real_nemo`,
+  `fail_closed`, evaluation stages, local policy active status, and blocked-spend ledger-row proof
+
+## Verified For Goal 8C
+
+- Input rail validates selected operation economics, synthetic/local sample boundary, vendor
+  safety, no real client data, no real client email, no live-money intent, and no PHI/patient-data
+  handling before planning continues.
+- Planning rail validates deterministic or Hermes plan JSON, the expected 19-tool sequence, and
+  unsafe plan text before any finance/spend action.
+- Execution rail now records pre-action guardrail evaluations before Stripe/test-double finance
+  proof, before revenue ledger marking, before each spend policy check, before each approved spend
+  ledger row, and after execution consistency review.
+- Spend execution was split so policy checks/events are recorded first and approved spend ledger
+  rows are written only after a guardrail preflight. Blocked spend still creates policy/evidence
+  records and no spend ledger row.
+- Output rail validates final report economics, protected profit/margin math, paid-state honesty,
+  no real client email, no PHI/patient data, and no live-money or Stripe-paid claim when
+  `paid=false`.
+- `nemo_guardrails` remains optional and fails closed when selected but unavailable before Stripe
+  or ledger actions. `nemo_compatible` remains fallback-only and never sets `used_real_nemo=true`.
+- Judge Demo Mode remains deterministic and secret-free with the expected 19 orchestration calls
+  and unchanged Northstar economics.
+- Full Proof compatibility fields remain intact. Goal 8C did not rerun Full Proof or make real
+  Stripe API calls.
+- UI/API proof now exposes rail/stage, decision, source/mode, adapter status, `used_real_nemo`,
+  `fail_closed`, and blocked-spend ledger-row evidence.
+- Verification completed:
+  - `backend/.venv/bin/python -m pytest backend/tests/test_guardrails_service.py backend/tests/test_demo_runner.py` passed with 34 tests.
+  - `./scripts/test.sh` passed with 61 backend tests and a successful frontend build.
+  - `./scripts/check-nemo.sh` passed with real NeMo runtime available and `guardrails/scalex`
+    loaded.
 
 ## Verified For Goal 8B
 
