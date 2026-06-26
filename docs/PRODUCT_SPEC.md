@@ -232,7 +232,7 @@ configuration or policy is invalid.
 - Stripe = finance proof / invoice / payment state.
 - ScaleX = execution and policy authority.
 - Local policy now = spend, margin, vendor, and payment-before-spend enforcement.
-- NeMo Guardrails planned = governed autonomy layer after Goal 8.
+- Real NVIDIA NeMo Guardrails target = governed autonomy layer after Goal 8.
 - SQLite = evidence ledger.
 - Profit Outcome = protected profit and blocked risk result.
 
@@ -242,4 +242,7 @@ Live-money payments, real client data, production Hermes, production Prometheus,
 homelab/OpenClaw, Recall memory, production auth, hosted secret exposure, and production SaaS
 features are out of scope. Local/sample workflow management demonstrates the product path;
 production multi-client onboarding is future work. Future live-money payments require Verified
-Live Mode. Real NeMo Guardrails is not wired yet.
+Live Mode. Real NVIDIA NeMo Guardrails is the Goal 8 target and is not wired yet. A
+NeMo-compatible/local fallback is allowed only if Goal 8A proves real NeMo cannot be safely wired
+before submission, and the product must not claim real NeMo is active unless it is installed,
+wired, tested, and documented.

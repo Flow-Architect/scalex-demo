@@ -5,10 +5,11 @@ Last updated: 2026-06-26
 ## Verified Current State
 
 - Project folder exists at `/home/ascabrya/dev/scalex-demo`.
-- Latest committed baseline before Goal 7.13A: `b8c9f68 Wire ScaleX favicon`.
-- Last completed goal: Goal 7.13A - Connection Hub / MCP Architecture Docs with ClientOps Concept Lock and Full Proof Real-Tool Demo Plan.
+- Latest committed baseline before Open Source Checkout Cleanup: `cb4bcdc Document Connection Hub and Full Proof demo plan`.
+- Last completed goal: Goal 7.13A - Connection Hub / MCP Architecture Docs with ClientOps Concept Lock, Full Proof Real-Tool Demo Plan, and Real NeMo Requirement.
 - Last completed implementation/QA goal: Goal 7.12 - Make Start Run a Real Product Execution.
-- Last completed documentation/tracking update: Goal 7.13A - Connection Hub / MCP Architecture Docs.
+- Last completed documentation/tracking update: Goal 7.13A - Connection Hub / MCP Architecture Docs and Real NeMo Requirement.
+- Last completed checkout cleanup: Open Source Checkout Cleanup for judge readiness.
 - Current priority: Goal 8A - NeMo Guardrails Preflight / Architecture Audit.
 - Goal 7.11B replaced the legacy Harbor sample with Northstar Dental Group / Client Implementation Launch.
 - Goal 7.11C-followup replaced the remaining generated dashboard/card shell with a ClientOps
@@ -18,8 +19,11 @@ Last updated: 2026-06-26
   Function Studio into a more business-readable demo path, normalized primary proof labels, and
   verified the browser flow from login through logout.
 - Goal 7.12 made Start Run visibly execute the Northstar client operation end to end.
-- Goal 7.13A documented Connection Hub, the future MCP-shaped boundary, and the Full Proof Mode
-  real-tool demo plan without changing code.
+- Goal 7.13A documented Connection Hub, the future MCP-shaped boundary, the Full Proof Mode
+  real-tool demo plan, and the real NeMo target without changing code.
+- Open Source Checkout Cleanup made Judge Demo Mode the safe `.env.example` default, taught
+  `scripts/dev.sh` to load `.env` quietly when present, added checkout run/test commands to
+  START_HERE, and clarified README/demo/submission checkout language.
 - Goal 8A - NeMo Guardrails Preflight / Architecture Audit remains intact and planned after Goal 7.13A.
 - Goal 9 remains final polish and submission assets.
 - Goal 7B remains future Verified Live Mode hardening.
@@ -48,7 +52,7 @@ a governed AI operations layer that can run those functions safely.
 - Stripe provides finance proof through test invoice/payment state.
 - ScaleX executes and enforces business rules.
 - Local policy is active now for spend, margin, vendor, and payment-before-spend enforcement.
-- NeMo Guardrails is planned after Goal 8 and is not wired yet.
+- Real NVIDIA NeMo Guardrails is the Goal 8 target and is not wired yet.
 - SQLite records evidence.
 - Profit Outcome reports protected profit and blocked risk.
 - MCP is documented as a future access pattern only. ScaleX does not currently expose an MCP
@@ -93,6 +97,28 @@ Functional product surfaces remain:
 - deterministic test-double paths for tests/CI/diagnostics only
 - local policy engine for current guardrail enforcement
 
+## Verified For Open Source Checkout Cleanup
+
+- `.env.example` now defaults to `SCALEX_EXECUTION_MODE=demo`, `SCALEX_AUTH_ENABLED=false`,
+  deterministic Hermes planning, and Stripe test-double/sandbox finance proof.
+- `.env.example` keeps real credentials blank, avoids live Stripe key examples, and marks Full
+  Proof Mode values as optional local-only configuration.
+- `scripts/dev.sh` loads `.env` if present without printing values and without failing when `.env`
+  is missing.
+- `scripts/setup.sh` no longer implies `.env` is required for the judge-safe demo.
+- README now presents the judge checkout path: install, run, use the printed frontend URL, click
+  Start Run in Judge Demo Mode, run tests, and optionally configure Full Proof Mode locally.
+- START_HERE now includes setup, run, frontend URL, and test commands.
+- Demo and submission docs clarify that Full Proof Mode uses Stripe test-mode invoice
+  creation/finalization for proof only and must not be presented as sending invoice email to a
+  real client.
+- A LICENSE file is still not present. Recommended license choices before public open-source
+  submission are MIT or Apache-2.0, subject to owner approval.
+- Goal 8 was not implemented; NeMo was not installed or wired; no MCP server or Connection Hub UI
+  was created; no Stripe API calls or Hermes model calls were run; no live-money support, real
+  client data, `.env` real values, SQLite `.db`, data backups, extra goal logs, or commits were
+  added.
+
 ## Verified For Goal 7.13A
 
 - Added the ScaleX Connection Hub concept as a planned internal product layer for ClientOps
@@ -115,6 +141,11 @@ Functional product surfaces remain:
   test-mode invoice creation/finalization, local policy guardrails, SQLite evidence, synthetic
   Northstar data only, no live money, no real client email, no patient data, no PHI, and no real
   NeMo claim until wired and verified.
+- Strengthened Goal 8 positioning: real NVIDIA NeMo Guardrails is the target governed autonomy
+  layer, not an optional nice-to-have. Goal 8A must determine the safest practical wiring path.
+- Documented the fallback rule: a NeMo-compatible/local adapter is allowed only if Goal 8A proves
+  real NeMo cannot be safely wired before submission, with the blocker, temporary adapter, and
+  remaining real-NeMo work clearly documented and no UI claim that real NeMo is active.
 - Clarified invoice lifecycle: Hermes plans the finance step; ScaleX backend executes approved
   finance actions; Stripe returns test-mode invoice proof and hosted invoice URL when available;
   ScaleX stores proof in the Evidence Ledger; Demo mode creates sandbox finance proof and does not
@@ -260,10 +291,18 @@ Research-to-Report, Ops Handoff, and Renewal Recommendation.
 
 ## Verification Commands
 
+- For Open Source Checkout Cleanup, `./scripts/test.sh` passed: 49 backend tests and Vite
+  production build.
+- For Open Source Checkout Cleanup, `git diff --check` passed.
+- For Open Source Checkout Cleanup, strict added-lines secret scan returned no matches.
+- For Open Source Checkout Cleanup, no `.env`, SQLite `.db`, `data/backups`, `frontend/dist`,
+  `CODEX_GOALS.md`, or `GOAL_LOG.md` file is in the git diff or staged.
+- For Open Source Checkout Cleanup, `CODEX_GOALS.md` and `GOAL_LOG.md` do not exist.
+- For Open Source Checkout Cleanup, `git status --short` was reviewed.
 - For Goal 7.13A, `git diff --check` passed.
 - For Goal 7.13A, strict added-lines secret scan returned no matches.
 - For Goal 7.13A, no `.env`, SQLite `.db`, `data/backups`, `frontend/dist`, `CODEX_GOALS.md`, or
-  `GOAL_LOG.md` file was changed.
+  `GOAL_LOG.md` file is in the git diff.
 - For Goal 7.13A, `CODEX_GOALS.md` and `GOAL_LOG.md` do not exist.
 - For Goal 7.13A, `git status --short` was reviewed.
 - For Goal 7.12, `./scripts/test.sh` passed: 49 backend tests and Vite production build.
@@ -326,13 +365,15 @@ Research-to-Report, Ops Handoff, and Renewal Recommendation.
 
 ## Incomplete Items
 
-- Goal 8A read-only NeMo Guardrails preflight has not run yet.
+- Goal 8A read-only NeMo Guardrails preflight has not run yet; it must determine the safest
+  practical path to wire real NVIDIA NeMo Guardrails.
 - Full Proof local validation with real isolated Hermes plus real Stripe test mode has not been
   run after this docs update.
 - Goal 7.13B Connection Hub UI has not been implemented yet.
 - Goal 7.13C MCP Server Prototype has not been implemented yet.
 - Real NVIDIA NeMo Guardrails is not wired yet.
 - Verified Live Mode live-money execution is not implemented.
+- License has not been selected; no `LICENSE` file exists yet.
 - Final demo recording and final submission assets are not complete.
 
 ## Deferred / Revisit
@@ -347,5 +388,5 @@ Research-to-Report, Ops Handoff, and Renewal Recommendation.
 
 Goal 8A - NeMo Guardrails Preflight / Architecture Audit.
 
-Goal 7.13A is complete as a docs-only Connection Hub / MCP architecture update. Goal 8A remains
-next and should stay read-only.
+Goal 7.13A is complete as a docs-only Connection Hub / MCP architecture update with the real NeMo
+Guardrails requirement documented. Goal 8A remains next and should stay read-only.

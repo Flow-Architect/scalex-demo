@@ -43,7 +43,7 @@
 - Stripe provides finance proof through test invoice/payment state.
 - ScaleX code executes and enforces business rules.
 - Local policy is active now for spend, margin, vendor, and payment-before-spend enforcement.
-- NeMo Guardrails is planned after Goal 8 and is not wired yet.
+- Real NVIDIA NeMo Guardrails is the Goal 8 target and is not wired yet.
 - SQLite is the evidence ledger.
 - Profit Outcome is the business result.
 - MCP is a future access pattern only. ScaleX does not currently expose an MCP server, external
@@ -83,9 +83,15 @@
   invoice proof in Full Proof Mode. Hermes does not directly create, send, or charge invoices.
 - No mode should claim a real client was emailed unless an explicit send step exists and is
   verified.
-- Goal 8 is the governed autonomy layer with NVIDIA NeMo Guardrails or a NeMo-compatible adapter.
-- Goal 8A is the read-only preflight to decide whether real NeMo Guardrails, NemoClaw, or a
-  NeMo-compatible adapter is safely available.
+- Goal 8 is the governed autonomy layer targeting real NVIDIA NeMo Guardrails.
+- Goal 8A is the read-only preflight to determine the safest practical path to wire real NeMo
+  Guardrails into this repo without production-system access, secret leakage, demo breakage, or
+  false claims.
+- A NeMo-compatible/local adapter is allowed only as a temporary fallback if Goal 8A proves real
+  NeMo cannot be safely wired before submission.
+- If fallback is required, docs and UI must state that real NeMo was targeted, what blocked it,
+  what adapter is used instead, what remains to wire real NeMo later, and that real NeMo is not
+  active.
 - The local policy engine remains active until Goal 8 safely wires a verified guardrail adapter.
 - ScaleX must not claim real NeMo Guardrails or real NemoClaw until installed, wired, tested, and documented.
 - No secrets are committed.

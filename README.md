@@ -13,8 +13,8 @@ but enterprises cannot safely let an agent execute client operations unless mone
 and evidence are governed.
 
 ScaleX solves that by letting Hermes plan and route the operation, Stripe provide finance proof,
-ScaleX enforce business rules, local policy check spend and margin today, NeMo Guardrails remain
-the planned governed autonomy layer, and SQLite record evidence.
+ScaleX enforce business rules, local policy check spend and margin today, real NVIDIA NeMo
+Guardrails remain the Goal 8 governed autonomy target, and SQLite record evidence.
 
 ## Current Implemented Sample
 
@@ -58,7 +58,7 @@ Client operation intake
 -> Stripe provides finance proof through test invoice/payment state
 -> ScaleX executes and enforces business rules
 -> local policy active now checks spend, margin, vendors, and payment-before-spend
--> NeMo Guardrails planned after Goal 8
+-> real NVIDIA NeMo Guardrails targeted in Goal 8
 -> SQLite records evidence
 -> Profit Outcome reports protected profit and blocked risk
 ```
@@ -75,7 +75,7 @@ must run in the appropriate environment.
 - Stripe test doubles are for automated tests, CI, local offline development, or explicitly labeled diagnostics.
 - Product-mode integration failures must surface visible errors.
 - Policy enforcement currently runs through a local policy engine.
-- Real NeMo Guardrails is planned and not wired yet.
+- Real NVIDIA NeMo Guardrails is the Goal 8 target and is not wired yet.
 - Hermes planning uses the ScaleX-isolated laptop install, not production Hermes.
 - Stripe test invoices are labeled honestly as open/unpaid unless Stripe reports `paid=true`.
 
@@ -123,16 +123,20 @@ Planned connector concepts:
 - Calendar kickoff scheduling
 
 MCP is documented as a future access pattern only. ScaleX does not currently expose an MCP server,
-external agents cannot yet call ScaleX through MCP, and NeMo Guardrails is not wired yet. A future
-ScaleX MCP server may expose safe tools/resources/prompts only after the guardrail and tool
+external agents cannot yet call ScaleX through MCP, and real NeMo Guardrails is not wired yet. A
+future ScaleX MCP server may expose safe tools/resources/prompts only after the guardrail and tool
 boundary is clear, without exposing secrets, bypassing policy, or enabling live-money actions.
 
 ## Local Browser Demo
 
-Install local dependencies:
+Judge Demo Mode is the default checkout path. It works without real secrets, Stripe keys, Hermes
+auth, NeMo, real client data, patient data, or PHI.
+
+Clone the repo, enter it, then install local dependencies:
 
 ```bash
-cp .env.example .env
+git clone <repo-url>
+cd scalex-demo
 ./scripts/setup.sh
 ```
 
@@ -142,14 +146,25 @@ Start the backend and frontend together:
 ./scripts/dev.sh
 ```
 
-Open:
+The dev script loads `.env` automatically if the file exists, without printing values. A `.env`
+file is optional for Judge Demo Mode. Use the frontend URL printed by the script; the default is:
 
 ```text
 http://127.0.0.1:5174
 ```
 
-When `SCALEX_AUTH_ENABLED=true`, configure local-only demo credentials in ignored `.env` before
-opening the UI:
+For the judge-safe path, open Dashboard, then Function Studio, then click `Start Run`. The run
+progresses through Hermes planning proof, Stripe sandbox finance proof, local policy decisions,
+approved setup spend, blocked risk, work execution, evidence ledger, and profit outcome.
+
+Optional local overrides can be placed in ignored `.env`:
+
+```bash
+cp .env.example .env
+```
+
+When `SCALEX_AUTH_ENABLED=true`, configure local-only demo credentials in `.env` before opening
+the UI:
 
 ```text
 SCALEX_DEMO_USERNAME=
@@ -185,6 +200,7 @@ claim unless Stripe reports `paid=true`.
 Hermes plans the finance step but does not create or send invoices directly. ScaleX backend
 executes approved finance actions, Stripe returns test-mode proof objects, and ScaleX stores that
 proof in the Evidence Ledger. Demo mode creates sandbox finance proof and does not call Stripe.
+Full Proof Mode must use Stripe test mode only and must not send invoice email to a real client.
 No mode should claim a real client was emailed unless an explicit send step exists and is verified.
 
 In product mode, Stripe requires a local `.env` `sk_test_...` key and returns a visible Stripe
@@ -239,6 +255,17 @@ Reset the demo state with:
 
 These commands must not use live Stripe mode or production service credentials.
 
+## Checkout Notes
+
+- Judge Demo Mode is safe by default and does not require secrets.
+- Full Proof Mode is optional and local-only.
+- Live-money Stripe execution is not implemented.
+- Northstar Dental Group is synthetic; no real client data, patient data, or PHI is used.
+- Connection Hub and MCP are planned only; no MCP server exists today.
+- Real NVIDIA NeMo Guardrails is the Goal 8 target and is not wired yet.
+- No `LICENSE` file is present yet. Select a license such as MIT or Apache-2.0 before public
+  open-source submission.
+
 ## What Is Real, Test, And Future
 
 - Real now: isolated Hermes planning through `scalex-operator`, real Stripe test-mode invoice
@@ -247,9 +274,11 @@ These commands must not use live Stripe mode or production service credentials.
   product flow.
 - Judge Demo Mode: deterministic Hermes planning and Stripe test-double/sandbox proof for hosted
   judge-safe demos, automated tests, CI, offline development, or explicitly labeled diagnostics.
-- Planned now: Goal 8A audits NeMo Guardrails availability without wiring real NeMo yet.
+- Planned now: Goal 8A audits the safest practical path to wire real NVIDIA NeMo Guardrails
+  without wiring real NeMo yet.
 - Planned after Goal 8A: Full Proof local validation with real isolated Hermes plus real Stripe
   test mode if safe ignored local credentials are configured, then Connection Hub UI and later MCP
   server prototype only after the guardrail/tool boundary is clear.
-- Future: Goal 8 governed autonomy with NVIDIA NeMo Guardrails or a NeMo-compatible adapter, Goal
-  9 final submission prep, and Verified Live Mode before any live-money Stripe actions.
+- Future: Goal 8 governed autonomy targets real NVIDIA NeMo Guardrails. A NeMo-compatible/local
+  fallback is allowed only if Goal 8A proves real NeMo cannot be safely wired before submission;
+  Goal 9 final submission prep and Verified Live Mode remain later work.

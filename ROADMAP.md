@@ -58,7 +58,7 @@ Client operation intake
 -> Stripe provides finance proof through test invoice/payment state
 -> ScaleX executes the run and enforces business rules
 -> local policy active now checks spend, margin, vendors, and payment-before-spend
--> NeMo Guardrails planned after Goal 8 for governed autonomy
+-> real NVIDIA NeMo Guardrails targeted in Goal 8 for governed autonomy
 -> SQLite records evidence
 -> Profit Outcome reports protected profit and blocked risk
 ```
@@ -129,7 +129,7 @@ Product framing:
 - Connection Hub exposes approved business capabilities.
 - Stripe provides finance proof.
 - Local policy is active now.
-- NeMo Guardrails is planned/not wired.
+- Real NVIDIA NeMo Guardrails is the Goal 8 target and is not wired yet.
 - SQLite Evidence Ledger records every action.
 - A future MCP server may let agents call ScaleX through safe tools/resources/prompts.
 
@@ -170,7 +170,7 @@ Security and governance rules for any future MCP work:
 - Product-mode integration failures must surface visible errors instead of silently falling back.
 - Stripe invoices must not be called paid unless Stripe reports `paid=true`.
 - Local policy is active now.
-- Real NeMo Guardrails is planned, not wired yet.
+- Real NVIDIA NeMo Guardrails is the Goal 8 target and is not wired yet.
 - Do not claim real NeMo Guardrails or NemoClaw integration until installed, wired, tested, and documented.
 
 ## Implemented Today
@@ -253,7 +253,7 @@ Completed baseline:
 - Goal 7.11C - ClientOps Function Studio Visual Pass
 - Goal 7.11D - Demo Polish / Visual Consistency Pass
 - Goal 7.12 - Make Start Run a Real Product Execution
-- Goal 7.13A - Connection Hub / MCP Architecture Docs with ClientOps Concept Lock and Full Proof Real-Tool Demo Plan
+- Goal 7.13A - Connection Hub / MCP Architecture Docs with ClientOps Concept Lock, Full Proof Real-Tool Demo Plan, and Real NeMo Requirement
 
 Suggested next sequence:
 
@@ -391,8 +391,9 @@ it must not turn ScaleX into a generic integration dashboard.
 
 Objective:
 
-Document Connection Hub, the future MCP-shaped tool boundary, and a safe Full Proof Mode real-tool
-demo plan while preserving ClientOps Autopilot as the main product story.
+Document Connection Hub, the future MCP-shaped tool boundary, a safe Full Proof Mode real-tool
+demo plan, and the real NeMo Guardrails target while preserving ClientOps Autopilot as the main
+product story.
 
 Required outputs:
 
@@ -406,6 +407,9 @@ Required outputs:
 - Clarify invoice lifecycle: Hermes plans the finance step, ScaleX backend executes approved
   finance actions, Stripe returns test-mode proof objects, and ScaleX stores proof in evidence.
 - Keep Judge Demo Mode safe without secrets and explicitly labeled as demo/sandbox proof.
+- Document real NVIDIA NeMo Guardrails as the Goal 8 target, not an optional nice-to-have.
+- Allow a NeMo-compatible adapter only if Goal 8A proves real NeMo cannot be safely wired before
+  submission, with the blocker and remaining real-NeMo work documented.
 
 Constraints:
 
@@ -521,7 +525,8 @@ Final demo language:
 
 > Judge Demo Mode works safely without secrets. Full Proof Mode shows real isolated Hermes
 > planning and real Stripe test-mode invoice creation. Both modes enforce local policy, block
-> risky spend, record evidence, and report protected profit.
+> risky spend, record evidence, and report protected profit. Goal 8 targets real NVIDIA NeMo
+> Guardrails as the governed autonomy layer.
 
 ## Goal 8 - Governed Autonomy Layer With NVIDIA NeMo Guardrails
 
@@ -534,19 +539,34 @@ Stack identity for Goal 8:
 - Stripe provides finance proof in test mode.
 - ScaleX executes and enforces business rules.
 - Local policy is active now.
-- NVIDIA NeMo Guardrails or a NeMo-compatible adapter is planned as the governed autonomy layer.
+- Real NVIDIA NeMo Guardrails is the target governed autonomy layer.
 - SQLite records guardrail proof and audit evidence.
 - Profit Outcome reports the business result.
 
-Do not claim real NeMo Guardrails unless it is installed, wired, tested, and documented. Until
-then, docs and UI must say local policy is active now and NeMo Guardrails is planned/not wired.
+Real NeMo Guardrails is not an optional nice-to-have. Goal 8A is not deciding whether NeMo matters;
+NeMo matters. Goal 8A determines the safest practical path to wire real NVIDIA NeMo Guardrails
+without touching production systems, leaking secrets, breaking the demo, or making false claims.
+
+Preferred Goal 8 path:
+
+1. Real NeMo Guardrails integration if safe.
+2. If blocked, a temporary NeMo-compatible adapter with the same rail concepts.
+3. Local policy remains deterministic fallback/test support only.
+
+If Goal 8A proves real NeMo cannot be safely wired before submission, docs and UI must clearly
+state that real NeMo was targeted, what blocked it, what local/compatible adapter is used instead,
+what remains to wire real NeMo later, and that real NeMo is not active. Do not claim real NeMo
+Guardrails unless it is installed, wired, tested, and documented. Until then, docs and UI must say
+local policy is active now and real NeMo Guardrails is planned/not wired.
 
 ### Goal 8A - NeMo Guardrails Preflight / Architecture Audit
 
 - Read-only.
 - Inspect whether `nemoguardrails`, `nemoclaw`, `openclaw`, Docker, and NVIDIA tooling are locally available.
 - Inspect current local policy engine and SQLite audit schema.
-- Decide whether real NeMo Guardrails is safely available.
+- Determine the safest practical path to wire real NeMo Guardrails into this repo.
+- If real NeMo cannot be safely wired before submission, document the blocker, temporary fallback,
+  and remaining real-NeMo work.
 - Produce the exact Goal 8B implementation prompt.
 - Do not implement code.
 - Do not install anything.
@@ -561,6 +581,8 @@ then, docs and UI must say local policy is active now and NeMo Guardrails is pla
   - `nemo_compatible`
 - Add guardrail evaluation persistence if needed.
 - Add API state for guardrail mode, status, and proof.
+- Prefer real `nemo_guardrails` integration if Goal 8A validates a safe path; use
+  `nemo_compatible` only as the documented fallback if real NeMo is blocked.
 - Keep local policy deterministic for tests.
 
 ### Goal 8C - Guardrail Execution Rails in Run Lifecycle
@@ -609,7 +631,7 @@ Acceptance criteria:
 - The implemented sample run can be recorded in under 3 minutes.
 - README clearly distinguishes Stripe test mode, future Verified Live Mode, and unsupported
   live-money execution.
-- Docs preserve local policy active now / real NeMo not wired yet.
+- Docs preserve local policy active now / real NeMo targeted and not wired yet.
 
 ## Goal 7B - Verified Live Mode
 
@@ -640,7 +662,7 @@ ScaleX is ready for the current Northstar sample state when:
 - Docs clearly explain revenue-backed client operations.
 - Docs and app select Northstar Dental Group / Client Implementation Launch as the implemented template.
 - Docs preserve Harbor only as historical previous sample context.
-- Docs preserve local policy active now / real NeMo not wired yet.
+- Docs preserve local policy active now / real NeMo targeted and not wired yet.
 - Goal 8A remains intact.
 - Goal 9 remains intact.
 - Goal 7B remains intact.

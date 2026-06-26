@@ -10,7 +10,46 @@ Use:
 
 ---
 
-## 2026-06-26 - Goal 7.13A: Connection Hub / MCP architecture docs
+## 2026-06-26 - Open Source Checkout Cleanup
+
+Completed:
+- Made Judge Demo Mode the safe default in `.env.example` with `SCALEX_EXECUTION_MODE=demo`,
+  auth disabled by default, deterministic local planning, Stripe test-double/sandbox proof, and
+  blank credential placeholders.
+- Added quiet optional `.env` loading to `scripts/dev.sh` while preserving operation without
+  `.env`.
+- Updated `scripts/setup.sh` so setup no longer implies `.env` is required for Judge Demo Mode.
+- Updated README with the judge checkout flow: install, run, use the printed frontend URL, click
+  `Start Run`, run tests, and optionally configure Full Proof Mode locally.
+- Updated START_HERE with setup, run, frontend URL, and test commands.
+- Clarified demo/submission wording that Full Proof Mode uses Stripe test-mode invoice
+  creation/finalization for proof only and must not be presented as sending invoice email to a
+  real client.
+- Recorded that no `LICENSE` file exists yet and recommended MIT or Apache-2.0 before public
+  open-source submission if approved by the owner.
+- Preserved safety boundaries: no Goal 8 implementation, no NeMo install/wiring, no MCP server,
+  no Connection Hub UI, no Stripe API calls, no Hermes model calls, no live-money support, no real
+  client data, no `.env` real values, no `data/*.db` edits, no `data/backups` edits, no extra goal
+  logs, no LICENSE addition, and no commit.
+
+Verified:
+- `./scripts/test.sh` passed with 49 backend tests and a successful Vite production build.
+- `git diff --check` passed.
+- Strict added-lines secret scan returned no matches.
+- No `.env`, SQLite `.db`, `data/backups`, `frontend/dist`, `CODEX_GOALS.md`, or `GOAL_LOG.md`
+  file is in the git diff or staged.
+- `CODEX_GOALS.md` and `GOAL_LOG.md` do not exist.
+- `git status --short` was reviewed.
+
+Suggested commit message:
+Improve judge checkout defaults
+
+Next:
+- Goal 8A - NeMo Guardrails Preflight / Architecture Audit.
+
+---
+
+## 2026-06-26 - Goal 7.13A: Connection Hub / MCP architecture docs and real NeMo requirement
 
 Completed:
 - Added the ScaleX Connection Hub concept as a planned internal ClientOps product layer for
@@ -31,6 +70,11 @@ Completed:
   test-mode invoice creation/finalization with synthetic Northstar data only.
 - Clarified invoice lifecycle: Hermes plans the finance step, ScaleX backend executes approved
   finance actions, Stripe returns test-mode proof, and ScaleX stores proof in the Evidence Ledger.
+- Strengthened Goal 8 positioning so real NVIDIA NeMo Guardrails is the target governed autonomy
+  layer, not an optional feature.
+- Documented that Goal 8A determines the safest practical path to wire real NeMo into this repo,
+  and that a NeMo-compatible/local fallback is allowed only if real NeMo cannot be safely wired
+  before submission.
 - Updated ROADMAP, TASKS, STATUS, README, START_HERE, AGENTS, DECISIONS, architecture, product,
   demo, and submission docs.
 - Preserved Goal 8A as the next read-only preflight, preserved Goal 8B-8E, Goal 9, and Goal 7B,
@@ -43,10 +87,12 @@ Completed:
 Verified:
 - `git diff --check` passed.
 - Strict added-lines secret scan returned no matches.
+- No `.env`, SQLite `.db`, `data/backups`, `frontend/dist`, `CODEX_GOALS.md`, or `GOAL_LOG.md`
+  file is in the git diff.
 - `git status --short` was reviewed.
 
 Suggested commit message:
-Document Connection Hub and MCP boundary
+Document Connection Hub, MCP boundary, and NeMo target
 
 Next:
 - Goal 8A - NeMo Guardrails Preflight / Architecture Audit.

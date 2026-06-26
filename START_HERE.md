@@ -26,6 +26,36 @@ Then inspect:
 - `git status --short`
 - `git log --oneline -5`
 
+## Local Checkout Commands
+
+Install dependencies:
+
+```bash
+./scripts/setup.sh
+```
+
+Run the backend and frontend:
+
+```bash
+./scripts/dev.sh
+```
+
+Use the frontend URL printed by the script. The default is:
+
+```text
+http://127.0.0.1:5174
+```
+
+Run tests and the frontend production build:
+
+```bash
+./scripts/test.sh
+```
+
+Judge Demo Mode is the default and works without secrets. `.env` is optional; `scripts/dev.sh`
+loads it quietly if present. Full Proof Mode is optional and local-only through ignored `.env`
+values when real isolated Hermes and Stripe test mode are safely configured.
+
 ## Current Product Goal
 
 Maintain a functional local product shell showing:
@@ -36,7 +66,7 @@ Client operation intake
 -> ScaleX Connection Hub declares allowed systems, modes, guardrails, and evidence duties
 -> Stripe test invoice/payment-state proof
 -> ScaleX business-rule enforcement
--> local policy guardrails now / NeMo Guardrails planned
+-> local policy guardrails now / real NVIDIA NeMo Guardrails targeted in Goal 8
 -> SQLite evidence ledger
 -> agent work
 -> Profit Outcome
@@ -44,8 +74,8 @@ Client operation intake
 
 Goal 7.12 is complete: `Start Run` visibly executes the Northstar Client Implementation Launch
 from run start through proof, evidence, and profit outcome. Goal 7.13A is complete as a docs-only
-Connection Hub / MCP architecture planning pass. The next product goal is Goal 8A: read-only NeMo
-Guardrails Preflight / Architecture Audit.
+Connection Hub / MCP architecture planning pass with the real NeMo requirement documented. The
+next product goal is Goal 8A: read-only NeMo Guardrails Preflight / Architecture Audit.
 
 ## Current Sample State
 
@@ -74,6 +104,9 @@ Harbor Fleet Services is historical only and is no longer the current implemente
   pattern only.
 - Keep Connection Hub positioned as an internal ClientOps Autopilot product layer, not a generic
   connector dashboard or marketplace.
+- Real NVIDIA NeMo Guardrails is the Goal 8 target. Goal 8A determines the safest practical path
+  to wire it; a NeMo-compatible/local fallback is allowed only if real NeMo cannot be safely wired
+  before submission.
 - Do not propose fallback-first implementation goals.
 - Product acceptance criteria should prove real integration usage.
 - Local auth is prototype auth, not production enterprise identity.
@@ -101,9 +134,10 @@ MCP is planned as a future safe access pattern. Possible future tools/resources/
 expose secrets, bypass local policy or future NeMo guardrails, touch live money, or use real
 client data.
 
-Goal 8A is read-only and should audit whether real NeMo Guardrails or a NeMo-compatible adapter
-is safely available after Goal 7.13A. Local policy is active now; real NeMo is not wired yet and
-must not be claimed as real until installed, wired, tested, and documented.
+Goal 8A is read-only and should determine the safest practical path to wire real NVIDIA NeMo
+Guardrails after Goal 7.13A. Local policy is active now; real NeMo is not wired yet and must not
+be claimed as real until installed, wired, tested, and documented. If real NeMo is blocked before
+submission, document the blocker, the temporary adapter, and the remaining real-NeMo work.
 
 ## Session Closeout Requirement
 

@@ -39,7 +39,8 @@ actionable failure.
    `used_real_hermes=true` for Full Proof Mode or deterministic local plan proof for Demo proof mode.
 7. Click Stripe Finance Proof and show either real Stripe test-mode proof with `livemode=false`
    and `paid=false` unless Stripe reports paid, or Stripe test-double/sandbox proof in Demo proof mode.
-8. Click Guardrail Review and show local policy active now, with NeMo Guardrails planned/not wired.
+8. Click Guardrail Review and show local policy active now, with real NVIDIA NeMo Guardrails
+   targeted in Goal 8 and not wired yet.
 9. Click Blocked Risk and show why the $3,200 Unapproved Data Broker Enrichment request was
    blocked and that no spend ledger row was created for it.
 10. Click Profit Outcome and show $8,500 revenue, $1,150 approved setup spend, $3,200 blocked
@@ -94,8 +95,8 @@ Full Proof Mode:
 - Shows visible errors if configured incorrectly.
 
 Truthfulness boundaries remain: Northstar is synthetic; no patient data; no PHI; no HIPAA claim;
-local policy active now; NeMo Guardrails planned/not wired; no live-money support; no production
-auth claim.
+local policy active now; real NVIDIA NeMo Guardrails is the Goal 8 target and not wired yet; no
+live-money support; no production auth claim.
 
 ## Full Proof Mode Real-Tool Demo Plan
 
@@ -116,7 +117,8 @@ What to say:
 
 > Judge Demo Mode works safely without secrets. Full Proof Mode shows real isolated Hermes
 > planning and real Stripe test-mode invoice creation. Both modes enforce local policy, block
-> risky spend, record evidence, and report protected profit.
+> risky spend, record evidence, and report protected profit. Goal 8 targets real NVIDIA NeMo
+> Guardrails as the governed autonomy layer.
 
 Hermes proof should show `used_real_hermes=true` only when real isolated Hermes ran. Stripe proof
 should show `used_real_stripe=true`, `stripe_mode=stripe_test`, `livemode=false`, invoice ID,
@@ -131,6 +133,8 @@ hosted invoice URL when Stripe provides it, and no paid claim unless Stripe repo
 - Stripe returns invoice proof objects and hosted invoice URL when available.
 - ScaleX stores invoice proof in the Evidence Ledger.
 - Demo mode creates sandbox finance proof and does not call Stripe.
+- Full Proof Mode invoice creation/finalization is proof only and must not be presented as sending
+  an invoice email to a real client.
 - No mode should claim a real client was emailed unless an explicit send step exists and is
   verified.
 
@@ -142,3 +146,5 @@ ClientOps Autopilot story and should not become the demo centerpiece.
 
 MCP is a future access pattern only. Do not say ScaleX has an MCP server, external agent MCP
 access, or real NeMo Guardrails unless those pieces are implemented, tested, and documented.
+Real NeMo is the Goal 8 target; a compatible/local fallback is only allowed if Goal 8A proves real
+NeMo cannot be safely wired before submission, and the demo must not claim real NeMo is active.

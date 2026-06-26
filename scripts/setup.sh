@@ -21,4 +21,5 @@ else
   exit 1
 fi
 
-echo "Setup complete. Copy .env.example to .env before running the full demo."
+echo "Setup complete. ./scripts/dev.sh runs Judge Demo Mode without secrets."
+echo "Optional: copy .env.example to .env for local overrides or Full Proof Mode."

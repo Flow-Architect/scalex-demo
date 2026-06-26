@@ -13,7 +13,7 @@ and evidence are governed.
 ScaleX demonstrates the governed operating loop: Hermes plans and routes the operation, Stripe
 provides finance proof in test mode, ScaleX enforces business rules, local policy checks spend and
 margin today, SQLite records evidence, and the final Profit Outcome reports protected profit and
-blocked risk. NeMo Guardrails is the planned governed autonomy layer after Goal 8; it is not wired
+blocked risk. Real NVIDIA NeMo Guardrails is the Goal 8 governed autonomy target; it is not wired
 yet and is not claimed as real.
 
 The current proof is a functional live working product prototype, not a static mock. The operator
@@ -49,16 +49,17 @@ Demo-readiness note:
   clearly labels demo/sandbox proof.
 - Full Proof Mode preserves real isolated Hermes and real Stripe test-mode proof when local
   ignored `.env` values are safely configured.
-- Goal 7.13A documents Connection Hub, the future MCP-shaped boundary, and the Full Proof Mode
-  real-tool demo plan only. It does not implement MCP, NeMo, new UI, or backend behavior.
+- Goal 7.13A documents Connection Hub, the future MCP-shaped boundary, the Full Proof Mode
+  real-tool demo plan, and the real NeMo requirement only. It does not implement MCP, NeMo, new UI,
+  or backend behavior.
 
 Demo story:
 
 Northstar Dental Group is a multi-location client that purchased an implementation package.
 ScaleX launches the client operation, confirms revenue through Stripe test invoice proof, lets
 Hermes plan onboarding and delivery, checks spend and vendor actions through local policy now and
-NeMo Guardrails later, approves safe setup spend, blocks risky enrichment spend, coordinates work
-units, records evidence, and reports protected profit and launch status.
+targets real NVIDIA NeMo Guardrails later, approves safe setup spend, blocks risky enrichment
+spend, coordinates work units, records evidence, and reports protected profit and launch status.
 
 Full Proof Mode demo plan:
 
@@ -78,6 +79,8 @@ Invoice lifecycle:
 - Stripe returns test-mode invoice proof objects and hosted invoice URL when available.
 - ScaleX stores invoice proof in the Evidence Ledger.
 - Demo mode creates sandbox finance proof and does not call Stripe.
+- Full Proof Mode invoice creation/finalization is proof only and must not be described as sending
+  an invoice email to a real client.
 - No mode should claim a real client was emailed unless an explicit send step exists and is verified.
 
 Truthfulness boundaries:
@@ -85,7 +88,10 @@ Truthfulness boundaries:
 - The login gate is local prototype auth, not production enterprise auth.
 - Workflow management is local/sample workflow management, not full multi-tenant SaaS.
 - The active spend authority is the local policy engine.
-- Real NeMo Guardrails is planned and not wired yet.
+- Real NVIDIA NeMo Guardrails is the Goal 8 target and is not wired yet.
+- A NeMo-compatible/local fallback is allowed only if Goal 8A proves real NeMo cannot be safely
+  wired before submission; the submission must then describe the blocker and must not claim real
+  NeMo is active.
 - MCP is planned and not implemented yet.
 - Stripe payment status is labeled honestly; invoices are not called paid unless Stripe reports `paid=true`.
 - Test doubles stay clearly labeled and are not product-mode integrations.

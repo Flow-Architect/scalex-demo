@@ -4,8 +4,8 @@
 
 Goal 8A - NeMo Guardrails Preflight / Architecture Audit.
 
-Goal 7.13A is complete as a docs-only Connection Hub / MCP architecture update. Goal 8A remains
-intact and should run next unless the plan changes.
+Open Source Checkout Cleanup is complete. Goal 7.13A remains the last roadmap/docs milestone, and
+Goal 8A remains intact and should run next unless the plan changes.
 
 ## Goal 7.11A Gate Result
 
@@ -62,7 +62,9 @@ Run Codex `/goal` 8A:
 - Inspect whether `nemoguardrails`, `nemoclaw`, `openclaw`, Docker, and NVIDIA tooling are locally
   available without installing or wiring them.
 - Inspect the current local policy engine and SQLite audit schema.
-- Decide whether real NeMo Guardrails or a NeMo-compatible layer is safely available.
+- Determine the safest practical path to wire real NVIDIA NeMo Guardrails into this repo.
+- If real NeMo cannot be safely wired before submission, document the blocker, the temporary
+  NeMo-compatible/local fallback, and what remains to wire real NeMo later.
 - Produce the exact Goal 8B implementation prompt.
 - Preserve product-mode truthfulness: local policy is active now and real NeMo is not wired yet.
 
@@ -80,10 +82,31 @@ Recommended sequence:
 5. Goal 7.13C - MCP Server Prototype if time allows and the guardrail/tool boundary is clear.
 6. Goal 9 - final recording/submission polish.
 
+## Open Source Checkout Cleanup Result
+
+Completed as a small judge-readiness cleanup, not a new roadmap goal:
+
+- `.env.example` defaults to Judge Demo Mode, disables auth by default, keeps credentials blank,
+  and keeps Full Proof Mode optional/local-only.
+- `scripts/dev.sh` loads `.env` quietly when present and still works without `.env`.
+- `scripts/setup.sh` tells reviewers that Judge Demo Mode runs without secrets.
+- README explains clone/setup/run/test flow, Judge Demo Mode, optional Full Proof Mode, no live
+  money, no real client data/PHI, Connection Hub/MCP planned only, and real NeMo targeted/not
+  wired.
+- START_HERE includes `./scripts/setup.sh`, `./scripts/dev.sh`, the default frontend URL, and
+  `./scripts/test.sh`.
+- Demo/submission docs clarify that Full Proof Mode Stripe test invoice creation/finalization is
+  proof only and must not be presented as sending invoice email to a real client.
+- LICENSE is still missing; choose MIT or Apache-2.0 before public open-source submission if the
+  owner approves.
+- No Goal 8 implementation, NeMo install/wiring, MCP server, Connection Hub UI, Stripe API call,
+  Hermes model call, live-money support, real client data, `.env` real values, SQLite `.db`,
+  data backups, extra goal logs, commit, or LICENSE file was added.
+
 ## Goal 7.13A Gate Result
 
-Goal 7.13A - Connection Hub / MCP Architecture Docs with ClientOps Concept Lock and Full Proof
-Real-Tool Demo Plan is complete as a docs-only planning update.
+Goal 7.13A - Connection Hub / MCP Architecture Docs with ClientOps Concept Lock, Full Proof
+Real-Tool Demo Plan, and Real NeMo Requirement is complete as a docs-only planning update.
 
 Completed:
 
@@ -98,6 +121,9 @@ Completed:
   test-mode invoice creation/finalization with synthetic Northstar data only.
 - Clarified invoice lifecycle: Hermes plans the finance step, ScaleX backend executes approved
   finance actions, Stripe returns test-mode proof, and ScaleX stores proof in the Evidence Ledger.
+- Strengthened Goal 8 positioning: real NVIDIA NeMo Guardrails is the target governed autonomy
+  layer, and a NeMo-compatible/local fallback is allowed only if Goal 8A proves real NeMo cannot
+  be safely wired before submission.
 - Preserved Judge Demo Mode as safe without secrets and clearly labeled deterministic/sandbox proof.
 - Preserved Full Proof Mode as real isolated Hermes plus real Stripe test mode only when safe
   ignored local credentials are configured.
@@ -191,15 +217,18 @@ the old card-dashboard shell with a ClientOps product workspace.
 
 ## Goal 8 Sequence
 
-Goal 8 remains planned as the governed autonomy layer after Goal 7.13A. Goal 8A is now the next
-recommended goal. Do not start Goal 8B, 8C, 8D, or 8E before Goal 8A is complete.
+Goal 8 remains planned as the governed autonomy layer after Goal 7.13A. Real NVIDIA NeMo
+Guardrails is the target, not an optional feature. Goal 8A is now the next recommended goal. Do
+not start Goal 8B, 8C, 8D, or 8E before Goal 8A is complete.
 
 ### Goal 8A - NeMo Guardrails Preflight / Architecture Audit
 
 - Read-only.
 - Inspect whether `nemoguardrails`, `nemoclaw`, `openclaw`, Docker, and NVIDIA tooling are locally available.
 - Inspect the current local policy engine and SQLite audit schema.
-- Decide whether real NeMo Guardrails is safely available.
+- Determine the safest practical path to wire real NeMo Guardrails into this repo.
+- If real NeMo is blocked before submission, document the blocker, temporary fallback, and
+  remaining real-NeMo work.
 - Produce the exact Goal 8B implementation prompt.
 - Preserve product-mode truthfulness: local policy is active now; real NeMo is not wired yet.
 
@@ -254,6 +283,9 @@ recommended goal. Do not start Goal 8B, 8C, 8D, or 8E before Goal 8A is complete
 - ScaleX code remains the authority for guardrails, spend policy, payment actions, ledger writes, and reports.
 - SQLite remains the evidence ledger.
 - Local policy is active now.
+- Real NVIDIA NeMo Guardrails is the Goal 8 target and is not optional.
+- A NeMo-compatible/local fallback is allowed only if Goal 8A proves real NeMo cannot be safely
+  wired before submission, and the UI must not claim real NeMo is active.
 - Real NeMo Guardrails is not wired yet.
 - Stripe live-money execution is not implemented until a future Verified Live Mode milestone.
 

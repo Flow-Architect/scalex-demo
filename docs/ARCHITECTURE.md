@@ -15,7 +15,7 @@ ScaleX UI
   -> Stripe finance proof in test mode
   -> ScaleX business-rule enforcement
   -> local policy active today
-  -> NeMo Guardrails planned after Goal 8
+  -> real NVIDIA NeMo Guardrails targeted in Goal 8
   -> SQLite evidence ledger
   -> agent work
   -> Profit Outcome
@@ -29,7 +29,7 @@ ScaleX UI
 - Stripe provides finance proof through test invoice/payment state.
 - ScaleX executes the operation and enforces business rules.
 - Local policy is active now for spend, margin, vendor, and payment-before-spend enforcement.
-- NeMo Guardrails is planned as the governed autonomy layer after Goal 8 preflight.
+- Real NVIDIA NeMo Guardrails is the Goal 8 governed autonomy target and is not wired yet.
 - SQLite records evidence for planning, orchestration, finance proof, policy checks, ledger rows,
   agent outputs, and final reports.
 - Profit Outcome reports protected profit and blocked risk.
@@ -49,7 +49,8 @@ ScaleX UI
 - Hermes CLI invocation with `--skills scalex-operator`, `--toolsets skills`, provider `openai-codex`, and model `gpt-5.5`.
 - SQLite `planning_runs` and `orchestration_calls` audit tables.
 - Real Stripe test-mode customer and finalized invoice records through orchestration for Goal 7.
-- Local policy engine for spend governance until Goal 8 safely wires NVIDIA NeMo Guardrails or a NeMo-compatible adapter.
+- Local policy engine for spend governance until Goal 8 safely wires real NVIDIA NeMo Guardrails
+  or, only if blocked, a documented temporary NeMo-compatible adapter.
 - Deterministic agent outputs.
 - Northstar Dental Group / Client Implementation Launch sample with persisted run history and proof inspection.
 - Judge Demo Mode as the default safe local execution mode without real secrets.
@@ -233,10 +234,18 @@ Future MCP governance:
 ## Governed Autonomy / Guardrails
 
 The local policy engine is currently active for spend cap, payment-before-spend, margin, vendor
-allowlist, and blocked-vendor checks. Goal 8A remains after Goal 7.13A as the read-only preflight
-to decide whether real NeMo Guardrails or a NeMo-compatible adapter is safely available. Later
-Goal 8 work should add a guardrail adapter boundary, NeMo-style input/planning/execution/output
-rails, and guardrail proof.
+allowlist, and blocked-vendor checks. Real NVIDIA NeMo Guardrails is the Goal 8 target governed
+autonomy layer, not an optional feature. Goal 8A remains after Goal 7.13A as the read-only
+preflight that determines the safest practical path to wire real NeMo Guardrails into this repo.
+
+If Goal 8A proves real NeMo cannot be safely wired before submission, a NeMo-compatible/local
+adapter is allowed only as a temporary fallback. The docs and UI must then state that real NeMo
+was targeted, what blocked it, what adapter is used instead, what remains to wire real NeMo later,
+and that real NeMo is not active.
+
+Later Goal 8 work should add a guardrail adapter boundary, NeMo-style
+input/planning/execution/output rails, and guardrail proof. The preferred path is real
+`nemo_guardrails`; `nemo_compatible` is only the documented fallback if real NeMo is blocked.
 
 ScaleX does not yet claim real NeMo Guardrails or real NemoClaw.
 

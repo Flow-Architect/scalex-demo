@@ -29,7 +29,7 @@ Client operation intake
 -> ScaleX Connection Hub declares allowed systems, modes, guardrails, and evidence duties
 -> Stripe test invoice/payment-state proof
 -> ScaleX business-rule enforcement
--> local policy guardrails now / NeMo Guardrails planned
+-> local policy guardrails now / real NVIDIA NeMo Guardrails targeted in Goal 8
 -> SQLite evidence ledger
 -> agent work
 -> Profit Outcome
@@ -109,7 +109,9 @@ Database:
 Guardrails:
 
 - local policy engine is active now
-- NVIDIA NeMo Guardrails or NeMo-compatible safety layer target for Goal 8
+- real NVIDIA NeMo Guardrails is the Goal 8 target
+- NeMo-compatible/local fallback is allowed only if Goal 8A proves real NeMo cannot be safely
+  wired before submission
 
 AI planning:
 
@@ -133,6 +135,9 @@ Stripe:
   - Verified Live Mode: the only allowed future path for live-money actions.
 - Hermes may plan and propose payment steps, but ScaleX code and guardrails must enforce keys,
   modes, caps, allowlists, confirmations, and audit records.
+- Goal 8A is not deciding whether NeMo matters. It determines the safest practical path to wire
+  real NVIDIA NeMo Guardrails without production-system access, secret leakage, demo breakage, or
+  false claims.
 
 Hermes:
 
