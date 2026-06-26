@@ -10,6 +10,45 @@ Use:
 
 ---
 
+## 2026-06-26 - Goal 7.14C: Document Full Proof Local Validation Result
+
+Completed:
+- Recorded the passed Goal 7.14B Full Proof local validation result in handoff, roadmap, demo,
+  submission, and README tracking docs.
+- Marked Full Proof local validation as complete and kept Goal 8C as the next implementation goal.
+- Kept Goal 7.13B Connection Hub UI after guardrail hardening unless explicitly reordered, with
+  Goal 9 preserved for final recording/submission polish.
+
+Verified Full Proof result recorded:
+- `./scripts/test.sh` passed with 55 backend tests and a successful frontend build.
+- `./scripts/check-nemo.sh` passed with real NeMo runtime available.
+- Full Proof Start Run completed with synthetic Northstar data only.
+- `used_real_hermes=true`, `used_real_stripe=true`, `stripe_mode=stripe_test`, `livemode=false`,
+  Stripe invoice ID present, hosted invoice URL present, and `paid=false` preserved as unpaid.
+- No real client email was used.
+- `used_real_nemo=true`, `adapter_status=runtime_verified`, `fail_closed=false`, and local policy
+  remained active as the deterministic business-rule gate.
+- SQLite proof counts were recorded as `planning_runs=1`, `stripe_events=4`, `policy_checks=4`,
+  `guardrail_evaluations=4`, `orchestration_calls=19`, `events=14`, `reports=1`, and
+  `ledger_entries=4`.
+- Economics were recorded as $1,150 approved setup spend, $3,200 blocked Unapproved Data Broker
+  Enrichment risk, $7,350 protected gross profit, and 86.5% protected margin.
+- Blocked spend created policy/evidence records and did not create a spend ledger row.
+
+Safety:
+- Docs-only update; no code implementation, Stripe run, Hermes run, NeMo run, Full Proof rerun,
+  commit, or staging.
+- Preserved no live money, no live Stripe key, no real client email, no patient data, no PHI, no
+  paid invoice claim, and no secret disclosure.
+
+Suggested commit message:
+Document Full Proof local validation result
+
+Next:
+- Goal 8C - Guardrail Execution Rails in Run Lifecycle.
+
+---
+
 ## 2026-06-26 - Goal 8B: Real-NeMo-Ready Guardrail Adapter + Schema/API
 
 Completed:

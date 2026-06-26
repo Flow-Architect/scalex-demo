@@ -112,18 +112,28 @@ configured:
 - no live money;
 - no real client email;
 - no patient data and no PHI;
-- no real NeMo claim until wired and verified.
+- real NeMo claim only when `nemo_guardrails` runtime verification has passed.
 
 What to say:
 
 > Judge Demo Mode works safely without secrets. Full Proof Mode shows real isolated Hermes
 > planning and real Stripe test-mode invoice creation. Both modes enforce local policy, block
-> risky spend, record evidence, and report protected profit. Goal 8 targets real NVIDIA NeMo
-> Guardrails as the governed autonomy layer.
+> risky spend, record evidence, and report protected profit. The configured Full Proof validation
+> also verified real NeMo runtime probing while local policy remained the deterministic
+> business-rule gate.
 
 Hermes proof should show `used_real_hermes=true` only when real isolated Hermes ran. Stripe proof
 should show `used_real_stripe=true`, `stripe_mode=stripe_test`, `livemode=false`, invoice ID,
 hosted invoice URL when Stripe provides it, and no paid claim unless Stripe reports `paid=true`.
+
+Goal 7.14B Full Proof local validation passed with synthetic Northstar data only:
+`used_real_hermes=true`, `used_real_stripe=true`, `stripe_mode=stripe_test`, `livemode=false`,
+Stripe invoice ID present, hosted invoice URL present, `paid=false` preserved as unpaid, no real
+client email, `used_real_nemo=true`, `adapter_status=runtime_verified`, `fail_closed=false`, and
+local policy active. SQLite evidence recorded one planning run, four Stripe events, four policy
+checks, four guardrail evaluations, 19 orchestration calls, 14 events, one report, and four ledger
+entries. The blocked Unapproved Data Broker Enrichment spend created policy/evidence records but
+no spend ledger row.
 
 ## Invoice Lifecycle Clarity
 

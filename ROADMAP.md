@@ -258,22 +258,26 @@ Completed baseline:
 - Open Source Checkout Cleanup
 - Goal 8A - NeMo Guardrails Preflight / Architecture Audit
 - Goal 8B - Real-NeMo-Ready Guardrail Adapter + Schema/API
+- Goal 7.14B - Full Proof Local Validation With Configured Real Tools
 
 Suggested next sequence:
 
 1. Goal 8C - Guardrail Execution Rails in Run Lifecycle.
 2. Goal 8D - Guardrail Proof UI in Workflow Canvas.
-3. Full Proof local validation - verify real isolated Hermes plus real Stripe test mode if safe
-   ignored local credentials are configured.
-4. Goal 7.13B - Connection Hub UI.
-5. Goal 7.13C - MCP Server Prototype if time allows and the guardrail/tool boundary is clear.
-6. Goal 8E - Enterprise Function Template Positioning + Recording Proof.
-7. Goal 9 - Final polish and submission assets.
-8. Goal 7B / Production Hardening - Verified Live Mode for future live-money payments.
+3. Goal 7.13B - Connection Hub UI after guardrail hardening unless explicitly reordered.
+4. Goal 7.13C - MCP Server Prototype if time allows and the guardrail/tool boundary is clear.
+5. Goal 8E - Enterprise Function Template Positioning + Recording Proof.
+6. Goal 9 - Final polish and submission assets.
+7. Goal 7B / Production Hardening - Verified Live Mode for future live-money payments.
+
+Goal 7.14B Full Proof local validation passed in a local-only configured environment. It verified
+real isolated Hermes, real Stripe test-mode invoice proof, real NeMo runtime verification, local
+policy as the business-rule gate, unpaid Stripe honesty, and synthetic Northstar data only. Rerun
+Full Proof validation only before final recording or after relevant integration changes.
 
 Goal 8A, Goal 9, and Goal 7B remain intact. Goal 7.13A was a docs-only architecture and handoff
-update. It does not implement an MCP server, frontend UI, backend behavior, NeMo wiring, Stripe
-calls, Hermes model calls, or live-money support.
+update. It does not implement an MCP server, frontend UI, backend behavior, Stripe live-money
+support, production Hermes, production data, or real client workflows.
 
 ## Goal 7.11B - Replace Harbor Sample with Northstar Client Implementation Launch
 
@@ -660,5 +664,7 @@ ScaleX is ready for the current Northstar sample state when:
 - Goal 9 remains intact.
 - Goal 7B remains intact.
 - Goal 8B adapter implementation is done; Goal 8C execution rails remain next.
+- Goal 7.14B Full Proof local validation passed with real isolated Hermes, Stripe test mode,
+  real NeMo runtime verification, local policy active, and unpaid Stripe honesty preserved.
 - No secrets are added.
 - No `.env` or SQLite `.db` files are touched.

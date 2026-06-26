@@ -279,7 +279,9 @@ These commands must not use live Stripe mode or production service credentials.
 - Implemented now for Goal 8B: guardrail adapter modes `local_policy`, `nemo_guardrails`, and
   `nemo_compatible`; `guardrail_evaluations` evidence; API/UI proof fields; and setup/check
   scripts for an external NeMo venv.
-- Planned next: Goal 8C deepens pre-action guardrail execution rails, then Full Proof local
-  validation, Connection Hub UI, and later MCP server prototype only after the guardrail/tool
-  boundary is clear.
+- Verified locally in Goal 7.14B: Full Proof Mode completed with real isolated Hermes, real
+  Stripe test-mode invoice proof, real NeMo runtime verification, local policy active,
+  `livemode=false`, and unpaid Stripe state preserved.
+- Planned next: Goal 8C deepens pre-action guardrail execution rails, then Connection Hub UI and
+  later MCP server prototype only after the guardrail/tool boundary is clear.
 - Future: Goal 9 final submission prep and Verified Live Mode remain later work.

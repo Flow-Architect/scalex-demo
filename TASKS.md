@@ -4,9 +4,10 @@
 
 Goal 8C - Guardrail Execution Rails in Run Lifecycle.
 
-Goal 8B is complete. The repo now has a guardrail adapter boundary, optional real-NeMo runtime
-probing, guardrail evaluation persistence, and UI/API proof fields. Goal 8C should deepen the
-runtime rail execution around protected actions.
+Goal 7.14B Full Proof local validation passed after Goal 8B. The repo now has a guardrail adapter
+boundary, optional real-NeMo runtime probing, guardrail evaluation persistence, UI/API proof
+fields, and verified Full Proof evidence from a local-only configured environment. Goal 8C should
+deepen the runtime rail execution around protected actions.
 
 ## Goal 7.11A Gate Result
 
@@ -67,6 +68,9 @@ Run Codex `/goal` 8C:
   when real NeMo is unavailable, broken, or misconfigured.
 - Keep `nemo_compatible` clearly labeled as a fallback and never set `used_real_nemo=true`.
 - Preserve the current Northstar economics and Start Run behavior.
+- Preserve Goal 7.14B Full Proof truthfulness: real isolated Hermes only when actually run, real
+  Stripe test mode only with `stripe_mode=stripe_test` and `livemode=false`, unpaid invoices not
+  represented as paid, real NeMo only after runtime verification, and local policy still active.
 
 Real NeMo is available locally outside the repo at `/home/ascabrya/.venvs/scalex-nemo/bin/python`
 and `scripts/check-nemo.sh` verifies NeMo 0.21.0 plus `RailsConfig.from_path` for
@@ -76,11 +80,39 @@ Recommended sequence:
 
 1. Goal 8C - Guardrail Execution Rails in Run Lifecycle.
 2. Goal 8D - Guardrail Proof UI in Workflow Canvas.
-3. Full Proof local validation - verify real isolated Hermes plus real Stripe test mode if safe
-   ignored local credentials are configured.
-4. Goal 7.13B - Connection Hub UI.
-5. Goal 7.13C - MCP Server Prototype if time allows and the guardrail/tool boundary is clear.
+3. Goal 7.13B - Connection Hub UI after guardrail hardening unless explicitly reordered.
+4. Goal 7.13C - MCP Server Prototype if time allows and the guardrail/tool boundary is clear.
+5. Goal 8E - Enterprise Function Template Positioning + Recording Proof.
 6. Goal 9 - final recording/submission polish.
+
+Goal 7.14B Full Proof local validation is complete. Rerun it only before final recording or after
+changes that touch Hermes, Stripe, NeMo, policy, guardrail, ledger, or run-proof behavior.
+
+## Goal 7.14B Gate Result
+
+Goal 7.14B - Full Proof Local Validation With Configured Real Tools passed from a local-only
+configured environment.
+
+Verified:
+
+- `./scripts/test.sh` passed with 55 backend tests and a successful frontend build.
+- `./scripts/check-nemo.sh` passed with real NeMo runtime available.
+- Full Proof Start Run completed with synthetic Northstar data only.
+- `used_real_hermes=true`.
+- `used_real_stripe=true`, `stripe_mode=stripe_test`, and `livemode=false`.
+- Stripe invoice ID was present and hosted invoice URL was present.
+- `paid=false` remained unpaid and was not represented as Stripe-paid.
+- No real client email was used.
+- `used_real_nemo=true`, `adapter_status=runtime_verified`, and `fail_closed=false`.
+- Local policy remained active as the deterministic business-rule gate.
+- SQLite proof counts: `planning_runs=1`, `stripe_events=4`, `policy_checks=4`,
+  `guardrail_evaluations=4`, `orchestration_calls=19`, `events=14`, `reports=1`, and
+  `ledger_entries=4`.
+- Economics remained $1,150 approved setup spend, $3,200 blocked Unapproved Data Broker
+  Enrichment risk, $7,350 protected gross profit, and 86.5% protected margin.
+- Blocked spend created policy/evidence records and did not create a spend ledger row.
+- Safety boundaries preserved: synthetic Northstar data only, no live money, no live Stripe key,
+  no real client email, no patient data, no PHI, and temporary `/tmp` validation database removed.
 
 ## Goal 8B Gate Result
 

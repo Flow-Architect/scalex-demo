@@ -12,9 +12,9 @@ and evidence are governed.
 
 ScaleX demonstrates the governed operating loop: Hermes plans and routes the operation, Stripe
 provides finance proof in test mode, ScaleX enforces business rules, local policy checks spend and
-margin today, SQLite records evidence, and the final Profit Outcome reports protected profit and
-blocked risk. Real NVIDIA NeMo Guardrails is the Goal 8 governed autonomy target; it is not wired
-yet and is not claimed as real.
+margin today, optional real NVIDIA NeMo Guardrails runtime probing is available through
+`nemo_guardrails` mode, SQLite records evidence, and the final Profit Outcome reports protected
+profit and blocked risk. Local policy remains the deterministic business-rule gate.
 
 The current proof is a functional live working product prototype, not a static mock. The operator
 logs in, creates or selects a saved local client operation, reviews money rules, starts a run for
@@ -49,6 +49,11 @@ Demo-readiness note:
   clearly labels demo/sandbox proof.
 - Full Proof Mode preserves real isolated Hermes and real Stripe test-mode proof when local
   ignored `.env` values are safely configured.
+- Goal 7.14B passed Full Proof local validation with synthetic Northstar data only: real isolated
+  Hermes ran, real Stripe test-mode invoice proof ran with `livemode=false`, Stripe invoice ID and
+  hosted invoice URL were present, `paid=false` remained unpaid, no real client email was used,
+  real NeMo runtime verification passed with `adapter_status=runtime_verified`, and local policy
+  remained active.
 - Goal 7.13A documents Connection Hub, the future MCP-shaped boundary, the Full Proof Mode
   real-tool demo plan, and the real NeMo requirement only. It does not implement MCP, NeMo, new UI,
   or backend behavior.
@@ -69,8 +74,9 @@ Full Proof Mode demo plan:
 - Keep Stripe `livemode=false`, show hosted invoice URL only when Stripe provides it, and never
   call `paid=false` paid.
 - Use synthetic Northstar data only.
-- Do not use live money, real client email, patient data, PHI, or real NeMo claims before NeMo is
-  wired and verified.
+- Do not use live money, real client email, patient data, or PHI.
+- Claim real NeMo only when `nemo_guardrails` runtime verification passes; otherwise keep
+  `used_real_nemo=false`.
 
 Invoice lifecycle:
 

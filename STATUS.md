@@ -5,10 +5,10 @@ Last updated: 2026-06-26
 ## Verified Current State
 
 - Project folder exists at `/home/ascabrya/dev/scalex-demo`.
-- Latest committed baseline before Goal 8B: `041751f Improve open-source checkout readiness`.
-- Last completed goal: Goal 8B - Real-NeMo-Ready Guardrail Adapter + Schema/API.
-- Last completed implementation/QA goal: Goal 7.12 - Make Start Run a Real Product Execution.
-- Last completed documentation/tracking update: Goal 8B - Real-NeMo-Ready Guardrail Adapter + Schema/API.
+- Latest committed baseline before Goal 7.14C docs update: `c0d2964 Add real-NeMo-ready guardrail adapter`.
+- Last completed goal: Goal 7.14B - Full Proof Local Validation With Configured Real Tools.
+- Last completed implementation/QA goal: Goal 7.14B - Full Proof Local Validation With Configured Real Tools.
+- Last completed documentation/tracking update: Goal 7.14C - Document Full Proof Local Validation Result.
 - Last completed checkout cleanup: Open Source Checkout Cleanup for judge readiness.
 - Current priority: Goal 8C - Guardrail Execution Rails in Run Lifecycle.
 - Goal 7.11B replaced the legacy Harbor sample with Northstar Dental Group / Client Implementation Launch.
@@ -29,6 +29,9 @@ Last updated: 2026-06-26
   `RailsConfig`; observed version is 0.21.0.
 - Goal 8B added the guardrail adapter boundary, optional real-NeMo runtime probing, SQLite
   guardrail evaluation persistence, API/UI proof fields, and setup/check scripts.
+- Goal 7.14B passed Full Proof local validation in a configured local-only environment with real
+  isolated Hermes, real Stripe test-mode invoice proof, real NeMo runtime verification, local
+  policy active, and synthetic Northstar data only.
 - Goal 9 remains final polish and submission assets.
 - Goal 7B remains future Verified Live Mode hardening.
 
@@ -139,6 +142,33 @@ Functional product surfaces remain:
 - Judge Demo Mode still works without secrets and with `used_real_nemo=false`.
 - No live Stripe keys, live money, Hermes production calls, production data, `.env` edits,
   SQLite `.db` files, data backups, secrets, or local venv files were added.
+
+## Verified For Goal 7.14B Full Proof Local Validation
+
+Goal 7.14B passed from a local-only configured environment. No repo files were edited during the
+validation run, and the temporary `/tmp/scalex-fullproof-validation.db` database was removed after
+inspection.
+
+- Baseline commit: `c0d2964 Add real-NeMo-ready guardrail adapter`.
+- `./scripts/test.sh` passed with 55 backend tests and a successful frontend build.
+- `./scripts/check-nemo.sh` passed with real NeMo runtime available.
+- Full Proof Start Run completed with synthetic Northstar data only.
+- Real isolated Hermes ran: `used_real_hermes=true`.
+- Real Stripe test-mode invoice proof ran: `used_real_stripe=true`, `stripe_mode=stripe_test`,
+  `livemode=false`, Stripe invoice ID present, hosted invoice URL present, and `paid=false`
+  remained unpaid and was not represented as Stripe-paid.
+- No real client email was used.
+- Real NeMo runtime verification ran: `used_real_nemo=true`, `adapter_status=runtime_verified`,
+  and `fail_closed=false`.
+- Local policy remained active as the deterministic business-rule gate.
+- SQLite proof counts: `planning_runs=1`, `stripe_events=4`, `policy_checks=4`,
+  `guardrail_evaluations=4`, `orchestration_calls=19`, `events=14`, `reports=1`, and
+  `ledger_entries=4`.
+- Economics verified: $1,150 approved setup spend, $3,200 blocked Unapproved Data Broker
+  Enrichment risk, $7,350 protected gross profit, and 86.5% protected margin.
+- Blocked spend created policy/evidence records and did not create a spend ledger row.
+- Safety boundaries preserved: no live money, no live Stripe key, no real client email, no
+  patient data, no PHI, no production Hermes, and no committed database changes.
 
 ## Verified For Open Source Checkout Cleanup
 
@@ -409,8 +439,8 @@ Research-to-Report, Ops Handoff, and Renewal Recommendation.
 ## Incomplete Items
 
 - Goal 8C Guardrail Execution Rails has not run yet.
-- Full Proof local validation with real isolated Hermes plus real Stripe test mode has not been
-  run after this docs update.
+- Goal 7.14B Full Proof local validation has passed; rerun it only before final recording or after
+  relevant integration changes.
 - Goal 7.13B Connection Hub UI has not been implemented yet.
 - Goal 7.13C MCP Server Prototype has not been implemented yet.
 - Real NeMo is not active by default; it is available only through optional `nemo_guardrails` mode
@@ -431,5 +461,7 @@ Research-to-Report, Ops Handoff, and Renewal Recommendation.
 
 Goal 8C - Guardrail Execution Rails in Run Lifecycle.
 
-Goal 8B is complete. Next work should deepen guardrail execution rails while preserving Judge Demo
-Mode as `local_policy` and `used_real_nemo=false` by default.
+Goal 7.14B Full Proof validation has passed. Next work should deepen guardrail execution rails
+while preserving Judge Demo Mode as `local_policy` and `used_real_nemo=false` by default, keeping
+Full Proof Mode honest about real Hermes, Stripe test mode, real NeMo runtime verification, local
+policy, and unpaid Stripe invoice state.
