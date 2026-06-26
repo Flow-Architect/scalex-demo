@@ -21,6 +21,15 @@ logs in, creates or selects a saved local client operation, reviews money rules,
 the active operation, watches the connected proof graph move, clicks proof nodes, reviews blocked
 risk, inspects persisted run history, and finishes with an audited profit outcome.
 
+ScaleX Connection Hub is documented as a planned internal product layer that will show which
+systems the ClientOps Autopilot is allowed to use, what execution mode each connector is in, what
+guardrails apply, which actions are blocked, which configuration is missing, and what evidence was
+recorded. Connection Hub supports the ClientOps Autopilot story; it is not a generic connector
+marketplace or MCP platform.
+
+MCP is documented as a future access pattern only. ScaleX does not currently expose an MCP server,
+external agents cannot yet call ScaleX through MCP, and the submission should not imply otherwise.
+
 Current implementation note:
 
 - Northstar Dental Group / Client Implementation Launch is the implemented sample.
@@ -33,14 +42,15 @@ Current implementation note:
 
 Demo-readiness note:
 
-- Goal 7.12 is planned before Goal 8A to make `Start Run` visibly execute the Northstar Client
-  Implementation Launch from run start through planning, finance proof, guardrail review, spend
-  decisions, work execution, evidence ledger, and profit outcome.
-- Judge Demo Mode should work without secrets using deterministic local proof/test-double records
-  and must clearly label demo/sandbox proof.
-- Full Proof Mode should preserve real isolated Hermes and real Stripe test-mode proof when local
+- Goal 7.12 is complete and makes `Start Run` visibly execute the Northstar Client Implementation
+  Launch from run start through planning, finance proof, guardrail review, spend decisions, work
+  execution, evidence ledger, and profit outcome.
+- Judge Demo Mode works without secrets using deterministic local proof/test-double records and
+  clearly labels demo/sandbox proof.
+- Full Proof Mode preserves real isolated Hermes and real Stripe test-mode proof when local
   ignored `.env` values are safely configured.
-- Goal 7.12 is not Goal 8 and does not wire real NeMo Guardrails.
+- Goal 7.13A documents Connection Hub, the future MCP-shaped boundary, and the Full Proof Mode
+  real-tool demo plan only. It does not implement MCP, NeMo, new UI, or backend behavior.
 
 Demo story:
 
@@ -50,12 +60,33 @@ Hermes plan onboarding and delivery, checks spend and vendor actions through loc
 NeMo Guardrails later, approves safe setup spend, blocks risky enrichment spend, coordinates work
 units, records evidence, and reports protected profit and launch status.
 
+Full Proof Mode demo plan:
+
+- Use real isolated Hermes planning.
+- Use real Stripe test-mode invoice creation/finalization.
+- Keep `used_real_hermes=true` and `used_real_stripe=true` only when those real adapters ran.
+- Keep Stripe `livemode=false`, show hosted invoice URL only when Stripe provides it, and never
+  call `paid=false` paid.
+- Use synthetic Northstar data only.
+- Do not use live money, real client email, patient data, PHI, or real NeMo claims before NeMo is
+  wired and verified.
+
+Invoice lifecycle:
+
+- Hermes plans the finance step but does not create or send invoices directly.
+- ScaleX backend executes approved finance actions.
+- Stripe returns test-mode invoice proof objects and hosted invoice URL when available.
+- ScaleX stores invoice proof in the Evidence Ledger.
+- Demo mode creates sandbox finance proof and does not call Stripe.
+- No mode should claim a real client was emailed unless an explicit send step exists and is verified.
+
 Truthfulness boundaries:
 
 - The login gate is local prototype auth, not production enterprise auth.
 - Workflow management is local/sample workflow management, not full multi-tenant SaaS.
 - The active spend authority is the local policy engine.
 - Real NeMo Guardrails is planned and not wired yet.
+- MCP is planned and not implemented yet.
 - Stripe payment status is labeled honestly; invoices are not called paid unless Stripe reports `paid=true`.
 - Test doubles stay clearly labeled and are not product-mode integrations.
 - Future live-money payments require Verified Live Mode.

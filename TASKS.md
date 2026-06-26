@@ -4,9 +4,8 @@
 
 Goal 8A - NeMo Guardrails Preflight / Architecture Audit.
 
-Goal 7.12 is complete after making Start Run visibly execute the Northstar client operation in
-honest Demo proof mode and preserving Full Proof Mode. Goal 8A remains intact and should run next
-unless the plan changes.
+Goal 7.13A is complete as a docs-only Connection Hub / MCP architecture update. Goal 8A remains
+intact and should run next unless the plan changes.
 
 ## Goal 7.11A Gate Result
 
@@ -66,6 +65,51 @@ Run Codex `/goal` 8A:
 - Decide whether real NeMo Guardrails or a NeMo-compatible layer is safely available.
 - Produce the exact Goal 8B implementation prompt.
 - Preserve product-mode truthfulness: local policy is active now and real NeMo is not wired yet.
+
+After Goal 8A, decide whether to run a small Full Proof local validation goal using safe ignored
+local credentials for real isolated Hermes plus real Stripe test mode, or to track that validation
+as Goal 7.14. Do not run that validation inside Goal 8A unless the prompt explicitly asks for it.
+
+Recommended sequence:
+
+1. Goal 8A - NeMo Guardrails Preflight / Architecture Audit.
+2. Full Proof local validation - verify real isolated Hermes plus real Stripe test mode if safe
+   ignored local credentials are configured.
+3. Goal 7.13B - Connection Hub UI.
+4. Goal 8B / 8C - Guardrail Adapter and Guardrail Execution Rails.
+5. Goal 7.13C - MCP Server Prototype if time allows and the guardrail/tool boundary is clear.
+6. Goal 9 - final recording/submission polish.
+
+## Goal 7.13A Gate Result
+
+Goal 7.13A - Connection Hub / MCP Architecture Docs with ClientOps Concept Lock and Full Proof
+Real-Tool Demo Plan is complete as a docs-only planning update.
+
+Completed:
+
+- Defined ScaleX Connection Hub as an internal ClientOps product layer that declares allowed
+  systems, connector modes, guardrails, missing config, blocked actions, and evidence duties.
+- Locked the product concept around ScaleX ClientOps Autopilot, not a generic MCP platform,
+  connector marketplace, integration dashboard, developer tool, Zapier/n8n clone, or agent
+  playground.
+- Documented MCP as a future access pattern only. ScaleX does not currently expose an MCP server,
+  external agents cannot yet call ScaleX through MCP, and no NeMo wiring is claimed.
+- Added a Full Proof Mode real-tool demo plan for real isolated Hermes planning plus real Stripe
+  test-mode invoice creation/finalization with synthetic Northstar data only.
+- Clarified invoice lifecycle: Hermes plans the finance step, ScaleX backend executes approved
+  finance actions, Stripe returns test-mode proof, and ScaleX stores proof in the Evidence Ledger.
+- Preserved Judge Demo Mode as safe without secrets and clearly labeled deterministic/sandbox proof.
+- Preserved Full Proof Mode as real isolated Hermes plus real Stripe test mode only when safe
+  ignored local credentials are configured.
+- Preserved Northstar economics: $8,500 revenue, $1,150 approved setup spend, $3,200 blocked risk,
+  $7,350 protected gross profit, 86.5% protected margin, and 50% margin floor.
+- Preserved truth boundaries: Northstar is synthetic, no patient data, no PHI, no HIPAA claim,
+  local policy active now, real NeMo Guardrails planned/not wired, no live-money support, and no
+  production auth claim.
+- Did not implement code, create an MCP server, add frontend UI, change backend behavior, run
+  Stripe API calls, run Hermes model calls, run Full Proof Mode live tests, implement Goal 8,
+  install/wire NeMo, edit `.env`, touch `data/*.db`, touch `data/backups`, create extra goal logs,
+  commit, or add secrets.
 
 ## Goal 7.12 Gate Result
 
@@ -147,7 +191,7 @@ the old card-dashboard shell with a ClientOps product workspace.
 
 ## Goal 8 Sequence
 
-Goal 8 remains planned as the governed autonomy layer after Goal 7.12. Goal 8A is now the next
+Goal 8 remains planned as the governed autonomy layer after Goal 7.13A. Goal 8A is now the next
 recommended goal. Do not start Goal 8B, 8C, 8D, or 8E before Goal 8A is complete.
 
 ### Goal 8A - NeMo Guardrails Preflight / Architecture Audit
@@ -191,6 +235,11 @@ recommended goal. Do not start Goal 8B, 8C, 8D, or 8E before Goal 8A is complete
 ## Required Product Facts To Preserve
 
 - ScaleX ClientOps Autopilot is an Enterprise Function Accelerator for revenue-backed client operations.
+- Connection Hub is an internal ScaleX product layer for allowed systems, modes, guardrails, and
+  evidence duties; it is not the product itself.
+- MCP is a future access pattern only; ScaleX does not currently expose an MCP server.
+- ScaleX must not be positioned as a generic MCP platform, connector marketplace, integration
+  dashboard, Zapier/n8n clone, developer tool first, or AI agent playground.
 - The demo video should be product usage in the browser.
 - Hosted judge demo mode must be safe and must not expose secrets.
 - Local full-proof mode can use ignored `.env` values for real isolated Hermes and Stripe test mode.
@@ -210,6 +259,14 @@ recommended goal. Do not start Goal 8B, 8C, 8D, or 8E before Goal 8A is complete
 
 ## Preserved Later Milestones
 
+Goal 7.13B - Connection Hub UI after Goal 8A unless a later planning pass explicitly justifies
+doing it earlier as UI-only. The view must support ClientOps Autopilot, not become a generic
+connector dashboard.
+
+Goal 7.13C - MCP Server Prototype after the guardrail/tool-boundary plan is clear. Start with
+read-only/resource-style tools where possible; no live-money tools, no real client data, and no
+policy/guardrail bypass.
+
 Goal 9 - Final polish and submission assets.
 
 Goal 7B / Production Hardening - Verified Live Mode for future live-money payments.
@@ -222,6 +279,8 @@ ScaleX code must enforce every safeguard and execute any allowed action.
 ## Do Not Work On Yet
 
 - Goal 8B, 8C, 8D, or 8E implementation before Goal 8A is complete.
+- Goal 7.13B Connection Hub UI before Goal 8A unless explicitly approved as a UI-only reorder.
+- Goal 7.13C MCP Server Prototype before the guardrail/tool-boundary plan is clear.
 - Live-money Stripe execution.
 - Real client data.
 - Public deployment.

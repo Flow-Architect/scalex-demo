@@ -17,11 +17,16 @@ policy-governed runs with finance proof, guardrail enforcement, and audit eviden
 is real-integration-first in the appropriate environment; test doubles are for automated tests,
 CI, offline development, or explicitly labeled diagnostics.
 
+Connection Hub and MCP planning must preserve this product identity. ScaleX is not a generic MCP
+platform, connector marketplace, integration dashboard, Zapier/n8n clone, developer tool first, or
+AI agent playground.
+
 ## Core Product Loop
 
 ```text
 Client operation intake
 -> Hermes/GPT-5.5 planning and routing
+-> ScaleX Connection Hub declares allowed systems, modes, guardrails, and evidence duties
 -> Stripe test invoice/payment-state proof
 -> ScaleX business-rule enforcement
 -> local policy guardrails now / NeMo Guardrails planned
@@ -53,12 +58,15 @@ Allowed wording before an integration is wired:
 - Hermes-style orchestration adapter
 - Stripe test-double event for tests/diagnostics
 - sandbox product prototype
+- Connection Hub planned/internal product layer
+- MCP planned/future access pattern
 - NeMo Guardrails planned/not wired
 
 Do not claim:
 
 - real NeMo Guardrails or NemoClaw integration
 - real Hermes production integration
+- implemented MCP server or external agent MCP access
 - live Stripe money movement outside Verified Live Mode
 - real customer workflow
 

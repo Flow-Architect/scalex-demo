@@ -10,6 +10,8 @@
   providers, operations teams, finance operations teams, and AI transformation teams.
 - Main goal: help B2B teams turn repeatable client operations into autonomous, revenue-backed,
   policy-governed runs with finance proof, guardrail enforcement, and audit evidence.
+- ScaleX must not be positioned as a generic MCP platform, generic connector marketplace,
+  integration dashboard, Zapier/n8n clone, developer tool first, or AI agent playground.
 - Product mode uses real integrations first in the appropriate environment: isolated Hermes Agent,
   Stripe test mode for Goal 7, real guardrail integration only when safe, and SQLite evidence records.
 - Mock/fallback/test-double paths are for automated tests, CI, local offline development, or
@@ -35,12 +37,17 @@
 ## Stack Decisions
 
 - Hermes plans and routes the client operation.
+- Connection Hub is a planned internal ScaleX product layer that declares allowed systems,
+  connector modes, guardrails, missing config, blocked actions, and evidence duties.
+- Connection Hub supports ClientOps Autopilot and is not the product itself.
 - Stripe provides finance proof through test invoice/payment state.
 - ScaleX code executes and enforces business rules.
 - Local policy is active now for spend, margin, vendor, and payment-before-spend enforcement.
 - NeMo Guardrails is planned after Goal 8 and is not wired yet.
 - SQLite is the evidence ledger.
 - Profit Outcome is the business result.
+- MCP is a future access pattern only. ScaleX does not currently expose an MCP server, external
+  agents cannot call ScaleX through MCP, and no docs should imply otherwise.
 
 ## Safety Decisions
 
@@ -72,6 +79,10 @@
 - Stripe test mode through the orchestration layer is the Goal 7 payment proof; test doubles are
   not product mode.
 - Goal 7 rejects live Stripe keys and any non-`sk_test_` key for Stripe test mode.
+- Hermes may plan a finance step, but ScaleX backend creates/finalizes approved Stripe test-mode
+  invoice proof in Full Proof Mode. Hermes does not directly create, send, or charge invoices.
+- No mode should claim a real client was emailed unless an explicit send step exists and is
+  verified.
 - Goal 8 is the governed autonomy layer with NVIDIA NeMo Guardrails or a NeMo-compatible adapter.
 - Goal 8A is the read-only preflight to decide whether real NeMo Guardrails, NemoClaw, or a
   NeMo-compatible adapter is safely available.
@@ -87,3 +98,10 @@
   - Full Proof Mode (`SCALEX_EXECUTION_MODE=full_proof`) preserves real isolated Hermes and real
     Stripe test mode when local ignored `.env` values are safely configured, and surfaces visible
     errors when misconfigured.
+- Goal 7.13A locked the Connection Hub / MCP architecture as docs-only planning:
+  - Active connector concepts: Hermes Planning, Stripe Finance Proof, Local Policy, SQLite
+    Evidence Ledger, and Prototype Auth.
+  - Planned connector concepts: NeMo Guardrails, Slack / Email approvals, CRM client context,
+    Docs / Notion workspace, and Calendar kickoff scheduling.
+  - Future MCP tools/resources/prompts must not expose secrets, bypass local policy or future NeMo
+    guardrails, use live money, or use real client data.

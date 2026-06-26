@@ -54,6 +54,7 @@ Onboarding, Research-to-Report, Ops Handoff, and Renewal Recommendation.
 ```text
 Client operation intake
 -> Hermes/GPT-5.5 plans and routes the operation
+-> ScaleX Connection Hub declares allowed systems, modes, guardrails, and evidence duties
 -> Stripe provides finance proof through test invoice/payment state
 -> ScaleX executes and enforces business rules
 -> local policy active now checks spend, margin, vendors, and payment-before-spend
@@ -95,6 +96,36 @@ Implemented today:
   Client Operations, Runs, Evidence Ledger, Integrations, and Settings.
 - Connected Function Studio page with proof nodes, selected-node inspector, persisted run history, and
   historical run inspection.
+- Judge Demo Mode as the default safe local execution path without secrets.
+- Full Proof Mode for safely configured real isolated Hermes plus real Stripe test mode.
+
+## Connection Hub And MCP Plan
+
+ScaleX Connection Hub is a planned internal product layer, not a separate product. It will show
+which systems the ClientOps Autopilot is allowed to use, which mode each connector is in, what
+guardrails apply, which actions are blocked, what configuration is missing, and what evidence was
+recorded.
+
+Active connector concepts documented today:
+
+- Hermes Planning
+- Stripe Finance Proof
+- Local Policy
+- SQLite Evidence Ledger
+- Prototype Auth
+
+Planned connector concepts:
+
+- NeMo Guardrails
+- Slack / Email approvals
+- CRM client context
+- Docs / Notion workspace
+- Calendar kickoff scheduling
+
+MCP is documented as a future access pattern only. ScaleX does not currently expose an MCP server,
+external agents cannot yet call ScaleX through MCP, and NeMo Guardrails is not wired yet. A future
+ScaleX MCP server may expose safe tools/resources/prompts only after the guardrail and tool
+boundary is clear, without exposing secrets, bypassing policy, or enabling live-money actions.
 
 ## Local Browser Demo
 
@@ -131,11 +162,30 @@ another synthetic/sample client operation, then open Function Studio and click `
 The run uses the active operation values and appends a new run record instead of
 overwriting prior history.
 
-Goal 7.12 is the planned next demo-proof pass before Goal 8A. It should make `Start Run` visibly
-execute from run start through Hermes planning, Stripe finance proof, guardrail review, approved
-setup spend, blocked risk, work execution, evidence ledger, and profit outcome. It should support
-Judge Demo Mode without secrets through deterministic local proof/test-double records, while
-preserving Full Proof Mode for safely configured real isolated Hermes and Stripe test mode.
+Goal 7.12 is complete: `Start Run` visibly executes from run start through Hermes planning,
+Stripe finance proof, guardrail review, approved setup spend, blocked risk, work execution,
+evidence ledger, and profit outcome.
+
+Judge Demo Mode is the default safe local path. It works without real secrets, uses deterministic
+local planning proof and Stripe test-double/sandbox finance proof, writes SQLite evidence records,
+and labels output as demo/sandbox proof.
+
+Full Proof Mode is available when ignored local `.env` values safely configure real isolated
+Hermes and Stripe test mode:
+
+```text
+SCALEX_EXECUTION_MODE=full_proof
+```
+
+Full Proof Mode should show `used_real_hermes=true` when real isolated Hermes ran,
+`used_real_stripe=true` when real Stripe test mode ran, `stripe_mode=stripe_test`,
+`livemode=false`, a Stripe invoice ID, a hosted invoice URL when Stripe provides it, and no paid
+claim unless Stripe reports `paid=true`.
+
+Hermes plans the finance step but does not create or send invoices directly. ScaleX backend
+executes approved finance actions, Stripe returns test-mode proof objects, and ScaleX stores that
+proof in the Evidence Ledger. Demo mode creates sandbox finance proof and does not call Stripe.
+No mode should claim a real client was emailed unless an explicit send step exists and is verified.
 
 In product mode, Stripe requires a local `.env` `sk_test_...` key and returns a visible Stripe
 integration error if test mode is not configured. Automated tests and CI use
@@ -195,9 +245,11 @@ These commands must not use live Stripe mode or production service credentials.
   creation/finalization, SQLite evidence ledger, local policy enforcement, local prototype auth,
   SQLite-backed local/sample workflows, selected-workflow runs, persisted run history, and browser
   product flow.
-- Test/diagnostic only: deterministic Hermes planning and Stripe test doubles in automated tests,
-  CI, offline development, or explicitly labeled diagnostics.
-- Planned next: Goal 7.12 makes `Start Run` visibly execute and populate Runs/Evidence Ledger.
-- After Goal 7.12: Goal 8A audits NeMo Guardrails availability without wiring real NeMo yet.
+- Judge Demo Mode: deterministic Hermes planning and Stripe test-double/sandbox proof for hosted
+  judge-safe demos, automated tests, CI, offline development, or explicitly labeled diagnostics.
+- Planned now: Goal 8A audits NeMo Guardrails availability without wiring real NeMo yet.
+- Planned after Goal 8A: Full Proof local validation with real isolated Hermes plus real Stripe
+  test mode if safe ignored local credentials are configured, then Connection Hub UI and later MCP
+  server prototype only after the guardrail/tool boundary is clear.
 - Future: Goal 8 governed autonomy with NVIDIA NeMo Guardrails or a NeMo-compatible adapter, Goal
   9 final submission prep, and Verified Live Mode before any live-money Stripe actions.

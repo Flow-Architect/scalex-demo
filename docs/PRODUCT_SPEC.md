@@ -12,6 +12,10 @@ Product mode is real-integration-first. Test doubles are for automated tests, CI
 development, or explicitly labeled diagnostics. Product-mode integration failures must become
 visible error states.
 
+Connection Hub and MCP planning must preserve ScaleX ClientOps Autopilot as the product. ScaleX
+is not a generic MCP platform, generic connector marketplace, integration dashboard, Zapier/n8n
+clone, developer tool first, or AI agent playground.
+
 ## Problem Statement
 
 B2B teams struggle to turn signed client work into coordinated execution because onboarding,
@@ -40,6 +44,8 @@ governed AI operations layer that can run those functions safely.
   with `invoice_status` and `paid` displayed honestly.
 - Stripe test-double payment records for tests and diagnostics.
 - Deterministic Finance, Marketing, Research, and Ops outputs for reliability.
+- Judge Demo Mode as the default safe local execution path without real secrets.
+- Full Proof Mode for safely configured real isolated Hermes plus real Stripe test mode.
 
 ## Current Template
 
@@ -65,14 +71,10 @@ Future templates, not implemented:
 - Ops Handoff
 - Renewal Recommendation
 
-## Planned Goal 7.12 Execution Pass
+## Execution Experience
 
-Goal 7.12 - Make Start Run a Real Product Execution is the next planned implementation task before
-Goal 8A. It is not implemented yet. It is a functionality and demo-proof pass, not a visual
-redesign.
-
-Goal 7.12 should make `Start Run` visibly execute the Northstar Client Implementation Launch from
-start to finish:
+Goal 7.12 made `Start Run` visibly execute the Northstar Client Implementation Launch from start
+to finish:
 
 - Run started.
 - Hermes planning step.
@@ -85,7 +87,7 @@ start to finish:
 - Profit outcome step.
 - Run completed, or clearly failed with an actionable reason.
 
-Product behavior required:
+Product behavior:
 
 - `Start Run` shows a visible running/loading state.
 - Function Studio shows step progression.
@@ -112,9 +114,121 @@ data, no PHI, no HIPAA claim, local policy active now, NeMo Guardrails planned/n
 live-money support, no production auth claim, and demo mode must not pretend to be real
 integration mode.
 
+## Connection Hub Product Layer
+
+ScaleX Connection Hub is planned as an internal product layer that shows what systems the
+ClientOps Autopilot is allowed to use. It is not the product itself.
+
+Connection Hub should answer:
+
+- Which systems can the agent use?
+- Which systems are active today?
+- Which systems are in Judge Demo Mode?
+- Which systems are in Full Proof Mode?
+- Which systems are planned?
+- Which connector is missing configuration?
+- Which actions are blocked by policy?
+- Which actions are unavailable or failed closed?
+- What evidence was recorded?
+
+Active connector concepts:
+
+- Hermes Planning
+- Stripe Finance Proof
+- Local Policy
+- SQLite Evidence Ledger
+- Prototype Auth
+
+Planned connector concepts:
+
+- NeMo Guardrails
+- Slack / Email approvals
+- CRM client context
+- Docs / Notion workspace
+- Calendar kickoff scheduling
+
+Connector statuses:
+
+- active
+- demo mode
+- full proof mode
+- planned
+- missing config
+- blocked by policy
+- unavailable
+- failed closed
+
+The Connection Hub should strengthen the ClientOps story by making execution authority visible
+inside a client operation. It should not read as a connector marketplace or generic integration
+dashboard.
+
+## Full Proof Mode Product Plan
+
+Full Proof Mode is the final local real-tool demo target when safe ignored `.env` credentials are
+configured.
+
+Target Full Proof Mode:
+
+- real isolated Hermes planning;
+- real Stripe test-mode invoice creation/finalization;
+- local policy guardrails;
+- SQLite evidence ledger;
+- synthetic Northstar data only;
+- no live money;
+- no real client email;
+- no patient data and no PHI;
+- no real NeMo claim until wired and verified.
+
+Expected proof:
+
+- Hermes proof shows `used_real_hermes=true` when real isolated Hermes ran and identifies the
+  planning source as real/isolated Hermes.
+- Stripe proof shows `used_real_stripe=true`, `stripe_mode=stripe_test`, `livemode=false`, invoice
+  ID, hosted invoice URL when provided, and no paid claim unless `paid=true`.
+- Policy proof shows local policy active, $1,150 approved setup spend, $3,200 Unapproved Data
+  Broker Enrichment blocked risk, 50% margin floor, and 86.5% protected margin.
+- Evidence proof shows timeline, orchestration/tool call records, Stripe finance proof, policy
+  checks, ledger entries, and final profit outcome.
+
+Invoice lifecycle:
+
+- Hermes plans the finance step.
+- Hermes does not create or send invoices directly.
+- ScaleX backend executes approved finance actions.
+- In Full Proof Mode, ScaleX uses Stripe test mode to create/finalize the invoice.
+- Stripe returns invoice proof objects and hosted invoice URL when available.
+- ScaleX stores invoice proof in the Evidence Ledger.
+- Demo mode creates sandbox finance proof and does not call Stripe.
+- No mode should claim a real client was emailed unless an explicit send step exists and is
+  verified.
+
+## Future MCP Boundary
+
+MCP is not the main product story. It is a future access pattern that could let external agents
+call ScaleX safely through approved tools, resources, and prompts.
+
+ScaleX does not currently have an MCP server, external agents cannot yet call ScaleX through MCP,
+and NeMo Guardrails is not wired yet.
+
+Future MCP tools may include `scalex_list_operations`, `scalex_get_operation`,
+`scalex_start_run`, `scalex_get_run`, `scalex_get_evidence`, `scalex_get_connector_status`, and
+`scalex_get_profit_outcome`.
+
+Future MCP resources may include `scalex://operations/current`, `scalex://runs/{run_id}`,
+`scalex://evidence/{run_id}`, `scalex://policy/current`, and `scalex://connectors/status`.
+
+Future MCP prompts may include `client_implementation_launch`, `invoice_to_cash`,
+`vendor_spend_review`, and `client_onboarding`.
+
+MCP tools must not expose secrets, bypass local policy or future NeMo guardrails, touch live
+money, use real client data, or skip evidence records. Action tools should fail closed when
+configuration or policy is invalid.
+
 ## Target Integrations
 
 - Hermes = planning and routing the client operation.
+- Connection Hub = allowed systems, connector modes, guardrails, missing config, blocked actions,
+  and evidence duties.
 - Stripe = finance proof / invoice / payment state.
 - ScaleX = execution and policy authority.
 - Local policy now = spend, margin, vendor, and payment-before-spend enforcement.

@@ -33,6 +33,7 @@ Maintain a functional local product shell showing:
 ```text
 Client operation intake
 -> Hermes/GPT-5.5 planning and routing
+-> ScaleX Connection Hub declares allowed systems, modes, guardrails, and evidence duties
 -> Stripe test invoice/payment-state proof
 -> ScaleX business-rule enforcement
 -> local policy guardrails now / NeMo Guardrails planned
@@ -41,8 +42,10 @@ Client operation intake
 -> Profit Outcome
 ```
 
-The next product goal is Goal 7.12: make `Start Run` visibly execute the Northstar Client
-Implementation Launch from run start through proof, evidence, and profit outcome before Goal 8A.
+Goal 7.12 is complete: `Start Run` visibly executes the Northstar Client Implementation Launch
+from run start through proof, evidence, and profit outcome. Goal 7.13A is complete as a docs-only
+Connection Hub / MCP architecture planning pass. The next product goal is Goal 8A: read-only NeMo
+Guardrails Preflight / Architecture Audit.
 
 ## Current Sample State
 
@@ -67,6 +70,10 @@ Harbor Fleet Services is historical only and is no longer the current implemente
 - No real Recall memory.
 - Must run locally from this Fedora laptop repo.
 - Do not claim real Hermes, NeMo Guardrails/NemoClaw, or Stripe integration unless it is actually wired and working.
+- Do not claim ScaleX has an MCP server or external agent MCP access; MCP is a future access
+  pattern only.
+- Keep Connection Hub positioned as an internal ClientOps Autopilot product layer, not a generic
+  connector dashboard or marketplace.
 - Do not propose fallback-first implementation goals.
 - Product acceptance criteria should prove real integration usage.
 - Local auth is prototype auth, not production enterprise identity.
@@ -78,18 +85,24 @@ Harbor Fleet Services is historical only and is no longer the current implemente
 
 ## Current Next Goals
 
-1. Goal 7.12 - Make Start Run a Real Product Execution.
-2. Goal 8A - NeMo Guardrails Preflight / Architecture Audit after Goal 7.12.
-3. Goal 8B - Guardrail Adapter + Schema/API after Goal 8A.
+1. Goal 8A - NeMo Guardrails Preflight / Architecture Audit.
+2. Full Proof local validation - verify real isolated Hermes plus real Stripe test mode if safe
+   ignored local credentials are configured.
+3. Goal 7.13B - Connection Hub UI.
+4. Goal 8B / 8C - Guardrail Adapter and Guardrail Execution Rails after Goal 8A.
+5. Goal 7.13C - MCP Server Prototype only after the guardrail/tool boundary is clear.
 
-Goal 7.12 is a functionality/demo-proof pass, not another visual redesign. It should make
-`Start Run` show visible execution, step progression, meaningful Evidence Drawer proof, Runs
-history, Evidence Ledger records, Dashboard latest-run status, count changes, and actionable
-failure states. It must preserve Judge Demo Mode without secrets and Full Proof Mode with real
-isolated Hermes / Stripe test mode when safely configured.
+Connection Hub is planned as the layer where ScaleX declares which systems Hermes and future
+agents can use, what mode each connector is in, what guardrails apply, which actions are blocked,
+what configuration is missing, and what evidence is recorded. It must support the ClientOps
+Autopilot story, not replace it.
+
+MCP is planned as a future safe access pattern. Possible future tools/resources/prompts must not
+expose secrets, bypass local policy or future NeMo guardrails, touch live money, or use real
+client data.
 
 Goal 8A is read-only and should audit whether real NeMo Guardrails or a NeMo-compatible adapter
-is safely available after Goal 7.12. Local policy is active now; real NeMo is not wired yet and
+is safely available after Goal 7.13A. Local policy is active now; real NeMo is not wired yet and
 must not be claimed as real until installed, wired, tested, and documented.
 
 ## Session Closeout Requirement

@@ -10,6 +10,49 @@ Use:
 
 ---
 
+## 2026-06-26 - Goal 7.13A: Connection Hub / MCP architecture docs
+
+Completed:
+- Added the ScaleX Connection Hub concept as a planned internal ClientOps product layer for
+  allowed systems, connector modes, guardrails, missing config, blocked actions, and evidence
+  duties.
+- Locked the product concept around ScaleX ClientOps Autopilot / Enterprise Function Accelerator
+  for revenue-backed client operations, not a generic MCP platform, connector marketplace,
+  integration dashboard, Zapier/n8n clone, developer tool first, or AI agent playground.
+- Documented active connector concepts: Hermes Planning, Stripe Finance Proof, Local Policy,
+  SQLite Evidence Ledger, and Prototype Auth.
+- Documented planned connector concepts: NeMo Guardrails, Slack / Email approvals, CRM client
+  context, Docs / Notion workspace, and Calendar kickoff scheduling.
+- Documented connector statuses: active, demo mode, full proof mode, planned, missing config,
+  blocked by policy, unavailable, and failed closed.
+- Documented MCP as a future access pattern only, including possible future ScaleX tools,
+  resources, and prompts, with no claim that an MCP server exists today.
+- Added a Full Proof Mode real-tool demo plan for real isolated Hermes planning plus real Stripe
+  test-mode invoice creation/finalization with synthetic Northstar data only.
+- Clarified invoice lifecycle: Hermes plans the finance step, ScaleX backend executes approved
+  finance actions, Stripe returns test-mode proof, and ScaleX stores proof in the Evidence Ledger.
+- Updated ROADMAP, TASKS, STATUS, README, START_HERE, AGENTS, DECISIONS, architecture, product,
+  demo, and submission docs.
+- Preserved Goal 8A as the next read-only preflight, preserved Goal 8B-8E, Goal 9, and Goal 7B,
+  and documented Full Proof local validation as a later validation step or small Goal 7.14.
+- Preserved safety boundaries: no code implementation, no MCP server, no frontend UI, no backend
+  behavior change, no Stripe API calls, no Hermes model calls, no Full Proof Mode live test, no
+  Goal 8 implementation, no NeMo install/wiring, no live-money support, no real client data, no
+  `.env` edits, no `data/*.db` edits, no `data/backups` edits, no extra goal logs, and no commit.
+
+Verified:
+- `git diff --check` passed.
+- Strict added-lines secret scan returned no matches.
+- `git status --short` was reviewed.
+
+Suggested commit message:
+Document Connection Hub and MCP boundary
+
+Next:
+- Goal 8A - NeMo Guardrails Preflight / Architecture Audit.
+
+---
+
 ## 2026-06-25 - Goal 7.12: Make Start Run a real product execution
 
 Completed:

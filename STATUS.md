@@ -1,14 +1,14 @@
 # STATUS - ScaleX ClientOps Autopilot
 
-Last updated: 2026-06-25
+Last updated: 2026-06-26
 
 ## Verified Current State
 
 - Project folder exists at `/home/ascabrya/dev/scalex-demo`.
-- Latest committed baseline before Goal 7.12: `92d278a Polish ClientOps demo visual consistency`.
-- Last completed goal: Goal 7.12 - Make Start Run a Real Product Execution.
+- Latest committed baseline before Goal 7.13A: `b8c9f68 Wire ScaleX favicon`.
+- Last completed goal: Goal 7.13A - Connection Hub / MCP Architecture Docs with ClientOps Concept Lock and Full Proof Real-Tool Demo Plan.
 - Last completed implementation/QA goal: Goal 7.12 - Make Start Run a Real Product Execution.
-- Last completed documentation/tracking update: Goal 7.12 closeout docs update.
+- Last completed documentation/tracking update: Goal 7.13A - Connection Hub / MCP Architecture Docs.
 - Current priority: Goal 8A - NeMo Guardrails Preflight / Architecture Audit.
 - Goal 7.11B replaced the legacy Harbor sample with Northstar Dental Group / Client Implementation Launch.
 - Goal 7.11C-followup replaced the remaining generated dashboard/card shell with a ClientOps
@@ -18,7 +18,9 @@ Last updated: 2026-06-25
   Function Studio into a more business-readable demo path, normalized primary proof labels, and
   verified the browser flow from login through logout.
 - Goal 7.12 made Start Run visibly execute the Northstar client operation end to end.
-- Goal 8A - NeMo Guardrails Preflight / Architecture Audit remains intact and planned after Goal 7.12.
+- Goal 7.13A documented Connection Hub, the future MCP-shaped boundary, and the Full Proof Mode
+  real-tool demo plan without changing code.
+- Goal 8A - NeMo Guardrails Preflight / Architecture Audit remains intact and planned after Goal 7.13A.
 - Goal 9 remains final polish and submission assets.
 - Goal 7B remains future Verified Live Mode hardening.
 
@@ -41,12 +43,16 @@ a governed AI operations layer that can run those functions safely.
 ## Stack Truth
 
 - Hermes plans and routes the client operation.
+- Connection Hub is now planned as the ScaleX product layer that declares allowed systems, modes,
+  guardrails, missing config, blocked actions, and evidence duties.
 - Stripe provides finance proof through test invoice/payment state.
 - ScaleX executes and enforces business rules.
 - Local policy is active now for spend, margin, vendor, and payment-before-spend enforcement.
 - NeMo Guardrails is planned after Goal 8 and is not wired yet.
 - SQLite records evidence.
 - Profit Outcome reports protected profit and blocked risk.
+- MCP is documented as a future access pattern only. ScaleX does not currently expose an MCP
+  server, external agents cannot yet call ScaleX through MCP, and no MCP implementation exists.
 
 ## Implemented Today
 
@@ -86,6 +92,41 @@ Functional product surfaces remain:
 - real Stripe test-mode invoice path when configured with `sk_test_...`
 - deterministic test-double paths for tests/CI/diagnostics only
 - local policy engine for current guardrail enforcement
+
+## Verified For Goal 7.13A
+
+- Added the ScaleX Connection Hub concept as a planned internal product layer for ClientOps
+  Autopilot. It declares which systems Hermes and future agents are allowed to use, what mode each
+  connector is in, what guardrails apply, what configuration is missing, which actions are blocked,
+  and what evidence is recorded.
+- Preserved the concept lock: ScaleX is business tooling for revenue-backed client operations, not
+  a generic MCP platform, generic connector marketplace, integration dashboard, Zapier/n8n clone,
+  developer tool first, or AI agent playground.
+- Documented active connector concepts: Hermes Planning, Stripe Finance Proof, Local Policy,
+  SQLite Evidence Ledger, and Prototype Auth.
+- Documented planned connector concepts: NeMo Guardrails, Slack / Email approvals, CRM client
+  context, Docs / Notion workspace, and Calendar kickoff scheduling.
+- Documented connector statuses: active, demo mode, full proof mode, planned, missing config,
+  blocked by policy, unavailable, and failed closed.
+- Documented MCP as a future access pattern that may expose safe ScaleX tools, resources, and
+  prompts only after the guardrail/tool boundary is clear. ScaleX does not currently expose an MCP
+  server and external agents cannot yet call ScaleX through MCP.
+- Added the Full Proof Mode real-tool demo plan: real isolated Hermes planning, real Stripe
+  test-mode invoice creation/finalization, local policy guardrails, SQLite evidence, synthetic
+  Northstar data only, no live money, no real client email, no patient data, no PHI, and no real
+  NeMo claim until wired and verified.
+- Clarified invoice lifecycle: Hermes plans the finance step; ScaleX backend executes approved
+  finance actions; Stripe returns test-mode invoice proof and hosted invoice URL when available;
+  ScaleX stores proof in the Evidence Ledger; Demo mode creates sandbox finance proof and does not
+  call Stripe.
+- Preserved Judge Demo Mode and Full Proof Mode truthfulness, including `used_real_hermes`,
+  `used_real_stripe`, `stripe_mode=stripe_test`, `livemode=false`, and no paid claim unless
+  Stripe reports `paid=true`.
+- Goal 8A, Goal 8B-8E, Goal 9, and Goal 7B / Verified Live Mode remain intact.
+- No code implementation, MCP server, frontend UI, backend behavior change, Stripe API call,
+  Hermes model call, Full Proof Mode live test, Goal 8 implementation, NeMo install/wiring,
+  live-money support, `.env` edit, `data/*.db` touch, `data/backups` touch, extra goal log, commit,
+  or secret addition was performed.
 
 ## Verified For Goal 7.12
 
@@ -219,6 +260,12 @@ Research-to-Report, Ops Handoff, and Renewal Recommendation.
 
 ## Verification Commands
 
+- For Goal 7.13A, `git diff --check` passed.
+- For Goal 7.13A, strict added-lines secret scan returned no matches.
+- For Goal 7.13A, no `.env`, SQLite `.db`, `data/backups`, `frontend/dist`, `CODEX_GOALS.md`, or
+  `GOAL_LOG.md` file was changed.
+- For Goal 7.13A, `CODEX_GOALS.md` and `GOAL_LOG.md` do not exist.
+- For Goal 7.13A, `git status --short` was reviewed.
 - For Goal 7.12, `./scripts/test.sh` passed: 49 backend tests and Vite production build.
 - For Goal 7.12, final auth-enabled browser QA passed on backend `8787` and frontend `5174`,
   using `/tmp/scalex-goal712-qa3.db`, `SCALEX_EXECUTION_MODE=demo`, `STRIPE_SECRET_KEY` unset,
@@ -279,8 +326,11 @@ Research-to-Report, Ops Handoff, and Renewal Recommendation.
 
 ## Incomplete Items
 
-- Goal 7.12 has not been implemented yet.
 - Goal 8A read-only NeMo Guardrails preflight has not run yet.
+- Full Proof local validation with real isolated Hermes plus real Stripe test mode has not been
+  run after this docs update.
+- Goal 7.13B Connection Hub UI has not been implemented yet.
+- Goal 7.13C MCP Server Prototype has not been implemented yet.
 - Real NVIDIA NeMo Guardrails is not wired yet.
 - Verified Live Mode live-money execution is not implemented.
 - Final demo recording and final submission assets are not complete.
@@ -295,6 +345,7 @@ Research-to-Report, Ops Handoff, and Renewal Recommendation.
 
 ## Current Priority
 
-Goal 7.12 - Make Start Run a Real Product Execution.
+Goal 8A - NeMo Guardrails Preflight / Architecture Audit.
 
-Goal 8A - NeMo Guardrails Preflight / Architecture Audit remains next after Goal 7.12.
+Goal 7.13A is complete as a docs-only Connection Hub / MCP architecture update. Goal 8A remains
+next and should stay read-only.
