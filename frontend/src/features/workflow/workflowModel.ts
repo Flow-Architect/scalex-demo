@@ -250,14 +250,14 @@ function buildSettledNodes(
   return [
     {
       key: "customer",
-      title: "Run Started",
-      eyebrow: "client intake",
+      title: "Input Rail",
+      eyebrow: "passed",
       proof: workflow
         ? `${workflow.client_name} - ${formatCurrency(workflow.invoice_amount_cents)} invoice`
         : job
           ? `${job.client_name} - ${formatCurrency(job.invoice_amount_cents)} invoice`
         : "Select or create a local client operation.",
-      badge: job ? "run started" : workflow ? "operation ready" : "needs operation",
+      badge: job ? "input passed" : workflow ? "operation ready" : "preloaded",
       status: workflow || job ? "complete" : "pending",
       tone: "teal",
       icon: Target,
@@ -266,8 +266,8 @@ function buildSettledNodes(
     },
     {
       key: "hermes",
-      title: "Hermes Plan",
-      eyebrow: "planning",
+      title: "Hermes Plan Created",
+      eyebrow: "planning rail",
       proof: planningProofText(planningRun, hermes),
       badge: planningBadgeLabel(planningRun?.source, hermes?.used_real_hermes),
       status: hermesFailed(hermes, planningRun)
@@ -284,7 +284,7 @@ function buildSettledNodes(
     },
     {
       key: "stripe",
-      title: "Stripe Finance Proof",
+      title: "Finance Rail",
       eyebrow: stripe?.used_real_stripe ? "Stripe test mode" : "sandbox finance",
       proof: stripe?.invoice_id
         ? `${stripe.customer_id ?? "customer not recorded"} / ${stripe.invoice_id}`
@@ -302,7 +302,7 @@ function buildSettledNodes(
     },
     {
       key: "payment",
-      title: "Revenue Gate",
+      title: "Revenue Gate Verified",
       eyebrow: "revenue gate",
       proof:
         stripe?.paid === true
@@ -329,7 +329,7 @@ function buildSettledNodes(
     },
     {
       key: "policy",
-      title: "Guardrail Review",
+      title: "Policy Rail",
       eyebrow: guardrails?.mode ? humanize(guardrails.mode) : "local guardrails",
       proof: guardrails
         ? `${execution?.guardrail_label ?? guardrails.adapter_status}; local policy active=${String(guardrails.local_policy_active)}`
@@ -355,8 +355,8 @@ function buildSettledNodes(
     },
     {
       key: "approved",
-      title: "Approved Resources",
-      eyebrow: "controlled setup",
+      title: "Approved Setup Spend",
+      eyebrow: "execution rail",
       proof:
         approvedChecks.length > 0
           ? `${formatCurrency(approvedChecks.reduce((total, check) => total + check.requested_amount_cents, 0))} approved`
@@ -370,7 +370,7 @@ function buildSettledNodes(
     },
     {
       key: "blocked",
-      title: "Blocked Risk",
+      title: "Blocked Risky Spend",
       eyebrow: "unsafe spend path",
       proof:
         blockedChecks.length > 0
@@ -385,8 +385,8 @@ function buildSettledNodes(
     },
     {
       key: "agents",
-      title: "Work Execution",
-      eyebrow: "deliverables",
+      title: "Execution Rail",
+      eyebrow: "work completed",
       proof: outputs.length > 0 ? `${outputs.length} deliverables recorded` : "Launch work appears after execution.",
       badge: outputs.length > 0 ? `${outputs.length}/4 outputs` : "awaiting work",
       status: outputs.length >= 4 ? "complete" : outputs.length > 0 ? "current" : "pending",
@@ -397,7 +397,7 @@ function buildSettledNodes(
     },
     {
       key: "audit",
-      title: "Evidence Ledger",
+      title: "Evidence Rail",
       eyebrow: "records",
       proof:
         auditRows > 0
@@ -423,10 +423,10 @@ function buildSettledNodes(
     },
     {
       key: "report",
-      title: "Profit Outcome",
+      title: "Profit Rail",
       eyebrow: "economics",
       proof: report
-        ? `${formatCurrency(report.gross_profit_cents)} profit, ${formatPercent(report.actual_margin_percent)} margin`
+        ? `${formatOptionalCurrency(money.grossProfitCents)} profit, ${formatPercent(money.marginPercent ?? report.actual_margin_percent)} margin`
         : "Final report appears after execution.",
       badge: report ? "report ready" : "awaiting outcome",
       status: report ? "complete" : "pending",

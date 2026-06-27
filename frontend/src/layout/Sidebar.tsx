@@ -29,7 +29,7 @@ export function Sidebar({
           </span>
           <div>
             <p className="text-lg font-semibold">ScaleX</p>
-            <p className="text-xs text-zinc-500">ClientOps workspace</p>
+            <p className="text-xs text-zinc-500">Governed ClientOps</p>
           </div>
         </div>
 

@@ -1,19 +1,18 @@
 # ScaleX ClientOps Autopilot Roadmap
 
 > **Project path:** `/home/ascabrya/dev/scalex-demo/`
-> **Product:** **ScaleX ClientOps Autopilot**
+> **Product:** **ScaleX ClientOps Autopilot** with judge-facing UI narrative **ScaleX Governed ClientOps**
 > **Category:** **Enterprise Function Accelerator**
-> **Pitch:** ScaleX helps B2B teams turn repeatable client operations into autonomous, revenue-backed, policy-governed runs with finance proof, guardrail enforcement, and audit evidence.
+> **Pitch:** ScaleX helps enterprise teams safely turn paid client work into governed AI-executed operations. Hermes plans the work, Stripe proves the financial state, NeMo checks actions before execution, and ScaleX records the evidence, blocks unsafe spend, and reports protected profit.
 
 ## Product Identity
 
 ScaleX ClientOps Autopilot is an Enterprise Function Accelerator for revenue-backed client operations.
 
-B2B teams struggle to turn signed client work into coordinated execution because onboarding,
-billing, vendor spend, approvals, task routing, and reporting are fragmented. AI can suggest
-next steps, but enterprises cannot safely let an agent execute client operations unless money,
-spend, policy, and evidence are governed. ScaleX gives them a governed AI operations layer that
-can run those functions safely.
+Enterprises want AI agents to help run client operations, but they cannot let raw agents touch
+money, vendors, client workflows, approvals, or internal systems without proof, policy, money
+control, and audit evidence. ScaleX gives them a governed execution layer for revenue-backed
+client operations.
 
 Core buyers:
 
@@ -63,7 +62,7 @@ Client operation intake
 -> NeMo Guardrails adapter available through nemoguardrails runtime verification
 -> optional NVIDIA NemoClaw / OpenShell / nemohermes API runtime for sandboxed Hermes planning
 -> SQLite records evidence
--> Profit Outcome reports protected profit and blocked risk
+-> Profit Outcome reports protected profit after approved spend and labor cost, plus blocked risk
 ```
 
 ScaleX code is the execution and policy authority. Hermes may plan and propose steps, but
@@ -246,8 +245,10 @@ Implemented current sample:
 - Margin floor: 50%
 - Approved setup spend: $350 Secure Workspace Pack, $500 Data Migration Sandbox, and $300 Launch Asset Kit
 - Blocked risk: $3,200 Unapproved Data Broker Enrichment
-- Profit outcome: $8,500 revenue, $1,150 approved setup spend, $3,200 blocked risk,
-  $7,350 protected gross profit, and 86.5% protected margin
+- Deterministic labor cost: $261.60
+- Protected profit after labor: $7,088.40
+- Protected margin after labor: 83.4%
+- Existing ledger gross profit before labor: $7,350 and 86.5%
 - Synthetic account only; no patient data, no PHI, no healthcare compliance claim, and no HIPAA
   support claim
 
@@ -260,8 +261,8 @@ Implemented product surfaces:
 - Vite React TypeScript product shell
 - local prototype auth
 - SQLite-backed local/sample workflow records
-- Dashboard, Onboarding, Customers, Studio, Runs, Audit/Evidence Ledger, Connection Hub, and Settings
-- connected Function Studio page with proof nodes and selected-node inspector
+- Dashboard, Onboarding, Customers, Governed Run Studio, Runs, Audit/Evidence Ledger, Connection Hub, and Settings
+- connected Governed Run Studio page with proof nodes and selected-node inspector
 - isolated Hermes planning in product mode
 - real Stripe test-mode invoice path when configured with `sk_test_...`
 - local policy enforcement for spend, margin, vendors, and payment-before-spend
@@ -289,8 +290,10 @@ Implemented demo numbers:
   - Total approved spend: $1,150
 - Blocked risky spend:
   - Unapproved Data Broker Enrichment: $3,200
-- Protected gross profit after approved spend: $7,350
-- Protected margin: 86.5%
+- Deterministic labor cost: $261.60
+- Protected profit after labor: $7,088.40
+- Protected margin after labor: 83.4%
+- Existing ledger gross profit before labor: $7,350 and 86.5%
 - Margin floor: 50%
 
 Future template candidates, not implemented yet:
@@ -326,10 +329,10 @@ Completed baseline:
 
 Suggested next sequence:
 
-1. Goal 8G - Telegram Human Approval Gate.
-2. Goal 7.13C - MCP Server Prototype only after NemoClaw, guardrail, and approval boundaries are
+1. Goal 8G - Enterprise Demo Narrative UI Lock.
+2. Goal 9 - Final polish and submission assets.
+3. Goal 7.13C - MCP Server Prototype only after NemoClaw, guardrail, and approval boundaries are
    safe.
-3. Goal 9 - Final polish and submission assets.
 4. Goal 7B / Production Hardening - Verified Live Mode for future live-money payments.
 
 Goal 7.14B Full Proof local validation passed in a local-only configured environment. It verified
@@ -554,8 +557,9 @@ depth visible in a clean 90-second judge path.
 
 Status:
 
-This product-depth plan is absorbed into Goal 8F, which expands it with document intake, employee
-onboarding, labor costing, and command-center proof panels.
+This product-depth plan was first absorbed into Goal 8F for document intake, employee onboarding,
+labor costing, and command-center proof panels. Goal 8G locks the judge-facing narrative around
+governed execution for revenue-backed client operations.
 
 Required improvements:
 
@@ -563,8 +567,8 @@ Required improvements:
    auth is enabled with local demo credentials, label it as prototype local auth and do not claim
    production auth. Avoid scary missing-config warnings during normal Judge Demo Mode.
 2. Command Center hero: first screen shows Northstar Dental Group, Client Implementation Launch,
-   revenue secured $8,500, approved setup spend $1,150, blocked risk $3,200, protected profit
-   $7,350, protected margin 86.5%, and a clear `Start Governed Run` CTA.
+   revenue secured $8,500, approved setup spend $1,150, blocked risk $3,200, labor cost $261.60,
+   protected profit $7,088.40, protected margin 83.4%, and a clear `Start Governed Run` CTA.
 3. Operation Catalog: show multiple ClientOps functions while only one needs to run now: Client
    Implementation Launch active demo; Invoice-to-Cash Follow-Up, Vendor Spend Review, Client
    Onboarding Checklist, and Renewal Risk Review planned.
@@ -572,9 +576,10 @@ Required improvements:
    allowlist/blocklist, blocked data broker enrichment, no PHI/patient data, no live money, no
    real client email, human approval over $1,000, NeMo Guardrails runtime verification, and
    NemoClaw sandbox target once wired.
-5. Run story timeline: make Start Run feel alive across input rail, Hermes plan, planning rail,
-   Stripe finance proof, execution rail, policy block, Telegram approval if required, Evidence
-   Ledger, output rail, and Profit Outcome.
+5. Run story timeline: make Start Governed Run feel alive across input rail, Hermes plan,
+   planning rail, Stripe finance proof, revenue gate, NeMo/local policy review, approved setup
+   spend, blocked risky vendor/data enrichment spend, Evidence Ledger, output rail, and Profit
+   Outcome.
 6. Evidence drill-down: show input rail passed, Hermes plan recorded, Stripe test invoice created
    when real test mode is used, NeMo Guardrails runtime verified when applicable, approved setup
    spend, policy-blocked data broker enrichment, no ledger spend row for blocked action, paid=false
@@ -590,9 +595,9 @@ Required improvements:
    for Hermes Planning, Stripe Finance Proof, NeMo Guardrails / local policy, NemoClaw / OpenShell
    Sandbox target, SQLite Evidence Ledger, Prototype Auth, Telegram Approval Gate planned,
    Slack/Email, CRM, Docs/Notion, Calendar planned, and MCP planned only.
-10. Demo recording path: support Command Center -> Start Governed Run -> Function Studio / Run
-    timeline -> Evidence Ledger -> Connection Hub -> Profit Outcome, with optional Telegram
-    approval moment once implemented.
+10. Demo recording path: support Command Center -> Start Governed Run -> Governed Run Studio /
+    Run timeline -> Evidence Ledger -> Connection Hub -> Profit Outcome. Telegram remains
+    planned/deferred unless explicitly reprioritized.
 
 ## Full Proof Mode Real-Tool Demo Plan
 
@@ -798,50 +803,57 @@ Labor math:
 - job profit = revenue - approved vendor spend - labor cost.
 - final margin = job profit / revenue.
 
-### Goal 8G - Telegram Human Approval Gate
+### Goal 8G - Enterprise Demo Narrative UI Lock
 
 Purpose:
 
-Telegram is not a chatbot-first feature. It is a human approval channel for risky actions.
+Goal 8G locks the judge-facing demo around ScaleX as a governed execution layer for
+revenue-backed client operations. It does not add new integrations.
 
-Flow:
+Required visible story:
 
-- ScaleX detects an action needs approval.
-- ScaleX creates a pending approval request.
-- ScaleX sends a Telegram approval card/message.
-- An authorized user approves or denies.
-- ScaleX verifies the decision.
-- ScaleX resumes or blocks the action.
-- Evidence Ledger records the decision.
+- Enterprises want AI agents to help run client operations, but cannot let raw agents touch money,
+  vendors, client workflows, approvals, or internal systems without proof, policy, money control,
+  and audit evidence.
+- ScaleX turns paid client work into a governed run: finance-backed, policy-checked,
+  guardrailed, and recorded before the agent can move the operation forward.
+- Hermes plans the work.
+- Stripe proves the financial state.
+- NeMo/local policy checks risky actions before execution.
+- ScaleX approves only allowed setup spend, blocks unsafe spend, records evidence, and reports
+  protected profit.
 
-Approval candidates:
+Demo story:
 
-- spend above approval threshold.
-- vendor spend near margin floor.
-- real Stripe invoice send if ever enabled.
-- real client email if ever enabled.
-- external connector action.
-- future MCP action requested by an external agent.
+- Client: Northstar Dental Group.
+- Operation: Client Implementation Launch.
+- Revenue secured: $8,500.
+- Approved setup spend: $1,150.
+- Blocked risky spend: $3,200.
+- Labor cost: $261.60.
+- Protected profit after labor: $7,088.40.
+- Protected margin after labor: 83.4%.
 
-Block outright, not approval-route:
+Visible run sequence:
 
-- PHI/patient data.
-- live-money attempt.
-- real client data where not allowed.
-- direct secret exposure.
-- policy bypass attempt.
+1. Input rail passed.
+2. Hermes plan created.
+3. Planning rail approved.
+4. Stripe finance proof created.
+5. Revenue gate verified.
+6. NeMo/local policy reviewed action.
+7. Controlled setup spend approved.
+8. Risky vendor/data enrichment spend blocked.
+9. Work execution completed.
+10. Evidence ledger recorded proof.
+11. Output rail verified paid-state honesty.
+12. Profit outcome recorded.
 
-Safety rules:
+Deferred:
 
-- allowlisted chat IDs only.
-- no secrets in Telegram messages.
-- no PHI or patient data in messages.
-- signed one-time approval token or approval ID.
-- expiry.
-- deny/expired means fail closed.
-- approval does not bypass NeMo/local policy/NemoClaw boundary.
-- re-check policy before execution.
-- every approval/denial writes evidence.
+- Telegram remains planned as a future human approval channel for risky but allowable actions.
+- MCP remains planned/future only.
+- Live-money execution remains future Verified Live Mode only.
 
 ## Goal 9 - Final Polish + Submission Assets
 

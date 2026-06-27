@@ -28,6 +28,7 @@ export function moneySnapshot(state: DemoState | null): MoneySnapshot {
   const report = state?.report ?? null;
   const totals = state?.ledger.totals ?? null;
   const placeholder = state?.report_placeholder ?? null;
+  const commandReport = state?.command_center?.final_profit_report ?? null;
   const job = state?.job ?? null;
   const workflow = state?.workflow ?? null;
   const hasLedgerRevenue = Boolean(totals && totals.revenue_cents > 0);
@@ -45,9 +46,11 @@ export function moneySnapshot(state: DemoState | null): MoneySnapshot {
       report?.blocked_spend_cents ??
       (hasPolicyChecks ? totals?.blocked_spend_cents ?? null : placeholder ? LOCKED_DEMO_BLOCKED_SPEND_CENTS : null),
     grossProfitCents:
+      commandReport?.gross_profit_after_labor_cents ??
       report?.gross_profit_cents ??
       (hasLedgerRevenue ? totals?.gross_profit_cents ?? null : placeholder?.expected_gross_profit_cents ?? null),
     marginPercent:
+      commandReport?.final_margin_after_labor_percent ??
       report?.actual_margin_percent ??
       report?.margin_percent ??
       (hasLedgerRevenue ? totals?.actual_margin_percent ?? null : placeholder?.expected_margin_percent ?? null),
@@ -88,7 +91,7 @@ export function runStatusLabel(
     return "Loading backend state";
   }
   if (busyAction === "run") {
-    return "Running selected client operation";
+    return "Running governed client operation";
   }
   if (busyAction === "reset") {
     return "Updating local data";

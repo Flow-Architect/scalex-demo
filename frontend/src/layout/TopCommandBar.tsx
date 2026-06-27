@@ -41,7 +41,7 @@ export function TopCommandBar({
       <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-2">
-            <StatusBadge icon={ShieldCheck} label="ScaleX ClientOps Autopilot" tone="emerald" />
+            <StatusBadge icon={ShieldCheck} label="ScaleX Governed ClientOps" tone="emerald" />
             <StatusBadge icon={Activity} label={runStatus} tone="sky" />
           </div>
           <div className="mt-3 min-w-0">
@@ -65,7 +65,7 @@ export function TopCommandBar({
             ) : (
               <Play className="h-4 w-4" aria-hidden="true" />
             )}
-            {busyAction === "run" ? "Running..." : "Start Run"}
+            {busyAction === "run" ? "Running governed run..." : "Start Governed Run"}
           </button>
           <button
             className="inline-flex min-h-11 items-center justify-center gap-2 rounded-md border border-zinc-300 bg-white px-4 py-3 text-sm font-semibold text-zinc-900 transition hover:bg-zinc-50 disabled:cursor-not-allowed disabled:text-zinc-400"

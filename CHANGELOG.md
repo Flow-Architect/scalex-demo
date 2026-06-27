@@ -10,6 +10,55 @@ Use:
 
 ---
 
+## 2026-06-27 - Goal 8G: Enterprise governed execution demo lock
+
+Completed:
+- Repositioned the judge-facing UI around ScaleX as a governed execution layer for
+  revenue-backed client operations.
+- Locked the core demo line: Hermes plans the work, Stripe proves the financial state,
+  NeMo/local policy checks actions before execution, and ScaleX records evidence, blocks unsafe
+  spend, and reports protected profit.
+- Documented the Northstar Dental Group / Client Implementation Launch story with $8,500 revenue,
+  $1,150 approved setup spend, $3,200 blocked risky spend, $261.60 deterministic labor cost,
+  $7,088.40 protected profit after labor, and 83.4% protected margin after labor.
+- Preserved the existing ledger gross-profit truth: $7,350 before labor and 86.5% gross margin.
+- Locked the visible run sequence: input rail, Hermes plan, planning rail, Stripe finance proof,
+  revenue gate, NeMo/local policy review, approved setup spend, blocked risky vendor/data
+  enrichment spend, work execution, evidence ledger, output rail, and profit outcome.
+- Updated the dashboard first screen with the requested headline, subheadline, Northstar primary
+  operation card, Start Governed Run CTA, Review Evidence Ledger CTA, visible execution stack,
+  Enterprise Pain -> ScaleX Control panel, Control Stack, Governed Execution Rails, Blocked Risk
+  Control, central Economic Control, Evidence Ledger Preview, and Why This Is Not Zapier panel.
+- Relabeled active UI language from Function Studio / Start Run / ClientOps Autopilot toward
+  Governed Run Studio / Start Governed Run / ScaleX Governed ClientOps.
+- Added enterprise audit columns to the Evidence Ledger page and kept raw proof in supporting
+  sections.
+- Kept Business Intake, Document Intake Review, and Workforce Costing as supporting modules.
+- Corrected the current deterministic labor model to $261.60, protected profit after labor to
+  $7,088.40, and protected margin after labor to 83.4%.
+- Deferred Telegram approval, MCP, live Stripe, Full Proof runs, Docker/NemoClaw commands,
+  production payroll/HR behavior, and external extraction services out of this goal.
+
+Verification:
+- Docs-first `git diff --check` passed before implementation.
+- `cd frontend && npm run build` passed.
+- `./scripts/test.sh` passed with 68 backend tests and a successful frontend build.
+- `./scripts/check-nemo.sh` passed with `nemoguardrails` 0.21.0 and `guardrails/scalex` loaded.
+- Post-implementation frontend label scan found no active old UI wording for Function Studio,
+  Function Map, Start Run, ClientOps Autopilot, No workflow selected, Create or select a workflow,
+  or Harbor Auto Care.
+- Unsafe/generated file scan returned no matches.
+- Local dev-server smoke was attempted with a `/tmp` database, but sandbox socket binding blocked
+  uvicorn and escalation was rejected. No workaround was attempted.
+
+Suggested commit message:
+Lock enterprise governed execution demo
+
+Next:
+- Goal 9 - final repo/video/submission polish.
+
+---
+
 ## 2026-06-27 - Goal 8F: Command center, intake, and labor costing
 
 Completed:
@@ -47,7 +96,7 @@ Suggested commit message:
 Deepen ScaleX command center with intake and labor costing
 
 Next:
-- Goal 8G - Telegram Human Approval Gate.
+- Goal 8G - Enterprise Demo Narrative UI Lock.
 
 ---
 

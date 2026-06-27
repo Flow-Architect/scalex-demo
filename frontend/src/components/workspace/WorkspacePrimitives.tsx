@@ -85,7 +85,7 @@ export function OperationHero({
         {actions ? <div className="mt-8 flex flex-col gap-3 sm:flex-row">{actions}</div> : null}
       </div>
       <aside className="border-t border-zinc-200 bg-zinc-50 px-6 py-7 sm:px-8 xl:border-l xl:border-t-0">
-        <p className="text-sm font-semibold uppercase text-zinc-500">Operation file</p>
+        <p className="text-sm font-semibold uppercase text-zinc-500">Primary operation</p>
         <div className="mt-5 divide-y divide-zinc-200">
           {states.map((item) => {
             const Icon = item.icon ?? CheckCircle2;
@@ -110,7 +110,7 @@ export function OperationHero({
 export function OutcomeRail({ items }: { items: RailItem[] }) {
   return (
     <section className="overflow-hidden rounded-md bg-white shadow-sm ring-1 ring-zinc-200" aria-label="Outcome ledger">
-      <div className="grid divide-y divide-zinc-200 sm:grid-cols-2 sm:divide-x sm:divide-y-0 xl:grid-cols-5">
+      <div className="grid divide-y divide-zinc-200 sm:grid-cols-2 sm:divide-x sm:divide-y-0 xl:grid-cols-6">
         {items.map((item) => (
           <div className="px-5 py-5 sm:px-6" key={item.label}>
             <p className="text-xs font-semibold uppercase text-zinc-500">{item.label}</p>
@@ -126,7 +126,7 @@ export function OutcomeRail({ items }: { items: RailItem[] }) {
 
 export function OperationTimeline({ steps }: { steps: TimelineStep[] }) {
   return (
-    <ol className="grid gap-0 overflow-hidden rounded-md bg-white shadow-sm ring-1 ring-zinc-200 lg:grid-cols-6">
+    <ol className="grid gap-0 overflow-hidden rounded-md bg-white shadow-sm ring-1 ring-zinc-200 lg:grid-cols-4">
       {steps.map((step, index) => {
         const Icon = step.icon;
         return (

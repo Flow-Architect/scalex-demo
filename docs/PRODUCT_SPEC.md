@@ -1,12 +1,14 @@
-# ScaleX ClientOps Autopilot Product Spec
+# ScaleX Governed ClientOps Product Spec
 
-ScaleX ClientOps Autopilot is an Enterprise Function Accelerator for revenue-backed client operations.
+ScaleX Governed ClientOps is the judge-facing demo narrative for ScaleX ClientOps Autopilot, an
+Enterprise Function Accelerator for revenue-backed client operations.
 
 ## Product Standard
 
-ScaleX proves a real client-operations loop: intake a repeatable client operation, route the work
-through Hermes, create finance proof through Stripe test mode, approve only policy-safe spend,
-coordinate agent work, record evidence, and produce a protected-profit report.
+ScaleX proves a real client-operations loop: intake a repeatable paid client operation, route the
+work through Hermes, create finance proof through Stripe test mode, approve only policy-safe
+spend, block unsafe spend, coordinate agent work, record evidence, and produce a protected-profit
+report.
 
 Product mode is real-integration-first. Test doubles are for automated tests, CI, offline
 development, or explicitly labeled diagnostics. Product-mode integration failures must become
@@ -18,10 +20,82 @@ clone, developer tool first, or AI agent playground.
 
 ## Problem Statement
 
-B2B teams struggle to turn signed client work into coordinated execution because onboarding,
-billing, vendor spend, approvals, task routing, and reporting are fragmented. ScaleX gives them a
-governed execution layer for revenue-backed client operations, so agents can touch operations,
-finance proof, approvals, and evidence only inside safe boundaries.
+Enterprises want AI agents to help run client operations, but they cannot let raw agents touch
+money, vendors, client workflows, approvals, or internal systems without proof, policy, money
+control, and audit evidence.
+
+ScaleX is the governed execution layer for revenue-backed client operations. Hermes plans the
+work, Stripe proves the financial state, NeMo/local policy checks risky actions before execution,
+ScaleX blocks unsafe actions, and the evidence ledger records proof. The product is not a generic
+workflow app, chatbot, integration dashboard, Zapier/n8n clone, developer tool first, or AI agent
+playground.
+
+Core demo line:
+
+> ScaleX helps enterprise teams safely turn paid client work into governed AI-executed operations.
+> Hermes plans the work, Stripe proves the financial state, NeMo checks actions before execution,
+> and ScaleX records the evidence, blocks unsafe spend, and reports protected profit.
+
+## Goal 8G Scope - Enterprise Demo Narrative UI Lock
+
+Goal 8G rewrites and polishes the demo UI so the first 10 seconds clearly communicate:
+
+```text
+Governed execution for revenue-backed client operations
+
+Hermes plans the work. Stripe proves the money. NeMo checks every risky action.
+ScaleX blocks unsafe execution, records evidence, and protects profit.
+```
+
+Primary operation:
+
+- Client: Northstar Dental Group.
+- Operation: Client Implementation Launch.
+- Revenue secured: $8,500.
+- Approved setup spend: $1,150.
+- Blocked risky spend: $3,200.
+- Deterministic labor cost from Goal 8F: $261.60.
+- Protected profit after labor: $7,088.40.
+- Protected margin after labor: 83.4%.
+- Existing ledger gross profit before labor remains $7,350 and 86.5%.
+- Formula: protected profit = revenue - approved setup spend - labor cost; protected margin =
+  protected profit / revenue.
+
+Visible run sequence:
+
+1. Input rail passed.
+2. Hermes plan created.
+3. Planning rail approved.
+4. Stripe finance proof created.
+5. Revenue gate verified.
+6. NeMo/local policy reviewed action.
+7. Controlled setup spend approved.
+8. Risky vendor/data enrichment spend blocked.
+9. Work execution completed.
+10. Evidence ledger recorded proof.
+11. Output rail verified paid-state honesty.
+12. Profit outcome recorded.
+
+Prominent UI modules:
+
+- First-screen hero with the headline, subheadline, Northstar operation card, metrics, Start
+  Governed Run, Review Evidence Ledger, and execution stack.
+- Enterprise pain -> ScaleX control section.
+- Control Stack panel: Hermes, Stripe, NeMo/local policy, and ScaleX.
+- Governed execution rails: Input, Planning, Finance, Policy, Execution, Output, Evidence, and
+  Profit.
+- Blocked-risk moment for Data broker enrichment / premium vendor spend, requested amount $3,200,
+  blocked decision, policy/margin/vendor reason, and protected-margin impact.
+- Economic Control with revenue secured, approved setup spend, blocked risky spend, labor cost,
+  protected profit, protected margin, margin floor, and formulas.
+- Evidence Ledger with timestamp/order, actor/system, action, result, evidence type, and safety
+  note.
+- Business Intake, Document Intake Review, and Workforce Costing remain supporting modules, not
+  the demo centerpiece.
+
+Out of scope for Goal 8G: Telegram implementation, MCP implementation, new external services,
+real Stripe runs, Full Proof runs, Docker/NemoClaw commands, production payroll/HR behavior,
+external extraction services, live money, real client data, and secrets.
 
 ## Goal 8F Scope - Command Center, Intake, And Labor Costing
 
@@ -172,9 +246,9 @@ Non-secret audit/proof events may include:
 - Local FastAPI backend and Vite React product shell.
 - Local prototype auth gate.
 - SQLite-backed local/sample client operation management with Northstar Dental Group defaults.
-- Product navigation for Dashboard, Function Studio, Onboarding, Client Operations, Runs,
+- Product navigation for Dashboard, Governed Run Studio, Onboarding, Client Operations, Runs,
   Evidence Ledger, Connection Hub, and Settings.
-- Connected Function Studio page for the autonomous run, with approved setup spend and blocked risk branches.
+- Connected Governed Run Studio page for the autonomous run, with approved setup spend and blocked risk branches.
 - Right selected-node inspector for Run Summary, Client Intake, Hermes Plan, Finance Proof,
   Revenue Gate, Guardrail Review, Approved Resources, Blocked Risk, Evidence Ledger, and Profit
   Outcome proof.
@@ -215,8 +289,10 @@ Implemented today:
 - Story: a multi-location client purchased an implementation package. ScaleX launches the
   client operation, confirms revenue, creates finance proof, checks business rules, blocks risky
   spend, coordinates work units, records evidence, and reports protected profit and launch status.
-- Numbers: $8,500 revenue, $1,150 approved setup spend, $3,200 blocked risk,
-  $7,350 protected gross profit, 86.5% protected margin, and a 50% margin floor.
+- Numbers: $8,500 revenue, $1,150 approved setup spend, $3,200 blocked risk, $261.60
+  deterministic labor cost, $7,088.40 protected profit after labor, 83.4% protected margin after
+  labor, $7,350 ledger gross profit before labor, 86.5% ledger gross margin before labor, and a
+  50% margin floor.
 - Harbor Fleet Services is historical only and is no longer the current implemented sample.
 
 Future templates, not implemented:
@@ -230,7 +306,7 @@ Future templates, not implemented:
 
 ## Execution Experience
 
-Goal 7.12 made `Start Run` visibly execute the Northstar Client Implementation Launch from start
+Goal 7.12 made `Start Governed Run` visibly execute the Northstar Client Implementation Launch from start
 to finish:
 
 - Run started.
@@ -246,9 +322,9 @@ to finish:
 
 Product behavior:
 
-- `Start Run` shows a visible running/loading state.
-- Function Studio shows step progression.
-- Function Map highlights pending, running, complete, and blocked states.
+- `Start Governed Run` shows a visible running/loading state.
+- Governed Run Studio shows step progression.
+- Governed rail map highlights pending, running, complete, and blocked states.
 - Evidence Drawer updates with meaningful proof.
 - Runs gets a new execution.
 - Evidence Ledger gets timeline, orchestration, ledger, Stripe, and policy proof.
@@ -334,8 +410,8 @@ Required future improvements:
    auth is enabled locally with demo credentials, show prototype local auth clearly and do not
    claim production auth. Avoid scary missing-config warnings in normal Judge Demo Mode.
 2. Command Center hero: immediately show Northstar Dental Group, Client Implementation Launch,
-   revenue secured $8,500, approved setup spend $1,150, blocked risk $3,200, protected profit
-   $7,350, protected margin 86.5%, and `Start Governed Run`.
+   revenue secured $8,500, approved setup spend $1,150, blocked risk $3,200, labor cost $261.60,
+   protected profit $7,088.40, protected margin 83.4%, and `Start Governed Run`.
 3. Operation Catalog: show ScaleX is repeatable across Client Implementation Launch active demo,
    Invoice-to-Cash Follow-Up planned, Vendor Spend Review planned, Client Onboarding Checklist
    planned, and Renewal Risk Review planned.
@@ -343,9 +419,9 @@ Required future improvements:
    blocked data broker enrichment, no PHI/patient data, no live money, no real client email, human
    approval over $1,000, NeMo Guardrails runtime verification, and NemoClaw sandbox target once
    wired.
-5. Run story timeline: input rail, Hermes plan, planning rail, Stripe finance proof, execution
-   rail, policy block, Telegram approval if required, Evidence Ledger, output rail, and Profit
-   Outcome.
+5. Run story timeline: input rail, Hermes plan, planning rail, Stripe finance proof, revenue gate,
+   NeMo/local policy review, controlled setup spend approved, risky vendor/data enrichment spend
+   blocked, Evidence Ledger, output rail, and Profit Outcome.
 6. Evidence drill-down: input rail passed, Hermes plan recorded, Stripe test invoice created when
    real test mode is used, NeMo Guardrails runtime verified when applicable, approved setup spend,
    policy-blocked data broker enrichment, no ledger spend row for blocked action, `paid=false`
@@ -361,9 +437,9 @@ Required future improvements:
    Guardrails / local policy, NemoClaw / OpenShell Sandbox target, SQLite Evidence Ledger,
    Prototype Auth, Telegram Approval Gate planned, Slack/Email, CRM, Docs/Notion, Calendar
    planned, and MCP planned only.
-10. Demo recording path: Command Center -> Start Governed Run -> Function Studio / Run timeline ->
-    Evidence Ledger -> Connection Hub -> Profit Outcome, with optional Telegram approval moment
-    once implemented.
+10. Demo recording path: Command Center -> Start Governed Run -> Governed Run Studio / run
+    timeline -> Evidence Ledger -> Connection Hub -> Profit Outcome. Telegram remains
+    planned/deferred unless explicitly reprioritized.
 
 ## Full Proof Mode Product Plan
 

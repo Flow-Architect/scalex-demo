@@ -17,11 +17,11 @@ export function Header({ health, loading }: HeaderProps) {
           <div className="flex items-center gap-2">
             <ShieldCheck className="h-5 w-5 text-emerald-700" aria-hidden="true" />
             <p className="text-sm font-semibold uppercase tracking-wide text-emerald-700">
-              ScaleX ClientOps Autopilot
+              ScaleX Governed ClientOps
             </p>
           </div>
           <p className="mt-1 text-sm text-slate-600">
-            Enterprise Function Accelerator for revenue-backed client operations.
+            Governed execution for revenue-backed client operations.
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-3 text-sm">
@@ -34,7 +34,7 @@ export function Header({ health, loading }: HeaderProps) {
                 : "Backend offline"}
           </span>
           <span className="inline-flex rounded-md border border-emerald-200 bg-emerald-50 px-3 py-2 font-medium text-emerald-800">
-            Product test mode
+            Judge demo mode
           </span>
         </div>
       </div>

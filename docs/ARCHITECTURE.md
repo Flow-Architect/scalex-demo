@@ -1,6 +1,7 @@
-# ScaleX ClientOps Autopilot Architecture
+# ScaleX Governed ClientOps Architecture
 
-ScaleX ClientOps Autopilot is an Enterprise Function Accelerator for revenue-backed client operations.
+ScaleX Governed ClientOps is the judge-facing demo narrative for ScaleX ClientOps Autopilot, an
+Enterprise Function Accelerator for revenue-backed client operations.
 
 ## Target Architecture
 
@@ -8,7 +9,7 @@ ScaleX ClientOps Autopilot is an Enterprise Function Accelerator for revenue-bac
 ScaleX UI
   -> local prototype auth gate
   -> SQLite-backed local/sample client operation records
-  -> product shell with Dashboard, Function Studio, Onboarding, Client Operations, Runs, Evidence Ledger, Connection Hub, Settings
+  -> product shell with Dashboard, Governed Run Studio, Onboarding, Client Operations, Runs, Evidence Ledger, Connection Hub, Settings
   -> FastAPI backend
   -> isolated Hermes planning and routing
   -> ScaleX Connection Hub for allowed systems, modes, guardrails, and evidence duties
@@ -38,7 +39,67 @@ ScaleX UI
   the NeMo Guardrails adapter.
 - SQLite records evidence for planning, orchestration, finance proof, policy checks, ledger rows,
   agent outputs, and final reports.
-- Profit Outcome reports protected profit and blocked risk.
+- Profit Outcome reports protected profit after approved spend and labor cost, plus blocked risk.
+
+## Goal 8G Enterprise Demo Architecture
+
+Goal 8G is a narrative/UI lock, not an integration expansion. It keeps the existing backend and
+execution modes while making the browser product show ScaleX as the governed execution layer for
+paid client work.
+
+Judge-facing architecture:
+
+```text
+Business Intake
+-> Input Rail validates synthetic/local client operation context
+-> Hermes creates the plan
+-> Planning Rail approves bounded work
+-> Stripe creates finance proof through demo/test-safe path
+-> Revenue Gate verifies the finance state honestly
+-> NeMo/local policy reviews risky actions
+-> ScaleX approves controlled setup spend
+-> ScaleX blocks risky vendor/data enrichment spend
+-> Agent work executes only inside allowed boundaries
+-> Evidence Ledger records proof
+-> Output Rail verifies paid-state honesty and safety claims
+-> Profit Rail records protected profit and margin
+```
+
+The first-screen Control Stack should make responsibilities explicit:
+
+- Hermes - Planner / Operator Brain: creates the client implementation plan and proposes next
+  actions.
+- Stripe - Finance Proof: provides test-mode invoice/payment proof and keeps the run financially
+  grounded.
+- NeMo / Local Policy - Guardrail Runtime: checks risky actions before execution and blocks unsafe
+  behavior.
+- ScaleX - Enterprise Control Plane: executes only what is allowed, records evidence, blocks risk,
+  and reports protected profit.
+
+Goal 8G exact Northstar economics:
+
+- Revenue secured: $8,500.
+- Approved setup spend: $1,150.
+- Blocked risky spend: $3,200.
+- Deterministic labor cost: $261.60.
+- Protected profit after labor: $7,088.40.
+- Protected margin after labor: 83.4%.
+- Existing ledger gross profit before labor: $7,350 and 86.5%.
+
+Profit formulas:
+
+```text
+protected_profit = revenue - approved_setup_spend - labor_cost
+protected_margin = protected_profit / revenue
+```
+
+Evidence Ledger should present enterprise audit fields: timestamp/order, actor/system, action,
+result, evidence type, and safety note. Raw debug data can remain available only as supporting
+detail, not the primary narrative.
+
+Goal 8G must not add Telegram, MCP, new external services, real Stripe runs, Full Proof runs,
+Docker/NemoClaw commands, production payroll/HR behavior, external extraction services, live
+money, real client data, or secrets.
 
 ## Goal 8F Command Center Architecture
 
@@ -107,8 +168,8 @@ or live-money operations.
 ## Implemented Today
 
 - Vite React TypeScript frontend.
-- Product shell with login, Dashboard, Function Studio, Onboarding, Client Operations, Runs, Evidence Ledger, Connection Hub, and Settings views.
-- Function Studio route with connected proof nodes and right selected-node inspector.
+- Product shell with login, Dashboard, Governed Run Studio, Onboarding, Client Operations, Runs, Evidence Ledger, Connection Hub, and Settings views.
+- Governed Run Studio route with connected proof nodes and right selected-node inspector.
 - FastAPI backend.
 - SQLite evidence ledger at `data/scalex.db`.
 - Deterministic `command_center` API state for Mission Control, runtime proof, client/employee
@@ -141,7 +202,7 @@ business tooling for revenue-backed client operations and a governed execution l
 Stripe, policy/guardrails, and evidence. It is not a generic MCP platform, connector marketplace,
 integration dashboard, Zapier/n8n clone, developer tool first, or AI agent playground.
 
-The demo should stay centered on Dashboard -> Function Studio -> Start Run -> visible execution ->
+The demo should stay centered on Dashboard -> Governed Run Studio -> Start Governed Run -> visible execution ->
 Evidence Drawer -> Runs -> Evidence Ledger -> Connection Hub.
 
 ## Connection Hub Architecture
@@ -242,7 +303,7 @@ error instead of silently using test doubles.
 
 ## Execution Modes
 
-Goal 7.12 made `Start Run` visibly execute the Northstar Client Implementation Launch.
+Goal 7.12 made `Start Governed Run` visibly execute the Northstar Client Implementation Launch.
 
 Judge Demo Mode works without secrets by using deterministic local proof/test-double paths. It
 creates local SQLite records, populates Runs and Evidence Ledger, labels output as demo/sandbox

@@ -22,11 +22,12 @@ export function ReportInspector({
   state: DemoState | null;
 }) {
   const report = state?.report ?? null;
+  const commandReport = state?.command_center?.final_profit_report ?? null;
 
   return (
     <div className="space-y-4">
       <InspectorSection
-        description="Final protected-profit economics are generated from the SQLite ledger and policy checks."
+        description="Final protected-profit economics include approved setup spend and deterministic labor cost."
         icon={FileText}
         title="Profit Outcome"
       >
@@ -44,7 +45,12 @@ export function ReportInspector({
           <Metric
             label="Protected profit"
             tone="teal"
-            value={report ? formatCurrency(report.gross_profit_cents) : formatOptionalCurrency(money.grossProfitCents)}
+            value={commandReport ? formatCurrency(commandReport.gross_profit_after_labor_cents) : formatOptionalCurrency(money.grossProfitCents)}
+          />
+          <Metric
+            label="Labor cost"
+            tone="violet"
+            value={commandReport ? formatCurrency(commandReport.labor_cost_cents) : "Pending"}
           />
           <Metric
             label="Blocked risk"
@@ -54,7 +60,7 @@ export function ReportInspector({
           <Metric
             label="Margin"
             tone="amber"
-            value={report ? formatPercent(report.actual_margin_percent) : formatOptionalPercent(money.marginPercent)}
+            value={commandReport ? formatPercent(commandReport.final_margin_after_labor_percent) : formatOptionalPercent(money.marginPercent)}
           />
         </div>
 

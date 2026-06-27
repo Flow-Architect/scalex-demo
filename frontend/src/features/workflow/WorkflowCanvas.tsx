@@ -131,8 +131,8 @@ export function WorkflowCanvas({
       <div className="border-b border-zinc-200 bg-white p-4">
         <div className="flex flex-col gap-3 2xl:flex-row 2xl:items-center 2xl:justify-between">
           <div>
-            <p className="text-xs font-semibold uppercase text-zinc-500">Function Map</p>
-            <h2 className="mt-1 text-xl font-semibold text-zinc-950">Client implementation path</h2>
+            <p className="text-xs font-semibold uppercase text-zinc-500">Governed Rail Map</p>
+            <h2 className="mt-1 text-xl font-semibold text-zinc-950">Client implementation run</h2>
             <p className="mt-1 text-sm text-zinc-600">
               Revenue, finance proof, guardrail review, evidence, and profit outcome in one governed route.
             </p>
@@ -140,7 +140,7 @@ export function WorkflowCanvas({
           <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center 2xl:justify-end">
             <CanvasLegend />
             <span className="w-fit rounded-md border border-zinc-200 bg-zinc-50 px-3 py-2 text-xs font-semibold text-zinc-700">
-              {model.activeCount}/{model.nodes.length} steps available
+              {model.activeCount}/{model.nodes.length} rails available
             </span>
           </div>
         </div>

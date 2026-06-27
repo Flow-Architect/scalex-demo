@@ -7,11 +7,11 @@ Last updated: 2026-06-27
 - Project folder exists at `/home/ascabrya/dev/scalex-demo`.
 - Latest committed baseline before Goal 8E: `615a9bd Document NemoClaw correction and next
   integration plan`.
-- Last completed goal: Goal 8F - Docs-First Command Center UI, Document Intake, and Labor Costing.
-- Last completed implementation/QA goal: Goal 8F - command-center UI and deterministic labor-costing proof.
-- Last completed documentation/tracking update: Goal 8F command-center/labor-costing handoff.
+- Last completed goal: Goal 8G - Enterprise Demo Narrative UI Lock.
+- Last completed implementation/QA goal: Goal 8G - judge-facing governed execution UI narrative lock.
+- Last completed documentation/tracking update: Goal 8G enterprise narrative UI closeout.
 - Last completed checkout cleanup: Open Source Checkout Cleanup for judge readiness.
-- Current priority: Goal 8G - Telegram Human Approval Gate.
+- Current priority: Goal 9 - final repo/video/submission polish.
 - Goal 7.11B replaced the legacy Harbor sample with Northstar Dental Group / Client Implementation Launch.
 - Goal 7.11C-followup replaced the remaining generated dashboard/card shell with a ClientOps
   operation-file workspace across Dashboard, Function Studio, Onboarding, Client Operations,
@@ -50,26 +50,35 @@ Last updated: 2026-06-27
   evidence, and fails closed if selected but unavailable.
 - Goal 8F implemented the command-center/product-depth pass with client onboarding, employee
   onboarding, document intake review, labor costing, richer economic controls, policy guardrail
-  proof, agent workbench, judge proof, and final profit after labor. The earlier Telegram
-  approval-gate goal is deferred to Goal 8G.
+  proof, agent workbench, judge proof, and final profit after labor.
+- Goal 8G is now the enterprise governed execution narrative lock. It supersedes the earlier
+  Telegram approval-gate handoff for this deadline window; Telegram remains deferred/planned.
+- Goal 8G updated the UI to lead with "Governed execution for revenue-backed client operations",
+  relabeled Function Studio to Governed Run Studio, changed Start Run to Start Governed Run,
+  added the first-screen Control Stack, Enterprise Pain -> ScaleX Control panel, governed
+  execution rails, blocked-risk spotlight, central Economic Control formula, enterprise Evidence
+  Ledger table, and Why This Is Not Zapier comparison.
 - Goal 9 remains final polish and submission assets.
 - Goal 7B remains future Verified Live Mode hardening.
 
 ## Product Positioning
 
-ScaleX is now documented as **ScaleX ClientOps Autopilot**, an **Enterprise Function Accelerator**
-for revenue-backed client operations.
+ScaleX is now documented as **ScaleX Governed ClientOps** for the judge-facing UI narrative, built
+on the **ScaleX ClientOps Autopilot** product identity and Enterprise Function Accelerator
+submission category.
 
 One-line pitch:
 
-> ScaleX helps B2B teams turn repeatable client operations into autonomous, revenue-backed,
-> policy-governed runs with finance proof, guardrail enforcement, and audit evidence.
+> ScaleX helps enterprise teams safely turn paid client work into governed AI-executed operations.
+> Hermes plans the work, Stripe proves the financial state, NeMo checks actions before execution,
+> and ScaleX records the evidence, blocks unsafe spend, and reports protected profit.
 
 Enterprise problem:
 
-B2B teams struggle to turn signed client work into coordinated execution because onboarding,
-billing, vendor spend, approvals, task routing, and reporting are fragmented. ScaleX gives them
-a governed AI operations layer that can run those functions safely.
+Enterprises want AI agents to help run client operations, but they cannot let raw agents touch
+money, vendors, client workflows, approvals, or internal systems without proof, policy, money
+control, and audit evidence. ScaleX gives them a governed execution layer that safely turns paid
+client work into guarded, finance-backed, auditable runs.
 
 ## Stack Truth
 
@@ -89,7 +98,7 @@ a governed AI operations layer that can run those functions safely.
   for sandbox `scalex-hermes`; ScaleX now has an optional `HERMES_RUNTIME=nemoclaw` adapter for
   the local OpenAI-compatible API. It is active only when selected and the API call succeeds.
 - SQLite records evidence.
-- Profit Outcome reports protected profit and blocked risk.
+- Profit Outcome reports protected profit after approved spend and labor cost, plus blocked risk.
 - MCP is documented as a future access pattern only. ScaleX does not currently expose an MCP
   server, external agents cannot yet call ScaleX through MCP, and no MCP implementation exists.
   MCP is paused until the NemoClaw runtime boundary, Telegram approval boundary, and product story
@@ -148,8 +157,11 @@ Dental Group account.
 - Margin floor: 50%
 - Approved setup spend: $350 Secure Workspace Pack, $500 Data Migration Sandbox, and $300 Launch Asset Kit
 - Blocked risk: $3,200 Unapproved Data Broker Enrichment
-- Final profit outcome: $8,500 revenue, $1,150 approved setup spend, $3,200 blocked risk,
-  $7,350 protected gross profit, and 86.5% protected margin
+- Deterministic Goal 8F labor cost: $261.60
+- Existing ledger gross profit before labor: $7,350 and 86.5% gross margin
+- Goal 8G protected profit after labor: $7,088.40 and 83.4% protected margin
+- Formula: protected profit = revenue - approved setup spend - labor cost; protected margin =
+  protected profit / revenue
 - Synthetic account only; no patient data, no PHI, no healthcare compliance claim, and no HIPAA
   support claim
 
@@ -162,9 +174,9 @@ Functional product surfaces remain:
 - Vite React TypeScript frontend
 - SQLite evidence ledger
 - local prototype auth
-- Dashboard, Function Studio, Onboarding, Client Operations, Runs, Evidence Ledger,
+- Dashboard, Governed Run Studio, Onboarding, Client Operations, Runs, Evidence Ledger,
   Connection Hub, and Settings
-- connected Function Studio page with proof nodes and selected-node inspector
+- connected Governed Run Studio page with proof nodes and selected-node inspector
 - Judge Demo Mode as the default local execution mode: deterministic Hermes plan,
   Stripe test-double/sandbox finance proof, local policy active, and SQLite evidence records
 - Full Proof Mode through `SCALEX_EXECUTION_MODE=full_proof` for configured real isolated Hermes
@@ -180,6 +192,8 @@ Functional product surfaces remain:
 - deterministic command-center state for fake/demo client and employee intake, extracted-data
   review before save, editable local browser records, fully loaded hourly rate, labor cost, profit
   after vendor spend and labor, and margin warnings
+- Goal 8G enterprise narrative UI: first-screen hero, Control Stack, governed rails, blocked-risk
+  spotlight, labor-aware protected profit, enterprise audit ledger, and comparison panel
 - real Stripe test-mode invoice path when configured with `sk_test_...`
 - deterministic test-double paths for tests/CI/diagnostics only
 - local policy engine for current guardrail enforcement
@@ -224,6 +238,54 @@ Verification completed:
 Suggested commit message:
 
 `Deepen ScaleX command center with intake and labor costing`
+
+## Verified For Goal 8G
+
+Goal 8G implemented the enterprise demo narrative UI lock without adding new integrations or
+changing protected execution behavior.
+
+Recorded updates:
+
+- Updated README, STATUS, TASKS, CHANGELOG, ROADMAP, PRODUCT_SPEC, DEMO_SCRIPT, ARCHITECTURE, and
+  SUBMISSION_WRITEUP for the governed execution narrative.
+- Reframed the first dashboard screen around ScaleX Governed ClientOps, Northstar Dental Group /
+  Client Implementation Launch, revenue secured, approved setup spend, blocked risk, deterministic
+  labor cost, protected profit after labor, and protected margin after labor.
+- Added prominent UI sections for Enterprise Pain -> ScaleX Control, Control Stack, Governed
+  Execution Rails, Blocked Risk Control, Economic Control, Evidence Ledger Preview, and Why This
+  Is Not Zapier.
+- Relabeled visible UI from Function Studio / Start Run / ClientOps Autopilot to Governed Run
+  Studio / Start Governed Run / ScaleX Governed ClientOps where applicable.
+- Kept Business Intake, Document Intake Review, Workforce Costing, Connection Hub, Runs, Settings,
+  deterministic Judge Demo Mode, isolated Hermes, optional NemoHermes runtime, fail-closed
+  behavior, Stripe safety boundaries, local policy behavior, and SQLite evidence.
+- Corrected the Goal 8F deterministic labor amount to $261.60, yielding $7,088.40 protected
+  profit after labor and 83.4% protected margin after labor. Existing ledger gross profit before
+  labor remains $7,350 and 86.5%.
+
+Intentionally not touched:
+
+- No Telegram, MCP, new external services, real Stripe run, Full Proof run, Docker/NemoClaw
+  command, production payroll/HR behavior, external extraction service, live money, real client
+  data, real `.env`, real database file, or secret setup was added.
+
+Verification completed:
+
+- Docs-first `git diff --check` passed before implementation.
+- `cd frontend && npm run build` passed.
+- `./scripts/test.sh` passed with 68 backend tests and a successful frontend build.
+- `./scripts/check-nemo.sh` passed with `nemoguardrails` 0.21.0 and `guardrails/scalex` loaded.
+- Post-implementation frontend label scan found no active old UI wording for Function Studio,
+  Function Map, Start Run, ClientOps Autopilot, No workflow selected, Create or select a workflow,
+  or Harbor Auto Care.
+- Unsafe/generated file scan returned no matches.
+- Local dev-server smoke was attempted against `/tmp/scalex-goal8g-demo.db`, but sandbox socket
+  binding blocked uvicorn and the required escalation was rejected. No localhost workaround was
+  attempted.
+
+Suggested commit message:
+
+`Lock enterprise governed execution demo`
 
 ## Verified For Goal 8E
 
@@ -668,7 +730,8 @@ Research-to-Report, Ops Handoff, and Renewal Recommendation.
 
 ## Incomplete Items
 
-- Telegram Human Approval Gate has not been implemented and is deferred to Goal 8G.
+- Telegram Human Approval Gate has not been implemented and is deferred unless explicitly
+  reprioritized after the enterprise demo lock.
 - Goal 7.14B Full Proof local validation has passed; rerun it only before final recording or after
   relevant integration changes.
 - Goal 7.13C MCP Server Prototype has not been implemented and is paused until after NemoClaw,
@@ -692,14 +755,14 @@ Research-to-Report, Ops Handoff, and Renewal Recommendation.
 
 ## Current Priority
 
-Goal 8G - Telegram Human Approval Gate.
+Goal 8G - Enterprise Demo Narrative UI Lock.
 
 Recommended sequence:
 
-1. Goal 8G - Telegram Human Approval Gate.
-2. Goal 7.13C - MCP Server Prototype only after NemoClaw, guardrail, and approval boundaries are
+1. Goal 8G - Enterprise Demo Narrative UI Lock.
+2. Goal 9 - final repo/video/submission polish.
+3. Goal 7.13C - MCP Server Prototype only after NemoClaw, guardrail, and approval boundaries are
    safe.
-3. Goal 9 - final repo/video/submission polish.
 
 Goal 7.14B Full Proof validation has passed. Rerun it only before final recording or after changes
 that touch Hermes, Stripe, NeMo Guardrails, NemoClaw, policy, guardrail, ledger, or run-proof

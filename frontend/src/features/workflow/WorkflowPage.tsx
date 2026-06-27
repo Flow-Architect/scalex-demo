@@ -189,13 +189,13 @@ function WorkflowHeader({
       <div className="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
         <div className="min-w-0">
           <p className="text-sm font-semibold uppercase text-emerald-700">
-            ClientOps Function Studio
+            ScaleX Execution Control Plane
           </p>
           <h1 className="mt-2 break-words text-4xl font-semibold leading-tight text-zinc-950 lg:text-5xl">
-            Function Studio
+            Governed Run Studio
           </h1>
           <p className="mt-2 max-w-4xl text-base leading-7 text-zinc-600">
-            Launch and inspect the {displayJob} function for {displayCustomer}.
+            Launch and inspect the governed execution rails for {displayCustomer} / {displayJob}.
           </p>
           <StudioFactStrip displayCustomer={displayCustomer} displayJob={displayJob} guardrailLabel={guardrailLabel} money={money} runStatus={runStatus} />
           {busyAction === "run" || runCompletedMoment ? (
@@ -209,7 +209,7 @@ function WorkflowHeader({
               </p>
               <p className="mt-1">
                 {busyAction === "run"
-                  ? "Function Studio is executing the client operation step by step."
+                  ? "ScaleX is executing the governed run rail by rail."
                   : `Protected profit ${formatOptionalCurrency(money.grossProfitCents)}, blocked risk ${formatOptionalCurrency(money.blockedSpendCents)}.`}
               </p>
             </div>
@@ -224,7 +224,7 @@ function WorkflowHeader({
             type="button"
           >
             {busyAction === "run" ? <RefreshCw className="h-4 w-4 animate-spin" aria-hidden="true" /> : <Play className="h-4 w-4" aria-hidden="true" />}
-            {busyAction === "run" ? "Running..." : "Start Run"}
+            {busyAction === "run" ? "Running governed run..." : "Start Governed Run"}
           </button>
           <button className="inline-flex min-h-11 items-center justify-center gap-2 rounded-md border border-zinc-300 bg-white px-4 text-sm font-semibold text-zinc-900 transition hover:bg-zinc-50 disabled:cursor-not-allowed disabled:text-zinc-400" disabled={isBusy} onClick={onRefresh} type="button">
             <RefreshCw className={`h-4 w-4 ${busyAction === "refresh" ? "animate-spin" : ""}`} aria-hidden="true" />
@@ -259,7 +259,7 @@ function StudioFactStrip({
 }) {
   const facts = [
     { label: "Client", value: displayCustomer },
-    { label: "Function", value: displayJob },
+    { label: "Operation", value: displayJob },
     { label: "Revenue", value: formatOptionalCurrency(money.revenueCents) },
     { label: "Protected profit", value: formatOptionalCurrency(money.grossProfitCents) },
     { label: "Guardrails", value: guardrailLabel },
@@ -293,11 +293,11 @@ function OperationBrief({
 }) {
   return (
     <aside className="border-l-4 border-zinc-950 bg-white p-5 shadow-sm ring-1 ring-zinc-200">
-      <p className="text-sm font-semibold uppercase text-zinc-500">Operation brief</p>
+      <p className="text-sm font-semibold uppercase text-zinc-500">Governed operation</p>
       <h2 className="mt-3 text-2xl font-semibold leading-tight text-zinc-950">{displayJob}</h2>
       <p className="mt-2 text-sm leading-6 text-zinc-600">{displayCustomer}</p>
       <div className="mt-5 space-y-3 text-sm">
-        <BriefRow icon={Building2} label="Launch file" value={activeWorkflow ? "Selected" : "Needs selection"} />
+        <BriefRow icon={Building2} label="Launch file" value={activeWorkflow ? "Ready" : "Northstar preloaded"} />
         <BriefRow icon={ShieldCheck} label="Guardrails" value={guardrailLabel} />
         <BriefRow icon={BookOpenCheck} label="Evidence" value="SQLite ledger" />
         <BriefRow icon={TrendingUp} label="Margin" value={formatOptionalPercent(money.marginPercent)} />
@@ -342,14 +342,14 @@ function StudioActivityTimeline({ state }: { state: DemoState | null }) {
     <section className="border-t border-zinc-200 pt-5">
       <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <p className="text-sm font-semibold uppercase text-zinc-500">Activity timeline</p>
-          <h2 className="mt-1 text-2xl font-semibold text-zinc-950">Client timeline</h2>
+          <p className="text-sm font-semibold uppercase text-zinc-500">Governed evidence timeline</p>
+          <h2 className="mt-1 text-2xl font-semibold text-zinc-950">Rail activity</h2>
         </div>
         <p className="text-sm text-zinc-600">{events.length} lifecycle events</p>
       </div>
       {events.length === 0 ? (
         <div className="mt-4 border border-dashed border-zinc-300 bg-white p-5 text-sm text-zinc-600">
-          Activity appears after the operation starts.
+          Rail activity appears after Start Governed Run.
         </div>
       ) : (
         <ol className="mt-4 grid gap-3 lg:grid-cols-3">

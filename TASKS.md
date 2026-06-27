@@ -2,11 +2,16 @@
 
 ## Current Priority
 
-Goal 8G - Telegram Human Approval Gate.
+Goal 9 - final repo/video/submission polish.
 
 Goal 8F is complete. ScaleX now has a docs-first command-center UI, deterministic client and
 employee intake proof, demo-safe document review states, labor costing, economic controls, policy
 proof, agent workbench, judge proof, and final profit after labor.
+
+Goal 8G is complete. ScaleX now opens with the enterprise governed execution narrative, preloaded
+Northstar operation metrics, Control Stack, governed execution rails, blocked-risk spotlight,
+labor-aware Economic Control, enterprise Evidence Ledger, and Why This Is Not Zapier comparison.
+Telegram approval remains deferred and was not implemented in Goal 8G.
 
 Goal 8E is complete. ScaleX has an optional backend runtime adapter for the already validated
 local NemoHermes OpenAI-compatible API. It is selected with `HERMES_RUNTIME=nemoclaw`, records
@@ -72,6 +77,99 @@ Safety:
 - Client and employee intake uses fake/demo records only.
 - Labor costing is job costing only, not payroll, HR compliance, or tax processing.
 - No raw file contents are logged or stored.
+
+## Goal 8G Scope - Enterprise Demo Narrative UI Lock
+
+Goal 8G is complete.
+
+Required positioning:
+
+- Problem: enterprises want AI agents to help run client operations, but cannot let raw agents
+  touch money, vendors, client workflows, approvals, or internal systems without proof, policy,
+  money control, and audit evidence.
+- ScaleX answer: ScaleX is a governed execution layer for revenue-backed client operations.
+  Hermes plans the work, Stripe proves the financial state, NeMo/local policy checks risky
+  actions before execution, ScaleX blocks unsafe actions, and the evidence ledger records proof.
+- Core demo line: ScaleX helps enterprise teams safely turn paid client work into governed
+  AI-executed operations. Hermes plans the work, Stripe proves the financial state, NeMo checks
+  actions before execution, and ScaleX records the evidence, blocks unsafe spend, and reports
+  protected profit.
+
+Exact demo story:
+
+- Client: Northstar Dental Group.
+- Operation: Client Implementation Launch.
+- Revenue secured: $8,500.
+- Approved setup spend: $1,150.
+- Blocked risky spend: $3,200.
+- Deterministic Goal 8F labor cost: $261.60.
+- Protected profit after labor: $7,088.40.
+- Protected margin after labor: 83.4%.
+- Existing ledger gross profit before labor remains $7,350 and 86.5%.
+
+Visible run sequence:
+
+1. Input rail passed.
+2. Hermes plan created.
+3. Planning rail approved.
+4. Stripe finance proof created.
+5. Revenue gate verified.
+6. NeMo/local policy reviewed action.
+7. Controlled setup spend approved.
+8. Risky vendor/data enrichment spend blocked.
+9. Work execution completed.
+10. Evidence ledger recorded proof.
+11. Output rail verified paid-state honesty.
+12. Profit outcome recorded.
+
+Implementation constraints:
+
+- Rewrite UI language from Function Studio / Start Run / ClientOps Autopilot toward Governed Run
+  Studio / Start Governed Run / ScaleX Governed ClientOps or equivalent enterprise wording.
+- Preload the Northstar judge demo and avoid empty default states such as no workflow selected.
+- Make the Control Stack prominent: Hermes planner, Stripe finance proof, NeMo/local policy
+  guardrail runtime, and ScaleX enterprise control plane.
+- Reframe run timeline as governed execution rails: Input, Planning, Finance, Policy, Execution,
+  Output, Evidence, and Profit.
+- Make the blocked risk decision one of the strongest visual moments.
+- Make Economic Control central and include protected profit and protected margin formulas.
+- Make Evidence Ledger feel like enterprise audit with actor/system, action, result, evidence
+  type, and safety note.
+- Preserve onboarding, document intake, and labor costing as Business Intake and Workforce
+  Costing support modules.
+- Do not add Telegram, new integrations, live API requirements, real Stripe, Full Proof runs,
+  production payroll/HR behavior, Docker, NemoClaw commands, or external extraction services.
+
+Completed Goal 8G outputs:
+
+- First-screen headline and subheadline now present ScaleX as governed execution for
+  revenue-backed client operations.
+- Primary operation card shows Northstar Dental Group / Client Implementation Launch with revenue
+  secured, approved setup spend, blocked risk, labor cost, protected profit, and protected margin.
+- Primary CTA is Start Governed Run; secondary CTA is Review Evidence Ledger.
+- Execution stack reads Hermes plans -> Stripe proves -> NeMo checks -> ScaleX records.
+- Control Stack panel makes Hermes, Stripe, NeMo/local policy, and ScaleX roles prominent.
+- Governed Execution Rails show Input, Planning, Finance, Policy, Execution, Evidence, Output,
+  and Profit rails with decision/proof language.
+- Blocked Risk Control highlights the $3,200 data broker enrichment / premium vendor spend block.
+- Economic Control centralizes revenue secured, approved setup spend, blocked risky spend, labor
+  cost, protected profit, protected margin, margin floor, and formulas.
+- Evidence Ledger Preview and Evidence Ledger page show enterprise audit columns.
+- Business Intake, Document Intake Review, and Workforce Costing remain as supporting modules.
+- Function Studio / Start Run / ClientOps Autopilot visible labels were reframed to Governed Run
+  Studio / Start Governed Run / ScaleX Governed ClientOps where applicable.
+
+Goal 8G validation:
+
+- Docs-first `git diff --check` passed before implementation.
+- `cd frontend && npm run build` passed.
+- `./scripts/test.sh` passed with 68 backend tests and a successful frontend build.
+- `./scripts/check-nemo.sh` passed with `nemoguardrails` 0.21.0 and `guardrails/scalex` loaded.
+- Frontend label scan found no active old wording for Function Studio, Function Map, Start Run,
+  ClientOps Autopilot, No workflow selected, Create or select a workflow, or Harbor Auto Care.
+- Unsafe/generated file scan returned no matches.
+- Local dev-server smoke was attempted with a `/tmp` database, but sandbox socket binding blocked
+  uvicorn and escalation was rejected; no workaround was attempted.
 
 ## Goal 7.15A Gate Result
 
@@ -154,11 +252,11 @@ the sample implementation pass.
 
 ## Next Recommended Goal
 
-Run Codex `/goal` 8G - Telegram Human Approval Gate.
+Run Codex `/goal` 9 - final repo/video/submission polish after Goal 8G lands.
 
-Goal 8G should add Telegram as a human approval channel for risky but allowable actions. It should
-not become a chatbot-first feature and must not bypass local policy, NeMo Guardrails checks,
-NemoClaw/NemoHermes runtime boundaries, or evidence recording.
+Goal 9 should record and package the judge-facing path around ScaleX as a governed execution layer
+for revenue-backed client operations. Telegram approval should remain deferred unless the user
+explicitly reprioritizes it after the narrative lock.
 
 Preserve the current truth:
 
@@ -172,24 +270,23 @@ Preserve the current truth:
 - Full Proof local mode must remain available through the existing validated path.
 - NemoHermes mode must fail closed if selected but unavailable.
 
-Goal 8G required output:
+Goal 9 required output:
 
-- Pending approval request model and evidence records.
-- Telegram send/approve/deny flow with allowlisted chat IDs, no secrets, no PHI, expiry, and
-  fail-closed deny/expired behavior.
-- Policy re-check before execution after approval.
-- Connection Hub status for planned/missing config/active/fail closed approval channel.
+- Final video/demo script verification against `docs/DEMO_SCRIPT.md`.
+- Final screenshot/browser pass for first-screen clarity, governed rails, blocked risk, economic
+  control, evidence ledger, and profit outcome.
+- Submission writeup polish only where it reflects implemented behavior.
 - Preserve deterministic Judge Demo Mode, isolated Hermes, optional NemoHermes runtime,
-  fail-closed behavior, no live money, no real HR/payroll/compliance data, and no external
-  extraction services.
-- Keep MCP paused.
+  fail-closed behavior, Stripe safety, no live money, no real HR/payroll/compliance data, and no
+  external extraction services.
+- Keep MCP and Telegram paused unless explicitly reprioritized.
 
 Recommended sequence:
 
-1. Goal 8G - Telegram Human Approval Gate.
-2. Goal 7.13C - MCP Server Prototype only after NemoClaw, guardrail, and approval boundaries are
+1. Goal 8G - Enterprise Demo Narrative UI Lock.
+2. Goal 9 - final repo/video/submission polish.
+3. Goal 7.13C - MCP Server Prototype only after NemoClaw, guardrail, and approval boundaries are
    safe.
-3. Goal 9 - final repo/video/submission polish.
 4. Goal 7B / Production Hardening - Verified Live Mode for future live-money payments.
 
 Goal 7.14B Full Proof local validation is complete. Rerun it only before final recording or after
@@ -528,16 +625,29 @@ OpenShell / `nemohermes` is a separate target and must be handled before MCP.
   fail-closed behavior, no live money, no real HR/payroll/compliance data, and no external
   extraction services.
 
-### Goal 8G - Telegram Human Approval Gate
+### Goal 8G - Enterprise Demo Narrative UI Lock
 
-- Implement Telegram as a human approval channel for risky actions, not as a chatbot-first feature.
-- Create pending approval requests, send authorized Telegram approval messages, verify approve/deny
-  decisions, resume or block actions, and record evidence.
-- Require allowlisted chat IDs, no secrets, no PHI/patient data, signed one-time approval token or
-  approval ID, expiry, deny/expired fail-closed behavior, policy re-check before execution, and
-  evidence for every approval/denial.
-- Block outright instead of approval-routing for PHI/patient data, live-money attempts, disallowed
-  real client data, direct secret exposure, and policy bypass attempts.
+- Lock the first screen around governed execution for revenue-backed client operations.
+- Show Northstar Dental Group / Client Implementation Launch with $8,500 revenue, $1,150 approved
+  setup spend, $3,200 blocked risk, $261.60 labor cost, $7,088.40 protected profit, and 83.4%
+  protected margin.
+- Make Hermes, Stripe, NeMo/local policy, and ScaleX roles obvious.
+- Reframe the run timeline as governed rails, make blocked risk visually important, centralize
+  money control, and make Evidence Ledger read as enterprise audit.
+- Preserve Business Intake, Document Intake Review, and Workforce Costing as support modules.
+- Do not add Telegram, MCP, new integrations, Full Proof runs, real Stripe runs, Docker/NemoClaw
+  commands, production payroll/HR behavior, external extraction services, live money, real client
+  data, or secrets.
+
+### Future Telegram Human Approval Gate
+
+- Telegram remains planned as a human approval channel for risky but allowable actions, not a
+  chatbot-first feature.
+- Future implementation must create pending approval requests, send authorized approval messages,
+  verify approve/deny decisions, resume or block actions, and record evidence.
+- Future implementation must require allowlisted chat IDs, no secrets, no PHI/patient data,
+  signed one-time approval token or approval ID, expiry, deny/expired fail-closed behavior, policy
+  re-check before execution, and evidence for every approval/denial.
 
 ## Required Product Facts To Preserve
 

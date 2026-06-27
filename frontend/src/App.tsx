@@ -82,8 +82,8 @@ export default function App() {
   const auditRows = useMemo(() => auditRowCount(state), [state]);
   const runStatus = runStatusLabel(state, busyAction, error);
   const activeWorkflow = state?.workflow ?? null;
-  const displayCustomer = activeWorkflow?.client_name ?? state?.job?.client_name ?? "No workflow selected";
-  const displayJob = activeWorkflow?.job_name ?? state?.job?.job_name ?? "Create or select a workflow";
+  const displayCustomer = activeWorkflow?.client_name ?? state?.job?.client_name ?? "Northstar Dental Group";
+  const displayJob = activeWorkflow?.job_name ?? state?.job?.job_name ?? "Client Implementation Launch";
 
   useEffect(() => {
     void loadSession();
@@ -193,7 +193,7 @@ export default function App() {
       ]);
       setHealth(healthResponse);
       setState(stateResponse);
-      setNotice("ClientOps Autopilot refreshed from the local backend.");
+      setNotice("ScaleX Governed ClientOps refreshed from the local backend.");
     } catch (caught) {
       setError(errorMessage(caught));
     } finally {
@@ -450,6 +450,7 @@ export default function App() {
           onDeleteWorkflow={handleDeleteWorkflow}
           onDraftChange={setOnboardingDraft}
           onInspectRun={handleInspectRun}
+          onRun={handleRunDemo}
           onSaveWorkflow={handleSaveOnboarding}
           onSelectWorkflow={handleSelectWorkflow}
           onUseNorthstarSample={handleUseNorthstarSample}
@@ -474,7 +475,7 @@ function LoadingScreen() {
             <Workflow className="h-5 w-5 animate-pulse" aria-hidden="true" />
           </span>
           <div>
-            <p className="text-lg font-semibold">ScaleX ClientOps Autopilot</p>
+            <p className="text-lg font-semibold">ScaleX Governed ClientOps</p>
             <p className="text-sm text-zinc-600">Loading local operation workspace</p>
           </div>
         </div>
@@ -505,17 +506,17 @@ function LoginScreen({
               <ShieldCheck className="h-5 w-5" aria-hidden="true" />
             </span>
             <div>
-              <p className="text-xl font-semibold">ScaleX ClientOps Autopilot</p>
+              <p className="text-xl font-semibold">ScaleX Governed ClientOps</p>
               <p className="text-sm text-zinc-600">Enterprise Function Accelerator</p>
             </div>
           </div>
 
           <div className="max-w-3xl">
             <p className="text-sm font-semibold uppercase text-emerald-700">
-              ClientOps workspace
+              Governed execution workspace
             </p>
             <h1 className="mt-3 text-4xl font-semibold leading-tight lg:text-6xl">
-              Access the governed client operation workspace.
+              Governed execution for revenue-backed client operations.
             </h1>
             <p className="mt-5 max-w-2xl text-base leading-7 text-zinc-600">
               Local prototype auth gates the demo API and product shell with a signed
@@ -540,7 +541,7 @@ function LoginScreen({
                 <KeyRound className="h-5 w-5" aria-hidden="true" />
               </span>
               <div>
-                <h2 className="text-lg font-semibold">ClientOps login</h2>
+                <h2 className="text-lg font-semibold">Governed ClientOps login</h2>
                 <p className="text-sm text-zinc-600">Prototype local auth</p>
               </div>
             </div>
@@ -582,7 +583,7 @@ function LoginScreen({
               ) : (
                 <LockKeyhole className="h-4 w-4" aria-hidden="true" />
               )}
-              Enter ClientOps Autopilot
+              Enter ScaleX Governed ClientOps
             </button>
           </form>
         </section>
