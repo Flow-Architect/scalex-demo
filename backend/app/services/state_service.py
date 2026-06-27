@@ -67,6 +67,19 @@ def build_demo_state(connection: sqlite3.Connection, run_id: str | None = None) 
             stripe_summary,
             guardrail_evaluations,
         ),
+        "command_center": _command_center_summary(
+            settings=settings,
+            seed_config=seed_config,
+            job=job,
+            totals=totals,
+            ledger_entries=ledger_entries,
+            policy_checks=policy_checks,
+            events=events,
+            agent_outputs=repository.list_agent_outputs(connection, job_id) if job_id else [],
+            reports=reports,
+            hermes_metadata=hermes_metadata,
+            stripe_summary=stripe_summary,
+        ),
         "database": {
             "initialized": True,
             "table_counts": _table_counts(connection),
@@ -203,6 +216,362 @@ def _guardrail_execution_label(guardrails: dict[str, Any]) -> str:
     return "Local policy active"
 
 
+def _command_center_summary(
+    *,
+    settings: Settings,
+    seed_config: dict[str, Any],
+    job: dict[str, Any] | None,
+    totals: dict[str, Any],
+    ledger_entries: list[dict[str, Any]],
+    policy_checks: list[dict[str, Any]],
+    events: list[dict[str, Any]],
+    agent_outputs: list[dict[str, Any]],
+    reports: list[dict[str, Any]],
+    hermes_metadata: dict[str, Any],
+    stripe_summary: dict[str, Any],
+) -> dict[str, Any]:
+    revenue_cents = int(totals.get("revenue_cents") or 0) or usd_to_cents(seed_config["invoiceAmountUsd"])
+    approved_vendor_spend_cents = int(totals.get("approved_spend_cents") or 0) or _approved_spend_cents(seed_config)
+    blocked_spend_cents = int(totals.get("blocked_spend_cents") or 0) or _blocked_spend_cents(seed_config)
+    margin_floor_percent = float(seed_config["marginFloorPercent"])
+    employees = _demo_employee_records()
+    total_labor_cost_cents = sum(employee["labor_cost_cents"] for employee in employees)
+    gross_profit_after_labor_cents = revenue_cents - approved_vendor_spend_cents - total_labor_cost_cents
+    final_margin_after_labor_percent = _percent(gross_profit_after_labor_cents, revenue_cents)
+    margin_warning = final_margin_after_labor_percent < margin_floor_percent
+    job_name = job["job_name"] if job else seed_config["jobName"]
+    client_name = job["client_name"] if job else seed_config["clientName"]
+    business_type = job["business_type"] if job else seed_config["businessType"]
+    job_goal = job["job_goal"] if job else seed_config["jobGoal"]
+    runtime_status = str(hermes_metadata.get("runtime_status") or "pending")
+    runtime_mode = (
+        "NemoHermes runtime"
+        if hermes_metadata.get("runtime") == "nemoclaw"
+        else "Deterministic judge demo"
+        if settings.hermes_test_mode or settings.scalex_execution_mode == "demo"
+        else "Isolated Hermes runtime"
+    )
+
+    audit_events = _command_center_audit_events(
+        events=events,
+        policy_checks=policy_checks,
+        ledger_entries=ledger_entries,
+        agent_outputs=agent_outputs,
+        labor_cost_cents=total_labor_cost_cents,
+        margin_warning=margin_warning,
+        reports=reports,
+    )
+
+    return {
+        "mission_control": {
+            "active_client": client_name,
+            "business_type": business_type,
+            "active_job": job_name,
+            "job_goal": job_goal,
+            "invoice_amount_cents": revenue_cents,
+            "spend_cap_cents": usd_to_cents(seed_config["spendCapUsd"]),
+            "margin_floor_percent": margin_floor_percent,
+            "approved_vendor_spend_cents": approved_vendor_spend_cents,
+            "blocked_spend_cents": blocked_spend_cents,
+            "labor_cost_cents": total_labor_cost_cents,
+            "projected_profit_cents": gross_profit_after_labor_cents,
+            "final_margin_after_labor_percent": final_margin_after_labor_percent,
+            "runtime_mode": runtime_mode,
+            "overall_status": "needs_review" if margin_warning else "safe_profitable",
+        },
+        "runtime_route": {
+            "route": [
+                "ScaleX",
+                "Hermes Adapter",
+                "NemoHermes API" if hermes_metadata.get("runtime") == "nemoclaw" else "Isolated Hermes / deterministic adapter",
+                hermes_metadata.get("api_endpoint") or "local planning boundary",
+                hermes_metadata.get("model") or "model recorded when available",
+            ],
+            "runtime": hermes_metadata.get("runtime") or settings.hermes_runtime,
+            "endpoint": hermes_metadata.get("api_endpoint"),
+            "sandbox": hermes_metadata.get("sandbox_name"),
+            "model": hermes_metadata.get("model"),
+            "provider": hermes_metadata.get("provider"),
+            "upstream_model": hermes_metadata.get("upstream_model"),
+            "status": runtime_status,
+            "duration_ms": int(hermes_metadata.get("duration_ms") or 0),
+            "error_class": hermes_metadata.get("error_class"),
+            "used_real_hermes": bool(hermes_metadata.get("used_real_hermes")),
+        },
+        "client_onboarding": {
+            "saved_record": {
+                "client_name": client_name,
+                "business_type": business_type,
+                "primary_contact": "Demo operations lead",
+                "contact_email": None,
+                "contact_phone": None,
+                "job_name": job_name,
+                "job_goal": job_goal,
+                "invoice_amount_cents": revenue_cents,
+                "spend_cap_cents": usd_to_cents(seed_config["spendCapUsd"]),
+                "margin_floor_percent": margin_floor_percent,
+                "service_notes": "Synthetic B2B implementation operation. No patient data, PHI, addresses, or real client records.",
+                "source": "manual_entry",
+                "status": "saved_editable",
+            },
+            "extracted_review": {
+                "source": "file_extraction_fixture",
+                "file_name": "demo-client-intake.pdf",
+                "file_type": "pdf",
+                "status": "review_required",
+                "confidence": "demo_fixture",
+                "missing_fields": ["contact_email", "contact_phone"],
+                "low_confidence_fields": ["primary_contact"],
+                "editable_before_save": True,
+                "silent_save": False,
+            },
+        },
+        "employee_onboarding": {
+            "saved_records": employees,
+            "extracted_review": {
+                "source": "file_extraction_fixture",
+                "file_name": "demo-workforce-roster.xlsx",
+                "file_type": "xlsx",
+                "status": "review_required",
+                "confidence": "demo_fixture",
+                "missing_fields": [],
+                "low_confidence_fields": ["assigned_hours"],
+                "editable_before_save": True,
+                "silent_save": False,
+            },
+        },
+        "document_intake": {
+            "accepted_file_types": ["pdf", "xlsx", "xls", "docx", "doc", "csv"],
+            "storage_policy": "uploaded files are not permanently stored in the repo or database",
+            "external_services": False,
+            "manual_entry_available": True,
+            "states": [
+                {
+                    "scope": "client",
+                    "file_type": "pdf",
+                    "status": "review_required",
+                    "message": "Demo client intake extracted; review and edit before save.",
+                },
+                {
+                    "scope": "employee",
+                    "file_type": "xlsx",
+                    "status": "review_required",
+                    "message": "Demo workforce roster extracted; review assigned hours before save.",
+                },
+                {
+                    "scope": "unsupported",
+                    "file_type": "png",
+                    "status": "unsupported_file",
+                    "message": "PDF, Excel/spreadsheet, Word/document, and optional CSV files are accepted.",
+                },
+                {
+                    "scope": "fallback",
+                    "file_type": "doc",
+                    "status": "extraction_failed",
+                    "message": "Extraction failed; manual entry remains available.",
+                },
+            ],
+        },
+        "labor_costing": {
+            "formula": "Margin = (Revenue - Approved Vendor Spend - Labor Cost) / Revenue",
+            "employees": employees,
+            "total_labor_cost_cents": total_labor_cost_cents,
+            "gross_profit_after_labor_cents": gross_profit_after_labor_cents,
+            "final_margin_after_labor_percent": final_margin_after_labor_percent,
+            "margin_floor_percent": margin_floor_percent,
+            "margin_warning": margin_warning,
+            "status": "needs_review" if margin_warning else "safe_profitable",
+        },
+        "final_profit_report": {
+            "client_name": client_name,
+            "job_name": job_name,
+            "revenue_cents": revenue_cents,
+            "approved_vendor_spend_cents": approved_vendor_spend_cents,
+            "blocked_spend_cents": blocked_spend_cents,
+            "labor_cost_cents": total_labor_cost_cents,
+            "gross_profit_after_labor_cents": gross_profit_after_labor_cents,
+            "final_margin_after_labor_percent": final_margin_after_labor_percent,
+            "margin_floor_percent": margin_floor_percent,
+            "policy_violations": len([check for check in policy_checks if not bool(check.get("approved"))]),
+            "decision": "Needs review" if margin_warning else "Safe / Profitable",
+            "recommendation": (
+                "Review scope or staffing before approving more spend."
+                if margin_warning
+                else "Proceed with implementation launch while preserving labor and vendor-spend guardrails."
+            ),
+        },
+        "audit_events": audit_events,
+        "safety_proof": [
+            "fake/demo clients only",
+            "fake/demo employees only",
+            "no SSNs, tax IDs, bank information, addresses, birth dates, or payroll records",
+            "no external extraction services or credentials",
+            "file bodies are not logged",
+            "deterministic Judge Demo Mode preserved",
+            "optional NemoHermes runtime remains fail-closed",
+            f"stripe_livemode={str(stripe_summary.get('livemode')).lower()}",
+        ],
+    }
+
+
+def _demo_employee_records() -> list[dict[str, Any]]:
+    base_records = [
+        {
+            "employee_name": "Maria Lopez",
+            "role_title": "Technician",
+            "base_hourly_rate_cents": 2400,
+            "labor_burden_percent": 20.0,
+            "assigned_hours": 5.0,
+            "skill_category": "Technical service",
+            "active": True,
+            "notes": "Demo employee only; no HR record.",
+            "source": "manual_entry",
+        },
+        {
+            "employee_name": "James Carter",
+            "role_title": "Service Assistant",
+            "base_hourly_rate_cents": 1800,
+            "labor_burden_percent": 20.0,
+            "assigned_hours": 3.0,
+            "skill_category": "Operations support",
+            "active": True,
+            "notes": "Demo employee only; no payroll record.",
+            "source": "file_extraction_fixture",
+        },
+        {
+            "employee_name": "Avery Smith",
+            "role_title": "Campaign/Ops Assistant",
+            "base_hourly_rate_cents": 2200,
+            "labor_burden_percent": 20.0,
+            "assigned_hours": 2.0,
+            "skill_category": "Campaign operations",
+            "active": True,
+            "notes": "Demo employee only; job-costing assumption.",
+            "source": "file_extraction_fixture",
+        },
+    ]
+    employees = []
+    for record in base_records:
+        loaded_rate_cents = round(
+            record["base_hourly_rate_cents"] * (1 + record["labor_burden_percent"] / 100)
+        )
+        labor_cost_cents = round(loaded_rate_cents * record["assigned_hours"])
+        employees.append(
+            {
+                **record,
+                "fully_loaded_hourly_rate_cents": loaded_rate_cents,
+                "labor_cost_cents": labor_cost_cents,
+                "status": "active" if record["active"] else "inactive",
+            }
+        )
+    return employees
+
+
+def _command_center_audit_events(
+    *,
+    events: list[dict[str, Any]],
+    policy_checks: list[dict[str, Any]],
+    ledger_entries: list[dict[str, Any]],
+    agent_outputs: list[dict[str, Any]],
+    labor_cost_cents: int,
+    margin_warning: bool,
+    reports: list[dict[str, Any]],
+) -> list[dict[str, Any]]:
+    proof_events = [
+        {
+            "type": "client_manual_created",
+            "title": "Client record prepared",
+            "status": "recorded",
+            "detail": "Synthetic client operation values are editable before run.",
+        },
+        {
+            "type": "client_extracted_from_file",
+            "title": "Client document intake reviewed",
+            "status": "review_required",
+            "detail": "Demo extraction fixture requires operator review before save.",
+        },
+        {
+            "type": "employee_manual_created",
+            "title": "Employee labor assumption added",
+            "status": "recorded",
+            "detail": "Demo employee record created for job costing only.",
+        },
+        {
+            "type": "employee_extracted_from_file",
+            "title": "Workforce document intake reviewed",
+            "status": "review_required",
+            "detail": "Demo workforce extraction fixture requires operator review before save.",
+        },
+        {
+            "type": "extraction_failed",
+            "title": "Document extraction fallback available",
+            "status": "visible",
+            "detail": "Manual entry remains available after unsupported or failed extraction.",
+        },
+        {
+            "type": "labor_cost_calculated",
+            "title": "Labor cost calculated",
+            "status": "complete",
+            "detail": f"Demo labor cost is ${labor_cost_cents / 100:,.2f}.",
+        },
+    ]
+    if margin_warning:
+        proof_events.append(
+            {
+                "type": "margin_warning_produced",
+                "title": "Margin warning produced",
+                "status": "needs_review",
+                "detail": "Labor cost pushed projected margin below the configured floor.",
+            }
+        )
+
+    proof_events.extend(
+        {
+            "type": "policy_check_approved" if bool(check.get("approved")) else "policy_check_blocked",
+            "title": f"Policy check {'approved' if bool(check.get('approved')) else 'blocked'}",
+            "status": "approved" if bool(check.get("approved")) else "blocked",
+            "detail": f"{check.get('vendor')} / {check.get('required_action')}",
+        }
+        for check in policy_checks
+    )
+    proof_events.extend(
+        {
+            "type": "ledger_entry_recorded",
+            "title": "Ledger row recorded",
+            "status": "recorded",
+            "detail": f"{entry.get('entry_type')} / {entry.get('label')}",
+        }
+        for entry in ledger_entries
+    )
+    proof_events.extend(
+        {
+            "type": "agent_output_recorded",
+            "title": f"{output.get('agent_name')} output recorded",
+            "status": output.get("status") or "recorded",
+            "detail": output.get("summary") or "Agent output summary recorded.",
+        }
+        for output in agent_outputs
+    )
+    if reports:
+        proof_events.append(
+            {
+                "type": "final_report_recorded",
+                "title": "Final profit report recorded",
+                "status": "complete",
+                "detail": "Final report includes vendor spend, labor cost, margin, and recommendation.",
+            }
+        )
+    if not events:
+        return proof_events
+    return proof_events
+
+
+def _percent(numerator: int, denominator: int) -> float:
+    if denominator <= 0:
+        return 0.0
+    return round((numerator / denominator) * 100, 1)
+
+
 def _selected_job(
     connection: sqlite3.Connection,
     active_workflow: dict[str, Any] | None,
@@ -259,6 +628,13 @@ def _approved_spend_cents(seed_config: dict[str, Any]) -> int:
     return sum(
         usd_to_cents(item.get("amountUsd", 0))
         for item in seed_config.get("approvedSpendRequests", [])
+    )
+
+
+def _blocked_spend_cents(seed_config: dict[str, Any]) -> int:
+    return sum(
+        usd_to_cents(item.get("amountUsd", 0))
+        for item in seed_config.get("blockedSpendRequests", [])
     )
 
 

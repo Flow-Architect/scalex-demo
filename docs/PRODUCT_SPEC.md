@@ -23,6 +23,150 @@ billing, vendor spend, approvals, task routing, and reporting are fragmented. Sc
 governed execution layer for revenue-backed client operations, so agents can touch operations,
 finance proof, approvals, and evidence only inside safe boundaries.
 
+## Goal 8F Scope - Command Center, Intake, And Labor Costing
+
+Goal 8F deepens ScaleX from a mostly linear run demo into a profit-aware agent command center for
+service businesses. The product surface should expose runtime routing, client onboarding,
+employee onboarding, document intake, labor costing, economic controls, policy guardrails, agent
+work, judge proof, audit evidence, and final profit reporting as first-class operating panels.
+
+This goal adds:
+
+- client onboarding with manual entry and demo-safe document intake;
+- employee onboarding with manual entry and demo-safe document intake;
+- document-intake review before any extracted values are saved;
+- labor costing so service profitability includes employee labor after approved vendor spend;
+- richer command-center sections around runtime routing, economics, policy, agents, and evidence.
+
+This goal preserves deterministic Judge Demo Mode, the isolated Hermes path, optional NemoHermes
+runtime routing, fail-closed behavior, existing Stripe test-mode boundaries, local policy
+guardrails, and SQLite evidence. It does not add live-money behavior, production payroll, HR
+compliance processing, tax processing, real client data, real employee records, or external
+document extraction services.
+
+## Command Center Sections
+
+Goal 8F should organize the primary UI as an operating dashboard/control room with these sections:
+
+- Mission Control: active client, active job/campaign, invoice amount, spend cap, margin floor,
+  approved vendor spend, labor cost, projected/final profit, final margin, selected runtime mode,
+  and overall safe/protected status.
+- Runtime / Connection Hub: route and non-secret runtime proof, including deterministic Judge
+  Demo Mode, isolated Hermes, or selected NemoHermes API routing.
+- Client Onboarding Center: manual client entry, file intake, extracted-data review, edit before
+  save, and edit after save.
+- Employee Onboarding Center: manual employee entry, file intake, extracted-data review, edit
+  before save, and edit after save.
+- Document Intake Review: upload status, extracted values, missing fields, low-confidence values,
+  unsupported-file or extraction-failed states, and explicit save/confirm actions.
+- Workforce / Labor Cost Panel: onboarded employees, role/title, rates, burden, assigned hours,
+  labor cost by employee, total labor cost, and margin after labor.
+- Economic Control Panel: revenue, approved vendor spend, blocked spend, labor cost, gross profit
+  after vendor spend and labor, projected/final margin, and margin floor.
+- Policy / Guardrail Console: approved and blocked policy checks, margin impact, required action,
+  and proof that blocked spend does not update the ledger.
+- Agent Workbench: Orchestrator, Finance Agent, Marketing Agent, Research Agent, and Ops Agent
+  work as separate visible workers when current demo data includes them.
+- Judge Proof / Audit Ledger: chronological proof across job creation, onboarding, extraction,
+  runtime selection, finance proof, policy checks, labor costing, agent outputs, and final report.
+- Final Profit Report: client/job summary, revenue, approved vendor spend, blocked spend, labor
+  breakdown, gross profit after labor, final margin, margin floor, blocked actions, and
+  recommendation.
+
+## Client Onboarding Requirements
+
+Client onboarding must support manual entry and demo-safe upload intake for PDF, Excel/spreadsheet
+files such as `.xlsx` or `.xls`, Word/document files such as `.docx` or `.doc`, and CSV if easy in
+the existing stack. CSV may not replace Excel support. Extracted values must be reviewed and
+editable before save, and saved client records must remain editable after save.
+
+Client fields:
+
+- client name;
+- business type;
+- primary contact;
+- contact email and phone when already present in demo data;
+- job/campaign name;
+- job/campaign goal;
+- invoice amount;
+- spend cap or budget;
+- margin floor or target;
+- service notes.
+
+## Employee Onboarding Requirements
+
+Employee onboarding must support manual entry and demo-safe upload intake for PDF,
+Excel/spreadsheet, Word/document, and optional CSV files. Extracted values must be reviewed and
+editable before save, and saved employee records must remain editable after save.
+
+Employee fields:
+
+- employee name;
+- role/title;
+- base hourly rate;
+- labor burden/overhead percentage;
+- fully loaded hourly rate;
+- estimated availability or assigned hours when provided;
+- skill/category when useful;
+- active/inactive status;
+- notes.
+
+## Document Intake Behavior
+
+Upload intake is demo-safe and not production OCR. Preferred behavior is deterministic demo
+extraction fixtures if real parsing would slow the build, with basic local parsing only when easy
+in the current stack.
+
+Rules:
+
+- no external extraction services;
+- no external credentials;
+- no silent saving of extracted data;
+- manual entry remains available after extraction failure;
+- unsupported-file and extraction-failed states are shown clearly;
+- uploaded files are not permanently stored unless a safe demo storage pattern already exists;
+- no real uploaded files are committed.
+
+## Labor Costing Model
+
+Labor costing rules:
+
+- fully loaded hourly rate = base hourly rate * (1 + labor burden percentage);
+- labor cost = fully loaded hourly rate * assigned hours;
+- job profit = revenue - approved vendor spend - labor cost;
+- final margin = job profit / revenue.
+
+Labor cost must feed Mission Control, Workforce / Labor Cost Panel, Economic Control Panel, Final
+Profit Report, and margin warnings when labor pushes the job below the configured margin floor.
+The UI should clearly state that this is demo-safe job costing, not payroll processing.
+
+## Goal 8F Safety Boundaries
+
+Goal 8F uses fake/demo clients and fake/demo employees only. It must not collect, display, store,
+or imply support for SSNs, tax IDs, bank information, addresses, birth dates, real HR records, or
+sensitive payroll records. It is not production payroll, HR compliance processing, tax processing,
+or live-money operation.
+
+No secrets are stored. Deterministic Judge Demo Mode, the isolated Hermes path, optional
+NemoHermes runtime routing, and fail-closed behavior are preserved. The app must not log raw file
+contents, secrets, sensitive personal data, tokens, raw credential headers, or `.env` values.
+
+## Goal 8F Audit Expectations
+
+Non-secret audit/proof events may include:
+
+- client manually created;
+- client extracted from file;
+- client edited;
+- employee manually created;
+- employee extracted from file;
+- employee edited;
+- extraction failed;
+- labor cost calculated;
+- margin warning produced;
+- policy check approved;
+- policy check blocked.
+
 ## Implemented Today
 
 - Local FastAPI backend and Vite React product shell.
@@ -34,6 +178,14 @@ finance proof, approvals, and evidence only inside safe boundaries.
 - Right selected-node inspector for Run Summary, Client Intake, Hermes Plan, Finance Proof,
   Revenue Gate, Guardrail Review, Approved Resources, Blocked Risk, Evidence Ledger, and Profit
   Outcome proof.
+- Command Center sections for Mission Control, Runtime / Connection Hub, Client Onboarding Center,
+  Employee Onboarding Center, Document Intake Review, Workforce / Labor Cost Panel, Economic
+  Control Panel, Policy / Guardrail Console, Agent Workbench, Judge Proof / Audit Ledger, and Final
+  Profit Report.
+- Demo-safe client and employee intake review with local browser-only manual/edit/save controls
+  and upload-triggered deterministic extraction fixtures.
+- Labor costing that includes fake/demo employee fully loaded rates, assigned hours, labor cost,
+  profit after approved vendor spend and labor, final margin, and margin warning state.
 - Selected workflow runs where customer, job, invoice amount, spend cap, margin floor, and vendor
   lists drive Stripe amount, policy math, ledger totals, and final report.
 - Persisted run history with historical proof inspection by run ID.
@@ -172,8 +324,9 @@ dashboard.
 
 ## Product Depth + Demo-Winning UI Plan
 
-The current UI/product surface may feel too simple even though backend proof is strong. Goal 7.15B
-should make ScaleX feel like a repeatable enterprise product, not a one-off Northstar workflow.
+The current UI/product surface may feel too simple even though backend proof is strong. Goal 8F
+absorbs the product-depth plan and should make ScaleX feel like a repeatable enterprise command
+center, not a one-off Northstar workflow.
 
 Required future improvements:
 
@@ -261,9 +414,8 @@ call ScaleX safely through approved tools, resources, and prompts.
 ScaleX does not currently have an MCP server, and external agents cannot yet call ScaleX through
 MCP.
 
-MCP is paused until NemoClaw preflight is complete, the Telegram approval gate is planned or
-implemented or explicitly deferred, the UI/product story is strong enough, and the guardrail/tool
-boundary remains safe.
+MCP is paused until the Telegram approval gate is planned or implemented or explicitly deferred,
+the command-center product story is strong enough, and the guardrail/tool boundary remains safe.
 
 Future MCP tools may include `scalex_list_operations`, `scalex_get_operation`,
 `scalex_start_run`, `scalex_get_run`, `scalex_get_evidence`, `scalex_get_connector_status`, and

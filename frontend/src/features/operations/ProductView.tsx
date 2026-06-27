@@ -1,4 +1,4 @@
-import type { FormEvent, ReactNode } from "react";
+import { useState, type FormEvent, type ReactNode } from "react";
 import {
   Activity,
   AlertTriangle,
@@ -58,6 +58,8 @@ import type { BusyAction } from "../../lib/demoSelectors";
 import type {
   AgentOutput,
   AuthStatus,
+  CommandCenterClientRecord,
+  CommandCenterEmployeeRecord,
   DemoEvent,
   DemoState,
   GuardrailEvaluation,
@@ -198,8 +200,6 @@ function DashboardView({
   const revenueCents = money.revenueCents ?? activeWorkflow?.invoice_amount_cents ?? latestRun?.invoice_amount_cents ?? 850_000;
   const approvedSpendCents = money.approvedSpendCents ?? spendCapCents;
   const blockedSpendCents = money.blockedSpendCents ?? 320_000;
-  const grossProfitCents = money.grossProfitCents ?? revenueCents - approvedSpendCents;
-  const marginPercent = money.marginPercent ?? (revenueCents > 0 ? (grossProfitCents / revenueCents) * 100 : null);
   const guardrailLabel = state?.execution.guardrail_label ?? "Local policy active";
   const guardrailTone: Tone = state?.guardrails.fail_closed
     ? "rose"
@@ -213,13 +213,6 @@ function DashboardView({
     { icon: Workflow, label: "Launch readiness", value: activeWorkflow ? "Ready for Studio" : "Select operation", tone: activeWorkflow ? "emerald" : "amber" },
     { icon: ShieldCheck, label: "Data boundary", value: "No patient data / no PHI", tone: "teal" },
     { icon: ShieldCheck, label: "Guardrails", value: guardrailLabel, tone: guardrailTone },
-  ];
-  const outcomeItems: RailItem[] = [
-    { label: "Revenue", value: formatCurrency(revenueCents), tone: "emerald" },
-    { label: "Setup spend", value: formatCurrency(approvedSpendCents), tone: "sky" },
-    { label: "Blocked risk", value: formatCurrency(blockedSpendCents), tone: "rose" },
-    { label: "Protected profit", value: formatCurrency(grossProfitCents), tone: "teal" },
-    { label: "Margin", value: formatOptionalPercent(marginPercent), tone: "amber" },
   ];
   const stackSteps: TimelineStep[] = [
     { icon: Building2, label: "Intake", description: "Northstar implementation scope and operating rules are selected." },
@@ -236,6 +229,109 @@ function DashboardView({
     "Research-to-Report",
     "Ops Handoff",
     "Renewal Recommendation",
+  ];
+  const commandCenter = state?.command_center ?? null;
+  const fallbackClientRecord: CommandCenterClientRecord = {
+    client_name: clientName,
+    business_type: businessType,
+    primary_contact: "Demo operations lead",
+    contact_email: null,
+    contact_phone: null,
+    job_name: operationName,
+    job_goal: latestRun?.job_goal ?? activeWorkflow?.job_goal ?? "Launch the client implementation package with governed spend and evidence.",
+    invoice_amount_cents: revenueCents,
+    spend_cap_cents: spendCapCents,
+    margin_floor_percent: latestRun?.margin_floor_percent ?? activeWorkflow?.margin_floor_percent ?? 50,
+    service_notes: "Synthetic B2B operation. No patient data, PHI, addresses, or real client records.",
+    source: "manual_entry",
+    status: "saved_editable",
+  };
+  const savedClient = commandCenter?.client_onboarding.saved_record ?? fallbackClientRecord;
+  const baseEmployees = commandCenter?.labor_costing.employees ?? demoEmployeeRecords();
+  const [clientMode, setClientMode] = useState<"manual" | "upload" | "review">("manual");
+  const [clientDraft, setClientDraft] = useState<CommandCenterClientRecord | null>(null);
+  const [clientOverride, setClientOverride] = useState<CommandCenterClientRecord | null>(null);
+  const [clientIntakeStatus, setClientIntakeStatus] = useState("Manual entry ready. Extracted data requires review before save.");
+  const [employeeMode, setEmployeeMode] = useState<"manual" | "upload" | "review">("manual");
+  const [employeeDrafts, setEmployeeDrafts] = useState<CommandCenterEmployeeRecord[] | null>(null);
+  const [employeeOverride, setEmployeeOverride] = useState<CommandCenterEmployeeRecord[] | null>(null);
+  const [employeeIntakeStatus, setEmployeeIntakeStatus] = useState("Manual workforce entry ready. Demo employees are job-costing assumptions only.");
+  const currentClient = clientDraft ?? clientOverride ?? savedClient;
+  const currentEmployees = (employeeDrafts ?? employeeOverride ?? baseEmployees).map(calculateLoadedEmployee);
+  const totalLaborCostCents = currentEmployees.reduce((sum, employee) => sum + employee.labor_cost_cents, 0);
+  const commandRevenueCents = currentClient.invoice_amount_cents || revenueCents;
+  const commandApprovedSpendCents = money.approvedSpendCents ?? commandCenter?.mission_control.approved_vendor_spend_cents ?? approvedSpendCents;
+  const commandBlockedSpendCents = money.blockedSpendCents ?? commandCenter?.mission_control.blocked_spend_cents ?? blockedSpendCents;
+  const profitAfterLaborCents = commandRevenueCents - commandApprovedSpendCents - totalLaborCostCents;
+  const marginAfterLaborPercent = commandRevenueCents > 0 ? (profitAfterLaborCents / commandRevenueCents) * 100 : 0;
+  const marginFloorPercent = currentClient.margin_floor_percent || 50;
+  const marginNeedsReview = marginAfterLaborPercent < marginFloorPercent;
+  const runtimeRoute = commandCenter?.runtime_route ?? null;
+  const commandAuditEvents = commandCenter?.audit_events ?? [];
+  const commandSafetyProof = commandCenter?.safety_proof ?? [
+    "fake/demo clients only",
+    "fake/demo employees only",
+    "no live money",
+    "uploaded data requires review",
+  ];
+  const clientReview = commandCenter?.client_onboarding.extracted_review;
+  const employeeReview = commandCenter?.employee_onboarding.extracted_review;
+  const documentStates = commandCenter?.document_intake.states ?? [];
+  const updateClientDraft = (patch: Partial<CommandCenterClientRecord>) => {
+    setClientDraft({ ...currentClient, ...patch });
+  };
+  const updateEmployeeDraft = (index: number, patch: Partial<CommandCenterEmployeeRecord>) => {
+    const sourceRows = currentEmployees.length > 0 ? currentEmployees : demoEmployeeRecords();
+    setEmployeeDrafts(
+      sourceRows.map((employee, employeeIndex) => (
+        employeeIndex === index ? calculateLoadedEmployee({ ...employee, ...patch }) : employee
+      )),
+    );
+  };
+  const handleClientFile = (fileName: string) => {
+    const extension = fileExtension(fileName);
+    if (!isAcceptedIntakeFile(extension)) {
+      setClientMode("upload");
+      setClientIntakeStatus(`Unsupported file type .${extension || "unknown"}. Use PDF, Excel, Word, or CSV.`);
+      return;
+    }
+    setClientDraft({
+      ...currentClient,
+      client_name: "Harbor Auto Care",
+      business_type: "Local auto repair shop",
+      primary_contact: "Demo shop manager",
+      contact_email: null,
+      contact_phone: null,
+      job_name: "30-day brake service campaign",
+      job_goal: "Create a governed brake-service campaign with finance proof, labor costing, and blocked-risk evidence.",
+      invoice_amount_cents: 120_000,
+      spend_cap_cents: 30_000,
+      margin_floor_percent: 50,
+      service_notes: "Demo extraction fixture. Review before save. No addresses, SSNs, tax IDs, or real client records.",
+      source: "file_extraction_fixture",
+      status: "review_required",
+    });
+    setClientMode("review");
+    setClientIntakeStatus(`${extension.toUpperCase()} client intake extracted with demo fixtures. Review and edit before save.`);
+  };
+  const handleEmployeeFile = (fileName: string) => {
+    const extension = fileExtension(fileName);
+    if (!isAcceptedIntakeFile(extension)) {
+      setEmployeeMode("upload");
+      setEmployeeIntakeStatus(`Unsupported file type .${extension || "unknown"}. Use PDF, Excel, Word, or CSV.`);
+      return;
+    }
+    setEmployeeDrafts(demoEmployeeRecords().map((employee) => ({ ...employee, source: "file_extraction_fixture", status: "review_required" })));
+    setEmployeeMode("review");
+    setEmployeeIntakeStatus(`${extension.toUpperCase()} workforce intake extracted with demo fixtures. Review and edit before save.`);
+  };
+  const commandOutcomeItems: RailItem[] = [
+    { label: "Revenue", value: formatCurrency(commandRevenueCents), tone: "emerald" },
+    { label: "Vendor spend", value: formatCurrency(commandApprovedSpendCents), tone: "sky" },
+    { label: "Labor cost", value: formatCurrency(totalLaborCostCents), tone: "violet" },
+    { label: "Profit after labor", value: formatCurrency(profitAfterLaborCents), tone: marginNeedsReview ? "rose" : "teal" },
+    { label: "Final margin", value: formatPercent(marginAfterLaborPercent), tone: marginNeedsReview ? "rose" : "amber" },
+    { label: "Blocked risk", value: formatCurrency(commandBlockedSpendCents), tone: "rose" },
   ];
 
   return (
@@ -270,7 +366,348 @@ function DashboardView({
         <p>{businessType}. Synthetic B2B implementation operations only: no patient data, no PHI, and no healthcare compliance claim.</p>
       </OperationHero>
 
-      <OutcomeRail items={outcomeItems} />
+      <OutcomeRail items={commandOutcomeItems} />
+
+      <WorkspaceSection
+        description="A first-screen operating view for the active client, runtime mode, margin floor, labor cost, and protected status."
+        title="Mission Control"
+      >
+        <div className="grid gap-4 lg:grid-cols-3 xl:grid-cols-6">
+          <MetricTile label="Active client" tone="slate" value={currentClient.client_name} />
+          <MetricTile label="Active job" tone="sky" value={currentClient.job_name} />
+          <MetricTile label="Runtime" tone={runtimeRoute?.status === "fail_closed" ? "rose" : runtimeRoute?.used_real_hermes ? "emerald" : "amber"} value={commandCenter?.mission_control.runtime_mode ?? state?.execution.label ?? "Judge Demo Mode"} />
+          <MetricTile label="Margin floor" tone="amber" value={formatPercent(marginFloorPercent)} />
+          <MetricTile label="Labor cost" tone="violet" value={formatCurrency(totalLaborCostCents)} />
+          <MetricTile label="Protected status" tone={marginNeedsReview ? "rose" : "emerald"} value={marginNeedsReview ? "Needs review" : "Safe / Profitable"} />
+        </div>
+      </WorkspaceSection>
+
+      <WorkspaceSection
+        description="Runtime routing is shown as proof, not as a secret-bearing config dump."
+        title="Runtime / Connection Hub"
+      >
+        <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_24rem]">
+          <div className="rounded-md bg-white p-5 shadow-sm ring-1 ring-zinc-200">
+            <div className="flex flex-wrap items-center gap-2">
+              {(runtimeRoute?.route ?? ["ScaleX", "Hermes Adapter", "Deterministic local planner"]).map((step, index) => (
+                <span className="inline-flex items-center gap-2 text-sm font-semibold text-zinc-700" key={`${step}-${index}`}>
+                  <span className="rounded-md bg-zinc-100 px-2.5 py-1">{step}</span>
+                  {index < (runtimeRoute?.route.length ?? 3) - 1 ? <span className="text-zinc-400">-&gt;</span> : null}
+                </span>
+              ))}
+            </div>
+            <ConnectionFactGrid
+              facts={[
+                { label: "Runtime", value: runtimeRoute?.runtime ?? state?.execution.hermes_runtime ?? "isolated_cli", tone: "sky" },
+                { label: "Endpoint", value: runtimeRoute?.endpoint ?? "Not selected / local deterministic", tone: runtimeRoute?.endpoint ? "slate" : "amber" },
+                { label: "Sandbox", value: runtimeRoute?.sandbox ?? "Not selected", tone: runtimeRoute?.sandbox ? "teal" : "slate" },
+                { label: "Model", value: runtimeRoute?.model ?? state?.hermes.model ?? "model not recorded", tone: "slate" },
+                { label: "Provider", value: runtimeRoute?.provider ?? state?.hermes.provider ?? "provider not recorded", tone: "slate" },
+                { label: "Upstream model", value: runtimeRoute?.upstream_model ?? "Not applicable", tone: "slate" },
+                { label: "Status", value: humanize(runtimeRoute?.status ?? state?.execution.hermes_runtime_status ?? "pending"), tone: runtimeRoute?.status === "fail_closed" ? "rose" : runtimeRoute?.used_real_hermes ? "emerald" : "amber" },
+                { label: "Duration / error", value: `${runtimeRoute?.duration_ms ?? state?.hermes.duration_ms ?? 0} ms / ${runtimeRoute?.error_class ?? "none"}`, tone: runtimeRoute?.error_class ? "rose" : "teal" },
+              ]}
+            />
+          </div>
+          <div className="rounded-md bg-white p-5 shadow-sm ring-1 ring-zinc-200">
+            <h3 className="font-semibold text-zinc-950">Fail-closed proof</h3>
+            <div className="mt-4 space-y-2">
+              {["unavailable", "timeout", "malformed response", "HTTP failure"].map((stateLabel) => (
+                <StatusBadge key={stateLabel} label={stateLabel} tone={runtimeRoute?.status === "fail_closed" ? "rose" : "slate"} />
+              ))}
+            </div>
+            <p className="mt-4 text-sm leading-6 text-zinc-600">
+              Runtime evidence records host/path, model, sandbox, provider, status, duration, and error class only. Secrets, tokens, raw credential headers, and `.env` values are not shown.
+            </p>
+          </div>
+        </div>
+      </WorkspaceSection>
+
+      <WorkspaceSection
+        description="Manual entry and upload intake both require review before values are saved into the local browser demo state."
+        title="Client Onboarding Center"
+      >
+        <div className="grid gap-5 xl:grid-cols-[minmax(0,1.2fr)_minmax(0,0.8fr)]">
+          <div className="rounded-md bg-white p-5 shadow-sm ring-1 ring-zinc-200">
+            <div className="flex flex-wrap gap-2">
+              <TabButton active={clientMode === "manual"} label="Manual Entry" onClick={() => setClientMode("manual")} />
+              <TabButton active={clientMode === "upload"} label="Upload File" onClick={() => setClientMode("upload")} />
+              <TabButton active={clientMode === "review"} label="Extracted Review" onClick={() => setClientMode("review")} />
+            </div>
+            {clientMode === "upload" ? (
+              <IntakeUpload
+                description="Accepted: PDF, Excel .xlsx/.xls, Word .docx/.doc, and CSV. Files are not stored."
+                onFileName={handleClientFile}
+                onSimulateFailure={() => {
+                  setClientMode("upload");
+                  setClientIntakeStatus("Extraction failed. Manual entry remains available and no values were saved.");
+                }}
+              />
+            ) : (
+              <div className="mt-5 grid gap-4 lg:grid-cols-2">
+                <FieldInput label="Client name" onChange={(value) => updateClientDraft({ client_name: value })} value={currentClient.client_name} />
+                <FieldInput label="Business type" onChange={(value) => updateClientDraft({ business_type: value })} value={currentClient.business_type} />
+                <FieldInput label="Primary contact" onChange={(value) => updateClientDraft({ primary_contact: value })} value={currentClient.primary_contact} />
+                <FieldInput label="Contact email" onChange={(value) => updateClientDraft({ contact_email: value || null })} value={currentClient.contact_email ?? ""} />
+                <FieldInput label="Job/campaign name" onChange={(value) => updateClientDraft({ job_name: value })} value={currentClient.job_name} />
+                <FieldInput label="Invoice amount" onChange={(value) => updateClientDraft({ invoice_amount_cents: dollarsToCents(value) })} type="number" value={centsToDollarInput(currentClient.invoice_amount_cents)} />
+                <FieldInput label="Spend cap/budget" onChange={(value) => updateClientDraft({ spend_cap_cents: dollarsToCents(value) })} type="number" value={centsToDollarInput(currentClient.spend_cap_cents)} />
+                <FieldInput label="Margin floor" onChange={(value) => updateClientDraft({ margin_floor_percent: numberInput(value) })} type="number" value={String(currentClient.margin_floor_percent)} />
+                <div className="lg:col-span-2">
+                  <TextAreaField label="Service notes" onChange={(value) => updateClientDraft({ service_notes: value })} value={currentClient.service_notes} />
+                </div>
+              </div>
+            )}
+            <div className="mt-5 flex flex-wrap items-center gap-2">
+              <PrimaryButton
+                icon={CheckCircle2}
+                label="Save reviewed client"
+                onClick={() => {
+                  setClientOverride({ ...currentClient, status: "saved_editable" });
+                  setClientDraft(null);
+                  setClientIntakeStatus("Client record saved to local browser demo state. Saved records remain editable.");
+                }}
+              />
+              <SecondaryButton icon={FileText} label="Edit saved client" onClick={() => setClientDraft({ ...currentClient })} />
+              <StatusBadge label={humanize(currentClient.source)} tone={currentClient.source === "file_extraction_fixture" ? "sky" : "teal"} />
+            </div>
+          </div>
+          <ReviewPanel
+            facts={[
+              { label: "Review status", value: clientReview?.status ?? currentClient.status, tone: clientMode === "upload" ? "amber" : "sky" },
+              { label: "File type", value: clientReview?.file_type ?? "manual", tone: "slate" },
+              { label: "Missing fields", value: clientReview?.missing_fields.join(", ") || "None", tone: clientReview?.missing_fields.length ? "amber" : "emerald" },
+              { label: "Low confidence", value: clientReview?.low_confidence_fields.join(", ") || "None", tone: clientReview?.low_confidence_fields.length ? "amber" : "emerald" },
+              { label: "Silent save", value: "false", tone: "emerald" },
+            ]}
+            status={clientIntakeStatus}
+            title="Extracted Data Review"
+          />
+        </div>
+      </WorkspaceSection>
+
+      <WorkspaceSection
+        description="Employee records are demo job-costing assumptions. This is not payroll, HR compliance, tax processing, or workforce management."
+        title="Employee Onboarding Center"
+      >
+        <div className="grid gap-5 xl:grid-cols-[minmax(0,1.3fr)_minmax(0,0.7fr)]">
+          <div className="rounded-md bg-white p-5 shadow-sm ring-1 ring-zinc-200">
+            <div className="flex flex-wrap gap-2">
+              <TabButton active={employeeMode === "manual"} label="Manual Entry" onClick={() => setEmployeeMode("manual")} />
+              <TabButton active={employeeMode === "upload"} label="Upload File" onClick={() => setEmployeeMode("upload")} />
+              <TabButton active={employeeMode === "review"} label="Extracted Review" onClick={() => setEmployeeMode("review")} />
+            </div>
+            {employeeMode === "upload" ? (
+              <IntakeUpload
+                description="Accepted: PDF, Excel .xlsx/.xls, Word .docx/.doc, and CSV. Files are not stored."
+                onFileName={handleEmployeeFile}
+                onSimulateFailure={() => {
+                  setEmployeeMode("upload");
+                  setEmployeeIntakeStatus("Extraction failed. Manual employee entry remains available and no values were saved.");
+                }}
+              />
+            ) : (
+              <div className="mt-5 overflow-x-auto">
+                <table className="min-w-full border-separate border-spacing-y-2 text-sm">
+                  <thead className="text-left text-xs uppercase text-zinc-500">
+                    <tr>
+                      <th className="px-3 py-2">Employee</th>
+                      <th className="px-3 py-2">Role</th>
+                      <th className="px-3 py-2">Base/hr</th>
+                      <th className="px-3 py-2">Burden</th>
+                      <th className="px-3 py-2">Hours</th>
+                      <th className="px-3 py-2">Loaded/hr</th>
+                      <th className="px-3 py-2">Labor cost</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {currentEmployees.map((employee, index) => (
+                      <tr className="bg-zinc-50" key={`${employee.employee_name}-${index}`}>
+                        <td className="px-3 py-2"><input className="w-40 rounded-md border border-zinc-300 px-2 py-1" onChange={(event) => updateEmployeeDraft(index, { employee_name: event.target.value })} value={employee.employee_name} /></td>
+                        <td className="px-3 py-2"><input className="w-40 rounded-md border border-zinc-300 px-2 py-1" onChange={(event) => updateEmployeeDraft(index, { role_title: event.target.value })} value={employee.role_title} /></td>
+                        <td className="px-3 py-2"><input className="w-24 rounded-md border border-zinc-300 px-2 py-1" onChange={(event) => updateEmployeeDraft(index, { base_hourly_rate_cents: dollarsToCents(event.target.value) })} type="number" value={centsToDollarInput(employee.base_hourly_rate_cents)} /></td>
+                        <td className="px-3 py-2"><input className="w-20 rounded-md border border-zinc-300 px-2 py-1" onChange={(event) => updateEmployeeDraft(index, { labor_burden_percent: numberInput(event.target.value) })} type="number" value={String(employee.labor_burden_percent)} /></td>
+                        <td className="px-3 py-2"><input className="w-20 rounded-md border border-zinc-300 px-2 py-1" onChange={(event) => updateEmployeeDraft(index, { assigned_hours: numberInput(event.target.value) })} type="number" value={String(employee.assigned_hours)} /></td>
+                        <td className="px-3 py-2 font-semibold">{formatCurrency(employee.fully_loaded_hourly_rate_cents)}</td>
+                        <td className="px-3 py-2 font-semibold">{formatCurrency(employee.labor_cost_cents)}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+            <div className="mt-5 flex flex-wrap items-center gap-2">
+              <PrimaryButton
+                icon={CheckCircle2}
+                label="Save reviewed employees"
+                onClick={() => {
+                  setEmployeeOverride(currentEmployees.map((employee) => ({ ...employee, status: "saved_editable" })));
+                  setEmployeeDrafts(null);
+                  setEmployeeIntakeStatus("Employee job-costing records saved to local browser demo state. Saved records remain editable.");
+                }}
+              />
+              <SecondaryButton icon={FileText} label="Edit saved employees" onClick={() => setEmployeeDrafts(currentEmployees.map((employee) => ({ ...employee })))} />
+            </div>
+          </div>
+          <ReviewPanel
+            facts={[
+              { label: "Review status", value: employeeReview?.status ?? "saved_editable", tone: employeeMode === "upload" ? "amber" : "sky" },
+              { label: "File type", value: employeeReview?.file_type ?? "manual", tone: "slate" },
+              { label: "Missing fields", value: employeeReview?.missing_fields.join(", ") || "None", tone: employeeReview?.missing_fields.length ? "amber" : "emerald" },
+              { label: "Low confidence", value: employeeReview?.low_confidence_fields.join(", ") || "None", tone: employeeReview?.low_confidence_fields.length ? "amber" : "emerald" },
+              { label: "Silent save", value: "false", tone: "emerald" },
+            ]}
+            status={employeeIntakeStatus}
+            title="Document Intake Review"
+          />
+        </div>
+      </WorkspaceSection>
+
+      <WorkspaceSection
+        description="Upload intake is demo-safe. Extracted values require review and manual entry remains available after failure."
+        title="Document Intake Review"
+      >
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+          {documentStates.map((stateItem) => (
+            <article className="rounded-md bg-white p-4 shadow-sm ring-1 ring-zinc-200" key={`${stateItem.scope}-${stateItem.status}`}>
+              <StatusBadge
+                label={humanize(stateItem.status)}
+                tone={stateItem.status === "review_required" ? "amber" : stateItem.status === "extraction_failed" || stateItem.status === "unsupported_file" ? "rose" : "slate"}
+              />
+              <h3 className="mt-3 font-semibold text-zinc-950">{humanize(stateItem.scope)} / .{stateItem.file_type}</h3>
+              <p className="mt-2 text-sm leading-6 text-zinc-600">{stateItem.message}</p>
+            </article>
+          ))}
+        </div>
+      </WorkspaceSection>
+
+      <WorkspaceSection
+        description="Labor cost feeds margin, economic controls, and the final recommendation. This is job costing, not payroll processing."
+        title="Workforce / Labor Cost Panel"
+      >
+        <div className="grid gap-4 lg:grid-cols-4">
+          <MetricTile label="Total labor cost" tone="violet" value={formatCurrency(totalLaborCostCents)} />
+          <MetricTile label="Profit after labor" tone={marginNeedsReview ? "rose" : "teal"} value={formatCurrency(profitAfterLaborCents)} />
+          <MetricTile label="Margin after labor" tone={marginNeedsReview ? "rose" : "amber"} value={formatPercent(marginAfterLaborPercent)} />
+          <MetricTile label="Labor status" tone={marginNeedsReview ? "rose" : "emerald"} value={marginNeedsReview ? "Needs review" : "Above floor"} />
+        </div>
+      </WorkspaceSection>
+
+      <WorkspaceSection
+        description="ScaleX protects margin before spending and after labor is included."
+        title="Economic Control Panel"
+      >
+        <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_24rem]">
+          <div className="rounded-md bg-white p-5 shadow-sm ring-1 ring-zinc-200">
+            <ConnectionFactGrid
+              facts={[
+                { label: "Revenue", value: formatCurrency(commandRevenueCents), tone: "emerald" },
+                { label: "Approved vendor spend", value: formatCurrency(commandApprovedSpendCents), tone: "sky" },
+                { label: "Blocked spend", value: formatCurrency(commandBlockedSpendCents), tone: "rose" },
+                { label: "Labor cost", value: formatCurrency(totalLaborCostCents), tone: "violet" },
+                { label: "Gross profit after labor", value: formatCurrency(profitAfterLaborCents), tone: marginNeedsReview ? "rose" : "teal" },
+                { label: "Final margin", value: formatPercent(marginAfterLaborPercent), tone: marginNeedsReview ? "rose" : "amber" },
+                { label: "Margin floor", value: formatPercent(marginFloorPercent), tone: "amber" },
+                { label: "Decision", value: marginNeedsReview ? "Needs review" : "Safe / Profitable", tone: marginNeedsReview ? "rose" : "emerald" },
+              ]}
+            />
+          </div>
+          <div className="rounded-md bg-zinc-950 p-5 text-white">
+            <p className="text-xs font-semibold uppercase text-zinc-300">Formula</p>
+            <p className="mt-3 text-lg font-semibold">Margin = (Revenue - Approved Vendor Spend - Labor Cost) / Revenue</p>
+            <p className="mt-4 text-sm leading-6 text-zinc-300">The command center recalculates margin as staffing assumptions change, before another spend decision is trusted.</p>
+          </div>
+        </div>
+      </WorkspaceSection>
+
+      <WorkspaceSection
+        description="Approved and blocked policy checks are first-class proof. Blocked spend never creates a spend ledger row."
+        title="Policy / Guardrail Console"
+      >
+        <div className="grid gap-4 lg:grid-cols-2 xl:grid-cols-4">
+          {(state?.policy_checks ?? []).map((check) => (
+            <PolicyDecisionCard check={check} ledgerEntries={state?.ledger.entries ?? []} key={check.id} />
+          ))}
+          {(state?.policy_checks.length ?? 0) === 0 ? (
+            <EmptyWorkspaceState>Policy decisions appear after Start Run.</EmptyWorkspaceState>
+          ) : null}
+          {marginNeedsReview ? (
+            <article className="rounded-md bg-rose-50 p-4 ring-1 ring-rose-200">
+              <StatusBadge label="needs review" tone="rose" />
+              <h3 className="mt-3 font-semibold text-rose-950">Labor margin warning</h3>
+              <p className="mt-2 text-sm leading-6 text-rose-800">Labor assignments push projected margin below the floor. Review staffing, scope, or approved spend before proceeding.</p>
+            </article>
+          ) : null}
+        </div>
+      </WorkspaceSection>
+
+      <WorkspaceSection
+        description="Agent work is separated by worker so screenshots show the operating team, not one final blob of text."
+        title="Agent Workbench"
+      >
+        <div className="grid gap-4 xl:grid-cols-5">
+          {agentWorkbenchItems(state?.agent_outputs ?? []).map((agent) => (
+            <article className="rounded-md bg-white p-4 shadow-sm ring-1 ring-zinc-200" key={agent.name}>
+              <StatusBadge label={agent.status} tone={agent.status === "complete" ? "emerald" : "amber"} />
+              <h3 className="mt-3 font-semibold text-zinc-950">{agent.name}</h3>
+              <p className="mt-2 text-sm leading-6 text-zinc-600">{agent.task}</p>
+              <p className="mt-3 border-t border-zinc-200 pt-3 text-sm font-semibold text-zinc-800">{agent.summary}</p>
+              <p className="mt-2 text-xs text-zinc-500">Evidence: {agent.evidence}</p>
+            </article>
+          ))}
+        </div>
+      </WorkspaceSection>
+
+      <WorkspaceSection
+        description="Non-secret proof across onboarding, document review, runtime selection, finance proof, policy checks, labor costing, agents, and final report."
+        title="Judge Proof / Audit Ledger"
+      >
+        <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_24rem]">
+          <div className="rounded-md bg-white p-5 shadow-sm ring-1 ring-zinc-200">
+            <div className="space-y-3">
+              {commandAuditEvents.slice(0, 12).map((event, index) => (
+                <div className="border-l-4 border-teal-500 pl-3" key={`${event.type}-${index}`}>
+                  <p className="text-xs font-semibold uppercase text-zinc-500">{humanize(event.type)} / {event.status}</p>
+                  <p className="mt-1 font-semibold text-zinc-950">{event.title}</p>
+                  <p className="mt-1 text-sm text-zinc-600">{event.detail}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="rounded-md bg-white p-5 shadow-sm ring-1 ring-zinc-200">
+            <h3 className="font-semibold text-zinc-950">Safety proof</h3>
+            <ul className="mt-4 space-y-2 text-sm text-zinc-700">
+              {commandSafetyProof.map((proof) => (
+                <li className="flex gap-2" key={proof}>
+                  <CheckCircle2 className="mt-0.5 h-4 w-4 flex-none text-emerald-600" aria-hidden="true" />
+                  <span>{proof}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      </WorkspaceSection>
+
+      <WorkspaceSection
+        description="Final profit after approved vendor spend and labor cost."
+        title="Final Profit Report"
+      >
+        <div className="rounded-md bg-white p-5 shadow-sm ring-1 ring-zinc-200">
+          <ConnectionFactGrid
+            facts={[
+              { label: "Client / job", value: `${currentClient.client_name} / ${currentClient.job_name}`, tone: "slate" },
+              { label: "Revenue", value: formatCurrency(commandRevenueCents), tone: "emerald" },
+              { label: "Approved vendor spend", value: formatCurrency(commandApprovedSpendCents), tone: "sky" },
+              { label: "Blocked spend", value: formatCurrency(commandBlockedSpendCents), tone: "rose" },
+              { label: "Labor cost breakdown", value: currentEmployees.map((employee) => `${employee.employee_name}: ${formatCurrency(employee.labor_cost_cents)}`).join("; "), tone: "violet" },
+              { label: "Gross profit after labor", value: formatCurrency(profitAfterLaborCents), tone: marginNeedsReview ? "rose" : "teal" },
+              { label: "Final margin", value: formatPercent(marginAfterLaborPercent), tone: marginNeedsReview ? "rose" : "amber" },
+              { label: "Margin floor", value: formatPercent(marginFloorPercent), tone: "amber" },
+              { label: "Recommendation", value: marginNeedsReview ? "Review staffing or scope before more spend." : "Proceed while preserving labor and vendor-spend guardrails.", tone: marginNeedsReview ? "rose" : "emerald" },
+            ]}
+          />
+        </div>
+      </WorkspaceSection>
 
       <WorkspaceSection
         description="The launch reads from left to right as a governed business process."
@@ -361,6 +798,232 @@ function SecondaryButton({
       {label}
     </button>
   );
+}
+
+function TabButton({ active, label, onClick }: { active: boolean; label: string; onClick: () => void }) {
+  return (
+    <button
+      className={`inline-flex min-h-10 items-center justify-center rounded-md px-3 text-sm font-semibold transition ${active ? "bg-zinc-950 text-white" : "border border-zinc-300 bg-white text-zinc-900 hover:bg-zinc-50"}`}
+      onClick={onClick}
+      type="button"
+    >
+      {label}
+    </button>
+  );
+}
+
+function IntakeUpload({
+  description,
+  onFileName,
+  onSimulateFailure,
+}: {
+  description: string;
+  onFileName: (fileName: string) => void;
+  onSimulateFailure: () => void;
+}) {
+  return (
+    <div className="mt-5 rounded-md border border-dashed border-zinc-300 bg-zinc-50 p-5">
+      <p className="text-sm leading-6 text-zinc-600">{description}</p>
+      <div className="mt-4 flex flex-wrap items-center gap-3">
+        <label className="inline-flex min-h-11 cursor-pointer items-center justify-center gap-2 rounded-md bg-zinc-950 px-4 text-sm font-semibold text-white transition hover:bg-zinc-800">
+          <FileText className="h-4 w-4" aria-hidden="true" />
+          Upload demo file
+          <input
+            accept=".pdf,.xlsx,.xls,.docx,.doc,.csv"
+            className="sr-only"
+            onChange={(event) => {
+              const file = event.target.files?.[0];
+              if (file) {
+                onFileName(file.name);
+              }
+              event.target.value = "";
+            }}
+            type="file"
+          />
+        </label>
+        <button
+          className="inline-flex min-h-11 items-center justify-center gap-2 rounded-md border border-amber-300 bg-amber-50 px-4 text-sm font-semibold text-amber-900 transition hover:bg-amber-100"
+          onClick={onSimulateFailure}
+          type="button"
+        >
+          <AlertTriangle className="h-4 w-4" aria-hidden="true" />
+          Simulate extraction failure
+        </button>
+      </div>
+      <p className="mt-4 text-xs text-zinc-500">The file is not stored. The UI uses deterministic demo fixtures for extracted review values.</p>
+    </div>
+  );
+}
+
+function ReviewPanel({
+  facts,
+  status,
+  title,
+}: {
+  facts: ConnectorFact[];
+  status: string;
+  title: string;
+}) {
+  return (
+    <div className="rounded-md bg-white p-5 shadow-sm ring-1 ring-zinc-200">
+      <h3 className="font-semibold text-zinc-950">{title}</h3>
+      <p className="mt-2 text-sm leading-6 text-zinc-600">{status}</p>
+      <ConnectionFactGrid facts={facts} />
+    </div>
+  );
+}
+
+function PolicyDecisionCard({ check, ledgerEntries }: { check: PolicyCheck; ledgerEntries: LedgerEntry[] }) {
+  const approved = isApproved(check);
+  const ledgerUpdated = ledgerEntries.some((entry) => entry.entry_type === "spend" && entry.label === check.vendor);
+  return (
+    <article className={`rounded-md p-4 shadow-sm ring-1 ${approved ? "bg-emerald-50 ring-emerald-200" : "bg-rose-50 ring-rose-200"}`}>
+      <StatusBadge label={approved ? "approved" : "blocked"} tone={approved ? "emerald" : "rose"} />
+      <h3 className="mt-3 font-semibold text-zinc-950">{check.vendor}</h3>
+      <p className="mt-2 text-sm text-zinc-700">Requested: {formatCurrency(check.requested_amount_cents)}</p>
+      <p className="mt-1 text-sm text-zinc-700">Margin after spend: {formatPercent(check.margin_after_spend_percent)}</p>
+      <p className="mt-3 text-sm leading-6 text-zinc-600">{check.reason}</p>
+      <div className="mt-3 border-t border-zinc-200 pt-3 text-xs font-semibold uppercase text-zinc-500">
+        Required action: {check.required_action}
+      </div>
+      <p className={`mt-2 text-sm font-semibold ${approved === ledgerUpdated ? "text-emerald-700" : "text-rose-700"}`}>
+        Ledger update: {ledgerUpdated ? "spend row recorded" : "no spend row recorded"}
+      </p>
+    </article>
+  );
+}
+
+function demoEmployeeRecords(): CommandCenterEmployeeRecord[] {
+  return [
+    calculateLoadedEmployee({
+      employee_name: "Maria Lopez",
+      role_title: "Technician",
+      base_hourly_rate_cents: 2400,
+      labor_burden_percent: 20,
+      fully_loaded_hourly_rate_cents: 0,
+      assigned_hours: 5,
+      labor_cost_cents: 0,
+      skill_category: "Technical service",
+      active: true,
+      status: "active",
+      notes: "Demo employee only; no HR record.",
+      source: "manual_entry",
+    }),
+    calculateLoadedEmployee({
+      employee_name: "James Carter",
+      role_title: "Service Assistant",
+      base_hourly_rate_cents: 1800,
+      labor_burden_percent: 20,
+      fully_loaded_hourly_rate_cents: 0,
+      assigned_hours: 3,
+      labor_cost_cents: 0,
+      skill_category: "Operations support",
+      active: true,
+      status: "active",
+      notes: "Demo employee only; no payroll record.",
+      source: "file_extraction_fixture",
+    }),
+    calculateLoadedEmployee({
+      employee_name: "Avery Smith",
+      role_title: "Campaign/Ops Assistant",
+      base_hourly_rate_cents: 2200,
+      labor_burden_percent: 20,
+      fully_loaded_hourly_rate_cents: 0,
+      assigned_hours: 2,
+      labor_cost_cents: 0,
+      skill_category: "Campaign operations",
+      active: true,
+      status: "active",
+      notes: "Demo employee only; job-costing assumption.",
+      source: "file_extraction_fixture",
+    }),
+  ];
+}
+
+function calculateLoadedEmployee(employee: CommandCenterEmployeeRecord): CommandCenterEmployeeRecord {
+  const fullyLoadedHourlyRateCents = Math.round(employee.base_hourly_rate_cents * (1 + employee.labor_burden_percent / 100));
+  return {
+    ...employee,
+    fully_loaded_hourly_rate_cents: fullyLoadedHourlyRateCents,
+    labor_cost_cents: Math.round(fullyLoadedHourlyRateCents * employee.assigned_hours),
+  };
+}
+
+function centsToDollarInput(cents: number): string {
+  return String(Math.round(cents) / 100);
+}
+
+function dollarsToCents(value: string): number {
+  return Math.round(numberInput(value) * 100);
+}
+
+function numberInput(value: string): number {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : 0;
+}
+
+function fileExtension(fileName: string): string {
+  const parts = fileName.toLowerCase().split(".");
+  return parts.length > 1 ? parts[parts.length - 1] : "";
+}
+
+function isAcceptedIntakeFile(extension: string): boolean {
+  return ["pdf", "xlsx", "xls", "docx", "doc", "csv"].includes(extension);
+}
+
+function agentWorkbenchItems(agentOutputs: AgentOutput[]) {
+  const defaultItems = [
+    {
+      name: "Orchestrator",
+      task: "Coordinate finance proof, policy checks, labor assumptions, and evidence.",
+      status: "complete",
+      summary: "Run route and evidence duties prepared.",
+      evidence: "orchestration calls",
+    },
+    {
+      name: "Finance Agent",
+      task: "Review invoice proof, vendor spend, blocked risk, and final economics.",
+      status: "pending",
+      summary: "Waiting for run output.",
+      evidence: "finance proof",
+    },
+    {
+      name: "Marketing Agent",
+      task: "Prepare campaign copy and client-facing launch notes.",
+      status: "pending",
+      summary: "Waiting for run output.",
+      evidence: "agent output",
+    },
+    {
+      name: "Research Agent",
+      task: "Review safe market and operations context without real client data.",
+      status: "pending",
+      summary: "Waiting for run output.",
+      evidence: "agent output",
+    },
+    {
+      name: "Ops Agent",
+      task: "Prepare implementation handoff and execution checklist.",
+      status: "pending",
+      summary: "Waiting for run output.",
+      evidence: "agent output",
+    },
+  ];
+  if (agentOutputs.length === 0) {
+    return defaultItems;
+  }
+  return defaultItems.map((item) => {
+    const output = agentOutputs.find((agentOutput) => agentOutput.agent_name.toLowerCase().includes(item.name.split(" ")[0].toLowerCase()));
+    if (!output) {
+      return item;
+    }
+    return {
+      ...item,
+      status: output.status,
+      summary: output.summary,
+      evidence: "SQLite agent_outputs",
+    };
+  });
 }
 
 function FormSection({

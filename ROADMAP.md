@@ -322,15 +322,15 @@ Completed baseline:
 - Goal 7.15A - Product Depth, Demo-Winning UI Plan, Telegram Approval Gate Plan, and NemoClaw
   Correction
 - Goal 8E - Wire ScaleX to the live NemoHermes API Runtime
+- Goal 8F - Docs-First Command Center UI, Document Intake, and Labor Costing
 
 Suggested next sequence:
 
-1. Goal 8F - Telegram Human Approval Gate.
-2. Goal 7.15B - Product Depth + Demo-Winning UI Pass.
-3. Goal 7.13C - MCP Server Prototype only after NemoClaw, guardrail, and approval boundaries are
+1. Goal 8G - Telegram Human Approval Gate.
+2. Goal 7.13C - MCP Server Prototype only after NemoClaw, guardrail, and approval boundaries are
    safe.
-4. Goal 9 - Final polish and submission assets.
-5. Goal 7B / Production Hardening - Verified Live Mode for future live-money payments.
+3. Goal 9 - Final polish and submission assets.
+4. Goal 7B / Production Hardening - Verified Live Mode for future live-money payments.
 
 Goal 7.14B Full Proof local validation passed in a local-only configured environment. It verified
 real isolated Hermes, real Stripe test-mode invoice proof, NeMo Guardrails adapter runtime
@@ -552,6 +552,11 @@ Make ScaleX feel like a repeatable enterprise product for governed ClientOps exe
 hardcoded Northstar workflow. The current backend proof is strong; the UI must make the product
 depth visible in a clean 90-second judge path.
 
+Status:
+
+This product-depth plan is absorbed into Goal 8F, which expands it with document intake, employee
+onboarding, labor costing, and command-center proof panels.
+
 Required improvements:
 
 1. Demo-friendly auth / login first impression: local demo access should feel intentional; if
@@ -747,7 +752,53 @@ active for deterministic business-rule enforcement.
   model `nvidia/nemotron-3-ultra-550b-a55b`.
 - Fail closed if NemoClaw is selected but unavailable.
 
-### Goal 8F - Telegram Human Approval Gate
+### Goal 8F - Docs-First Command Center UI, Document Intake, and Labor Costing
+
+Purpose:
+
+Deepen ScaleX from a linear run demo into a profit-aware command center for service businesses.
+Goal 8F adds client onboarding with manual and demo-safe document intake, employee onboarding with
+manual and demo-safe document intake, document-intake review, labor costing, economic controls,
+policy proof, agent workbench, judge proof, and final profit reporting after labor.
+
+Status:
+
+Complete. Goal 8F added deterministic command-center backend state, typed frontend models,
+local browser-only manual/edit/save interactions, upload-triggered deterministic extraction
+fixtures, labor-costing math, command-center dashboard sections, and tests for deterministic state
+and no secret-like evidence.
+
+Required sections:
+
+- Mission Control.
+- Runtime / Connection Hub.
+- Client Onboarding Center.
+- Employee Onboarding Center.
+- Document Intake Review.
+- Workforce / Labor Cost Panel.
+- Economic Control Panel.
+- Policy / Guardrail Console.
+- Agent Workbench.
+- Judge Proof / Audit Ledger.
+- Final Profit Report.
+
+Safety:
+
+- fake/demo clients and employees only.
+- no SSNs, tax IDs, bank information, addresses, birth dates, real HR records, sensitive payroll
+  records, production payroll, HR compliance, tax processing, live money, secrets, external
+  extraction services, raw uploaded file logging, or `.env` exposure.
+- deterministic Judge Demo Mode, isolated Hermes, optional NemoHermes runtime, and fail-closed
+  behavior must be preserved.
+
+Labor math:
+
+- fully loaded hourly rate = base hourly rate * (1 + labor burden percentage).
+- labor cost = fully loaded hourly rate * assigned hours.
+- job profit = revenue - approved vendor spend - labor cost.
+- final margin = job profit / revenue.
+
+### Goal 8G - Telegram Human Approval Gate
 
 Purpose:
 

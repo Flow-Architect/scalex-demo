@@ -1,4 +1,5 @@
 from contextlib import closing
+import json
 from types import SimpleNamespace
 
 import pytest
@@ -497,6 +498,86 @@ def test_demo_run_records_planning_and_orchestration_calls(tmp_path, monkeypatch
     ]
     assert calls[1]["tool_output_json"]["hermes_metadata"]["used_real_hermes"] is False
     assert all(call["status"] in {"complete", "completed"} for call in calls)
+
+
+def test_command_center_demo_state_includes_intake_review_and_labor_costing(
+    tmp_path, monkeypatch
+) -> None:
+    monkeypatch.setenv("DATABASE_PATH", str(tmp_path / "scalex.db"))
+
+    response = _call_post_demo_run_route()
+    command_center = response["state"]["command_center"]
+
+    client = command_center["client_onboarding"]["saved_record"]
+    assert client["client_name"] == "Northstar Dental Group"
+    assert client["source"] == "manual_entry"
+    assert client["status"] == "saved_editable"
+
+    client_review = command_center["client_onboarding"]["extracted_review"]
+    assert client_review["file_type"] == "pdf"
+    assert client_review["status"] == "review_required"
+    assert client_review["editable_before_save"] is True
+    assert client_review["silent_save"] is False
+
+    employee_review = command_center["employee_onboarding"]["extracted_review"]
+    assert employee_review["file_type"] == "xlsx"
+    assert employee_review["status"] == "review_required"
+    assert employee_review["silent_save"] is False
+
+    document_states = command_center["document_intake"]["states"]
+    assert {state["status"] for state in document_states} >= {
+        "review_required",
+        "unsupported_file",
+        "extraction_failed",
+    }
+    assert command_center["document_intake"]["external_services"] is False
+    assert command_center["document_intake"]["manual_entry_available"] is True
+
+    employees = command_center["labor_costing"]["employees"]
+    assert [employee["employee_name"] for employee in employees] == [
+        "Maria Lopez",
+        "James Carter",
+        "Avery Smith",
+    ]
+    assert employees[0]["fully_loaded_hourly_rate_cents"] == 2880
+    assert employees[0]["labor_cost_cents"] == 14400
+    assert command_center["labor_costing"]["total_labor_cost_cents"] == 26160
+    assert command_center["labor_costing"]["gross_profit_after_labor_cents"] == 708840
+    assert command_center["labor_costing"]["final_margin_after_labor_percent"] == 83.4
+    assert command_center["labor_costing"]["margin_warning"] is False
+    assert command_center["final_profit_report"]["decision"] == "Safe / Profitable"
+
+
+def test_command_center_audit_evidence_has_no_secret_or_raw_file_content(
+    tmp_path, monkeypatch
+) -> None:
+    monkeypatch.setenv("DATABASE_PATH", str(tmp_path / "scalex.db"))
+
+    response = _call_post_demo_run_route()
+    command_center = response["state"]["command_center"]
+    evidence_text = json.dumps(
+        {
+            "audit_events": command_center["audit_events"],
+            "runtime_route": command_center["runtime_route"],
+            "safety_proof": command_center["safety_proof"],
+            "document_intake": command_center["document_intake"],
+        },
+        sort_keys=True,
+    )
+
+    forbidden_fragments = [
+        "Authorization",
+        "Bearer",
+        "sk_" + "test_",
+        "sk_" + "live_",
+        "nvapi-",
+        "OPENAI_API_KEY",
+        "NVIDIA_API_KEY",
+        "OPENROUTER_API_KEY",
+        "raw file contents",
+    ]
+    for fragment in forbidden_fragments:
+        assert fragment not in evidence_text
 
 
 def test_planning_guardrail_blocks_unsafe_hermes_output_before_finance_or_spend(tmp_path, monkeypatch) -> None:

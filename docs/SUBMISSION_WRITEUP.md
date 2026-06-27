@@ -17,10 +17,11 @@ mode, optional NemoHermes API routing is available when selected and verified, S
 evidence, and the final Profit Outcome reports protected profit and blocked risk. Local policy
 remains the deterministic business-rule gate.
 
-The current proof is a functional live working product prototype, not a static mock. The operator
-logs in, creates or selects a saved local client operation, reviews money rules, starts a run for
-the active operation, watches the connected proof graph move, clicks proof nodes, reviews blocked
-risk, inspects persisted run history, and finishes with an audited profit outcome.
+The current proof is a functional live working product prototype, not a static mock. Goal 8F
+deepens the browser surface into a command center: the operator can review runtime routing, onboard
+demo clients, onboard demo employees, review demo-safe document extraction, estimate labor cost,
+inspect economic controls, start a governed run, inspect agent work, and finish with audited
+profit after vendor spend and labor.
 
 ScaleX Connection Hub is an implemented internal product layer that shows which
 systems the ClientOps Autopilot is allowed to use, what execution mode each connector is in, what
@@ -63,6 +64,12 @@ Demo-readiness note:
 - Goal 7.15A corrected the docs so NeMo Guardrails adapter proof is not confused with actual
   NemoClaw. It also added the future Telegram approval-gate plan and Product Depth + Demo-Winning
   UI plan.
+- Goal 8F targets a docs-first command-center UI, client/employee onboarding with manual and
+  demo-safe document intake, and labor costing. It implements deterministic command-center state,
+  local browser-only intake review/edit/save controls, upload-triggered deterministic extraction
+  fixtures, fake/demo labor costing, and final profit after labor. It does not add live-money
+  behavior, production payroll, HR compliance processing, tax processing, real client data, or real
+  employee records.
 
 Demo story:
 
@@ -71,7 +78,27 @@ ScaleX launches the client operation, confirms revenue through Stripe test invoi
 Hermes plan onboarding and delivery, checks spend and vendor actions through local policy now and
 the optional NeMo Guardrails adapter when configured, targets actual NemoClaw/OpenShell sandboxing
 later, approves safe setup spend, blocks risky enrichment spend, coordinates work units, records
-evidence, and reports protected profit and launch status.
+evidence, adds demo labor-cost assumptions, and reports protected profit and launch status after
+approved vendor spend and labor.
+
+Goal 8F command-center proof:
+
+- Mission Control shows active client/job economics, runtime mode, labor cost, margin, and safe
+  status.
+- Client Onboarding Center and Employee Onboarding Center support manual entry and demo-safe PDF,
+  Excel/spreadsheet, and Word/document intake.
+- Document Intake Review requires extracted-data review and editing before save; unsupported-file
+  and extraction-failed states are visible.
+- Workforce / Labor Cost Panel shows fake/demo employees, base rates, burden, fully loaded rates,
+  assigned hours, labor cost, and margin after labor.
+- Economic Control uses `Margin = (Revenue - Approved Vendor Spend - Labor Cost) / Revenue`.
+- Policy / Guardrail Console shows approved/blocked decisions and proves blocked spend does not
+  update the ledger.
+- Agent Workbench separates Orchestrator, Finance Agent, Marketing Agent, Research Agent, and Ops
+  Agent outputs when available.
+- Judge Proof / Audit Ledger shows non-secret events for onboarding, extraction review,
+  runtime selection, finance proof, policy checks, labor-cost calculations, agent work, and final
+  report.
 
 Full Proof Mode demo plan:
 

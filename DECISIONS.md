@@ -18,6 +18,8 @@
   explicitly labeled diagnostics only.
 - Real integration failures surface visible error states; product mode must not silently fall back
   and pretend the run succeeded.
+- Goal 8F command-center work must make ScaleX feel like a profit-aware operating dashboard for
+  service businesses, not only a linear scripted wizard.
 
 ## Template Decisions
 
@@ -58,8 +60,8 @@
   implemented yet.
 - MCP is a future access pattern only. ScaleX does not currently expose an MCP server, external
   agents cannot call ScaleX through MCP, and no docs should imply otherwise. MCP remains paused
-  until NemoClaw preflight, approval-gate planning/implementation or explicit deferral,
-  product-story review, and guardrail/tool-boundary review are safe.
+  until approval-gate planning/implementation or explicit deferral, command-center product-story
+  review, and guardrail/tool-boundary review are safe.
 
 ## Safety Decisions
 
@@ -72,6 +74,11 @@
 - Homelab/OpenClaw dependency is out of scope.
 - Public deployment is optional and not required for MVP.
 - No live money in Goal 7 and no real client data.
+- Goal 8F client and employee intake uses fake/demo records only.
+- Goal 8F labor costing is job costing only; it is not payroll, HR compliance, tax processing, or
+  production workforce management.
+- Goal 8F document intake must be demo-safe: no external extraction services, no external
+  credentials, no raw file-content logging, and no silent save of extracted values.
 
 ## Technical Decisions
 
@@ -119,6 +126,8 @@
   NemoClaw, Docker, provider credentials, or secrets.
 - Goal 8F may implement Telegram approval as a human approval gate; approval must not bypass
   local policy, NeMo Guardrails, NemoClaw boundaries, or evidence recording.
+- Goal 8F is currently assigned to command-center UI, document intake, and labor costing. Telegram
+  approval is deferred to a later goal and remains planned until implemented.
 - No secrets are committed.
 - Hosted judge demo mode must not expose secrets to the browser.
 - Local full-proof mode may use ignored `.env` values for real isolated Hermes and Stripe test mode.

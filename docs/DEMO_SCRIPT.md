@@ -20,40 +20,45 @@ Implemented template:
 
 ## Recording Path
 
-Goal 7.12 made the `Start Run` portion of this path visibly execute. The product motion is: run
-started, Hermes planning, Stripe finance proof, guardrail review, approved setup spend, blocked
-risk, work execution, evidence ledger, profit outcome, and then run completed or a clearly
-actionable failure.
+Goal 8F should make the browser path feel like a command center for profit-aware agent operations,
+not only a scripted wizard. Keep one-click run, but surround it with proof panels for runtime
+routing, onboarding, document intake, labor costing, policy, agents, evidence, and final profit.
 
 1. Login.
-2. Dashboard: explain Northstar Dental Group / Client Implementation Launch as a synthetic B2B
-   implementation operation with no patient data and no PHI. If the sample is not selected, load
-   and save/select the Northstar sample from Onboarding.
-3. Open Function Studio.
-4. Click `Start Run`.
-5. Watch run progression through Run Started, Hermes Plan, Stripe Finance Proof, Revenue Gate,
+2. Open the command-center view and show Mission Control: active client, active job/campaign,
+   invoice amount, spend cap, margin floor, runtime mode, approved vendor spend, labor cost,
+   projected/final profit, final margin, and protected/safe status.
+3. Show Runtime / Connection Hub. In Judge Demo Mode, call out deterministic local proof. If
+   NemoHermes is selected, show the non-secret route: ScaleX -> Hermes Adapter -> NemoHermes API
+   -> local OpenAI-compatible endpoint -> model/provider, plus status, duration, and error class
+   when present.
+4. Show Client Onboarding Center with manual entry and file intake tabs/buttons. Upload/extraction
+   is demo-safe; extracted values are reviewed and edited before save.
+5. Show Employee Onboarding Center with manual entry and file intake tabs/buttons. Employee labor
+   assumptions are fake/demo only and reviewed before save.
+6. Show Workforce / Labor Cost Panel and explain fully loaded hourly rate, assigned hours, labor
+   cost by employee, total labor cost, and margin after labor. State that this is job costing, not
+   payroll processing.
+7. Click `Start Run` from the command center or Function Studio.
+8. Watch run progression through Run Started, Hermes Plan, Stripe Finance Proof, Revenue Gate,
    Guardrail Review, Approved Resources, Blocked Risk, Work Execution, Evidence Ledger, and Profit
    Outcome. In Judge Demo Mode, call out Demo proof mode, deterministic local planning,
    Stripe test-double/sandbox proof, and local policy active.
-6. Click Hermes Plan and show the generated plan summary, proposed tool sequence, and either
+9. Click Hermes Plan and show the generated plan summary, proposed tool sequence, and either
    `used_real_hermes=true` for Full Proof Mode or deterministic local plan proof for Demo proof mode.
-7. Click Stripe Finance Proof and show either real Stripe test-mode proof with `livemode=false`
+10. Click Stripe Finance Proof and show either real Stripe test-mode proof with `livemode=false`
    and `paid=false` unless Stripe reports paid, or Stripe test-double/sandbox proof in Demo proof mode.
-8. Click Guardrail Review and show guardrail mode/status, `used_real_nemo`, `fail_closed`, input /
+11. Click Guardrail Review and show guardrail mode/status, `used_real_nemo`, `fail_closed`, input /
    planning / execution / output evaluations, and local policy active now.
-9. Click Blocked Risk and show why the $3,200 Unapproved Data Broker Enrichment request was
+12. Click Blocked Risk and show why the blocked request was
    blocked and that no spend ledger row was created for it.
-10. Click Profit Outcome and show $8,500 revenue, $1,150 approved setup spend, $3,200 blocked
-    risk, $7,350 protected gross profit, and 86.5% protected margin.
-11. Open Runs and show the new execution, selected-run summary, execution feed, and profit outcome proof.
-12. Open Evidence Ledger and show grouped timeline, Hermes/orchestration, Stripe finance proof,
-    guardrail/local policy decisions, ledger entries, and profit outcome.
-13. Open Connection Hub and show Demo proof mode or Full Proof Mode labels, Stripe honesty,
-    local policy / guardrail adapter status, SQLite ledger evidence, prototype auth, planned-only
-    connectors, blocked policy actions, and rail-stage proof. In default Judge Demo Mode,
-    `used_real_nemo=false`. Present Connection Hub as the ClientOps operating boundary, not as a
-    generic connector dashboard.
-14. Logout.
+13. Show Economic Control Panel and Final Profit Report with revenue, approved vendor spend,
+    blocked spend, labor-cost breakdown, gross profit after labor, final margin after labor,
+    margin floor, policy violations or blocked actions, and recommendation.
+14. Open Judge Proof / Audit Ledger and show chronological job creation, onboarding, document
+    extraction/review, runtime selection, Stripe/test payment, policy checks, ledger entries,
+    labor-cost calculations, agent outputs, and final report.
+15. Logout.
 
 No terminal output should be needed in the video. Hosted judge demo mode must not expose secrets.
 Local full-proof mode can use ignored `.env` values for real isolated Hermes and real Stripe
@@ -63,6 +68,19 @@ test-mode invoice proof.
 
 The demo should show:
 
+- The app feels like an operating dashboard/control room, not only a linear wizard.
+- Mission Control exposes client/job economics, runtime mode, labor cost, margin, and safe status.
+- Client and employee onboarding support manual entry, upload intake, extracted-data review,
+  edit-before-save, save/confirm, and edit-after-save.
+- Document intake shows unsupported-file and extraction-failed states without silently saving data.
+- Workforce / Labor Cost Panel shows fake/demo employees, loaded hourly rates, assigned hours,
+  total labor cost, and margin after labor.
+- Economic Control Panel uses `Margin = (Revenue - Approved Vendor Spend - Labor Cost) / Revenue`.
+- Policy / Guardrail Console shows approved and blocked policy checks as first-class proof.
+- Agent Workbench shows Orchestrator, Finance, Marketing, Research, and Ops workers when data is
+  available.
+- Judge Proof / Audit Ledger shows safety proof without secrets, raw file contents, or sensitive
+  personal data.
 - `Start Run` has an obvious running/loading state.
 - Function Studio shows step progression.
 - Function Map highlights pending, running, complete, and blocked states.
@@ -99,7 +117,8 @@ Truthfulness boundaries remain: Northstar is synthetic; no patient data; no PHI;
 local policy active now; NeMo Guardrails adapter proof is optional through `nemo_guardrails` only
 when runtime verification passes; NemoHermes API routing is optional through
 `HERMES_RUNTIME=nemoclaw` only when the selected local runtime call succeeds; Telegram approval is
-planned and not implemented; no live-money support; no production auth claim.
+planned and not implemented; document intake is demo-safe and requires review; labor costing is
+not payroll processing; no live-money support; no production auth claim.
 
 ## Full Proof Mode Real-Tool Demo Plan
 
@@ -162,14 +181,14 @@ blocked actions, missing configuration, planned-only boundaries, and recorded ev
 supports the ClientOps Autopilot story and should not become the demo centerpiece.
 
 MCP is a future access pattern only. Do not say ScaleX has an MCP server or external agent MCP
-access. MCP is paused until NemoClaw preflight, approval-gate planning/implementation or explicit
-deferral, product-story review, and guardrail/tool-boundary review. Do not say the NeMo Guardrails
+access. MCP is paused until approval-gate planning/implementation or explicit deferral,
+command-center product-story review, and guardrail/tool-boundary review. Do not say the NeMo Guardrails
 adapter is active unless `nemo_guardrails` runtime verification passes. `nemo_compatible` must be
 described as a fallback and not real NeMo. Do not say actual NemoClaw is active.
 
 ## Future 90-Second Product Path
 
-Goal 7.15B should make the browser path feel like a repeatable enterprise product:
+Goal 8F should make the browser path feel like a repeatable enterprise product:
 
 1. Command Center with Northstar Dental Group, Client Implementation Launch, $8,500 revenue,
    $1,150 approved setup spend, $3,200 blocked risk, $7,350 protected profit, 86.5% protected

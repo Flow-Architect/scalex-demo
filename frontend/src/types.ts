@@ -343,6 +343,134 @@ export interface ReportPlaceholder {
   recommendation: string;
 }
 
+export interface CommandCenterClientRecord {
+  client_name: string;
+  business_type: string;
+  primary_contact: string;
+  contact_email: string | null;
+  contact_phone: string | null;
+  job_name: string;
+  job_goal: string;
+  invoice_amount_cents: number;
+  spend_cap_cents: number;
+  margin_floor_percent: number;
+  service_notes: string;
+  source: string;
+  status: string;
+}
+
+export interface CommandCenterEmployeeRecord {
+  employee_name: string;
+  role_title: string;
+  base_hourly_rate_cents: number;
+  labor_burden_percent: number;
+  fully_loaded_hourly_rate_cents: number;
+  assigned_hours: number;
+  labor_cost_cents: number;
+  skill_category: string;
+  active: boolean;
+  status: string;
+  notes: string;
+  source: string;
+}
+
+export interface CommandCenterReviewState {
+  source: string;
+  file_name: string;
+  file_type: string;
+  status: string;
+  confidence: string;
+  missing_fields: string[];
+  low_confidence_fields: string[];
+  editable_before_save: boolean;
+  silent_save: boolean;
+}
+
+export interface CommandCenterAuditEvent {
+  type: string;
+  title: string;
+  status: string;
+  detail: string;
+}
+
+export interface CommandCenterState {
+  mission_control: {
+    active_client: string;
+    business_type: string;
+    active_job: string;
+    job_goal: string;
+    invoice_amount_cents: number;
+    spend_cap_cents: number;
+    margin_floor_percent: number;
+    approved_vendor_spend_cents: number;
+    blocked_spend_cents: number;
+    labor_cost_cents: number;
+    projected_profit_cents: number;
+    final_margin_after_labor_percent: number;
+    runtime_mode: string;
+    overall_status: string;
+  };
+  runtime_route: {
+    route: string[];
+    runtime: string;
+    endpoint: string | null;
+    sandbox: string | null;
+    model: string | null;
+    provider: string | null;
+    upstream_model: string | null;
+    status: string;
+    duration_ms: number;
+    error_class: string | null;
+    used_real_hermes: boolean;
+  };
+  client_onboarding: {
+    saved_record: CommandCenterClientRecord;
+    extracted_review: CommandCenterReviewState;
+  };
+  employee_onboarding: {
+    saved_records: CommandCenterEmployeeRecord[];
+    extracted_review: CommandCenterReviewState;
+  };
+  document_intake: {
+    accepted_file_types: string[];
+    storage_policy: string;
+    external_services: boolean;
+    manual_entry_available: boolean;
+    states: Array<{
+      scope: string;
+      file_type: string;
+      status: string;
+      message: string;
+    }>;
+  };
+  labor_costing: {
+    formula: string;
+    employees: CommandCenterEmployeeRecord[];
+    total_labor_cost_cents: number;
+    gross_profit_after_labor_cents: number;
+    final_margin_after_labor_percent: number;
+    margin_floor_percent: number;
+    margin_warning: boolean;
+    status: string;
+  };
+  final_profit_report: {
+    client_name: string;
+    job_name: string;
+    revenue_cents: number;
+    approved_vendor_spend_cents: number;
+    blocked_spend_cents: number;
+    labor_cost_cents: number;
+    gross_profit_after_labor_cents: number;
+    final_margin_after_labor_percent: number;
+    margin_floor_percent: number;
+    policy_violations: number;
+    decision: string;
+    recommendation: string;
+  };
+  audit_events: CommandCenterAuditEvent[];
+  safety_proof: string[];
+}
+
 export interface OnboardingConfig {
   id: string;
   config_json: {
@@ -362,6 +490,7 @@ export interface OnboardingConfig {
 export interface DemoState {
   mode: string;
   execution: ExecutionSummary;
+  command_center: CommandCenterState;
   database: {
     initialized: boolean;
     path?: string;

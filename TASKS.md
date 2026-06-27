@@ -2,9 +2,13 @@
 
 ## Current Priority
 
-Goal 8F - Telegram Human Approval Gate.
+Goal 8G - Telegram Human Approval Gate.
 
-Goal 8E is complete. ScaleX now has an optional backend runtime adapter for the already validated
+Goal 8F is complete. ScaleX now has a docs-first command-center UI, deterministic client and
+employee intake proof, demo-safe document review states, labor costing, economic controls, policy
+proof, agent workbench, judge proof, and final profit after labor.
+
+Goal 8E is complete. ScaleX has an optional backend runtime adapter for the already validated
 local NemoHermes OpenAI-compatible API. It is selected with `HERMES_RUNTIME=nemoclaw`, records
 non-secret runtime evidence, and fails closed if selected but unavailable.
 
@@ -37,6 +41,37 @@ Safety:
   `.db`, backup, live-money, Telegram, MCP, or secret setup was modified.
 - Real `used_real_hermes=true` is set only when the selected runtime call succeeds.
 - MCP remains paused until the approval gate and product story are ready.
+
+## Goal 8F Gate Result
+
+Goal 8F - Docs-First Command Center UI, Document Intake, and Labor Costing is complete.
+
+Completed:
+
+- Updated docs/spec/tracking first to define intended command-center behavior, UI sections, data
+  flow, demo-safe boundaries, labor-costing model, audit expectations, and validation plan.
+- Added deterministic backend `command_center` state for Mission Control, runtime route proof,
+  client onboarding, employee onboarding, document intake states, labor costing, final profit
+  report, audit proof, and safety proof.
+- Added command-center dashboard sections for Mission Control, Runtime / Connection Hub, Client
+  Onboarding Center, Employee Onboarding Center, Document Intake Review, Workforce / Labor Cost
+  Panel, Economic Control Panel, Policy / Guardrail Console, Agent Workbench, Judge Proof / Audit
+  Ledger, and Final Profit Report.
+- Added local browser-only manual/edit/save interactions and upload-triggered deterministic
+  extraction fixtures. Uploaded files are not stored.
+- Added fake/demo employee labor costing with fully loaded hourly rates, assigned hours, total
+  labor cost, profit after approved vendor spend and labor, final margin, and margin warning state.
+- Preserved deterministic Judge Demo Mode, isolated Hermes, optional NemoHermes runtime routing,
+  fail-closed behavior, Stripe safety, local policy guardrails, and SQLite evidence.
+
+Safety:
+
+- No NemoClaw, Docker, provider credential, production Hermes, production data, `.env`, SQLite
+  `.db`, backup, live-money, Telegram, MCP, external extraction service, or secret setup was
+  modified.
+- Client and employee intake uses fake/demo records only.
+- Labor costing is job costing only, not payroll, HR compliance, or tax processing.
+- No raw file contents are logged or stored.
 
 ## Goal 7.15A Gate Result
 
@@ -119,9 +154,9 @@ the sample implementation pass.
 
 ## Next Recommended Goal
 
-Run Codex `/goal` 8F - Telegram Human Approval Gate.
+Run Codex `/goal` 8G - Telegram Human Approval Gate.
 
-Goal 8F should add Telegram as a human approval channel for risky but allowable actions. It should
+Goal 8G should add Telegram as a human approval channel for risky but allowable actions. It should
 not become a chatbot-first feature and must not bypass local policy, NeMo Guardrails checks,
 NemoClaw/NemoHermes runtime boundaries, or evidence recording.
 
@@ -137,23 +172,25 @@ Preserve the current truth:
 - Full Proof local mode must remain available through the existing validated path.
 - NemoHermes mode must fail closed if selected but unavailable.
 
-Goal 8F required output:
+Goal 8G required output:
 
 - Pending approval request model and evidence records.
 - Telegram send/approve/deny flow with allowlisted chat IDs, no secrets, no PHI, expiry, and
   fail-closed deny/expired behavior.
 - Policy re-check before execution after approval.
 - Connection Hub status for planned/missing config/active/fail closed approval channel.
+- Preserve deterministic Judge Demo Mode, isolated Hermes, optional NemoHermes runtime,
+  fail-closed behavior, no live money, no real HR/payroll/compliance data, and no external
+  extraction services.
 - Keep MCP paused.
 
 Recommended sequence:
 
-1. Goal 8F - Telegram Human Approval Gate.
-2. Goal 7.15B - Product Depth + Demo-Winning UI Pass.
-3. Goal 7.13C - MCP Server Prototype only after NemoClaw, guardrail, and approval boundaries are
+1. Goal 8G - Telegram Human Approval Gate.
+2. Goal 7.13C - MCP Server Prototype only after NemoClaw, guardrail, and approval boundaries are
    safe.
-4. Goal 9 - final repo/video/submission polish.
-5. Goal 7B / Production Hardening - Verified Live Mode for future live-money payments.
+3. Goal 9 - final repo/video/submission polish.
+4. Goal 7B / Production Hardening - Verified Live Mode for future live-money payments.
 
 Goal 7.14B Full Proof local validation is complete. Rerun it only before final recording or after
 changes that touch Hermes, Stripe, NeMo Guardrails, NemoClaw, policy, guardrail, ledger, or
@@ -476,7 +513,22 @@ OpenShell / `nemohermes` is a separate target and must be handled before MCP.
 - Fail closed if NemoClaw is selected but unavailable.
 - Do not claim NemoHermes was used unless the selected local API call succeeded.
 
-### Goal 8F - Telegram Human Approval Gate
+### Goal 8F - Docs-First Command Center UI, Document Intake, and Labor Costing
+
+- Make the UI feel like a repeatable enterprise ClientOps command center, not one hardcoded
+  Northstar workflow.
+- Add Mission Control, Runtime / Connection Hub, Client Onboarding Center, Employee Onboarding
+  Center, Document Intake Review, Workforce / Labor Cost Panel, Economic Control Panel, Policy /
+  Guardrail Console, Agent Workbench, Judge Proof / Audit Ledger, and Final Profit Report.
+- Support manual and demo-safe file intake for clients and employees, extracted-data review before
+  save, edit-before-save, and edit-after-save.
+- Add job costing for fake/demo employees only: loaded hourly rates, assigned hours, labor cost,
+  profit after vendor spend and labor, final margin, and margin warning states.
+- Preserve deterministic Judge Demo Mode, isolated Hermes, optional NemoHermes runtime,
+  fail-closed behavior, no live money, no real HR/payroll/compliance data, and no external
+  extraction services.
+
+### Goal 8G - Telegram Human Approval Gate
 
 - Implement Telegram as a human approval channel for risky actions, not as a chatbot-first feature.
 - Create pending approval requests, send authorized Telegram approval messages, verify approve/deny
@@ -486,14 +538,6 @@ OpenShell / `nemohermes` is a separate target and must be handled before MCP.
   evidence for every approval/denial.
 - Block outright instead of approval-routing for PHI/patient data, live-money attempts, disallowed
   real client data, direct secret exposure, and policy bypass attempts.
-
-### Goal 7.15B - Product Depth + Demo-Winning UI Pass
-
-- Make the UI feel like a repeatable enterprise ClientOps product, not one hardcoded Northstar
-  workflow.
-- Improve local demo auth, Command Center hero, Operation Catalog, Policy / Risk Library, run-story
-  timeline, Evidence Ledger drill-down, guardrail proof, Stripe proof honesty, Connection Hub
-  polish, and the 90-second recording path.
 
 ## Required Product Facts To Preserve
 
@@ -528,10 +572,10 @@ OpenShell / `nemohermes` is a separate target and must be handled before MCP.
 
 ## Preserved Later Milestones
 
-Goal 7.13C - MCP Server Prototype after the NemoClaw runtime boundary, guardrail boundary,
-Telegram approval boundary, and product story are clear. Start with read-only/resource-style tools
-where possible; no live-money tools, no real client data, no PHI, no secret exposure, and no
-policy/guardrail/approval bypass.
+Goal 7.13C - MCP Server Prototype after the NemoHermes runtime boundary, guardrail boundary,
+Telegram approval boundary, and command-center product story are clear. Start with
+read-only/resource-style tools where possible; no live-money tools, no real client data, no PHI,
+no secret exposure, and no policy/guardrail/approval bypass.
 
 Goal 9 - Final polish and submission assets.
 
@@ -544,8 +588,8 @@ ScaleX code must enforce every safeguard and execute any allowed action.
 
 ## Do Not Work On Yet
 
-- Goal 7.13C MCP Server Prototype before NemoClaw preflight, the approval-gate boundary, product
-  story, and guardrail/tool boundary pass review.
+- Goal 7.13C MCP Server Prototype before the approval-gate boundary, command-center product story,
+  and guardrail/tool boundary pass review.
 - Additional NemoClaw installation/onboarding work; the current adapter must not modify NemoClaw
   itself.
 - Live-money Stripe execution.

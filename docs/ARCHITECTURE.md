@@ -40,6 +40,70 @@ ScaleX UI
   agent outputs, and final reports.
 - Profit Outcome reports protected profit and blocked risk.
 
+## Goal 8F Command Center Architecture
+
+Goal 8F should move the product experience from a linear demo path to a command-center layout for
+profit-aware agent operations. The implementation should preserve the existing backend behavior
+unless typed UI data access or deterministic demo-state support requires small additions.
+
+Command Center sections:
+
+- Mission Control.
+- Runtime / Connection Hub.
+- Client Onboarding Center.
+- Employee Onboarding Center.
+- Document Intake Review.
+- Workforce / Labor Cost Panel.
+- Economic Control Panel.
+- Policy / Guardrail Console.
+- Agent Workbench.
+- Judge Proof / Audit Ledger.
+- Final Profit Report.
+
+Data flow:
+
+```text
+manual client entry or demo-safe document intake
+-> extracted-data review
+-> editable/saved client operation values
+-> Mission Control / Economic Control / Agent Workbench / Profit Report
+
+manual employee entry or demo-safe document intake
+-> extracted-data review
+-> editable/saved employee labor assumptions
+-> Workforce Panel / Economic Control / Profit Report
+
+revenue and approved vendor spend
+-> labor costing
+-> margin check against floor
+-> margin warning or safe/profitable status
+-> non-secret audit proof
+```
+
+Document intake must be local and demo-safe. It can use deterministic fixtures for PDF, Excel,
+Word, and optional CSV extraction. It must not use external extraction services, external
+credentials, or silent saves. Unsupported-file and extraction-failed states should be visible, and
+manual entry must remain available.
+
+Labor costing formulas:
+
+```text
+fully_loaded_hourly_rate = base_hourly_rate * (1 + labor_burden_percentage)
+labor_cost = fully_loaded_hourly_rate * assigned_hours
+job_profit = revenue - approved_vendor_spend - labor_cost
+final_margin = job_profit / revenue
+```
+
+Audit events should remain non-secret and should not include raw file contents. Suitable proof
+events include client manual creation, client extraction, client edit, employee manual creation,
+employee extraction, employee edit, extraction failure, labor-cost calculation, margin warning,
+policy approval, and policy block.
+
+Forbidden data for Goal 8F: SSNs, tax IDs, bank information, addresses, birth dates, real HR
+records, sensitive payroll records, secrets, raw credential headers, raw `.env` values, and raw
+uploaded file contents. Goal 8F is job costing only, not payroll, HR compliance, tax processing,
+or live-money operations.
+
 ## Implemented Today
 
 - Vite React TypeScript frontend.
@@ -47,6 +111,9 @@ ScaleX UI
 - Function Studio route with connected proof nodes and right selected-node inspector.
 - FastAPI backend.
 - SQLite evidence ledger at `data/scalex.db`.
+- Deterministic `command_center` API state for Mission Control, runtime proof, client/employee
+  intake, document review states, labor costing, audit proof, safety proof, and final profit after
+  labor.
 - Local prototype auth using an environment-configured username/password and signed HTTP-only session cookie.
 - Local/sample workflow configs persisted through SQLite `workflows` and `onboarding_configs`.
 - Unique run history persisted through SQLite `jobs` plus run-scoped audit/proof tables.
@@ -58,6 +125,10 @@ ScaleX UI
 - Local policy engine for spend governance, with optional NeMo Guardrails adapter proof when
   configured.
 - Optional NemoHermes API runtime for sandboxed Hermes planning.
+- Local browser-only command-center intake interactions for manual/edit/save and upload-triggered
+  deterministic extraction fixtures. Uploaded files are not stored.
+- Fake/demo labor costing for service job profitability. This is not payroll, HR compliance, tax
+  processing, or production workforce management.
 - Deterministic agent outputs.
 - Northstar Dental Group / Client Implementation Launch sample with persisted run history and proof inspection.
 - Judge Demo Mode as the default safe local execution mode without real secrets.
@@ -229,9 +300,8 @@ MCP is a future access pattern only. ScaleX does not currently expose an MCP ser
 agents cannot yet call ScaleX through MCP. The optional NemoHermes runtime adapter does not change
 that boundary.
 
-MCP is paused until actual NemoClaw preflight is complete, the Telegram approval gate is planned
-or implemented or explicitly deferred, the UI/product story is strong enough, and the
-guardrail/tool boundary remains safe.
+MCP is paused until the Telegram approval gate is planned or implemented or explicitly deferred,
+the command-center product story is strong enough, and the guardrail/tool boundary remains safe.
 
 A future local ScaleX MCP server may expose safe tools, resources, and prompts so Hermes or other
 agents can request approved ScaleX actions without directly touching Stripe, policy, secrets, or

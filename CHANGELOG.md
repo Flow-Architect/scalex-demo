@@ -10,6 +10,47 @@ Use:
 
 ---
 
+## 2026-06-27 - Goal 8F: Command center, intake, and labor costing
+
+Completed:
+- Deepen ScaleX from a linear demo flow into a profit-aware command center for service businesses.
+- Add Mission Control, Runtime / Connection Hub, Client Onboarding Center, Employee Onboarding
+  Center, Document Intake Review, Workforce / Labor Cost Panel, Economic Control Panel, Policy /
+  Guardrail Console, Agent Workbench, Judge Proof / Audit Ledger, and Final Profit Report.
+- Support manual and demo-safe document intake for clients and employees, including PDF,
+  Excel/spreadsheet, Word/document, and optional CSV paths.
+- Require extracted-data review and editing before save, edit saved records after save, and
+  visible unsupported-file or extraction-failed states.
+- Add labor costing: fully loaded hourly rate, labor cost by employee, total labor cost, profit
+  after approved vendor spend and labor, final margin, and margin warnings.
+- Add deterministic backend `command_center` state and typed frontend models.
+- Add local browser-only manual/edit/save controls and upload-triggered deterministic extraction
+  fixtures. Uploaded files are not stored.
+- Preserve deterministic Judge Demo Mode, isolated Hermes, optional NemoHermes runtime,
+  fail-closed behavior, Stripe safety, local policy guardrails, and SQLite evidence.
+
+Safety plan:
+- Fake/demo clients and employees only.
+- No SSNs, tax IDs, bank information, addresses, birth dates, real HR records, sensitive payroll
+  records, production payroll, HR compliance, tax processing, live money, external extraction
+  services, secrets, raw credential headers, `.env` values, or raw uploaded file contents.
+
+Verified so far:
+- `git diff --check` passed after the docs-first checkpoint.
+- `backend/.venv/bin/python -m pytest backend/tests/test_demo_runner.py` passed with 24 tests.
+- `cd frontend && npm run build` passed.
+- `./scripts/test.sh` passed with 68 backend tests and a successful frontend build.
+- `./scripts/check-nemo.sh` passed with `nemoguardrails` 0.21.0 and `guardrails/scalex` loaded.
+- Final `git diff --check` passed before staging.
+
+Suggested commit message:
+Deepen ScaleX command center with intake and labor costing
+
+Next:
+- Goal 8G - Telegram Human Approval Gate.
+
+---
+
 ## 2026-06-27 - Goal 8E: NemoHermes API runtime wiring
 
 Completed:
@@ -50,7 +91,7 @@ Suggested commit message:
 Wire NemoHermes API runtime
 
 Next:
-- Goal 8F - Telegram Human Approval Gate.
+- Goal 8F - Docs-First Command Center UI, Document Intake, and Labor Costing.
 
 ---
 

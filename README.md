@@ -50,6 +50,35 @@ Implemented today:
 Future templates are planned, not implemented yet: Invoice-to-Cash, Vendor Spend Approval, Client
 Onboarding, Research-to-Report, Ops Handoff, and Renewal Recommendation.
 
+## Goal 8F Command Center Direction
+
+Goal 8F deepens ScaleX from a linear demo flow into a profit-aware command center for service
+businesses. The intended first screen should make runtime routing, client onboarding, employee
+onboarding, document intake, labor costing, economic controls, policy guardrails, agent work,
+judge proof, audit evidence, and final profit reporting visible as coordinated operating panels.
+
+The command-center sections are Mission Control, Runtime / Connection Hub, Client Onboarding
+Center, Employee Onboarding Center, Document Intake Review, Workforce / Labor Cost Panel, Economic
+Control Panel, Policy / Guardrail Console, Agent Workbench, Judge Proof / Audit Ledger, and Final
+Profit Report.
+
+Client and employee onboarding should support manual entry plus demo-safe PDF, Excel/spreadsheet,
+and Word/document intake. Extracted values require review and editing before save, saved records
+remain editable, manual entry remains available after extraction failure, and unsupported-file
+states are shown clearly. Intake uses deterministic fixtures or basic local parsing only; no
+external extraction services, credentials, real uploaded files, or raw file contents are committed
+or logged.
+
+Labor costing is job costing only, not payroll. Fully loaded hourly rate is base hourly rate times
+`1 + labor burden percentage`; labor cost is fully loaded rate times assigned hours; job profit is
+revenue minus approved vendor spend minus labor cost; final margin is job profit divided by
+revenue. Labor cost should feed Mission Control, Workforce, Economic Control, Final Profit Report,
+and margin warnings.
+
+Safety boundaries: fake/demo clients and employees only; no SSNs, tax IDs, bank information,
+addresses, birth dates, real HR records, sensitive payroll records, production payroll, HR
+compliance, tax processing, live money, secrets, raw credential headers, or `.env` values.
+
 ## Architecture
 
 ```text
@@ -103,6 +132,13 @@ Implemented today:
   Client Operations, Runs, Evidence Ledger, Connection Hub, and Settings.
 - Connected Function Studio page with proof nodes, selected-node inspector, persisted run history, and
   historical run inspection.
+- Command Center dashboard sections for Mission Control, Runtime / Connection Hub, Client
+  Onboarding Center, Employee Onboarding Center, Document Intake Review, Workforce / Labor Cost
+  Panel, Economic Control Panel, Policy / Guardrail Console, Agent Workbench, Judge Proof / Audit
+  Ledger, and Final Profit Report.
+- Demo-safe client and employee intake review with local browser-only manual/edit/save controls
+  and upload-triggered deterministic extraction fixtures. Uploaded files are not stored.
+- Fake/demo labor costing for job profitability after approved vendor spend and employee labor.
 - Judge Demo Mode as the default safe local execution path without secrets.
 - Full Proof Mode for safely configured real isolated Hermes plus real Stripe test mode.
 - Optional NeMo Guardrails adapter proof through `nemoguardrails` runtime verification.
@@ -135,8 +171,8 @@ Planned connector concepts:
 - MCP local prototype boundary
 
 MCP is documented as a future access pattern only. ScaleX does not currently expose an MCP server,
-and external agents cannot yet call ScaleX through MCP. MCP is paused until the NemoClaw preflight,
-Telegram approval boundary, product-depth pass, and guardrail/tool-boundary review are safe. A
+and external agents cannot yet call ScaleX through MCP. MCP is paused until the Telegram approval
+boundary, command-center product-depth pass, and guardrail/tool-boundary review are safe. A
 future ScaleX MCP server may expose safe local read-only tools/resources/prompts first, without
 exposing secrets, bypassing policy or approval, or enabling live-money actions.
 
@@ -303,6 +339,6 @@ These commands must not use live Stripe mode or production service credentials.
   default and fails closed when selected but unavailable.
 - Not implemented today: Telegram approval, MCP server, live money, real client email, real client
   data, and PHI handling.
-- Planned next: Telegram Human Approval Gate, then Product Depth + Demo-Winning UI Pass, then MCP
-  only after the boundaries are safe.
+- Planned next after Goal 8F: Telegram Human Approval Gate, then MCP only after the boundaries are
+  safe.
 - Future: Goal 9 final submission prep and Verified Live Mode remain later work.
