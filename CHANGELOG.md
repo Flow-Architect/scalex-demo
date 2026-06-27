@@ -10,6 +10,52 @@ Use:
 
 ---
 
+## 2026-06-26 - Goal 7.13B: Connection Hub UI
+
+Completed:
+- Replaced the visible Integrations navigation label with Connection Hub while preserving the
+  existing internal route key.
+- Added a product-facing Connection Hub view for the ClientOps operating boundary, not a generic
+  connector marketplace or MCP dashboard.
+- Added Active Today cards for Hermes Planning, Stripe Finance Proof, Guardrails, SQLite Evidence
+  Ledger, and Prototype Auth.
+- Added Full Proof Capable cards for isolated Hermes, Stripe test-mode finance, and optional real
+  NeMo guardrails.
+- Added Planned cards for Slack/Email approvals, CRM context, Docs/Notion workspace, Calendar
+  kickoff scheduling, and MCP server boundary, each clearly marked planned only.
+- Surfaced connector statuses for active, demo mode, full proof capable, runtime verified, missing
+  config, fail closed, blocked by policy, and planned states.
+- Added evidence panels for latest run proof, guardrail rail stages, blocked policy actions,
+  blocked-spend/no-ledger-row proof, evidence counts, blocked risk, protected profit, and
+  protected margin.
+- Reused existing Goal 8B/8C state fields; no backend API fields, connector backend, MCP server,
+  Stripe call, Hermes call, or NeMo call was added.
+
+Verified:
+- `./scripts/test.sh` passed with 61 backend tests and a successful frontend build.
+- `./scripts/check-nemo.sh` passed with real NeMo runtime available and `guardrails/scalex`
+  loaded.
+- `npm run build` in `frontend/` passed during implementation.
+- `git diff --check` passed.
+- Strict added-lines secret scan returned no matches.
+- Unsafe/generated path scan returned no matches.
+- `git status --short` was reviewed.
+
+Safety:
+- No live Stripe keys, live-money calls, real Stripe API calls, production Hermes calls,
+  production connector calls, Full Proof validation run, real client data, patient data, PHI,
+  `.env` edits, SQLite `.db` files, data backups, MCP server, CODEX goal logs, or secrets were
+  added.
+
+Suggested commit message:
+Add Connection Hub UI
+
+Next:
+- Goal 8D - Guardrail Proof UI in Workflow Canvas if a final demo pass exposes a proof gap;
+  otherwise Goal 7.13C - MCP Server Prototype only after the boundary remains strong.
+
+---
+
 ## 2026-06-26 - Goal 8C: Guardrail Execution Rails in Run Lifecycle
 
 Completed:

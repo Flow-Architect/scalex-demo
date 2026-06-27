@@ -2,12 +2,12 @@
 
 ## Current Priority
 
-Goal 7.13B - Connection Hub UI.
+Goal 8D - Guardrail Proof UI in Workflow Canvas if the final demo pass exposes a proof gap;
+otherwise Goal 7.13C - MCP Server Prototype only after the boundary remains strong.
 
-Goal 8C is complete. The repo now has guardrail rail decisions persisted around input, planning,
-protected execution actions, and output honesty, while preserving Judge Demo Mode and Full Proof
-compatibility. The next recommended product goal is Goal 7.13B - Connection Hub UI, unless a later
-guardrail review finds a blocker.
+Goal 7.13B is complete. The repo now has a product-facing Connection Hub view for allowed
+systems, connector modes, guardrails, evidence duties, missing config, blocked policy actions, and
+planned boundaries while preserving Judge Demo Mode and Full Proof compatibility.
 
 ## Goal 7.11A Gate Result
 
@@ -58,20 +58,20 @@ the sample implementation pass.
 
 ## Next Recommended Goal
 
-Run Codex `/goal` 7.13B:
+Run Codex `/goal` 8D only if a final browser/demo review shows the Workflow Canvas still needs
+clearer guardrail proof:
 
-- Build the Connection Hub UI as a ScaleX ClientOps product layer, not a generic connector
-  marketplace or MCP dashboard.
-- Show active systems and planned systems with truthful statuses: Hermes Planning, Stripe Finance
-  Proof, Local Policy, Guardrail Adapter, SQLite Evidence Ledger, Prototype Auth, and planned
-  Slack/Email, CRM, Docs/Notion, Calendar, MCP, and future NeMo proof surfaces as appropriate.
-- Surface connector mode, allowed actions, blocked actions, missing config, evidence duties, and
-  current run proof without claiming unsupported integrations.
-- Reuse Goal 8C guardrail evidence so Connection Hub can show rails, decisions, adapter status,
-  `used_real_nemo`, `fail_closed`, and blocked-spend ledger-row proof.
+- Strengthen any remaining guardrail proof gaps in Function Studio / Workflow Canvas.
+- Keep local policy, real NeMo optional mode, fail-closed status, blocked action evidence, and
+  rail-stage proof readable without duplicating the Connection Hub.
 - Preserve Judge Demo Mode determinism and Full Proof compatibility.
-- Do not implement an MCP server, live-money Stripe path, production Hermes access, production
-  connector calls, or real client data.
+- Do not rerun Full Proof unless explicitly requested.
+- Do not implement MCP, live-money Stripe, production Hermes access, production connector calls,
+  or real client data.
+
+If no Workflow Canvas proof gap remains, Goal 7.13C - MCP Server Prototype is the next candidate,
+but only after a boundary review confirms the Connection Hub and guardrail execution rails are
+strong enough.
 
 Real NeMo is available locally outside the repo at `/home/ascabrya/.venvs/scalex-nemo/bin/python`
 and `scripts/check-nemo.sh` verifies NeMo 0.21.0 plus `RailsConfig.from_path` for
@@ -79,16 +79,52 @@ and `scripts/check-nemo.sh` verifies NeMo 0.21.0 plus `RailsConfig.from_path` fo
 
 Recommended sequence:
 
-1. Goal 7.13B - Connection Hub UI.
-2. Goal 8D - Guardrail Proof UI in Workflow Canvas, if the Connection Hub pass exposes a remaining
+1. Goal 8D - Guardrail Proof UI in Workflow Canvas, if the Connection Hub pass exposes a remaining
    workflow-canvas proof gap.
-3. Goal 7.13C - MCP Server Prototype if time allows and the guardrail/tool boundary is clear.
-4. Goal 8E - Enterprise Function Template Positioning + Recording Proof.
-5. Goal 9 - final recording/submission polish.
-6. Goal 7B / Production Hardening - Verified Live Mode for future live-money payments.
+2. Goal 7.13C - MCP Server Prototype if time allows and the guardrail/tool boundary is clear.
+3. Goal 8E - Enterprise Function Template Positioning + Recording Proof.
+4. Goal 9 - final recording/submission polish.
+5. Goal 7B / Production Hardening - Verified Live Mode for future live-money payments.
 
 Goal 7.14B Full Proof local validation is complete. Rerun it only before final recording or after
 changes that touch Hermes, Stripe, NeMo, policy, guardrail, ledger, or run-proof behavior.
+
+## Goal 7.13B Gate Result
+
+Goal 7.13B - Connection Hub UI is complete.
+
+Completed:
+
+- Replaced the visible Integrations nav label with Connection Hub while preserving the existing
+  route key.
+- Added a product-facing Connection Hub view for the ClientOps operating boundary, not a generic
+  connector marketplace.
+- Added Active Today cards for Hermes Planning, Stripe Finance Proof, Guardrails, SQLite Evidence
+  Ledger, and Prototype Auth.
+- Added Full Proof Capable cards for isolated Hermes, Stripe test-mode finance, and optional real
+  NeMo guardrails.
+- Added Planned cards for Slack/Email approvals, CRM context, Docs/Notion workspace, Calendar
+  kickoff scheduling, and MCP server boundary, each clearly marked planned only.
+- Surfaced status chips for active, demo mode, full proof capable, runtime verified, missing
+  config, fail closed, blocked by policy, and planned states.
+- Added evidence panels for latest run proof, rail stages, policy-blocked actions, blocked
+  spend/no-ledger-row proof, table counts, blocked risk, protected profit, and protected margin.
+- Reused existing state fields only; no new connector backend, API route, MCP server, Stripe call,
+  Hermes call, or NeMo call was added.
+
+Verified:
+
+- `./scripts/test.sh` passed with 61 backend tests and a successful frontend build.
+- `./scripts/check-nemo.sh` passed with real NeMo runtime available and `guardrails/scalex`
+  loaded.
+- A direct `npm run build` in `frontend/` passed during implementation.
+- `git diff --check` passed.
+- Strict added-lines secret scan returned no matches.
+- Unsafe/generated path scan returned no matches.
+- `git status --short` was reviewed.
+
+Suggested commit message:
+Add Connection Hub UI
 
 ## Goal 8C Gate Result
 
@@ -316,7 +352,8 @@ the old card-dashboard shell with a ClientOps product workspace.
 ## Goal 8 Sequence
 
 Goal 8 is the governed autonomy layer. Goal 8A, Goal 8B, and Goal 8C are complete. Goal 7.13B
-Connection Hub UI is next.
+Connection Hub UI is complete. Goal 8D is next only if Workflow Canvas guardrail proof still
+needs polish.
 
 ### Goal 8A - NeMo Guardrails Preflight / Architecture Audit
 
@@ -386,10 +423,6 @@ Connection Hub UI is next.
 
 ## Preserved Later Milestones
 
-Goal 7.13B - Connection Hub UI after Goal 8C unless a later planning pass explicitly justifies
-doing it earlier as UI-only. The view must support ClientOps Autopilot, not become a generic
-connector dashboard.
-
 Goal 7.13C - MCP Server Prototype after the guardrail/tool-boundary plan is clear. Start with
 read-only/resource-style tools where possible; no live-money tools, no real client data, and no
 policy/guardrail bypass.
@@ -405,9 +438,8 @@ ScaleX code must enforce every safeguard and execute any allowed action.
 
 ## Do Not Work On Yet
 
-- Goal 8D or Goal 8E before Goal 8C is complete.
-- Goal 7.13B Connection Hub UI before Goal 8C unless explicitly approved as a UI-only reorder.
-- Goal 7.13C MCP Server Prototype before the guardrail/tool-boundary plan is clear.
+- Goal 7.13C MCP Server Prototype before the Connection Hub and guardrail/tool boundary pass a
+  final review.
 - Live-money Stripe execution.
 - Real client data.
 - Public deployment.

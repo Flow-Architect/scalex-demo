@@ -48,11 +48,11 @@ actionable failure.
 11. Open Runs and show the new execution, selected-run summary, execution feed, and profit outcome proof.
 12. Open Evidence Ledger and show grouped timeline, Hermes/orchestration, Stripe finance proof,
     guardrail/local policy decisions, ledger entries, and profit outcome.
-13. Open Integrations and show Demo proof mode or Full Proof Mode labels, Stripe honesty, local
-    policy active, SQLite ledger, prototype auth, and the guardrail adapter status. In default
-    Judge Demo Mode, `used_real_nemo=false`.
-    If Connection Hub UI exists in a future run, present it as the ClientOps operating boundary,
-    not as a generic connector dashboard.
+13. Open Connection Hub and show Demo proof mode or Full Proof Mode labels, Stripe honesty,
+    local policy / guardrail adapter status, SQLite ledger evidence, prototype auth, planned-only
+    connectors, blocked policy actions, and rail-stage proof. In default Judge Demo Mode,
+    `used_real_nemo=false`. Present Connection Hub as the ClientOps operating boundary, not as a
+    generic connector dashboard.
 14. Logout.
 
 No terminal output should be needed in the video. Hosted judge demo mode must not expose secrets.
@@ -151,9 +151,9 @@ no spend ledger row.
 
 ## Connection Hub / MCP Framing
 
-Connection Hub is planned as the ScaleX layer that declares allowed systems, connector modes,
-guardrails, blocked actions, missing configuration, and recorded evidence. It supports the
-ClientOps Autopilot story and should not become the demo centerpiece.
+Connection Hub is the ScaleX layer that declares allowed systems, connector modes, guardrails,
+blocked actions, missing configuration, planned-only boundaries, and recorded evidence. It
+supports the ClientOps Autopilot story and should not become the demo centerpiece.
 
 MCP is a future access pattern only. Do not say ScaleX has an MCP server or external agent MCP
 access. Do not say real NeMo is active unless `nemo_guardrails` runtime verification passes.

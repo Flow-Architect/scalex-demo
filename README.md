@@ -94,7 +94,7 @@ Implemented today:
 - Stripe test-double records for automated tests, CI, offline development, and diagnostics.
 - Deterministic Finance, Marketing, Research, and Ops outputs.
 - Vite React product shell with local prototype auth, Dashboard, Function Studio, Onboarding,
-  Client Operations, Runs, Evidence Ledger, Integrations, and Settings.
+  Client Operations, Runs, Evidence Ledger, Connection Hub, and Settings.
 - Connected Function Studio page with proof nodes, selected-node inspector, persisted run history, and
   historical run inspection.
 - Judge Demo Mode as the default safe local execution path without secrets.
@@ -102,7 +102,7 @@ Implemented today:
 
 ## Connection Hub And MCP Plan
 
-ScaleX Connection Hub is a planned internal product layer, not a separate product. It will show
+ScaleX Connection Hub is an implemented internal product layer, not a separate product. It shows
 which systems the ClientOps Autopilot is allowed to use, which mode each connector is in, what
 guardrails apply, which actions are blocked, what configuration is missing, and what evidence was
 recorded.
@@ -262,7 +262,8 @@ These commands must not use live Stripe mode or production service credentials.
 - Full Proof Mode is optional and local-only.
 - Live-money Stripe execution is not implemented.
 - Northstar Dental Group is synthetic; no real client data, patient data, or PHI is used.
-- Connection Hub and MCP are planned only; no MCP server exists today.
+- Connection Hub UI is implemented as the ClientOps operating boundary; MCP remains planned only
+  and no MCP server exists today.
 - Real NeMo is optional through `nemo_guardrails` mode only when runtime verification passes; the
   default Judge Demo Mode remains `local_policy` and does not require NeMo.
 - No `LICENSE` file is present yet. Select a license such as MIT or Apache-2.0 before public
@@ -276,12 +277,15 @@ These commands must not use live Stripe mode or production service credentials.
   workflows, selected-workflow runs, persisted run history, and browser product flow.
 - Judge Demo Mode: deterministic Hermes planning and Stripe test-double/sandbox proof for hosted
   judge-safe demos, automated tests, CI, offline development, or explicitly labeled diagnostics.
-- Implemented now for Goal 8B: guardrail adapter modes `local_policy`, `nemo_guardrails`, and
-  `nemo_compatible`; `guardrail_evaluations` evidence; API/UI proof fields; and setup/check
-  scripts for an external NeMo venv.
+- Implemented now for Goals 8B/8C: guardrail adapter modes `local_policy`, `nemo_guardrails`, and
+  `nemo_compatible`; `guardrail_evaluations` evidence; input/planning/execution/output rails;
+  API/UI proof fields; and setup/check scripts for an external NeMo venv.
+- Implemented now for Goal 7.13B: Connection Hub UI for allowed systems, connector modes,
+  guardrails, evidence duties, blocked policy actions, missing config, Full Proof capability, and
+  planned-only connector boundaries.
 - Verified locally in Goal 7.14B: Full Proof Mode completed with real isolated Hermes, real
   Stripe test-mode invoice proof, real NeMo runtime verification, local policy active,
   `livemode=false`, and unpaid Stripe state preserved.
-- Planned next: Goal 8C deepens pre-action guardrail execution rails, then Connection Hub UI and
-  later MCP server prototype only after the guardrail/tool boundary is clear.
+- Planned next: guardrail proof UI polish if a final demo pass exposes a gap; otherwise an MCP
+  server prototype only after the guardrail/tool boundary is clear.
 - Future: Goal 9 final submission prep and Verified Live Mode remain later work.

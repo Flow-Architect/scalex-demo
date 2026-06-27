@@ -5,12 +5,13 @@ Last updated: 2026-06-26
 ## Verified Current State
 
 - Project folder exists at `/home/ascabrya/dev/scalex-demo`.
-- Latest committed baseline before Goal 8C: `55f5adb Document Full Proof local validation result`.
-- Last completed goal: Goal 8C - Guardrail Execution Rails in Run Lifecycle.
-- Last completed implementation/QA goal: Goal 8C - Guardrail Execution Rails in Run Lifecycle.
-- Last completed documentation/tracking update: Goal 8C closeout docs.
+- Latest committed baseline before Goal 7.13B: `35c9acb Add guardrail execution rails`.
+- Last completed goal: Goal 7.13B - Connection Hub UI.
+- Last completed implementation/QA goal: Goal 7.13B - Connection Hub UI.
+- Last completed documentation/tracking update: Goal 7.13B closeout docs.
 - Last completed checkout cleanup: Open Source Checkout Cleanup for judge readiness.
-- Current priority: Goal 7.13B - Connection Hub UI.
+- Current priority: Goal 8D - Guardrail Proof UI in Workflow Canvas if a final demo pass exposes
+  a proof gap; otherwise Goal 7.13C - MCP Server Prototype only after the boundary remains strong.
 - Goal 7.11B replaced the legacy Harbor sample with Northstar Dental Group / Client Implementation Launch.
 - Goal 7.11C-followup replaced the remaining generated dashboard/card shell with a ClientOps
   operation-file workspace across Dashboard, Function Studio, Onboarding, Client Operations,
@@ -33,6 +34,9 @@ Last updated: 2026-06-26
   requests, spend policy/ledger actions, and output honesty. Guardrail decisions are now recorded
   as `allow`, `warn`, `block`, or `fail_closed`, and blocked unsafe content stops before protected
   actions continue.
+- Goal 7.13B replaced the old Integrations surface with a product-facing Connection Hub view for
+  allowed systems, connector modes, guardrails, missing config, blocked policy actions, planned
+  connectors, and evidence duties.
 - Goal 7.14B passed Full Proof local validation in a configured local-only environment with real
   isolated Hermes, real Stripe test-mode invoice proof, real NeMo runtime verification, local
   policy active, and synthetic Northstar data only.
@@ -58,8 +62,8 @@ a governed AI operations layer that can run those functions safely.
 ## Stack Truth
 
 - Hermes plans and routes the client operation.
-- Connection Hub is now planned as the ScaleX product layer that declares allowed systems, modes,
-  guardrails, missing config, blocked actions, and evidence duties.
+- Connection Hub is now implemented as the ScaleX product layer that declares allowed systems,
+  modes, guardrails, missing config, blocked actions, planned boundaries, and evidence duties.
 - Stripe provides finance proof through test invoice/payment state.
 - ScaleX executes and enforces business rules.
 - Local policy is active now for spend, margin, vendor, and payment-before-spend enforcement.
@@ -101,7 +105,7 @@ Functional product surfaces remain:
 - SQLite evidence ledger
 - local prototype auth
 - Dashboard, Function Studio, Onboarding, Client Operations, Runs, Evidence Ledger,
-  Integrations, and Settings
+  Connection Hub, and Settings
 - connected Function Studio page with proof nodes and selected-node inspector
 - Judge Demo Mode as the default local execution mode: deterministic Hermes plan,
   Stripe test-double/sandbox finance proof, local policy active, and SQLite evidence records
@@ -117,6 +121,38 @@ Functional product surfaces remain:
   policy checks, approved spend ledger rows, and post-execution blocked-spend consistency
 - API/UI proof fields for guardrail mode, adapter status, decision, `used_real_nemo`,
   `fail_closed`, evaluation stages, local policy active status, and blocked-spend ledger-row proof
+
+## Verified For Goal 7.13B
+
+- Added a reachable Connection Hub view through the existing product shell navigation.
+- The view shows Hermes Planning, Stripe Finance Proof, Guardrails, SQLite Evidence Ledger,
+  Prototype Auth, and planned Slack/Email approvals, CRM context, Docs/Notion, Calendar, and MCP
+  boundary cards.
+- The view distinguishes Judge Demo Mode, Full Proof capability, runtime verification,
+  missing configuration, fail-closed, blocked-by-policy, and planned-only states.
+- Stripe proof stays honest: live money is unsupported, invoice/hosted URL presence is shown only
+  when available, and `paid=false` is not represented as paid.
+- Guardrail proof shows mode, adapter status, `used_real_nemo`, `fail_closed`, and the input,
+  planning, execution, and output rail stages from existing state fields.
+- Evidence proof shows latest selected-run summary, planning/Stripe/policy/guardrail/orchestration
+  counts, blocked-spend/no-ledger-row evidence, blocked policy actions, blocked risk, protected
+  profit, and protected margin.
+- Planned connectors are explicitly planned only; no MCP server, real client email, CRM, Notion,
+  calendar, production auth, or generic connector marketplace claim was added.
+- No backend API fields or connector backends were added. The UI reuses existing `state_service`
+  fields from Goal 8B/8C.
+- Verification completed:
+  - `./scripts/test.sh` passed with 61 backend tests and a successful frontend build.
+  - `./scripts/check-nemo.sh` passed with real NeMo runtime available and `guardrails/scalex`
+    loaded.
+  - A direct `npm run build` in `frontend/` passed during implementation.
+  - `git diff --check` passed.
+  - Strict added-lines secret scan returned no matches.
+  - Unsafe/generated path scan returned no matches for `.env`, SQLite `.db`, data backups,
+    `frontend/dist`, `node_modules`, venvs, logs, `CODEX_GOALS.md`, or `GOAL_LOG.md`.
+  - `git status --short` was reviewed.
+- Goal 7.13B did not run Full Proof validation, make Stripe API calls, call production Hermes,
+  edit `.env`, touch `data/*.db` or `data/backups`, add secrets, create an MCP server, or commit.
 
 ## Verified For Goal 8C
 
@@ -474,10 +510,9 @@ Research-to-Report, Ops Handoff, and Renewal Recommendation.
 
 ## Incomplete Items
 
-- Goal 8C Guardrail Execution Rails has not run yet.
+- Goal 8D Guardrail Proof UI in Workflow Canvas has not run yet.
 - Goal 7.14B Full Proof local validation has passed; rerun it only before final recording or after
   relevant integration changes.
-- Goal 7.13B Connection Hub UI has not been implemented yet.
 - Goal 7.13C MCP Server Prototype has not been implemented yet.
 - Real NeMo is not active by default; it is available only through optional `nemo_guardrails` mode
   after runtime verification.
@@ -495,9 +530,9 @@ Research-to-Report, Ops Handoff, and Renewal Recommendation.
 
 ## Current Priority
 
-Goal 8C - Guardrail Execution Rails in Run Lifecycle.
+Goal 8D - Guardrail Proof UI in Workflow Canvas if the final demo pass exposes a remaining proof
+gap; otherwise Goal 7.13C - MCP Server Prototype only after the Connection Hub and guardrail
+boundary are confirmed strong enough.
 
-Goal 7.14B Full Proof validation has passed. Next work should deepen guardrail execution rails
-while preserving Judge Demo Mode as `local_policy` and `used_real_nemo=false` by default, keeping
-Full Proof Mode honest about real Hermes, Stripe test mode, real NeMo runtime verification, local
-policy, and unpaid Stripe invoice state.
+Goal 7.14B Full Proof validation has passed. Rerun it only before final recording or after changes
+that touch Hermes, Stripe, NeMo, policy, guardrail, ledger, or run-proof behavior.

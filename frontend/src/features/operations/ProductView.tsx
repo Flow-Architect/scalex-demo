@@ -163,7 +163,7 @@ export function ProductView({
           <AuditView auditRows={auditRows} health={health} state={state} />
         ) : null}
         {activeView === "integrations" ? (
-          <IntegrationsView auditRows={auditRows} health={health} state={state} />
+          <ConnectionHubView auditRows={auditRows} auth={auth} health={health} money={money} state={state} />
         ) : null}
         {activeView === "settings" ? (
           <SettingsView auth={auth} auditRows={auditRows} health={health} state={state} />
@@ -245,7 +245,7 @@ function DashboardView({
       meta={
         <p className="text-sm font-semibold text-zinc-600">
           {activeWorkflow
-            ? "Demo path: open Function Studio, start the run, then review Evidence Ledger and Integrations."
+            ? "Demo path: open Function Studio, start the run, then review Evidence Ledger and Connection Hub."
             : "Demo path: configure the Northstar sample, open Function Studio, then start the run."}
         </p>
       }
@@ -293,9 +293,9 @@ function DashboardView({
         <div className="grid gap-3 lg:grid-cols-3">
           <button className="text-left" onClick={() => onNavigate("integrations")} type="button">
             <ProofRoute
-              description="Hermes, Stripe test mode, local policy, SQLite, prototype auth, and Goal 8 boundaries."
+              description="Allowed systems, connector modes, guardrail rails, and evidence duties for ClientOps execution."
               icon={Layers3}
-              label="Integrations"
+              label="Connection Hub"
               tone="sky"
             />
           </button>
@@ -779,94 +779,525 @@ function AuditView({
   );
 }
 
-function IntegrationsView({
+function ConnectionHubView({
   auditRows,
+  auth,
   health,
+  money,
   state,
 }: {
   auditRows: number;
+  auth: AuthStatus | null;
   health: HealthResponse | null;
+  money: MoneySnapshot;
   state: DemoState | null;
 }) {
   const hermes = state?.hermes ?? null;
   const stripe = state?.stripe ?? null;
   const execution = state?.execution ?? null;
   const guardrails = state?.guardrails ?? null;
+  const policySummary = state?.policy.summary ?? null;
+  const tableCounts = state?.database.table_counts ?? {};
+  const policyChecks = state?.policy_checks ?? [];
+  const ledgerEntries = state?.ledger.entries ?? [];
+  const blockedChecks = policyChecks.filter((check) => !isApproved(check));
+  const spendLedgerLabels = new Set(
+    ledgerEntries
+      .filter((entry) => entry.entry_type === "spend")
+      .map((entry) => entry.label),
+  );
+  const blockedSpendLedgerRows = blockedChecks.filter((check) => spendLedgerLabels.has(check.vendor));
+  const guardrailStages = guardrails?.evaluation_stages ?? execution?.guardrail_evaluation_stages ?? [];
+  const databaseMode = health?.mode ?? state?.mode ?? "local_sqlite";
+  const stripeMode = stripe?.stripe_mode ?? execution?.stripe_mode ?? "not_configured";
+  const stripeMissingConfig = stripeMode === "not_configured" && !stripe?.used_real_stripe;
+  const hermesMissingConfig = Boolean(hermes?.failure_reason || hermes?.error) && !hermes?.used_real_hermes;
+  const nemoMissingConfig = Boolean(guardrails && guardrails.mode === "nemo_guardrails" && !guardrails.used_real_nemo && !guardrails.nemo_python_configured);
+  const fullProofRuntimeVerified = Boolean(execution?.used_real_hermes || execution?.used_real_stripe || guardrails?.used_real_nemo);
+  const counts = [
+    { label: "Planning runs", value: tableCounts.planning_runs ?? state?.planning_runs.length ?? 0, tone: "violet" as Tone },
+    { label: "Stripe events", value: tableCounts.stripe_events ?? state?.stripe_events.length ?? 0, tone: "sky" as Tone },
+    { label: "Policy checks", value: tableCounts.policy_checks ?? policyChecks.length, tone: "amber" as Tone },
+    { label: "Guardrail evaluations", value: tableCounts.guardrail_evaluations ?? state?.guardrail_evaluations.length ?? 0, tone: "teal" as Tone },
+    { label: "Orchestration calls", value: tableCounts.orchestration_calls ?? state?.orchestration_calls.length ?? 0, tone: "emerald" as Tone },
+    { label: "Events", value: tableCounts.events ?? state?.events.length ?? 0, tone: "slate" as Tone },
+    { label: "Reports", value: tableCounts.reports ?? state?.reports.length ?? 0, tone: "rose" as Tone },
+    { label: "Ledger entries", value: tableCounts.ledger_entries ?? ledgerEntries.length, tone: "teal" as Tone },
+  ];
 
   return (
     <WorkspacePage
-      description="The operating stack behind a ClientOps run, with current proof and explicit integration boundaries."
-      eyebrow="Operating stack"
-      meta={<p className="text-sm font-semibold text-zinc-600">{execution?.label ?? "Execution mode not recorded"} / {auditRows} evidence rows available in Evidence Ledger</p>}
-      title="Operating Stack"
+      description="Allowed systems, guardrails, and evidence for ClientOps execution."
+      eyebrow="ClientOps operating boundary"
+      meta={
+        <div className="flex flex-wrap gap-2">
+          <StatusBadge label={execution?.label ?? "Judge Demo Mode"} tone={execution?.mode === "full_proof" ? "emerald" : "amber"} />
+          <StatusBadge label={`${auditRows} evidence rows`} tone="teal" />
+          <StatusBadge label={fullProofRuntimeVerified ? "runtime verified" : "runtime proof pending"} tone={fullProofRuntimeVerified ? "emerald" : "slate"} />
+        </div>
+      }
+      title="Connection Hub"
     >
-      <PlainTable headers={["Component", "Role", "Current proof", "Boundary"]}>
-        <StackRow
-          boundary="Product mode uses the isolated ScaleX Hermes path; test mode stays labeled."
-          icon={BrainCircuit}
-          name="Hermes"
-          proof={hermes?.used_real_hermes ? `${hermes.provider ?? "Hermes"} / ${hermes.model ?? "model recorded"}` : state?.planning_run ? execution?.planning_label ?? "Deterministic local plan" : hermes?.failure_reason ?? hermes?.error ?? "Not run in this local state"}
-          role="Plans the client implementation operation."
-        />
-        <StackRow
-          boundary="Stripe invoice is not shown as paid unless Stripe returns paid=true."
-          icon={CreditCard}
-          name="Stripe"
-          proof={execution?.finance_label ?? (stripe?.used_real_stripe ? "Real Stripe test mode" : humanize(stripe?.stripe_mode ?? "not configured"))}
-          role="Provides finance proof through test-mode invoice records."
-        />
-        <StackRow
-          boundary="Local policy is the active guardrail layer today."
-          icon={ShieldCheck}
-          name="Local policy"
-          proof={`${state?.policy.summary.approved_vendors.length ?? 0} approved vendors / ${state?.policy.summary.blocked_vendors.length ?? 0} blocked vendors`}
-          role="Controls setup spend, vendor risk, cap, and margin floor."
-        />
-        <StackRow
-          boundary={
-            guardrails?.mode === "nemo_guardrails"
-              ? "Real NeMo is selected only when the configured Python runtime verifies successfully; otherwise ScaleX fails closed."
-              : guardrails?.mode === "nemo_compatible"
-                ? "Temporary fallback only. This is not real NeMo and must stay labeled."
-                : "Default Judge Demo Mode has no NeMo dependency."
-          }
-          icon={ShieldAlert}
-          name="Guardrail adapter"
-          proof={guardrails ? `${guardrails.mode} / ${guardrails.adapter_status} / used_real_nemo=${String(guardrails.used_real_nemo)}` : "Not recorded"}
-          role="Records input, planning, execution, and output rail evidence."
-        />
-        <StackRow
-          boundary="Local evidence ledger only; no production customer data."
-          icon={Database}
-          name="SQLite"
-          proof={`${state?.runs.length ?? 0} runs / ${state?.workflows.length ?? 0} operation files / ${health?.mode ?? state?.mode ?? "local"}`}
-          role="Records run evidence and operation files."
-        />
-        <StackRow
-          boundary="Prototype auth only, not enterprise identity."
-          icon={LockKeyhole}
-          name="Prototype auth"
-          proof="Local session boundary"
-          role="Protects the local browser product surface."
-        />
-      </PlainTable>
-
-      <div className="grid gap-8 xl:grid-cols-2">
-        <WorkspaceSection title="Stripe finance detail">
-          <StripeEvidence summary={stripe} events={state?.stripe_events ?? []} />
-        </WorkspaceSection>
-        <WorkspaceSection title="Guardrail boundary">
-          <PolicyEvidence
-            checks={state?.policy_checks ?? []}
-            evaluations={state?.guardrail_evaluations ?? []}
-            guardrails={guardrails}
-            ledgerEntries={state?.ledger.entries ?? []}
-            summary={state?.policy.summary ?? null}
-          />
-        </WorkspaceSection>
+      <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+        <MetricTile label="Mode" tone={execution?.mode === "full_proof" ? "emerald" : "amber"} value={execution?.label ?? "Judge Demo Mode"} />
+        <MetricTile label="Planning proof" tone={execution?.used_real_hermes ? "emerald" : "amber"} value={execution?.planning_label ?? "Pending"} />
+        <MetricTile label="Finance proof" tone={execution?.used_real_stripe ? "emerald" : "sky"} value={execution?.finance_label ?? "Pending"} />
+        <MetricTile label="Guardrails" tone={guardrails?.fail_closed ? "rose" : guardrails?.used_real_nemo ? "emerald" : "teal"} value={execution?.guardrail_label ?? "Local policy active"} />
       </div>
+
+      <WorkspaceSection
+        description="Systems ScaleX is allowed to use for the current revenue-backed ClientOps run. Each card states the current mode and boundary."
+        title="Active Today"
+      >
+        <div className="grid gap-4 xl:grid-cols-3">
+          <ConnectorCard
+            boundary="Uses the ScaleX-isolated Hermes path in Full Proof Mode; no production Hermes config is used."
+            description="Plans the implementation operation and proposes the controlled tool sequence."
+            facts={[
+              { label: "Judge Demo Mode", value: "Deterministic/local plan proof", tone: "amber" },
+              { label: "Full Proof Mode", value: "Isolated Hermes when configured", tone: "sky" },
+              { label: "used_real_hermes", value: String(Boolean(hermes?.used_real_hermes)), tone: hermes?.used_real_hermes ? "emerald" : "amber" },
+              { label: "Provider/model", value: hermes?.used_real_hermes ? `${hermes.provider ?? "Hermes"} / ${hermes.model ?? "model recorded"}` : hermes?.failure_reason ?? hermes?.error ?? "Not runtime verified in this state", tone: hermesMissingConfig ? "rose" : "slate" },
+            ]}
+            icon={BrainCircuit}
+            name="Hermes Planning"
+            statuses={[
+              { label: "active", tone: "emerald" },
+              { label: "demo mode", tone: "amber" },
+              { label: "full proof capable", tone: "sky" },
+              ...(hermes?.used_real_hermes ? [{ label: "runtime verified", tone: "emerald" as Tone }] : []),
+              ...(hermesMissingConfig ? [{ label: "missing config", tone: "rose" as Tone }] : []),
+            ]}
+          />
+
+          <ConnectorCard
+            boundary="Live money is unsupported. Stripe paid state is shown only when Stripe returns it."
+            description="Provides finance proof for the ClientOps run through sandbox/test-mode invoice records."
+            facts={[
+              { label: "Judge Demo Mode", value: "Test-double/sandbox proof", tone: "amber" },
+              { label: "Full Proof Mode", value: "Real Stripe test mode", tone: "sky" },
+              { label: "Stripe mode", value: humanize(stripeMode), tone: stripe?.used_real_stripe ? "emerald" : stripeMissingConfig ? "rose" : "amber" },
+              { label: "Invoice ID", value: stripe?.invoice_id ? "Available" : "Not recorded", tone: stripe?.invoice_id ? "emerald" : "slate" },
+              { label: "Hosted invoice URL", value: stripe?.hosted_invoice_url ? "Available" : "Not recorded", tone: stripe?.hosted_invoice_url ? "emerald" : "slate" },
+              { label: "Paid", value: stripe?.paid === null || stripe?.paid === undefined ? "Not recorded" : String(stripe.paid), tone: stripe?.paid ? "emerald" : "amber" },
+            ]}
+            icon={CreditCard}
+            name="Stripe Finance Proof"
+            statuses={[
+              { label: stripe?.used_real_stripe ? "runtime verified" : "demo mode", tone: stripe?.used_real_stripe ? "emerald" : "amber" },
+              { label: "full proof capable", tone: "sky" },
+              { label: "blocked by policy", tone: "rose" },
+              ...(stripeMissingConfig ? [{ label: "missing config", tone: "rose" as Tone }] : []),
+            ]}
+          />
+
+          <ConnectorCard
+            boundary="Local policy is active now. Real NeMo is claimed only when used_real_nemo=true; fail-closed remains visible."
+            description="Guards input, planning, execution, and output rails before work is accepted as proof."
+            facts={[
+              { label: "Mode", value: guardrails?.mode ?? "local_policy", tone: guardrails?.used_real_nemo ? "emerald" : "teal" },
+              { label: "Adapter status", value: guardrails?.adapter_status ?? "pending", tone: guardrails?.fail_closed ? "rose" : guardrails?.used_real_nemo ? "emerald" : "amber" },
+              { label: "used_real_nemo", value: String(Boolean(guardrails?.used_real_nemo)), tone: guardrails?.used_real_nemo ? "emerald" : "amber" },
+              { label: "fail_closed", value: String(Boolean(guardrails?.fail_closed)), tone: guardrails?.fail_closed ? "rose" : "teal" },
+              { label: "Rails", value: "input / planning / execution / output", tone: "slate" },
+            ]}
+            icon={ShieldCheck}
+            name="Guardrails"
+            statuses={[
+              { label: "active", tone: "emerald" },
+              { label: guardrails?.used_real_nemo ? "runtime verified" : "local policy", tone: guardrails?.used_real_nemo ? "emerald" : "teal" },
+              ...(guardrails?.fail_closed ? [{ label: "fail closed", tone: "rose" as Tone }] : []),
+              ...(guardrails?.blocked ? [{ label: "blocked by policy", tone: "rose" as Tone }] : []),
+              ...(nemoMissingConfig ? [{ label: "missing config", tone: "rose" as Tone }] : []),
+            ]}
+          />
+
+          <ConnectorCard
+            boundary="Local SQLite evidence only; no production customer data or external ledger is connected."
+            description="Persists run events, ledger rows, planning proof, policy checks, guardrail evaluations, and reports."
+            facts={[
+              { label: "Database mode", value: databaseMode, tone: "teal" },
+              { label: "Runs", value: String(state?.runs.length ?? 0), tone: "slate" },
+              { label: "Ledger entries", value: String(tableCounts.ledger_entries ?? ledgerEntries.length), tone: "teal" },
+              { label: "Evidence rows", value: String(auditRows), tone: "emerald" },
+              { label: "Blocked spend ledger rows", value: String(blockedSpendLedgerRows.length), tone: blockedSpendLedgerRows.length === 0 ? "emerald" : "rose" },
+            ]}
+            icon={Database}
+            name="SQLite Evidence Ledger"
+            statuses={[
+              { label: "active", tone: "emerald" },
+              { label: "demo mode", tone: "amber" },
+            ]}
+          />
+
+          <ConnectorCard
+            boundary="Prototype local auth only. It is not production enterprise identity."
+            description="Protects the local product shell when enabled and stays disabled by default for judge checkout."
+            facts={[
+              { label: "Auth enabled", value: String(Boolean(auth?.auth_enabled)), tone: auth?.auth_enabled ? "emerald" : "amber" },
+              { label: "Session", value: auth?.authenticated ? `Signed in as ${auth.username ?? "operator"}` : "No local session required", tone: auth?.authenticated ? "emerald" : "slate" },
+              { label: "Production auth", value: "Not implemented", tone: "amber" },
+            ]}
+            icon={LockKeyhole}
+            name="Prototype Auth"
+            statuses={[
+              { label: auth?.auth_enabled ? "active" : "demo mode", tone: auth?.auth_enabled ? "emerald" : "amber" },
+            ]}
+          />
+        </div>
+      </WorkspaceSection>
+
+      <WorkspaceSection
+        description="Full Proof Mode paths are capability boundaries, not a claim that every runtime was used in this local state."
+        title="Full Proof Capable"
+      >
+        <div className="grid gap-4 lg:grid-cols-3">
+          <CapabilityCard
+            detail={hermes?.used_real_hermes ? `${hermes.provider ?? "Hermes"} / ${hermes.model ?? "model recorded"}` : hermesMissingConfig ? hermes?.failure_reason ?? hermes?.error ?? "Hermes config error recorded." : "Available through isolated Hermes configuration."}
+            icon={BrainCircuit}
+            label="Isolated Hermes planning"
+            status={hermes?.used_real_hermes ? "runtime verified" : hermesMissingConfig ? "missing config" : "full proof capable"}
+            tone={hermes?.used_real_hermes ? "emerald" : hermesMissingConfig ? "rose" : "sky"}
+          />
+          <CapabilityCard
+            detail={stripe?.used_real_stripe ? "Real Stripe test-mode proof recorded." : stripeMissingConfig ? "Stripe test mode has no configured proof in this state." : "Real Stripe test mode is the Full Proof finance path."}
+            icon={CreditCard}
+            label="Stripe test-mode finance"
+            status={stripe?.used_real_stripe ? "runtime verified" : stripeMissingConfig ? "missing config" : "full proof capable"}
+            tone={stripe?.used_real_stripe ? "emerald" : stripeMissingConfig ? "rose" : "sky"}
+          />
+          <CapabilityCard
+            detail={guardrails?.used_real_nemo ? "Real NeMo Guardrails runtime evidence was recorded." : guardrails?.mode === "nemo_compatible" ? "NeMo-compatible fallback only; not real NeMo." : guardrails?.nemo_python_configured ? "Real NeMo runtime can be probed when selected." : "Real NeMo is optional and needs configured runtime values before use."}
+            icon={ShieldAlert}
+            label="Real NeMo guardrails"
+            status={guardrails?.used_real_nemo ? "runtime verified" : nemoMissingConfig || !guardrails?.nemo_python_configured ? "missing config" : "full proof capable"}
+            tone={guardrails?.used_real_nemo ? "emerald" : nemoMissingConfig || !guardrails?.nemo_python_configured ? "rose" : "sky"}
+          />
+        </div>
+      </WorkspaceSection>
+
+      <WorkspaceSection
+        description="The latest selected run records what was planned, guarded, blocked, and persisted."
+        title="Evidence Recorded"
+      >
+        <div className="grid gap-5 xl:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
+          <div className="space-y-5">
+            <ConnectionPanel icon={ReceiptText} title="Latest run proof summary">
+              <ConnectionFactGrid
+                facts={[
+                  { label: "Selected run", tone: "slate", value: state?.job ? humanize(state.job.status) : "No run selected" },
+                  { label: "Stripe paid", tone: stripe?.paid ? "emerald" : "amber", value: stripe?.paid === null || stripe?.paid === undefined ? "Not recorded" : String(stripe.paid) },
+                  { label: "Blocked risk", tone: "rose", value: formatOptionalCurrency(money.blockedSpendCents) },
+                  { label: "Protected profit", tone: "teal", value: formatOptionalCurrency(money.grossProfitCents) },
+                  { label: "Protected margin", tone: "amber", value: formatOptionalPercent(money.marginPercent) },
+                  {
+                    label: "No blocked spend row proof",
+                    tone: blockedChecks.length > 0 && blockedSpendLedgerRows.length === 0 ? "emerald" : blockedSpendLedgerRows.length > 0 ? "rose" : "slate",
+                    value: blockedChecks.length > 0 ? blockedSpendLedgerRows.length === 0 ? "Preserved" : "Review ledger" : "Pending blocked decision",
+                  },
+                ]}
+              />
+            </ConnectionPanel>
+
+            <ConnectionPanel icon={BookOpenCheck} title="Evidence counts">
+              <ConnectionFactGrid
+                facts={counts.map((item) => ({
+                  label: item.label,
+                  tone: item.tone,
+                  value: String(item.value),
+                }))}
+              />
+            </ConnectionPanel>
+          </div>
+
+          <div className="space-y-5">
+            <ConnectionPanel icon={ShieldCheck} title="Guardrail rail stages">
+              <RailStageGrid stages={guardrailStages} />
+            </ConnectionPanel>
+            <ConnectionPanel icon={Ban} title="Blocked by policy">
+              <BlockedPolicyList blockedChecks={blockedChecks} spendLedgerLabels={spendLedgerLabels} />
+              {policySummary ? (
+                <p className="mt-3 text-xs leading-5 text-zinc-500">
+                  Approved vendors: {policySummary.approved_vendors.join(", ")}. Blocked vendors: {policySummary.blocked_vendors.join(", ")}.
+                </p>
+              ) : null}
+            </ConnectionPanel>
+          </div>
+        </div>
+      </WorkspaceSection>
+
+      <WorkspaceSection
+        description="Future systems are shown as planned boundaries only. They are not active connectors and no MCP server is claimed."
+        title="Planned"
+      >
+        <div className="grid gap-4 xl:grid-cols-5">
+          <PlannedConnectorCard
+            boundary="Approval transport is planned; no real client email is connected."
+            icon={ClipboardList}
+            name="Slack or Email approvals"
+          />
+          <PlannedConnectorCard
+            boundary="CRM context is planned; no production CRM or real customer data is connected."
+            icon={Users}
+            name="CRM context"
+          />
+          <PlannedConnectorCard
+            boundary="Workspace publishing is planned; no Notion or docs workspace is connected."
+            icon={FileText}
+            name="Docs / Notion workspace"
+          />
+          <PlannedConnectorCard
+            boundary="Kickoff scheduling is planned; no calendar API is connected."
+            icon={CircleDashed}
+            name="Calendar kickoff scheduling"
+          />
+          <PlannedConnectorCard
+            boundary="Future access pattern only. No MCP server or external agent access is implemented."
+            icon={Settings}
+            name="MCP server boundary"
+          />
+        </div>
+      </WorkspaceSection>
     </WorkspacePage>
   );
+}
+
+interface ConnectionStatus {
+  label: string;
+  tone: Tone;
+}
+
+interface ConnectorFact {
+  label: string;
+  value: string;
+  tone: Tone;
+}
+
+function ConnectorCard({
+  boundary,
+  description,
+  facts,
+  icon: Icon,
+  name,
+  statuses,
+}: {
+  boundary: string;
+  description: string;
+  facts: ConnectorFact[];
+  icon: LucideIcon;
+  name: string;
+  statuses: ConnectionStatus[];
+}) {
+  return (
+    <article className="rounded-md bg-white p-5 shadow-sm ring-1 ring-zinc-200">
+      <div className="flex items-start gap-3">
+        <span className="flex h-10 w-10 flex-none items-center justify-center rounded-md bg-zinc-950 text-white">
+          <Icon className="h-5 w-5" aria-hidden="true" />
+        </span>
+        <div className="min-w-0">
+          <h3 className="text-lg font-semibold text-zinc-950">{name}</h3>
+          <p className="mt-1 text-sm leading-6 text-zinc-600">{description}</p>
+        </div>
+      </div>
+      <div className="mt-4 flex flex-wrap gap-2">
+        {statuses.map((status, index) => (
+          <StatusBadge key={`${status.label}-${index}`} label={status.label} tone={status.tone} />
+        ))}
+      </div>
+      <ConnectionFactGrid facts={facts} />
+      <p className="mt-4 border-t border-zinc-200 pt-3 text-xs leading-5 text-zinc-500">{boundary}</p>
+    </article>
+  );
+}
+
+function ConnectionFactGrid({ facts }: { facts: ConnectorFact[] }) {
+  return (
+    <dl className="mt-5 grid gap-3 sm:grid-cols-2">
+      {facts.map((fact) => (
+        <div className={`border-l-4 pl-3 ${toneAccentClass(fact.tone)}`} key={fact.label}>
+          <dt className="text-[0.68rem] font-semibold uppercase text-zinc-500">{fact.label}</dt>
+          <dd className="mt-1 break-words text-sm font-semibold text-zinc-950">{fact.value}</dd>
+        </div>
+      ))}
+    </dl>
+  );
+}
+
+function CapabilityCard({
+  detail,
+  icon: Icon,
+  label,
+  status,
+  tone,
+}: {
+  detail: string;
+  icon: LucideIcon;
+  label: string;
+  status: string;
+  tone: Tone;
+}) {
+  return (
+    <article className="rounded-md bg-white p-5 shadow-sm ring-1 ring-zinc-200">
+      <div className="flex items-start justify-between gap-3">
+        <div className="flex items-start gap-3">
+          <span className={`flex h-9 w-9 flex-none items-center justify-center rounded-md border ${softToneClass(tone)}`}>
+            <Icon className="h-4 w-4" aria-hidden="true" />
+          </span>
+          <div>
+            <h3 className="font-semibold text-zinc-950">{label}</h3>
+            <p className="mt-1 text-sm leading-6 text-zinc-600">{detail}</p>
+          </div>
+        </div>
+        <StatusBadge label={status} tone={tone} />
+      </div>
+    </article>
+  );
+}
+
+function ConnectionPanel({
+  children,
+  icon: Icon,
+  title,
+}: {
+  children: ReactNode;
+  icon: LucideIcon;
+  title: string;
+}) {
+  return (
+    <article className="rounded-md bg-white p-5 shadow-sm ring-1 ring-zinc-200">
+      <div className="flex items-center gap-2">
+        <Icon className="h-5 w-5 text-zinc-700" aria-hidden="true" />
+        <h3 className="text-base font-semibold text-zinc-950">{title}</h3>
+      </div>
+      <div className="mt-4">{children}</div>
+    </article>
+  );
+}
+
+function RailStageGrid({ stages }: { stages: GuardrailSummary["evaluation_stages"] }) {
+  if (stages.length === 0) {
+    return <EmptyState>Rail evidence appears after guardrail evaluation records are written.</EmptyState>;
+  }
+
+  return (
+    <div className="grid gap-3 sm:grid-cols-2">
+      {stages.map((stage) => (
+        <article
+          className={`rounded-md border p-3 ${
+            stage.fail_closed || stage.decision === "block"
+              ? "border-rose-200 bg-rose-50"
+              : stage.used_real_nemo
+                ? "border-emerald-200 bg-emerald-50"
+                : "border-zinc-200 bg-zinc-50"
+          }`}
+          key={stage.stage}
+        >
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <p className="font-semibold text-zinc-950">{stage.label}</p>
+              <p className="mt-1 text-xs font-semibold uppercase text-zinc-400">
+                {humanize(stage.stage)} / {stage.adapter}
+              </p>
+            </div>
+            <StatusBadge
+              label={humanize(stage.decision)}
+              tone={stage.fail_closed || stage.decision === "block" ? "rose" : stage.used_real_nemo ? "emerald" : stage.decision === "pending" ? "slate" : "teal"}
+            />
+          </div>
+          <p className="mt-2 text-sm leading-6 text-zinc-600">{stage.summary}</p>
+          <div className="mt-3 flex flex-wrap gap-2">
+            <StatusBadge label={`used_real_nemo=${String(stage.used_real_nemo)}`} tone={stage.used_real_nemo ? "emerald" : "amber"} />
+            <StatusBadge label={`fail_closed=${String(stage.fail_closed)}`} tone={stage.fail_closed ? "rose" : "teal"} />
+          </div>
+        </article>
+      ))}
+    </div>
+  );
+}
+
+function BlockedPolicyList({
+  blockedChecks,
+  spendLedgerLabels,
+}: {
+  blockedChecks: PolicyCheck[];
+  spendLedgerLabels: Set<string>;
+}) {
+  if (blockedChecks.length === 0) {
+    return <EmptyState>No blocked policy actions are recorded for the selected run yet.</EmptyState>;
+  }
+
+  return (
+    <div className="space-y-3">
+      {blockedChecks.map((check) => (
+        <article className="rounded-md border border-rose-200 bg-rose-50 p-3" key={check.id}>
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <p className="font-semibold text-zinc-950">{check.vendor}</p>
+              <p className="mt-1 text-xs font-semibold uppercase text-rose-700">blocked by policy</p>
+            </div>
+            <StatusBadge label={formatCurrency(check.requested_amount_cents)} tone="rose" />
+          </div>
+          <p className="mt-2 text-sm leading-6 text-zinc-700">{check.reason}</p>
+          <div className="mt-3 flex flex-wrap gap-2">
+            <StatusBadge label={`Action ${check.required_action}`} tone="slate" />
+            <StatusBadge
+              label={spendLedgerLabels.has(check.vendor) ? "Spend ledger row present" : "No spend ledger row"}
+              tone={spendLedgerLabels.has(check.vendor) ? "rose" : "emerald"}
+            />
+            <StatusBadge label={formatDateTime(check.created_at)} tone="slate" />
+          </div>
+        </article>
+      ))}
+    </div>
+  );
+}
+
+function PlannedConnectorCard({
+  boundary,
+  icon: Icon,
+  name,
+}: {
+  boundary: string;
+  icon: LucideIcon;
+  name: string;
+}) {
+  return (
+    <article className="rounded-md bg-white p-4 shadow-sm ring-1 ring-zinc-200">
+      <div className="flex items-start gap-3">
+        <span className="flex h-9 w-9 flex-none items-center justify-center rounded-md border border-zinc-200 bg-zinc-50 text-zinc-700">
+          <Icon className="h-4 w-4" aria-hidden="true" />
+        </span>
+        <div className="min-w-0">
+          <h3 className="text-sm font-semibold text-zinc-950">{name}</h3>
+          <div className="mt-2">
+            <StatusBadge label="planned" tone="slate" />
+          </div>
+          <p className="mt-3 text-xs leading-5 text-zinc-500">{boundary}</p>
+        </div>
+      </div>
+    </article>
+  );
+}
+
+function toneAccentClass(tone: Tone): string {
+  switch (tone) {
+    case "emerald":
+      return "border-emerald-500";
+    case "sky":
+      return "border-sky-500";
+    case "amber":
+      return "border-amber-500";
+    case "rose":
+      return "border-rose-500";
+    case "teal":
+      return "border-teal-500";
+    case "violet":
+      return "border-violet-500";
+    case "slate":
+      return "border-zinc-300";
+    default:
+      return "border-zinc-300";
+  }
 }
 
 function SettingsView({

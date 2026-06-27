@@ -27,6 +27,6 @@ export const NAV_ITEMS: Array<{ view: AppView; label: string; icon: LucideIcon }
   { view: "customers", label: "Client Operations", icon: Users },
   { view: "runs", label: "Runs", icon: ClipboardList },
   { view: "audit", label: "Evidence Ledger", icon: BookOpenCheck },
-  { view: "integrations", label: "Integrations", icon: PlugZap },
+  { view: "integrations", label: "Connection Hub", icon: PlugZap },
   { view: "settings", label: "Settings", icon: Settings },
 ];

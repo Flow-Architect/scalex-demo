@@ -118,14 +118,14 @@ Harbor Fleet Services is historical only and is no longer the current implemente
 
 ## Current Next Goals
 
-1. Goal 8A - NeMo Guardrails Preflight / Architecture Audit.
-2. Full Proof local validation - verify real isolated Hermes plus real Stripe test mode if safe
-   ignored local credentials are configured.
-3. Goal 7.13B - Connection Hub UI.
-4. Goal 8B / 8C - Guardrail Adapter and Guardrail Execution Rails after Goal 8A.
-5. Goal 7.13C - MCP Server Prototype only after the guardrail/tool boundary is clear.
+1. Goal 8D - Guardrail Proof UI in Workflow Canvas if a final demo pass exposes a proof gap.
+2. Goal 7.13C - MCP Server Prototype only after the Connection Hub and guardrail/tool boundary
+   remain strong.
+3. Goal 8E - Enterprise Function Template Positioning + Recording Proof.
+4. Goal 9 - final recording/submission polish.
+5. Goal 7B / Production Hardening - Verified Live Mode for future live-money payments.
 
-Connection Hub is planned as the layer where ScaleX declares which systems Hermes and future
+Connection Hub is implemented as the layer where ScaleX declares which systems Hermes and future
 agents can use, what mode each connector is in, what guardrails apply, which actions are blocked,
 what configuration is missing, and what evidence is recorded. It must support the ClientOps
 Autopilot story, not replace it.
@@ -134,10 +134,9 @@ MCP is planned as a future safe access pattern. Possible future tools/resources/
 expose secrets, bypass local policy or future NeMo guardrails, touch live money, or use real
 client data.
 
-Goal 8A is read-only and should determine the safest practical path to wire real NVIDIA NeMo
-Guardrails after Goal 7.13A. Local policy is active now; real NeMo is not wired yet and must not
-be claimed as real until installed, wired, tested, and documented. If real NeMo is blocked before
-submission, document the blocker, the temporary adapter, and the remaining real-NeMo work.
+Goal 8A, Goal 8B, and Goal 8C are complete. Local policy remains active by default; real NeMo is
+available only through optional `nemo_guardrails` mode after runtime verification and must not be
+claimed active unless `used_real_nemo=true`.
 
 ## Session Closeout Requirement
 

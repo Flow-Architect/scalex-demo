@@ -8,7 +8,7 @@ ScaleX ClientOps Autopilot is an Enterprise Function Accelerator for revenue-bac
 ScaleX UI
   -> local prototype auth gate
   -> SQLite-backed local/sample client operation records
-  -> product shell with Dashboard, Function Studio, Onboarding, Client Operations, Runs, Evidence Ledger, Integrations, Settings
+  -> product shell with Dashboard, Function Studio, Onboarding, Client Operations, Runs, Evidence Ledger, Connection Hub, Settings
   -> FastAPI backend
   -> isolated Hermes planning and routing
   -> ScaleX Connection Hub for allowed systems, modes, guardrails, and evidence duties
@@ -29,7 +29,7 @@ ScaleX UI
 - Stripe provides finance proof through test invoice/payment state.
 - ScaleX executes the operation and enforces business rules.
 - Local policy is active now for spend, margin, vendor, and payment-before-spend enforcement.
-- Goal 8B adds an optional real-NeMo-ready guardrail adapter boundary. Default mode is
+- Goal 8B added an optional real-NeMo-ready guardrail adapter boundary. Default mode is
   `local_policy`; `nemo_guardrails` verifies a configured external Python runtime and fails closed
   if selected but unavailable.
 - SQLite records evidence for planning, orchestration, finance proof, policy checks, ledger rows,
@@ -39,7 +39,7 @@ ScaleX UI
 ## Implemented Today
 
 - Vite React TypeScript frontend.
-- Product shell with login, Dashboard, Function Studio, Onboarding, Client Operations, Runs, Evidence Ledger, Integrations, and Settings views.
+- Product shell with login, Dashboard, Function Studio, Onboarding, Client Operations, Runs, Evidence Ledger, Connection Hub, and Settings views.
 - Function Studio route with connected proof nodes and right selected-node inspector.
 - FastAPI backend.
 - SQLite evidence ledger at `data/scalex.db`.
@@ -66,11 +66,11 @@ Stripe, policy/guardrails, and evidence. It is not a generic MCP platform, conne
 integration dashboard, Zapier/n8n clone, developer tool first, or AI agent playground.
 
 The demo should stay centered on Dashboard -> Function Studio -> Start Run -> visible execution ->
-Evidence Drawer -> Runs -> Evidence Ledger -> Integrations.
+Evidence Drawer -> Runs -> Evidence Ledger -> Connection Hub.
 
 ## Connection Hub Architecture
 
-ScaleX Connection Hub is a planned internal product layer. It is where ScaleX declares:
+ScaleX Connection Hub is an implemented internal product layer. It is where ScaleX declares:
 
 - which systems Hermes and future agents are allowed to use;
 - which connectors are active today, in Judge Demo Mode, in Full Proof Mode, planned, missing

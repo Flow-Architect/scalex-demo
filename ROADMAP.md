@@ -69,9 +69,9 @@ reports.
 
 ## ScaleX Connection Hub
 
-The planned ScaleX Connection Hub is the product layer where ScaleX declares which systems Hermes
-and future agents are allowed to use, what mode each connector is in, what guardrails apply, and
-what evidence must be recorded.
+The ScaleX Connection Hub is the product layer where ScaleX declares which systems Hermes and
+future agents are allowed to use, what mode each connector is in, what guardrails apply, and what
+evidence must be recorded. Goal 7.13B implemented the first product-facing view.
 
 The Connection Hub is not the product. It supports ClientOps Autopilot by making execution
 authority visible for a revenue-backed client operation.
@@ -202,7 +202,7 @@ Implemented product surfaces:
 - Vite React TypeScript product shell
 - local prototype auth
 - SQLite-backed local/sample workflow records
-- Dashboard, Onboarding, Customers, Studio, Runs, Audit, Integrations, and Settings
+- Dashboard, Onboarding, Customers, Studio, Runs, Audit/Evidence Ledger, Connection Hub, and Settings
 - connected Function Studio page with proof nodes and selected-node inspector
 - isolated Hermes planning in product mode
 - real Stripe test-mode invoice path when configured with `sk_test_...`
@@ -260,16 +260,16 @@ Completed baseline:
 - Goal 8B - Real-NeMo-Ready Guardrail Adapter + Schema/API
 - Goal 7.14B - Full Proof Local Validation With Configured Real Tools
 - Goal 8C - Guardrail Execution Rails in Run Lifecycle
+- Goal 7.13B - Connection Hub UI
 
 Suggested next sequence:
 
-1. Goal 7.13B - Connection Hub UI.
-2. Goal 8D - Guardrail Proof UI in Workflow Canvas, if the Connection Hub pass exposes a remaining
+1. Goal 8D - Guardrail Proof UI in Workflow Canvas, if the Connection Hub pass exposes a remaining
    workflow-canvas proof gap.
-3. Goal 7.13C - MCP Server Prototype if time allows and the guardrail/tool boundary is clear.
-4. Goal 8E - Enterprise Function Template Positioning + Recording Proof.
-5. Goal 9 - Final polish and submission assets.
-6. Goal 7B / Production Hardening - Verified Live Mode for future live-money payments.
+2. Goal 7.13C - MCP Server Prototype if time allows and the guardrail/tool boundary is clear.
+3. Goal 8E - Enterprise Function Template Positioning + Recording Proof.
+4. Goal 9 - Final polish and submission assets.
+5. Goal 7B / Production Hardening - Verified Live Mode for future live-money payments.
 
 Goal 7.14B Full Proof local validation passed in a local-only configured environment. It verified
 real isolated Hermes, real Stripe test-mode invoice proof, real NeMo runtime verification, local
@@ -391,9 +391,9 @@ Constraints:
 
 ## Goal 7.13 - Connection Hub / MCP Tool Boundary
 
-Goal 7.13 documents and later implements a Connection Hub layer and MCP-shaped access boundary
-without changing the core product. Connection Hub must strengthen the ClientOps Autopilot story;
-it must not turn ScaleX into a generic integration dashboard.
+Goal 7.13 documents and implements a Connection Hub layer and MCP-shaped access boundary without
+changing the core product. Connection Hub must strengthen the ClientOps Autopilot story; it must
+not turn ScaleX into a generic integration dashboard.
 
 ### Goal 7.13A - Connection Hub / MCP Architecture Docs
 
@@ -409,7 +409,7 @@ Required outputs:
   modes, guardrails, missing config, blocked actions, and evidence duties.
 - Define MCP as a future access pattern only, not an implemented ScaleX capability.
 - Preserve the Northstar Client Implementation Launch demo path: Dashboard -> Function Studio ->
-  Start Run -> visible execution -> Evidence Drawer -> Runs -> Evidence Ledger -> Integrations.
+  Start Run -> visible execution -> Evidence Drawer -> Runs -> Evidence Ledger -> Connection Hub.
 - Add a Full Proof Mode local validation plan using real isolated Hermes and real Stripe test mode
   with synthetic Northstar data only.
 - Clarify invoice lifecycle: Hermes plans the finance step, ScaleX backend executes approved
@@ -430,8 +430,8 @@ Constraints:
 
 Objective:
 
-Add a product view showing active/planned connectors and execution modes after Goal 8C unless a
-later planning pass justifies doing it earlier as UI-only.
+Complete: added a product view showing active/planned connectors and execution modes after Goal
+8C.
 
 The UI should show:
 
@@ -538,8 +538,8 @@ Final demo language:
 
 ## Goal 8 - Governed Autonomy Layer With NVIDIA NeMo Guardrails
 
-Goal 8A, Goal 8B, and Goal 8C are complete. Goal 7.13B Connection Hub UI is next unless a later
-guardrail review finds a hardening blocker.
+Goal 8A, Goal 8B, Goal 8C, and Goal 7.13B are complete. Goal 8D is next only if a final demo pass
+exposes a remaining Workflow Canvas guardrail proof gap.
 
 Stack identity for Goal 8:
 
@@ -660,7 +660,7 @@ ScaleX is ready for the current Northstar sample state when:
 - Docs and app select Northstar Dental Group / Client Implementation Launch as the implemented template.
 - Docs preserve Harbor only as historical previous sample context.
 - Docs preserve local policy active now / optional real NeMo only after runtime verification.
-- Goal 7.13B Connection Hub UI remains next.
+- Goal 7.13B Connection Hub UI is complete.
 - Goal 9 remains intact.
 - Goal 7B remains intact.
 - Goal 8B adapter implementation and Goal 8C execution rails are done.

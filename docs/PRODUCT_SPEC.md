@@ -28,7 +28,7 @@ governed AI operations layer that can run those functions safely.
 - Local prototype auth gate.
 - SQLite-backed local/sample client operation management with Northstar Dental Group defaults.
 - Product navigation for Dashboard, Function Studio, Onboarding, Client Operations, Runs,
-  Evidence Ledger, Integrations, and Settings.
+  Evidence Ledger, Connection Hub, and Settings.
 - Connected Function Studio page for the autonomous run, with approved setup spend and blocked risk branches.
 - Right selected-node inspector for Run Summary, Client Intake, Hermes Plan, Finance Proof,
   Revenue Gate, Guardrail Review, Approved Resources, Blocked Risk, Evidence Ledger, and Profit
@@ -116,10 +116,10 @@ mode must not pretend to be real integration mode.
 
 ## Connection Hub Product Layer
 
-ScaleX Connection Hub is planned as an internal product layer that shows what systems the
+ScaleX Connection Hub is an implemented internal product layer that shows what systems the
 ClientOps Autopilot is allowed to use. It is not the product itself.
 
-Connection Hub should answer:
+Connection Hub answers:
 
 - Which systems can the agent use?
 - Which systems are active today?
@@ -224,7 +224,7 @@ MCP tools must not expose secrets, bypass local policy or future NeMo guardrails
 money, use real client data, or skip evidence records. Action tools should fail closed when
 configuration or policy is invalid.
 
-## Target Integrations
+## Target Systems
 
 - Hermes = planning and routing the client operation.
 - Connection Hub = allowed systems, connector modes, guardrails, missing config, blocked actions,
