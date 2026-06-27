@@ -1,6 +1,7 @@
 import sqlite3
 from typing import Any
 import json
+from urllib.parse import urlparse
 
 from .. import repository
 from ..config import Settings, get_settings, normalized_execution_mode
@@ -50,7 +51,7 @@ def build_demo_state(connection: sqlite3.Connection, run_id: str | None = None) 
         _decode_orchestration_call(call)
         for call in (repository.list_orchestration_calls(connection, job_id) if job_id else [])
     ]
-    hermes_metadata = _latest_hermes_metadata(latest_planning_run, orchestration_calls)
+    hermes_metadata = _latest_hermes_metadata(settings, latest_planning_run, orchestration_calls)
     stripe_events = [
         _decode_stripe_event(event)
         for event in (repository.list_stripe_events(connection, job_id) if job_id else [])
@@ -126,14 +127,26 @@ def _execution_summary(
     planning_source = planning_run.get("source") if planning_run else None
     stripe_mode = stripe_summary.get("stripe_mode")
     guardrails = guardrail_summary(settings=settings, evaluations=guardrail_evaluations)
+    hermes_runtime = str(hermes_metadata.get("runtime") or settings.hermes_runtime)
+    hermes_runtime_status = str(
+        hermes_metadata.get("runtime_status")
+        or ("available" if used_real_hermes else "fail_closed" if hermes_metadata.get("error") else "pending")
+    )
+    nemohermes_selected = hermes_runtime == "nemoclaw"
 
     return {
         "mode": mode,
         "label": "Demo proof mode" if demo_mode else "Full Proof Mode",
         "requested_full_proof": not demo_mode,
         "planning_label": (
-            "Real isolated Hermes"
+            "NemoHermes API"
+            if used_real_hermes and nemohermes_selected
+            else "Real isolated Hermes"
             if used_real_hermes
+            else "NemoHermes fail-closed"
+            if nemohermes_selected and hermes_runtime_status == "fail_closed"
+            else "NemoHermes selected; proof pending"
+            if nemohermes_selected and planning_source
             else "Deterministic Hermes plan"
             if planning_source
             else "Planning proof pending"
@@ -154,6 +167,14 @@ def _execution_summary(
         "guardrail_evaluation_stages": guardrails["evaluation_stages"],
         "used_real_hermes": used_real_hermes,
         "used_real_stripe": used_real_stripe,
+        "hermes_runtime": hermes_runtime,
+        "hermes_runtime_status": hermes_runtime_status,
+        "hermes_api_base_url": hermes_metadata.get("api_base_url"),
+        "hermes_api_endpoint": hermes_metadata.get("api_endpoint"),
+        "hermes_sandbox_name": hermes_metadata.get("sandbox_name"),
+        "hermes_upstream_provider": hermes_metadata.get("upstream_provider"),
+        "hermes_upstream_model": hermes_metadata.get("upstream_model"),
+        "hermes_error_class": hermes_metadata.get("error_class"),
         "planning_source": planning_source,
         "stripe_mode": stripe_mode,
         "truthfulness_note": (
@@ -161,9 +182,10 @@ def _execution_summary(
             "finance proof. It does not claim real Hermes, real Stripe, or real NeMo usage."
             if demo_mode
             else (
-                "Full Proof Mode uses configured real isolated Hermes and real Stripe test-mode "
-                "adapters. Missing credentials or selected guardrail runtime failures remain "
-                "visible integration errors."
+                "Full Proof Mode uses the configured real planning adapter, real Stripe test-mode "
+                "finance proof, and selected guardrails. NemoHermes/OpenShell is used only when "
+                "HERMES_RUNTIME=nemoclaw succeeds; missing runtime, credentials, or selected "
+                "guardrail failures remain visible integration errors."
             )
         ),
     }
@@ -321,19 +343,41 @@ def _decode_json(value: Any) -> Any:
 
 
 def _latest_hermes_metadata(
+    settings: Settings,
     planning_run: dict[str, Any] | None,
     orchestration_calls: list[dict[str, Any]],
 ) -> dict[str, Any]:
+    hermes_runtime = settings.hermes_runtime
+    nemohermes_selected = hermes_runtime == "nemoclaw"
+    hermes_mode = (
+        "nemohermes_api"
+        if nemohermes_selected and settings.hermes_mode == "isolated_cli"
+        else settings.hermes_mode
+    )
     default = {
-        "mode": "isolated_cli",
+        "runtime": hermes_runtime,
+        "mode": hermes_mode,
         "used_real_hermes": False,
-        "provider": None,
-        "model": None,
-        "skill_name": None,
-        "toolsets_used": [],
+        "provider": settings.nemoclaw_provider if nemohermes_selected else settings.hermes_provider,
+        "model": settings.hermes_model,
+        "skill_name": None if nemohermes_selected else settings.hermes_skill_name,
+        "toolsets_used": [] if nemohermes_selected else _toolsets(settings),
         "error": None,
         "failure_reason": None,
         "duration_ms": 0,
+        "runtime_status": "pending",
+        "api_base_url": (
+            _safe_endpoint_label(settings.hermes_api_base_url) if nemohermes_selected else None
+        ),
+        "api_endpoint": (
+            _safe_endpoint_label(f"{settings.hermes_api_base_url.rstrip('/')}/chat/completions")
+            if nemohermes_selected
+            else None
+        ),
+        "sandbox_name": settings.nemoclaw_sandbox_name if nemohermes_selected else None,
+        "upstream_provider": settings.nemoclaw_provider if nemohermes_selected else None,
+        "upstream_model": settings.nemoclaw_model if nemohermes_selected else None,
+        "error_class": None,
         "command_safety_summary": "Hermes has not run for the current demo state.",
     }
     planning_call = next(
@@ -348,7 +392,7 @@ def _latest_hermes_metadata(
         output = planning_call.get("tool_output_json") or {}
         metadata = output.get("hermes_metadata") if isinstance(output, dict) else None
         if isinstance(metadata, dict):
-            return metadata
+            return _merge_non_empty(default, metadata)
 
     if planning_run is not None:
         fallback = dict(default)
@@ -364,6 +408,31 @@ def _latest_hermes_metadata(
         return fallback
 
     return default
+
+
+def _merge_non_empty(default: dict[str, Any], values: dict[str, Any]) -> dict[str, Any]:
+    merged = dict(default)
+    for key, value in values.items():
+        if value is not None or key not in merged:
+            merged[key] = value
+    return merged
+
+
+def _safe_endpoint_label(value: str | None) -> str | None:
+    if not value:
+        return None
+    parsed = urlparse(str(value))
+    if not parsed.netloc:
+        return None
+    return f"{parsed.netloc}{parsed.path}".rstrip("/")
+
+
+def _toolsets(settings: Settings) -> list[str]:
+    return [
+        item.strip()
+        for item in settings.hermes_toolsets.split(",")
+        if item.strip()
+    ]
 
 
 def _stripe_summary(

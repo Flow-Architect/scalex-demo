@@ -48,7 +48,8 @@ finance proof, approvals, and evidence only inside safe boundaries.
 - Judge Demo Mode as the default safe local execution path without real secrets.
 - Full Proof Mode for safely configured real isolated Hermes plus real Stripe test mode.
 - Optional NeMo Guardrails adapter proof through `nemoguardrails` runtime verification.
-- Actual NVIDIA NemoClaw / OpenShell / `nemohermes` is not installed or wired yet.
+- Optional NVIDIA NemoClaw / OpenShell / `nemohermes` routing through
+  `HERMES_RUNTIME=nemoclaw` when the local API is already validated.
 - Telegram approval and MCP are planned only.
 
 ## Current Template
@@ -108,16 +109,16 @@ Execution modes:
 - Judge Demo Mode works without secrets, uses deterministic local proof/test-double paths, creates
   local SQLite records, populates Runs and Evidence Ledger, labels output as demo/sandbox proof,
   and does not claim real Stripe or real Hermes unless real adapters were used.
-- Full Proof Mode uses real isolated Hermes and real Stripe test mode when local ignored `.env`
-  values are safely configured, keeps Stripe `livemode=false`, shows hosted invoice URLs only when
-  available, never labels `paid=false` as paid, and shows visible integration errors if configured
-  incorrectly.
+- Full Proof Mode uses real isolated Hermes or selected NemoHermes API planning plus real Stripe
+  test mode when local ignored `.env` values are safely configured, keeps Stripe `livemode=false`,
+  shows hosted invoice URLs only when available, never labels `paid=false` as paid, and shows
+  visible integration errors if configured incorrectly.
 
 Truthfulness boundaries: Northstar is synthetic, no patient data, no PHI, no HIPAA claim, local
 policy active now, default guardrail mode is `local_policy`, optional NeMo Guardrails adapter proof
-requires `nemo_guardrails` runtime verification, actual NemoClaw is not wired, Telegram approval is
-not implemented, no live-money support, no production auth claim, and demo mode must not pretend
-to be real integration mode.
+requires `nemo_guardrails` runtime verification, optional NemoHermes requires selected-runtime API
+verification, Telegram approval is not implemented, no live-money support, no production auth
+claim, and demo mode must not pretend to be real integration mode.
 
 ## Connection Hub Product Layer
 
@@ -306,7 +307,8 @@ evidence for every approval or denial.
 - ScaleX = execution and policy authority.
 - Local policy now = spend, margin, vendor, and payment-before-spend enforcement.
 - NeMo Guardrails adapter = optional `nemo_guardrails` mode after runtime verification.
-- Actual NVIDIA NemoClaw / OpenShell / `nemohermes` = target sandboxed Hermes runtime, not wired.
+- Actual NVIDIA NemoClaw / OpenShell / `nemohermes` = optional sandboxed Hermes runtime through
+  the local NemoHermes API when selected and verified.
 - Telegram = planned human approval channel.
 - SQLite = evidence ledger.
 - Profit Outcome = protected profit and blocked risk result.

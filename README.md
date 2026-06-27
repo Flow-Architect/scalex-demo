@@ -14,8 +14,8 @@ and evidence are governed.
 
 ScaleX solves that by letting Hermes plan and route the operation, Stripe provide finance proof,
 ScaleX enforce business rules, local policy check spend and margin today, the NeMo Guardrails
-adapter provide optional runtime-verified guardrail proof, actual NemoClaw/OpenShell remain the
-next sandbox target, and SQLite record evidence.
+adapter provide optional runtime-verified guardrail proof, optional NemoHermes API routing run
+Hermes through the local NemoClaw/OpenShell sandbox when selected, and SQLite record evidence.
 
 ## Current Implemented Sample
 
@@ -60,7 +60,7 @@ Client operation intake
 -> ScaleX executes and enforces business rules
 -> local policy active now checks spend, margin, vendors, and payment-before-spend
 -> NeMo Guardrails adapter available when runtime verified
--> actual NVIDIA NemoClaw / OpenShell / nemohermes targeted next, not wired yet
+-> optional NVIDIA NemoClaw / OpenShell / nemohermes API runtime when selected and verified
 -> SQLite records evidence
 -> Profit Outcome reports protected profit and blocked risk
 ```
@@ -80,7 +80,8 @@ must run in the appropriate environment.
 - Guardrail mode defaults to `local_policy`; optional `nemo_guardrails` mode can verify the
   Python `nemoguardrails` runtime through `SCALEX_NEMO_PYTHON` and fails closed if selected but
   unavailable.
-- Actual NVIDIA NemoClaw / OpenShell / `nemohermes` is not installed or wired yet.
+- Optional NVIDIA NemoClaw / OpenShell / `nemohermes` routing is available through
+  `HERMES_RUNTIME=nemoclaw` after the local API is already validated.
 - Telegram approval is planned and not implemented yet.
 - Hermes planning uses the ScaleX-isolated laptop install, not production Hermes.
 - Stripe test invoices are labeled honestly as open/unpaid unless Stripe reports `paid=true`.
@@ -105,7 +106,8 @@ Implemented today:
 - Judge Demo Mode as the default safe local execution path without secrets.
 - Full Proof Mode for safely configured real isolated Hermes plus real Stripe test mode.
 - Optional NeMo Guardrails adapter proof through `nemoguardrails` runtime verification.
-- No actual NemoClaw/OpenShell/`nemohermes` integration yet.
+- Optional NemoHermes API runtime for sandboxed Hermes planning; it is not active by default and
+  fails closed if selected but unavailable.
 
 ## Connection Hub And MCP Plan
 
@@ -119,12 +121,12 @@ Active connector concepts documented today:
 - Hermes Planning
 - Stripe Finance Proof
 - Local Policy
+- NemoClaw / OpenShell Sandbox through optional NemoHermes API runtime
 - SQLite Evidence Ledger
 - Prototype Auth
 
 Planned connector concepts:
 
-- NemoClaw / OpenShell Sandbox target
 - Telegram Approval Gate
 - Slack / Email notifications or future approvals
 - CRM client context
@@ -297,9 +299,10 @@ These commands must not use live Stripe mode or production service credentials.
 - Verified locally in Goal 7.14B: Full Proof Mode completed with real isolated Hermes, real
   Stripe test-mode invoice proof, NeMo Guardrails runtime verification through
   `nemoguardrails`, local policy active, `livemode=false`, and unpaid Stripe state preserved.
-- Not installed/wired today: actual NVIDIA NemoClaw / OpenShell / `nemohermes`, Telegram approval,
-  MCP server, live money, real client email, real client data, and PHI handling.
-- Planned next: actual NemoClaw / NemoHermes preflight, then conditional NemoClaw runtime wiring,
-  then Telegram Human Approval Gate, then Product Depth + Demo-Winning UI Pass, then MCP only after
-  the boundaries are safe.
+- Optional now: NemoHermes API runtime behind `HERMES_RUNTIME=nemoclaw`; it is not active by
+  default and fails closed when selected but unavailable.
+- Not implemented today: Telegram approval, MCP server, live money, real client email, real client
+  data, and PHI handling.
+- Planned next: Telegram Human Approval Gate, then Product Depth + Demo-Winning UI Pass, then MCP
+  only after the boundaries are safe.
 - Future: Goal 9 final submission prep and Verified Live Mode remain later work.

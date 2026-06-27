@@ -812,8 +812,17 @@ function ConnectionHubView({
   const stripeMode = stripe?.stripe_mode ?? execution?.stripe_mode ?? "not_configured";
   const stripeMissingConfig = stripeMode === "not_configured" && !stripe?.used_real_stripe;
   const hermesMissingConfig = Boolean(hermes?.failure_reason || hermes?.error) && !hermes?.used_real_hermes;
+  const hermesRuntime = hermes?.runtime ?? execution?.hermes_runtime ?? "isolated_cli";
+  const hermesRuntimeStatus = hermes?.runtime_status ?? execution?.hermes_runtime_status ?? "pending";
+  const nemoHermesSelected = hermesRuntime === "nemoclaw" || hermes?.mode === "nemohermes_api";
+  const nemoHermesVerified = Boolean(nemoHermesSelected && hermes?.used_real_hermes && hermesRuntimeStatus === "available");
+  const nemoHermesFailClosed = Boolean(nemoHermesSelected && hermesRuntimeStatus === "fail_closed");
+  const nemoHermesApiBase = hermes?.api_base_url ?? execution?.hermes_api_base_url ?? "127.0.0.1:8642/v1";
+  const nemoHermesSandbox = hermes?.sandbox_name ?? execution?.hermes_sandbox_name ?? "scalex-hermes";
+  const nemoHermesProvider = hermes?.upstream_provider ?? execution?.hermes_upstream_provider ?? hermes?.provider ?? "nvidia-prod";
+  const nemoHermesUpstreamModel = hermes?.upstream_model ?? execution?.hermes_upstream_model ?? "nvidia/nemotron-3-ultra-550b-a55b";
   const nemoMissingConfig = Boolean(guardrails && guardrails.mode === "nemo_guardrails" && !guardrails.used_real_nemo && !guardrails.nemo_python_configured);
-  const fullProofRuntimeVerified = Boolean(execution?.used_real_hermes || execution?.used_real_stripe || guardrails?.used_real_nemo);
+  const fullProofRuntimeVerified = Boolean(execution?.used_real_hermes || execution?.used_real_stripe || guardrails?.used_real_nemo || nemoHermesVerified);
   const counts = [
     { label: "Planning runs", value: tableCounts.planning_runs ?? state?.planning_runs.length ?? 0, tone: "violet" as Tone },
     { label: "Stripe events", value: tableCounts.stripe_events ?? state?.stripe_events.length ?? 0, tone: "sky" as Tone },
@@ -851,11 +860,11 @@ function ConnectionHubView({
       >
         <div className="grid gap-4 xl:grid-cols-3">
           <ConnectorCard
-            boundary="Uses the ScaleX-isolated Hermes path in Full Proof Mode; no production Hermes config is used."
+            boundary={nemoHermesSelected ? "Selected runtime is NemoHermes API through the local NemoClaw/OpenShell sandbox; no production Hermes config is used." : "Uses the ScaleX-isolated Hermes path in Full Proof Mode; no production Hermes config is used."}
             description="Plans the implementation operation and proposes the controlled tool sequence."
             facts={[
               { label: "Judge Demo Mode", value: "Deterministic/local plan proof", tone: "amber" },
-              { label: "Full Proof Mode", value: "Isolated Hermes when configured", tone: "sky" },
+              { label: "Full Proof Mode", value: nemoHermesSelected ? "NemoHermes API when available" : "Isolated Hermes when configured", tone: "sky" },
               { label: "used_real_hermes", value: String(Boolean(hermes?.used_real_hermes)), tone: hermes?.used_real_hermes ? "emerald" : "amber" },
               { label: "Provider/model", value: hermes?.used_real_hermes ? `${hermes.provider ?? "Hermes"} / ${hermes.model ?? "model recorded"}` : hermes?.failure_reason ?? hermes?.error ?? "Not runtime verified in this state", tone: hermesMissingConfig ? "rose" : "slate" },
             ]}
@@ -865,10 +874,35 @@ function ConnectionHubView({
               { label: "active", tone: "emerald" },
               { label: "demo mode", tone: "amber" },
               { label: "full proof capable", tone: "sky" },
+              ...(nemoHermesSelected ? [{ label: "NemoHermes selected", tone: "sky" as Tone }] : []),
               ...(hermes?.used_real_hermes ? [{ label: "runtime verified", tone: "emerald" as Tone }] : []),
               ...(hermesMissingConfig ? [{ label: "missing config", tone: "rose" as Tone }] : []),
             ]}
           />
+
+          {nemoHermesSelected ? (
+            <ConnectorCard
+              boundary="NemoClaw/OpenShell owns the sandbox boundary. ScaleX records non-secret runtime evidence and fails closed when the local API is unavailable."
+              description="Routes Hermes Agent planning through the local OpenAI-compatible NemoHermes API."
+              facts={[
+                { label: "Runtime", value: "NemoHermes API", tone: nemoHermesVerified ? "emerald" : nemoHermesFailClosed ? "rose" : "sky" },
+                { label: "Sandbox", value: nemoHermesSandbox, tone: "slate" },
+                { label: "Local API", value: nemoHermesApiBase, tone: "slate" },
+                { label: "Agent model", value: hermes?.model ?? "hermes-agent", tone: "sky" },
+                { label: "Upstream provider", value: nemoHermesProvider, tone: "slate" },
+                { label: "Upstream model", value: nemoHermesUpstreamModel, tone: "slate" },
+                { label: "Runtime status", value: humanize(hermesRuntimeStatus), tone: nemoHermesVerified ? "emerald" : nemoHermesFailClosed ? "rose" : "amber" },
+              ]}
+              icon={Layers3}
+              name="NemoClaw / OpenShell Sandbox"
+              statuses={[
+                { label: "selected", tone: "sky" },
+                { label: nemoHermesVerified ? "runtime verified" : nemoHermesFailClosed ? "fail closed" : "proof pending", tone: nemoHermesVerified ? "emerald" : nemoHermesFailClosed ? "rose" : "amber" },
+                { label: "Hermes Agent", tone: "teal" },
+                { label: "NVIDIA endpoint", tone: "slate" },
+              ]}
+            />
+          ) : null}
 
           <ConnectorCard
             boundary="Live money is unsupported. Stripe paid state is shown only when Stripe returns it."
@@ -951,7 +985,7 @@ function ConnectionHubView({
         description="Full Proof Mode paths are capability boundaries, not a claim that every runtime was used in this local state."
         title="Full Proof Capable"
       >
-        <div className="grid gap-4 lg:grid-cols-3">
+        <div className="grid gap-4 lg:grid-cols-2 xl:grid-cols-4">
           <CapabilityCard
             detail={hermes?.used_real_hermes ? `${hermes.provider ?? "Hermes"} / ${hermes.model ?? "model recorded"}` : hermesMissingConfig ? hermes?.failure_reason ?? hermes?.error ?? "Hermes config error recorded." : "Available through isolated Hermes configuration."}
             icon={BrainCircuit}
@@ -972,6 +1006,13 @@ function ConnectionHubView({
             label="Real NeMo guardrails"
             status={guardrails?.used_real_nemo ? "runtime verified" : nemoMissingConfig || !guardrails?.nemo_python_configured ? "missing config" : "full proof capable"}
             tone={guardrails?.used_real_nemo ? "emerald" : nemoMissingConfig || !guardrails?.nemo_python_configured ? "rose" : "sky"}
+          />
+          <CapabilityCard
+            detail={nemoHermesSelected ? `${nemoHermesSandbox} via ${nemoHermesApiBase}` : "Select HERMES_RUNTIME=nemoclaw to route planning through the local NemoHermes API."}
+            icon={Layers3}
+            label="NemoClaw / NemoHermes runtime"
+            status={nemoHermesVerified ? "runtime verified" : nemoHermesFailClosed ? "fail closed" : nemoHermesSelected ? "selected" : "full proof capable"}
+            tone={nemoHermesVerified ? "emerald" : nemoHermesFailClosed ? "rose" : "sky"}
           />
         </div>
       </WorkspaceSection>

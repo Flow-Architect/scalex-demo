@@ -10,6 +10,50 @@ Use:
 
 ---
 
+## 2026-06-27 - Goal 8E: NemoHermes API runtime wiring
+
+Completed:
+- Added optional `HERMES_RUNTIME=nemoclaw` config support with safe `.env.example` values for
+  `HERMES_API_BASE_URL`, `HERMES_MODEL=hermes-agent`, `NEMOCLAW_SANDBOX_NAME`,
+  `NEMOCLAW_PROVIDER`, and `NEMOCLAW_MODEL`.
+- Added a backend NemoHermes OpenAI-compatible `chat/completions` adapter that sends the existing
+  planning prompt as a user message, defaults to local bearer auth, uses a timeout, and fails
+  closed when selected but unavailable.
+- Recorded non-secret runtime evidence: selected runtime, endpoint host/path only, model, sandbox,
+  provider, upstream model, status, duration, and error class.
+- Preserved the existing deterministic Judge Demo Mode and isolated Hermes planning path.
+- Updated API/UI state and Connection Hub display for NemoClaw / OpenShell Sandbox, Hermes Agent,
+  local API, NVIDIA provider route, upstream model, runtime verified, unavailable, and fail-closed
+  states.
+- Added fake-endpoint adapter tests for success, HTTP error, malformed response, timeout,
+  unreachable API, and credential/header non-leakage.
+- Updated docs/tracking to record that the local NemoHermes runtime was validated externally before
+  this goal, ScaleX can optionally route through `HERMES_RUNTIME=nemoclaw`, no secrets are stored,
+  the NVIDIA provider route is active, and the Nous OAuth path was intentionally not used because
+  its session-key minting path is retired for this local setup.
+
+Safety:
+- Did not edit or run anything inside `~/.nemoclaw`.
+- Did not run `nemohermes update`, `nemohermes onboard`, `nemohermes rebuild`, Docker, Stripe,
+  production Hermes, production data, Telegram, MCP, or Full Proof.
+- Did not touch real `.env`, SQLite `.db` files, backups, provider credentials, or secrets.
+- `used_real_hermes=true` is true only after the selected real runtime call succeeds.
+
+Verified:
+- `backend/.venv/bin/python -m pytest backend/tests/test_hermes_adapter.py backend/tests/test_demo_runner.py`
+  passed with 30 tests.
+- `./scripts/test.sh` passed with 66 backend tests and a successful frontend build.
+- `./scripts/check-nemo.sh` passed with `nemoguardrails` 0.21.0 and `guardrails/scalex` loaded.
+- `git diff --check` passed.
+
+Suggested commit message:
+Wire NemoHermes API runtime
+
+Next:
+- Goal 8F - Telegram Human Approval Gate.
+
+---
+
 ## 2026-06-27 - Goal 7.15A: Product depth, Telegram gate plan, and NemoClaw correction
 
 Completed:

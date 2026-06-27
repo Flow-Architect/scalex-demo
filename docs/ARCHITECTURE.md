@@ -16,7 +16,7 @@ ScaleX UI
   -> ScaleX business-rule enforcement
   -> local policy active today
   -> NeMo Guardrails adapter available when runtime verified
-  -> actual NVIDIA NemoClaw / OpenShell / nemohermes targeted next, not wired yet
+  -> optional NVIDIA NemoClaw / OpenShell / nemohermes API runtime when selected and verified
   -> SQLite evidence ledger
   -> agent work
   -> Profit Outcome
@@ -33,8 +33,9 @@ ScaleX UI
 - Goal 8B added an optional NeMo Guardrails adapter boundary. Default mode is `local_policy`;
   `nemo_guardrails` verifies a configured external Python `nemoguardrails` runtime and fails
   closed if selected but unavailable.
-- Actual NVIDIA NemoClaw / OpenShell / `nemohermes` is not installed or wired yet. It is the next
-  sandboxed Hermes runtime target, not the current guardrail adapter.
+- Actual NVIDIA NemoClaw / OpenShell / `nemohermes` is the optional sandboxed Hermes runtime path
+  when `HERMES_RUNTIME=nemoclaw` is selected and the local API call succeeds. It is separate from
+  the NeMo Guardrails adapter.
 - SQLite records evidence for planning, orchestration, finance proof, policy checks, ledger rows,
   agent outputs, and final reports.
 - Profit Outcome reports protected profit and blocked risk.
@@ -56,7 +57,7 @@ ScaleX UI
 - Real Stripe test-mode customer and finalized invoice records through orchestration for Goal 7.
 - Local policy engine for spend governance, with optional NeMo Guardrails adapter proof when
   configured.
-- No actual NemoClaw/OpenShell/`nemohermes` runtime integration yet.
+- Optional NemoHermes API runtime for sandboxed Hermes planning.
 - Deterministic agent outputs.
 - Northstar Dental Group / Client Implementation Launch sample with persisted run history and proof inspection.
 - Judge Demo Mode as the default safe local execution mode without real secrets.
@@ -88,12 +89,12 @@ Active connector concepts:
 - Hermes Planning
 - Stripe Finance Proof
 - Local Policy
+- NemoClaw / OpenShell Sandbox through optional NemoHermes API runtime
 - SQLite Evidence Ledger
 - Prototype Auth
 
 Planned connector concepts:
 
-- NemoClaw / OpenShell Sandbox target
 - Telegram Approval Gate
 - Slack / Email notifications or future approvals
 - CRM client context
@@ -111,10 +112,11 @@ ScaleX currently has two distinct guardrail/sandbox concepts:
 - NeMo Guardrails adapter: implemented through Python `nemoguardrails`, invoked through the
   configured `SCALEX_NEMO_PYTHON` subprocess, and runtime verified when selected. It may set
   `used_real_nemo=true` only when verification passes.
-- NVIDIA NemoClaw / OpenShell / `nemohermes`: target sandboxed-agent runtime for Hermes. It is not
-  installed and not wired into ScaleX.
+- NVIDIA NemoClaw / OpenShell / `nemohermes`: optional sandboxed-agent runtime for Hermes. The
+  local runtime was validated externally before Goal 8E, and ScaleX can route planning through
+  its local OpenAI-compatible API when selected.
 
-Recorded local prerequisite probe:
+Historical Goal 7.15A local prerequisite probe, superseded by later local runtime validation:
 
 - `nemoclaw`: missing.
 - `nemohermes`: missing.
@@ -125,9 +127,10 @@ Recorded local prerequisite probe:
 - `zstd`: present.
 - `strings`: present.
 
-Target future NemoClaw mode may use settings such as `HERMES_MODE=nemohermes_api` or
-`HERMES_RUNTIME=nemoclaw`, `HERMES_API_BASE_URL=http://127.0.0.1:8642/v1`, and
-`NEMOCLAW_SANDBOX_NAME=scalex-hermes`. If selected but unavailable, the runtime must fail closed.
+Implemented optional NemoHermes mode uses `HERMES_MODE=nemohermes_api` or
+`HERMES_RUNTIME=nemoclaw`, `HERMES_API_BASE_URL=http://127.0.0.1:8642/v1`,
+`HERMES_MODEL=hermes-agent`, and `NEMOCLAW_SANDBOX_NAME=scalex-hermes`. If selected but
+unavailable, the runtime fails closed.
 
 ## Current Template Boundary
 
@@ -146,9 +149,10 @@ home/config/auth: /home/ascabrya/.scalex-hermes/home
 skill source: hermes/skills/scalex-operator/SKILL.md
 ```
 
-Product mode calls real Hermes for planning. ScaleX code still executes Stripe, policy checks,
-ledger writes, local agent outputs, and reports. Hermes may propose payment steps but cannot
-execute payment actions directly.
+Product mode calls real Hermes for planning through either the isolated Hermes CLI path or the
+optional NemoHermes API path. ScaleX code still executes Stripe, policy checks, ledger writes,
+local agent outputs, and reports. Hermes may propose payment steps but cannot execute payment
+actions directly.
 
 ## Stripe Integration
 
@@ -173,10 +177,10 @@ Judge Demo Mode works without secrets by using deterministic local proof/test-do
 creates local SQLite records, populates Runs and Evidence Ledger, labels output as demo/sandbox
 proof, and avoids claiming real Stripe or real Hermes unless real adapters were used.
 
-Full Proof Mode uses real isolated Hermes and real Stripe test mode when local ignored `.env`
-values are safely configured. It must keep Stripe `livemode=false`, show hosted
-invoice URLs only when available, never label `paid=false` as paid, and surface visible
-integration errors when misconfigured.
+Full Proof Mode uses real isolated Hermes or selected NemoHermes API planning plus real Stripe
+test mode when local ignored `.env` values are safely configured. It must keep Stripe
+`livemode=false`, show hosted invoice URLs only when available, never label `paid=false` as paid,
+and surface visible integration errors when misconfigured.
 
 The visible execution path records run started, Hermes planning, Stripe finance proof,
 guardrail review, approved setup spend, blocked risk, work execution, evidence ledger, and profit
@@ -186,7 +190,7 @@ outcome proof before reporting completion or an actionable failure.
 
 The target final local recording mode should use:
 
-- real isolated Hermes planning;
+- real isolated Hermes planning or selected NemoHermes API planning;
 - real Stripe test-mode invoice creation/finalization;
 - local policy guardrails;
 - SQLite evidence ledger;
@@ -198,8 +202,8 @@ The target final local recording mode should use:
 
 Expected proof:
 
-- Hermes: `used_real_hermes=true` when real isolated Hermes ran, with planning source clearly
-  identifying real/isolated Hermes.
+- Hermes: `used_real_hermes=true` only when the selected real Hermes path succeeds, with planning
+  source clearly identifying `real_hermes` or `nemohermes_api`.
 - Stripe: `used_real_stripe=true`, `stripe_mode=stripe_test`, `livemode=false`, invoice ID,
   hosted invoice URL when Stripe provides it, and no paid claim unless `paid=true`.
 - Policy: `local_policy_active=true`, $1,150 approved setup spend, $3,200 Unapproved Data Broker
@@ -221,9 +225,9 @@ Invoice lifecycle:
 
 ## Future MCP Boundary
 
-MCP is a future access pattern only. ScaleX does not currently expose an MCP server, external
-agents cannot yet call ScaleX through MCP, and this architecture does not claim NemoClaw is
-wired.
+MCP is a future access pattern only. ScaleX does not currently expose an MCP server, and external
+agents cannot yet call ScaleX through MCP. The optional NemoHermes runtime adapter does not change
+that boundary.
 
 MCP is paused until actual NemoClaw preflight is complete, the Telegram approval gate is planned
 or implemented or explicitly deferred, the UI/product story is strong enough, and the

@@ -13,9 +13,9 @@ and evidence are governed.
 ScaleX demonstrates the governed operating loop: Hermes plans and routes the operation, Stripe
 provides finance proof in test mode, ScaleX enforces business rules, local policy checks spend and
 margin today, optional NeMo Guardrails runtime probing is available through `nemo_guardrails`
-mode, SQLite records evidence, and the final Profit Outcome reports protected profit and blocked
-risk. Local policy remains the deterministic business-rule gate. Actual NVIDIA NemoClaw /
-OpenShell / `nemohermes` is the next sandbox target and is not installed or wired yet.
+mode, optional NemoHermes API routing is available when selected and verified, SQLite records
+evidence, and the final Profit Outcome reports protected profit and blocked risk. Local policy
+remains the deterministic business-rule gate.
 
 The current proof is a functional live working product prototype, not a static mock. The operator
 logs in, creates or selects a saved local client operation, reviews money rules, starts a run for
@@ -30,8 +30,8 @@ marketplace or MCP platform.
 
 MCP is documented as a future access pattern only. ScaleX does not currently expose an MCP server,
 external agents cannot yet call ScaleX through MCP, and the submission should not imply otherwise.
-MCP is paused until NemoClaw preflight, the Telegram approval boundary, product-depth review, and
-guardrail/tool-boundary review are safe.
+MCP is paused until the Telegram approval boundary, product-depth review, and guardrail/tool
+boundary are safe.
 
 Current implementation note:
 
@@ -84,8 +84,8 @@ Full Proof Mode demo plan:
 - Do not use live money, real client email, patient data, or PHI.
 - Claim NeMo Guardrails adapter proof only when `nemo_guardrails` runtime verification passes;
   otherwise keep `used_real_nemo=false`.
-- Do not claim NemoClaw until actual NemoClaw/OpenShell/`nemohermes` is installed, onboarded,
-  connected, and verified.
+- Do not claim NemoHermes was used unless `HERMES_RUNTIME=nemoclaw` was selected and the local API
+  call succeeded.
 
 Invoice lifecycle:
 
@@ -106,7 +106,8 @@ Truthfulness boundaries:
 - NeMo Guardrails adapter proof is optional through `nemo_guardrails` mode only when
   `SCALEX_NEMO_PYTHON` runtime verification passes.
 - `nemo_compatible` is a labeled fallback and must not claim real NeMo.
-- Actual NemoClaw / OpenShell / `nemohermes` is planned and not implemented.
+- Optional NemoHermes API routing is implemented behind `HERMES_RUNTIME=nemoclaw`, not active by
+  default, and fail-closed when unavailable.
 - Telegram approval is planned and not implemented.
 - MCP is planned and not implemented yet.
 - Stripe payment status is labeled honestly; invoices are not called paid unless Stripe reports `paid=true`.

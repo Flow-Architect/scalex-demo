@@ -42,6 +42,7 @@ def generate_operating_plan(
             summary=plan["executive_summary"],
             error=None,
             hermes_metadata={
+                "runtime": settings.hermes_runtime,
                 "mode": settings.hermes_mode,
                 "used_real_hermes": False,
                 "provider": settings.hermes_provider,
@@ -49,6 +50,21 @@ def generate_operating_plan(
                 "error": None,
                 "failure_reason": None,
                 "duration_ms": 0,
+                "runtime_status": "pending",
+                "api_base_url": None,
+                "api_endpoint": None,
+                "sandbox_name": (
+                    settings.nemoclaw_sandbox_name
+                    if settings.hermes_runtime == "nemoclaw"
+                    else None
+                ),
+                "upstream_provider": (
+                    settings.nemoclaw_provider if settings.hermes_runtime == "nemoclaw" else None
+                ),
+                "upstream_model": (
+                    settings.nemoclaw_model if settings.hermes_runtime == "nemoclaw" else None
+                ),
+                "error_class": None,
                 "command_safety_summary": (
                     "Demo proof mode; deterministic local planning output was used. "
                     "No Hermes subprocess was invoked."
@@ -66,7 +82,7 @@ def generate_operating_plan(
         return _planning_payload(
             settings=settings,
             status="failed",
-            source="real_hermes",
+            source=_source_for_result(first_result),
             prompt_text=prompt,
             result_json=None,
             summary=None,
@@ -79,7 +95,7 @@ def generate_operating_plan(
         return _planning_payload(
             settings=settings,
             status="completed",
-            source="real_hermes",
+            source=_source_for_result(first_result),
             prompt_text=prompt,
             result_json=parsed_plan,
             summary=str(parsed_plan["executive_summary"]),
@@ -95,7 +111,7 @@ def generate_operating_plan(
         return _planning_payload(
             settings=settings,
             status="failed",
-            source="real_hermes",
+            source=_source_for_result(repair_result),
             prompt_text=prompt,
             result_json=None,
             summary=None,
@@ -112,7 +128,7 @@ def generate_operating_plan(
         return _planning_payload(
             settings=settings,
             status="completed",
-            source="real_hermes",
+            source=_source_for_result(repair_result),
             prompt_text=prompt,
             result_json=repaired_plan,
             summary=str(repaired_plan["executive_summary"]),
@@ -127,7 +143,7 @@ def generate_operating_plan(
     return _planning_payload(
         settings=settings,
         status="failed",
-        source="real_hermes",
+        source=_source_for_result(repair_result),
         prompt_text=prompt,
         result_json=None,
         summary=None,
@@ -393,9 +409,9 @@ def _planning_payload(
     hermes_metadata: dict[str, Any],
 ) -> dict[str, Any]:
     return {
-        "mode": settings.hermes_mode,
-        "provider": settings.hermes_provider,
-        "model": settings.hermes_model,
+        "mode": str(hermes_metadata.get("mode") or settings.hermes_mode),
+        "provider": str(hermes_metadata.get("provider") or settings.hermes_provider),
+        "model": str(hermes_metadata.get("model") or settings.hermes_model),
         "source": source,
         "status": status,
         "prompt_version": PROMPT_VERSION,
@@ -405,6 +421,10 @@ def _planning_payload(
         "error": sanitize_text(error) if error else None,
         "hermes_metadata": hermes_metadata,
     }
+
+
+def _source_for_result(result: Any) -> str:
+    return "nemohermes_api" if getattr(result, "runtime", "") == "nemoclaw" else "real_hermes"
 
 
 def _toolsets(settings: Settings) -> list[str]:

@@ -97,16 +97,16 @@ Full Proof Mode:
 
 Truthfulness boundaries remain: Northstar is synthetic; no patient data; no PHI; no HIPAA claim;
 local policy active now; NeMo Guardrails adapter proof is optional through `nemo_guardrails` only
-when runtime verification passes; actual NemoClaw / OpenShell / `nemohermes` is not installed or
-wired; Telegram approval is planned and not implemented; no live-money support; no production auth
-claim.
+when runtime verification passes; NemoHermes API routing is optional through
+`HERMES_RUNTIME=nemoclaw` only when the selected local runtime call succeeds; Telegram approval is
+planned and not implemented; no live-money support; no production auth claim.
 
 ## Full Proof Mode Real-Tool Demo Plan
 
 The target final local recording mode is Full Proof Mode when safe ignored local credentials are
 configured:
 
-- real isolated Hermes planning;
+- real isolated Hermes planning or selected NemoHermes API planning;
 - real Stripe test-mode invoice creation/finalization;
 - local policy guardrails;
 - SQLite evidence ledger;
@@ -115,8 +115,8 @@ configured:
 - no real client email;
 - no patient data and no PHI;
 - NeMo Guardrails adapter claim only when `nemo_guardrails` runtime verification has passed;
-- no NemoClaw claim until actual NemoClaw/OpenShell/`nemohermes` is installed, onboarded,
-  connected, and verified.
+- NemoHermes claim only when `HERMES_RUNTIME=nemoclaw` was selected and the local API call
+  succeeded.
 
 What to say:
 
@@ -124,11 +124,12 @@ What to say:
 > planning and real Stripe test-mode invoice creation. Both modes enforce local policy, block
 > risky spend, record evidence, and report protected profit. The configured Full Proof validation
 > also verified the NeMo Guardrails adapter runtime while local policy remained the deterministic
-> business-rule gate. Actual NemoClaw is not wired yet.
+> business-rule gate. Optional NemoHermes API routing is available when selected and verified.
 
-Hermes proof should show `used_real_hermes=true` only when real isolated Hermes ran. Stripe proof
-should show `used_real_stripe=true`, `stripe_mode=stripe_test`, `livemode=false`, invoice ID,
-hosted invoice URL when Stripe provides it, and no paid claim unless Stripe reports `paid=true`.
+Hermes proof should show `used_real_hermes=true` only when the selected real Hermes path ran
+successfully. Stripe proof should show `used_real_stripe=true`, `stripe_mode=stripe_test`,
+`livemode=false`, invoice ID, hosted invoice URL when Stripe provides it, and no paid claim unless
+Stripe reports `paid=true`.
 
 Goal 7.14B Full Proof local validation passed with synthetic Northstar data only:
 `used_real_hermes=true`, `used_real_stripe=true`, `stripe_mode=stripe_test`, `livemode=false`,

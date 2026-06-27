@@ -20,6 +20,14 @@ export interface ExecutionSummary {
   guardrail_evaluation_stages: GuardrailStageSummary[];
   used_real_hermes: boolean;
   used_real_stripe: boolean;
+  hermes_runtime: string;
+  hermes_runtime_status: string;
+  hermes_api_base_url: string | null;
+  hermes_api_endpoint: string | null;
+  hermes_sandbox_name: string | null;
+  hermes_upstream_provider: string | null;
+  hermes_upstream_model: string | null;
+  hermes_error_class: string | null;
   planning_source: string | null;
   stripe_mode: string | null;
   truthfulness_note: string;
@@ -289,6 +297,7 @@ export interface OrchestrationCall {
 }
 
 export interface HermesMetadata {
+  runtime?: string;
   mode: string;
   used_real_hermes: boolean;
   provider: string | null;
@@ -298,6 +307,13 @@ export interface HermesMetadata {
   error: string | null;
   failure_reason: string | null;
   duration_ms: number;
+  runtime_status?: string;
+  api_base_url?: string | null;
+  api_endpoint?: string | null;
+  sandbox_name?: string | null;
+  upstream_provider?: string | null;
+  upstream_model?: string | null;
+  error_class?: string | null;
   command_safety_summary: string;
   retry_count?: number;
   ok?: boolean;

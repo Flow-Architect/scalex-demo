@@ -3,12 +3,17 @@
 from __future__ import annotations
 
 from dataclasses import asdict, dataclass
+import json
 import os
 from pathlib import Path
 import re
 import shutil
+import socket
 import subprocess
 import time
+from urllib.error import HTTPError, URLError
+from urllib.parse import urljoin, urlparse
+from urllib.request import Request, urlopen
 
 from ..config import REPO_ROOT, Settings, get_settings, resolve_repo_path
 
@@ -21,9 +26,17 @@ COMMAND_SAFETY_SUMMARY = (
     "sanitized, and truncated."
 )
 
+NEMOHERMES_SAFETY_SUMMARY = (
+    "NemoHermes is invoked through a local OpenAI-compatible chat/completions API; "
+    "only sanitized endpoint host/path, runtime, model, sandbox, provider, upstream model, "
+    "status, duration, and error class are recorded. Credential headers and raw provider "
+    "payloads are never recorded."
+)
+
 
 @dataclass(frozen=True)
 class HermesResult:
+    runtime: str
     mode: str
     used_real_hermes: bool
     provider: str
@@ -37,6 +50,13 @@ class HermesResult:
     failure_reason: str | None
     duration_ms: int
     command_safety_summary: str
+    runtime_status: str = "pending"
+    api_base_url: str | None = None
+    api_endpoint: str | None = None
+    sandbox_name: str | None = None
+    upstream_provider: str | None = None
+    upstream_model: str | None = None
+    error_class: str | None = None
 
     @property
     def ok(self) -> bool:
@@ -68,6 +88,9 @@ def run_hermes_oneshot(prompt: str, settings: Settings | None = None) -> HermesR
                 "HERMES_TEST_MODE=true; the Hermes subprocess was intentionally not invoked."
             ),
         )
+
+    if settings.hermes_runtime == "nemoclaw":
+        return _run_nemohermes_chat_completion(prompt, settings, started_at)
 
     validation_error = _validate_product_settings(settings)
     if validation_error is not None:
@@ -169,6 +192,166 @@ def run_hermes_oneshot(prompt: str, settings: Settings | None = None) -> HermesR
     )
 
 
+def _run_nemohermes_chat_completion(
+    prompt: str,
+    settings: Settings,
+    started_at: float,
+) -> HermesResult:
+    endpoint, endpoint_error = _nemohermes_endpoint(settings)
+    if endpoint_error is not None:
+        return _nemohermes_result(
+            settings=settings,
+            started_at=started_at,
+            used_real_hermes=False,
+            stdout="",
+            error=endpoint_error,
+            failure_reason=endpoint_error,
+            runtime_status="fail_closed",
+            error_class="configuration_error",
+        )
+
+    request_payload = {
+        "model": settings.hermes_model,
+        "messages": [{"role": "user", "content": prompt}],
+        "temperature": 0,
+        "stream": False,
+    }
+    body = json.dumps(request_payload).encode("utf-8")
+    headers = {
+        "Authorization": f"Bearer {settings.hermes_api_key or 'local'}",
+        "Content-Type": "application/json",
+    }
+    request = Request(endpoint, data=body, headers=headers, method="POST")
+
+    try:
+        with urlopen(request, timeout=max(settings.hermes_timeout_seconds, 1)) as response:
+            status_code = int(getattr(response, "status", 200) or 200)
+            response_body = response.read()
+    except HTTPError as exc:
+        failure = f"NemoHermes API HTTP error: HTTP {exc.code}"
+        return _nemohermes_result(
+            settings=settings,
+            started_at=started_at,
+            used_real_hermes=False,
+            stdout="",
+            error=failure,
+            failure_reason=failure,
+            runtime_status="fail_closed",
+            error_class="http_error",
+            returncode=exc.code,
+        )
+    except (TimeoutError, socket.timeout) as exc:
+        failure = f"NemoHermes API timed out after {settings.hermes_timeout_seconds} seconds."
+        return _nemohermes_result(
+            settings=settings,
+            started_at=started_at,
+            used_real_hermes=False,
+            stdout="",
+            error=failure,
+            failure_reason=failure,
+            runtime_status="fail_closed",
+            error_class=type(exc).__name__,
+        )
+    except URLError as exc:
+        reason = sanitize_text(getattr(exc, "reason", exc))
+        failure = f"NemoHermes API unavailable: {reason}"
+        return _nemohermes_result(
+            settings=settings,
+            started_at=started_at,
+            used_real_hermes=False,
+            stdout="",
+            error=failure,
+            failure_reason=failure,
+            runtime_status="fail_closed",
+            error_class=type(exc).__name__,
+        )
+    except OSError as exc:
+        failure = f"NemoHermes API could not be reached: {sanitize_text(str(exc))}"
+        return _nemohermes_result(
+            settings=settings,
+            started_at=started_at,
+            used_real_hermes=False,
+            stdout="",
+            error=failure,
+            failure_reason=failure,
+            runtime_status="fail_closed",
+            error_class=type(exc).__name__,
+        )
+
+    if status_code < 200 or status_code >= 300:
+        failure = f"NemoHermes API HTTP error: HTTP {status_code}"
+        return _nemohermes_result(
+            settings=settings,
+            started_at=started_at,
+            used_real_hermes=False,
+            stdout="",
+            error=failure,
+            failure_reason=failure,
+            runtime_status="fail_closed",
+            error_class="http_error",
+            returncode=status_code,
+        )
+
+    content, parse_error = _extract_nemohermes_message_content(response_body)
+    if parse_error is not None:
+        return _nemohermes_result(
+            settings=settings,
+            started_at=started_at,
+            used_real_hermes=False,
+            stdout="",
+            error=parse_error,
+            failure_reason=parse_error,
+            runtime_status="fail_closed",
+            error_class="malformed_response",
+            returncode=status_code,
+        )
+
+    return _nemohermes_result(
+        settings=settings,
+        started_at=started_at,
+        used_real_hermes=True,
+        stdout=_clean_output(content or "", settings),
+        error=None,
+        failure_reason=None,
+        runtime_status="available",
+        error_class=None,
+        returncode=0,
+    )
+
+
+def _nemohermes_endpoint(settings: Settings) -> tuple[str, str | None]:
+    base_url = settings.hermes_api_base_url.strip()
+    if not base_url:
+        return "", "HERMES_API_BASE_URL is required when HERMES_RUNTIME=nemoclaw."
+    parsed = urlparse(base_url)
+    if parsed.scheme not in {"http", "https"} or not parsed.netloc:
+        return "", "HERMES_API_BASE_URL must be an http(s) URL."
+    endpoint = urljoin(base_url.rstrip("/") + "/", "chat/completions")
+    return endpoint, None
+
+
+def _extract_nemohermes_message_content(response_body: bytes) -> tuple[str | None, str | None]:
+    try:
+        parsed = json.loads(response_body.decode("utf-8"))
+    except (UnicodeDecodeError, json.JSONDecodeError):
+        return None, "NemoHermes API returned malformed JSON."
+    if not isinstance(parsed, dict):
+        return None, "NemoHermes API response must be a JSON object."
+    choices = parsed.get("choices")
+    if not isinstance(choices, list) or not choices:
+        return None, "NemoHermes API response did not include choices."
+    first_choice = choices[0]
+    if not isinstance(first_choice, dict):
+        return None, "NemoHermes API first choice was malformed."
+    message = first_choice.get("message")
+    if not isinstance(message, dict):
+        return None, "NemoHermes API first choice did not include a message."
+    content = message.get("content")
+    if not isinstance(content, str) or not content.strip():
+        return None, "NemoHermes API message content was empty."
+    return content, None
+
+
 def sanitize_text(value: object) -> str:
     text = "" if value is None else str(value)
     secret_patterns = [
@@ -176,8 +359,13 @@ def sanitize_text(value: object) -> str:
         (r"sk_test_[A-Za-z0-9_\-]+", "sk_test_REDACTED"),
         (r"sk-proj-[A-Za-z0-9_\-]+", "sk-proj_REDACTED"),
         (r"whsec_[A-Za-z0-9_\-]+", "whsec_REDACTED"),
+        (r"nvapi-[A-Za-z0-9_\-]+", "nvapi_REDACTED"),
         (r"(OPENAI_API_KEY=)[^\s]+", r"\1REDACTED"),
         (r"(HERMES_API_KEY=)[^\s]+", r"\1REDACTED"),
+        (r"(NVIDIA_API_KEY=)[^\s]+", r"\1REDACTED"),
+        (r"(OPENROUTER_API_KEY=)[^\s]+", r"\1REDACTED"),
+        (r"(COMPATIBLE_API_KEY=)[^\s]+", r"\1REDACTED"),
+        (r"(Authorization:\s*Bearer\s+)[^\s]+", r"\1REDACTED"),
     ]
     sanitized = text
     for pattern, replacement in secret_patterns:
@@ -367,6 +555,7 @@ def _result(
     command_safety_summary: str = COMMAND_SAFETY_SUMMARY,
 ) -> HermesResult:
     return HermesResult(
+        runtime=settings.hermes_runtime,
         mode=settings.hermes_mode,
         used_real_hermes=used_real_hermes,
         provider=settings.hermes_provider,
@@ -380,4 +569,58 @@ def _result(
         failure_reason=failure_reason,
         duration_ms=round((time.monotonic() - started_at) * 1000),
         command_safety_summary=command_safety_summary,
+        runtime_status="available" if used_real_hermes and error is None else "unavailable" if error else "pending",
+        api_base_url=None,
+        api_endpoint=None,
+        sandbox_name=None,
+        upstream_provider=None,
+        upstream_model=None,
+        error_class="hermes_cli_error" if error else None,
     )
+
+
+def _nemohermes_result(
+    *,
+    settings: Settings,
+    started_at: float,
+    used_real_hermes: bool,
+    stdout: str,
+    error: str | None,
+    failure_reason: str | None,
+    runtime_status: str,
+    error_class: str | None,
+    returncode: int | None = None,
+) -> HermesResult:
+    endpoint, _endpoint_error = _nemohermes_endpoint(settings)
+    return HermesResult(
+        runtime=settings.hermes_runtime,
+        mode=settings.hermes_mode if settings.hermes_mode != "isolated_cli" else "nemohermes_api",
+        used_real_hermes=used_real_hermes,
+        provider=settings.nemoclaw_provider,
+        model=settings.hermes_model,
+        skill_name=None,
+        toolsets_used=[],
+        stdout=stdout,
+        stderr="",
+        returncode=returncode,
+        error=sanitize_text(error) if error else None,
+        failure_reason=sanitize_text(failure_reason) if failure_reason else None,
+        duration_ms=round((time.monotonic() - started_at) * 1000),
+        command_safety_summary=NEMOHERMES_SAFETY_SUMMARY,
+        runtime_status=runtime_status,
+        api_base_url=_safe_endpoint_label(settings.hermes_api_base_url),
+        api_endpoint=_safe_endpoint_label(endpoint) if endpoint else None,
+        sandbox_name=settings.nemoclaw_sandbox_name or None,
+        upstream_provider=settings.nemoclaw_provider or None,
+        upstream_model=settings.nemoclaw_model or None,
+        error_class=error_class,
+    )
+
+
+def _safe_endpoint_label(value: str) -> str | None:
+    if not value:
+        return None
+    parsed = urlparse(value)
+    if not parsed.netloc:
+        return None
+    return f"{parsed.netloc}{parsed.path}".rstrip("/")

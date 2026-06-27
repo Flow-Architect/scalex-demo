@@ -464,6 +464,11 @@ def test_demo_run_records_planning_and_orchestration_calls(tmp_path, monkeypatch
     assert planning_run["source"] == "deterministic_demo"
     assert planning_run["status"] == "completed"
     assert planning_run["result_json"]["proposed_tool_sequence"]
+    assert state["execution"]["used_real_hermes"] is False
+    assert state["execution"]["hermes_runtime"] == "isolated_cli"
+    assert state["execution"]["planning_label"] == "Deterministic Hermes plan"
+    assert state["hermes"]["runtime"] == "isolated_cli"
+    assert state["hermes"]["runtime_status"] == "pending"
     assert state["hermes"]["skill_name"] == "scalex-operator"
     assert state["hermes"]["toolsets_used"] == ["skills"]
 

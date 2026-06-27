@@ -25,6 +25,12 @@ class Settings:
     hermes_skill_name: str
     hermes_skill_source_path: str
     hermes_toolsets: str
+    hermes_runtime: str = "isolated_cli"
+    hermes_api_base_url: str = "http://127.0.0.1:8642/v1"
+    hermes_api_key: str = "local"
+    nemoclaw_sandbox_name: str = "scalex-hermes"
+    nemoclaw_provider: str = "nvidia-prod"
+    nemoclaw_model: str = "nvidia/nemotron-3-ultra-550b-a55b"
     guardrail_mode: str = "local_policy"
     nemo_python_path: str = ""
     nemo_config_path: str = "./guardrails/scalex"
@@ -92,6 +98,14 @@ def get_settings() -> Settings:
             "./hermes/skills/scalex-operator",
         ),
         hermes_toolsets=os.getenv("HERMES_TOOLSETS", "skills"),
+        hermes_runtime=normalized_hermes_runtime(
+            os.getenv("HERMES_RUNTIME", os.getenv("HERMES_MODE", "isolated_cli"))
+        ),
+        hermes_api_base_url=os.getenv("HERMES_API_BASE_URL", "http://127.0.0.1:8642/v1"),
+        hermes_api_key=os.getenv("HERMES_API_KEY", "local"),
+        nemoclaw_sandbox_name=os.getenv("NEMOCLAW_SANDBOX_NAME", "scalex-hermes"),
+        nemoclaw_provider=os.getenv("NEMOCLAW_PROVIDER", "nvidia-prod"),
+        nemoclaw_model=os.getenv("NEMOCLAW_MODEL", "nvidia/nemotron-3-ultra-550b-a55b"),
         stripe_mode=os.getenv("STRIPE_MODE", "test"),
         stripe_secret_key=os.getenv("STRIPE_SECRET_KEY", ""),
         stripe_test_mode=_bool_env("STRIPE_TEST_MODE", True),
@@ -155,6 +169,23 @@ def normalized_guardrail_mode(value: str | None) -> str:
         raise ValueError(
             "SCALEX_GUARDRAIL_MODE must be local_policy, nemo_guardrails, or nemo_compatible."
         )
+    return normalized
+
+
+def normalized_hermes_runtime(value: str | None) -> str:
+    normalized = (value or "isolated_cli").strip().lower().replace("-", "_")
+    aliases = {
+        "cli": "isolated_cli",
+        "isolated": "isolated_cli",
+        "hermes_cli": "isolated_cli",
+        "nemo": "nemoclaw",
+        "nemo_claw": "nemoclaw",
+        "nemohermes": "nemoclaw",
+        "nemohermes_api": "nemoclaw",
+    }
+    normalized = aliases.get(normalized, normalized)
+    if normalized not in {"isolated_cli", "nemoclaw"}:
+        raise ValueError("HERMES_RUNTIME must be isolated_cli or nemoclaw.")
     return normalized
 
 

@@ -47,9 +47,9 @@
   configured external `SCALEX_NEMO_PYTHON` runtime verifies successfully.
 - The NeMo Guardrails adapter is implemented through Python `nemoguardrails`; it is not the same
   as actual NVIDIA NemoClaw.
-- Actual NVIDIA NemoClaw / OpenShell / `nemohermes` is the target sandboxed Hermes runtime, is not
-  installed or wired yet, and must not be claimed active until installed, onboarded, connected, and
-  verified.
+- Actual NVIDIA NemoClaw / OpenShell / `nemohermes` is the optional sandboxed Hermes runtime path
+  when `HERMES_RUNTIME=nemoclaw` is selected and the local API call succeeds. It remains separate
+  from the NeMo Guardrails adapter.
 - Judge Demo Mode defaults to `local_policy` and must not require NeMo or secrets.
 - `nemo_compatible` is a labeled temporary fallback only and must not claim real NeMo.
 - SQLite is the evidence ledger.
@@ -95,8 +95,8 @@
   invoice proof in Full Proof Mode. Hermes does not directly create, send, or charge invoices.
 - No mode should claim a real client was emailed unless an explicit send step exists and is
   verified.
-- Goal 8 is the governed autonomy layer covering the NeMo Guardrails adapter and the future
-  NemoClaw sandbox target.
+- Goal 8 is the governed autonomy layer covering the NeMo Guardrails adapter and the optional
+  NemoClaw/NemoHermes sandbox runtime path.
 - Goal 8A preflight is complete; local `nemoguardrails` availability was verified outside the repo.
 - Goal 8B adds a NeMo-Guardrails-ready adapter boundary with modes `local_policy`,
   `nemo_guardrails`, and `nemo_compatible`.
@@ -107,11 +107,16 @@
 - The local policy engine remains the deterministic business-rule gate for Judge Demo Mode and
   tests, including spend, margin, vendor, and payment-before-spend decisions.
 - ScaleX must not claim the NeMo Guardrails adapter is active unless runtime verification passes.
-- ScaleX must not claim real NemoClaw integration.
-- Goal 7.15A recorded that `nemoclaw`, `nemohermes`, `openshell`, and Docker are missing/not
-  usable locally, while `node` v22.22.2, `npm` 10.9.7, `zstd`, and `strings` are present.
-- Goal 8D must preflight actual NemoClaw / NemoHermes before any MCP implementation.
-- Goal 8E may wire ScaleX to NemoClaw Hermes runtime only if Goal 8D proves it is safe.
+- ScaleX must not claim NemoClaw/NemoHermes was used for a run unless the selected local API call
+  succeeded.
+- Goal 7.15A recorded that `nemoclaw`, `nemohermes`, `openshell`, and Docker were missing/not
+  usable locally at that time, while `node` v22.22.2, `npm` 10.9.7, `zstd`, and `strings` were
+  present.
+- Before Goal 8E, the local NemoClaw/NemoHermes runtime was validated externally with sandbox
+  `scalex-hermes`, local API `127.0.0.1:8642/v1`, model `hermes-agent`, provider `nvidia-prod`,
+  and upstream model `nvidia/nemotron-3-ultra-550b-a55b`.
+- Goal 8E wires ScaleX to the already validated local NemoHermes API runtime without modifying
+  NemoClaw, Docker, provider credentials, or secrets.
 - Goal 8F may implement Telegram approval as a human approval gate; approval must not bypass
   local policy, NeMo Guardrails, NemoClaw boundaries, or evidence recording.
 - No secrets are committed.
