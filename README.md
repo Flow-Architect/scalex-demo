@@ -13,8 +13,9 @@ but enterprises cannot safely let an agent execute client operations unless mone
 and evidence are governed.
 
 ScaleX solves that by letting Hermes plan and route the operation, Stripe provide finance proof,
-ScaleX enforce business rules, local policy check spend and margin today, real NVIDIA NeMo
-Guardrails remain the Goal 8 governed autonomy target, and SQLite record evidence.
+ScaleX enforce business rules, local policy check spend and margin today, the NeMo Guardrails
+adapter provide optional runtime-verified guardrail proof, actual NemoClaw/OpenShell remain the
+next sandbox target, and SQLite record evidence.
 
 ## Current Implemented Sample
 
@@ -58,7 +59,8 @@ Client operation intake
 -> Stripe provides finance proof through test invoice/payment state
 -> ScaleX executes and enforces business rules
 -> local policy active now checks spend, margin, vendors, and payment-before-spend
--> real NVIDIA NeMo Guardrails targeted in Goal 8
+-> NeMo Guardrails adapter available when runtime verified
+-> actual NVIDIA NemoClaw / OpenShell / nemohermes targeted next, not wired yet
 -> SQLite records evidence
 -> Profit Outcome reports protected profit and blocked risk
 ```
@@ -75,8 +77,11 @@ must run in the appropriate environment.
 - Stripe test doubles are for automated tests, CI, local offline development, or explicitly labeled diagnostics.
 - Product-mode integration failures must surface visible errors.
 - Policy enforcement currently runs through a local policy engine.
-- Guardrail mode defaults to `local_policy`; optional `nemo_guardrails` mode can verify a real
-  NeMo runtime through `SCALEX_NEMO_PYTHON` and fails closed if selected but unavailable.
+- Guardrail mode defaults to `local_policy`; optional `nemo_guardrails` mode can verify the
+  Python `nemoguardrails` runtime through `SCALEX_NEMO_PYTHON` and fails closed if selected but
+  unavailable.
+- Actual NVIDIA NemoClaw / OpenShell / `nemohermes` is not installed or wired yet.
+- Telegram approval is planned and not implemented yet.
 - Hermes planning uses the ScaleX-isolated laptop install, not production Hermes.
 - Stripe test invoices are labeled honestly as open/unpaid unless Stripe reports `paid=true`.
 
@@ -99,6 +104,8 @@ Implemented today:
   historical run inspection.
 - Judge Demo Mode as the default safe local execution path without secrets.
 - Full Proof Mode for safely configured real isolated Hermes plus real Stripe test mode.
+- Optional NeMo Guardrails adapter proof through `nemoguardrails` runtime verification.
+- No actual NemoClaw/OpenShell/`nemohermes` integration yet.
 
 ## Connection Hub And MCP Plan
 
@@ -117,16 +124,19 @@ Active connector concepts documented today:
 
 Planned connector concepts:
 
-- NeMo Guardrails
-- Slack / Email approvals
+- NemoClaw / OpenShell Sandbox target
+- Telegram Approval Gate
+- Slack / Email notifications or future approvals
 - CRM client context
 - Docs / Notion workspace
 - Calendar kickoff scheduling
+- MCP local prototype boundary
 
 MCP is documented as a future access pattern only. ScaleX does not currently expose an MCP server,
-and external agents cannot yet call ScaleX through MCP. A future ScaleX MCP server may expose safe
-tools/resources/prompts only after the guardrail and tool boundary is clear, without exposing
-secrets, bypassing policy, or enabling live-money actions.
+and external agents cannot yet call ScaleX through MCP. MCP is paused until the NemoClaw preflight,
+Telegram approval boundary, product-depth pass, and guardrail/tool-boundary review are safe. A
+future ScaleX MCP server may expose safe local read-only tools/resources/prompts first, without
+exposing secrets, bypassing policy or approval, or enabling live-money actions.
 
 ## Local Browser Demo
 
@@ -272,9 +282,10 @@ These commands must not use live Stripe mode or production service credentials.
 ## What Is Real, Test, And Future
 
 - Real now: isolated Hermes planning through `scalex-operator`, real Stripe test-mode invoice
-  creation/finalization, SQLite evidence ledger, local policy enforcement, optional real-NeMo
-  runtime probing through `SCALEX_NEMO_PYTHON`, local prototype auth, SQLite-backed local/sample
-  workflows, selected-workflow runs, persisted run history, and browser product flow.
+  creation/finalization, SQLite evidence ledger, local policy enforcement, optional NeMo
+  Guardrails adapter runtime probing through `SCALEX_NEMO_PYTHON`, local prototype auth,
+  SQLite-backed local/sample workflows, selected-workflow runs, persisted run history, and browser
+  product flow.
 - Judge Demo Mode: deterministic Hermes planning and Stripe test-double/sandbox proof for hosted
   judge-safe demos, automated tests, CI, offline development, or explicitly labeled diagnostics.
 - Implemented now for Goals 8B/8C: guardrail adapter modes `local_policy`, `nemo_guardrails`, and
@@ -284,8 +295,11 @@ These commands must not use live Stripe mode or production service credentials.
   guardrails, evidence duties, blocked policy actions, missing config, Full Proof capability, and
   planned-only connector boundaries.
 - Verified locally in Goal 7.14B: Full Proof Mode completed with real isolated Hermes, real
-  Stripe test-mode invoice proof, real NeMo runtime verification, local policy active,
-  `livemode=false`, and unpaid Stripe state preserved.
-- Planned next: guardrail proof UI polish if a final demo pass exposes a gap; otherwise an MCP
-  server prototype only after the guardrail/tool boundary is clear.
+  Stripe test-mode invoice proof, NeMo Guardrails runtime verification through
+  `nemoguardrails`, local policy active, `livemode=false`, and unpaid Stripe state preserved.
+- Not installed/wired today: actual NVIDIA NemoClaw / OpenShell / `nemohermes`, Telegram approval,
+  MCP server, live money, real client email, real client data, and PHI handling.
+- Planned next: actual NemoClaw / NemoHermes preflight, then conditional NemoClaw runtime wiring,
+  then Telegram Human Approval Gate, then Product Depth + Demo-Winning UI Pass, then MCP only after
+  the boundaries are safe.
 - Future: Goal 9 final submission prep and Verified Live Mode remain later work.

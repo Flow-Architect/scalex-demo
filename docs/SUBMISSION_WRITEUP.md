@@ -12,16 +12,17 @@ and evidence are governed.
 
 ScaleX demonstrates the governed operating loop: Hermes plans and routes the operation, Stripe
 provides finance proof in test mode, ScaleX enforces business rules, local policy checks spend and
-margin today, optional real NVIDIA NeMo Guardrails runtime probing is available through
-`nemo_guardrails` mode, SQLite records evidence, and the final Profit Outcome reports protected
-profit and blocked risk. Local policy remains the deterministic business-rule gate.
+margin today, optional NeMo Guardrails runtime probing is available through `nemo_guardrails`
+mode, SQLite records evidence, and the final Profit Outcome reports protected profit and blocked
+risk. Local policy remains the deterministic business-rule gate. Actual NVIDIA NemoClaw /
+OpenShell / `nemohermes` is the next sandbox target and is not installed or wired yet.
 
 The current proof is a functional live working product prototype, not a static mock. The operator
 logs in, creates or selects a saved local client operation, reviews money rules, starts a run for
 the active operation, watches the connected proof graph move, clicks proof nodes, reviews blocked
 risk, inspects persisted run history, and finishes with an audited profit outcome.
 
-ScaleX Connection Hub is documented as a planned internal product layer that will show which
+ScaleX Connection Hub is an implemented internal product layer that shows which
 systems the ClientOps Autopilot is allowed to use, what execution mode each connector is in, what
 guardrails apply, which actions are blocked, which configuration is missing, and what evidence was
 recorded. Connection Hub supports the ClientOps Autopilot story; it is not a generic connector
@@ -29,6 +30,8 @@ marketplace or MCP platform.
 
 MCP is documented as a future access pattern only. ScaleX does not currently expose an MCP server,
 external agents cannot yet call ScaleX through MCP, and the submission should not imply otherwise.
+MCP is paused until NemoClaw preflight, the Telegram approval boundary, product-depth review, and
+guardrail/tool-boundary review are safe.
 
 Current implementation note:
 
@@ -52,19 +55,23 @@ Demo-readiness note:
 - Goal 7.14B passed Full Proof local validation with synthetic Northstar data only: real isolated
   Hermes ran, real Stripe test-mode invoice proof ran with `livemode=false`, Stripe invoice ID and
   hosted invoice URL were present, `paid=false` remained unpaid, no real client email was used,
-  real NeMo runtime verification passed with `adapter_status=runtime_verified`, and local policy
-  remained active.
+  NeMo Guardrails adapter runtime verification passed with `adapter_status=runtime_verified`, and
+  local policy remained active. This did not verify actual NemoClaw.
 - Goal 7.13A documents Connection Hub, the future MCP-shaped boundary, the Full Proof Mode
-  real-tool demo plan, and the real NeMo requirement only. It does not implement MCP, NeMo, new UI,
-  or backend behavior.
+  real-tool demo plan, and the NeMo Guardrails adapter requirement only. It does not implement MCP, actual
+  NemoClaw, new UI, or backend behavior.
+- Goal 7.15A corrected the docs so NeMo Guardrails adapter proof is not confused with actual
+  NemoClaw. It also added the future Telegram approval-gate plan and Product Depth + Demo-Winning
+  UI plan.
 
 Demo story:
 
 Northstar Dental Group is a multi-location client that purchased an implementation package.
 ScaleX launches the client operation, confirms revenue through Stripe test invoice proof, lets
 Hermes plan onboarding and delivery, checks spend and vendor actions through local policy now and
-targets real NVIDIA NeMo Guardrails later, approves safe setup spend, blocks risky enrichment
-spend, coordinates work units, records evidence, and reports protected profit and launch status.
+the optional NeMo Guardrails adapter when configured, targets actual NemoClaw/OpenShell sandboxing
+later, approves safe setup spend, blocks risky enrichment spend, coordinates work units, records
+evidence, and reports protected profit and launch status.
 
 Full Proof Mode demo plan:
 
@@ -75,8 +82,10 @@ Full Proof Mode demo plan:
   call `paid=false` paid.
 - Use synthetic Northstar data only.
 - Do not use live money, real client email, patient data, or PHI.
-- Claim real NeMo only when `nemo_guardrails` runtime verification passes; otherwise keep
-  `used_real_nemo=false`.
+- Claim NeMo Guardrails adapter proof only when `nemo_guardrails` runtime verification passes;
+  otherwise keep `used_real_nemo=false`.
+- Do not claim NemoClaw until actual NemoClaw/OpenShell/`nemohermes` is installed, onboarded,
+  connected, and verified.
 
 Invoice lifecycle:
 
@@ -94,9 +103,11 @@ Truthfulness boundaries:
 - The login gate is local prototype auth, not production enterprise auth.
 - Workflow management is local/sample workflow management, not full multi-tenant SaaS.
 - The active spend authority is the local policy engine.
-- Real NVIDIA NeMo Guardrails is optional through `nemo_guardrails` mode only when
+- NeMo Guardrails adapter proof is optional through `nemo_guardrails` mode only when
   `SCALEX_NEMO_PYTHON` runtime verification passes.
 - `nemo_compatible` is a labeled fallback and must not claim real NeMo.
+- Actual NemoClaw / OpenShell / `nemohermes` is planned and not implemented.
+- Telegram approval is planned and not implemented.
 - MCP is planned and not implemented yet.
 - Stripe payment status is labeled honestly; invoices are not called paid unless Stripe reports `paid=true`.
 - Test doubles stay clearly labeled and are not product-mode integrations.

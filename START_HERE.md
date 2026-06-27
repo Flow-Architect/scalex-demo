@@ -66,16 +66,16 @@ Client operation intake
 -> ScaleX Connection Hub declares allowed systems, modes, guardrails, and evidence duties
 -> Stripe test invoice/payment-state proof
 -> ScaleX business-rule enforcement
--> local policy guardrails now / real NVIDIA NeMo Guardrails targeted in Goal 8
+-> local policy guardrails now / NeMo Guardrails adapter verified when configured
+-> actual NVIDIA NemoClaw / OpenShell / nemohermes targeted next, not wired yet
 -> SQLite evidence ledger
 -> agent work
 -> Profit Outcome
 ```
 
-Goal 7.12 is complete: `Start Run` visibly executes the Northstar Client Implementation Launch
-from run start through proof, evidence, and profit outcome. Goal 7.13A is complete as a docs-only
-Connection Hub / MCP architecture planning pass with the real NeMo requirement documented. The
-next product goal is Goal 8A: read-only NeMo Guardrails Preflight / Architecture Audit.
+Goal 7.15A is complete as a docs-only alignment pass. It corrected NeMo Guardrails vs actual
+NemoClaw, added the Telegram approval-gate plan, added the Product Depth + Demo-Winning UI plan,
+and paused MCP until NemoClaw, approval, product, and guardrail boundaries are safe.
 
 ## Current Sample State
 
@@ -99,14 +99,18 @@ Harbor Fleet Services is historical only and is no longer the current implemente
 - No homelab/OpenClaw dependency.
 - No real Recall memory.
 - Must run locally from this Fedora laptop repo.
-- Do not claim real Hermes, NeMo Guardrails/NemoClaw, or Stripe integration unless it is actually wired and working.
+- Do not claim real Hermes, NeMo Guardrails, NemoClaw, or Stripe integration unless it is actually
+  wired and working.
 - Do not claim ScaleX has an MCP server or external agent MCP access; MCP is a future access
   pattern only.
 - Keep Connection Hub positioned as an internal ClientOps Autopilot product layer, not a generic
   connector dashboard or marketplace.
-- Real NVIDIA NeMo Guardrails is the Goal 8 target. Goal 8A determines the safest practical path
-  to wire it; a NeMo-compatible/local fallback is allowed only if real NeMo cannot be safely wired
-  before submission.
+- The NeMo Guardrails adapter path is implemented through `nemoguardrails` and runtime verified
+  only when configured. This is not the same as NemoClaw.
+- Actual NVIDIA NemoClaw / OpenShell / `nemohermes` is not installed or wired yet.
+- Do not claim Telegram approval is implemented.
+- Do not implement MCP before NemoClaw preflight, approval-gate planning/implementation or
+  explicit deferral, product-story review, and guardrail/tool-boundary review.
 - Do not propose fallback-first implementation goals.
 - Product acceptance criteria should prove real integration usage.
 - Local auth is prototype auth, not production enterprise identity.
@@ -118,25 +122,29 @@ Harbor Fleet Services is historical only and is no longer the current implemente
 
 ## Current Next Goals
 
-1. Goal 8D - Guardrail Proof UI in Workflow Canvas if a final demo pass exposes a proof gap.
-2. Goal 7.13C - MCP Server Prototype only after the Connection Hub and guardrail/tool boundary
-   remain strong.
-3. Goal 8E - Enterprise Function Template Positioning + Recording Proof.
-4. Goal 9 - final recording/submission polish.
-5. Goal 7B / Production Hardening - Verified Live Mode for future live-money payments.
+1. Goal 8D - Actual NemoClaw / NemoHermes Preflight.
+2. Goal 8E - Wire ScaleX to NemoClaw Hermes Runtime if safe.
+3. Goal 8F - Telegram Human Approval Gate.
+4. Goal 7.15B - Product Depth + Demo-Winning UI Pass.
+5. Goal 7.13C - MCP Server Prototype only after NemoClaw, guardrail, and approval boundaries are
+   safe.
+6. Goal 9 - final repo/video/submission polish.
+7. Goal 7B / Production Hardening - Verified Live Mode for future live-money payments.
 
 Connection Hub is implemented as the layer where ScaleX declares which systems Hermes and future
 agents can use, what mode each connector is in, what guardrails apply, which actions are blocked,
 what configuration is missing, and what evidence is recorded. It must support the ClientOps
 Autopilot story, not replace it.
 
-MCP is planned as a future safe access pattern. Possible future tools/resources/prompts must not
-expose secrets, bypass local policy or future NeMo guardrails, touch live money, or use real
-client data.
+MCP is planned as a future safe access pattern and remains paused. Possible future
+tools/resources/prompts must not expose secrets, bypass local policy, bypass NeMo Guardrails
+adapter checks, bypass future NemoClaw runtime boundaries, bypass Telegram approvals, touch live
+money, use real client data, or use PHI.
 
-Goal 8A, Goal 8B, and Goal 8C are complete. Local policy remains active by default; real NeMo is
-available only through optional `nemo_guardrails` mode after runtime verification and must not be
-claimed active unless `used_real_nemo=true`.
+Goal 8A, Goal 8B, and Goal 8C are complete. Local policy remains active by default; the NeMo
+Guardrails adapter is available only through optional `nemo_guardrails` mode after runtime
+verification and must not be claimed active unless `used_real_nemo=true`. Actual NemoClaw /
+OpenShell / `nemohermes` is not installed or wired.
 
 ## Session Closeout Requirement
 

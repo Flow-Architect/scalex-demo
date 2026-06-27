@@ -37,20 +37,29 @@
 ## Stack Decisions
 
 - Hermes plans and routes the client operation.
-- Connection Hub is a planned internal ScaleX product layer that declares allowed systems,
+- Connection Hub is an implemented internal ScaleX product layer that declares allowed systems,
   connector modes, guardrails, missing config, blocked actions, and evidence duties.
 - Connection Hub supports ClientOps Autopilot and is not the product itself.
 - Stripe provides finance proof through test invoice/payment state.
 - ScaleX code executes and enforces business rules.
 - Local policy is active now for spend, margin, vendor, and payment-before-spend enforcement.
-- Real NVIDIA NeMo Guardrails is optional through the Goal 8B guardrail adapter boundary when a
+- The NeMo Guardrails adapter is optional through the Goal 8B guardrail adapter boundary when a
   configured external `SCALEX_NEMO_PYTHON` runtime verifies successfully.
+- The NeMo Guardrails adapter is implemented through Python `nemoguardrails`; it is not the same
+  as actual NVIDIA NemoClaw.
+- Actual NVIDIA NemoClaw / OpenShell / `nemohermes` is the target sandboxed Hermes runtime, is not
+  installed or wired yet, and must not be claimed active until installed, onboarded, connected, and
+  verified.
 - Judge Demo Mode defaults to `local_policy` and must not require NeMo or secrets.
 - `nemo_compatible` is a labeled temporary fallback only and must not claim real NeMo.
 - SQLite is the evidence ledger.
 - Profit Outcome is the business result.
+- Telegram approval is planned as a human approval channel for risky actions and is not
+  implemented yet.
 - MCP is a future access pattern only. ScaleX does not currently expose an MCP server, external
-  agents cannot call ScaleX through MCP, and no docs should imply otherwise.
+  agents cannot call ScaleX through MCP, and no docs should imply otherwise. MCP remains paused
+  until NemoClaw preflight, approval-gate planning/implementation or explicit deferral,
+  product-story review, and guardrail/tool-boundary review are safe.
 
 ## Safety Decisions
 
@@ -86,18 +95,25 @@
   invoice proof in Full Proof Mode. Hermes does not directly create, send, or charge invoices.
 - No mode should claim a real client was emailed unless an explicit send step exists and is
   verified.
-- Goal 8 is the governed autonomy layer targeting real NVIDIA NeMo Guardrails.
-- Goal 8A preflight is complete; local NeMo availability was verified outside the repo.
-- Goal 8B adds a real-NeMo-ready guardrail adapter boundary with modes `local_policy`,
+- Goal 8 is the governed autonomy layer covering the NeMo Guardrails adapter and the future
+  NemoClaw sandbox target.
+- Goal 8A preflight is complete; local `nemoguardrails` availability was verified outside the repo.
+- Goal 8B adds a NeMo-Guardrails-ready adapter boundary with modes `local_policy`,
   `nemo_guardrails`, and `nemo_compatible`.
-- `nemo_guardrails` must verify real NeMo at runtime through `SCALEX_NEMO_PYTHON` and fail closed
-  if selected but unavailable, broken, or misconfigured.
-- The main backend process must not import `nemoguardrails`; real NeMo probing uses the configured
-  external Python subprocess.
+- `nemo_guardrails` must verify the NeMo Guardrails runtime through `SCALEX_NEMO_PYTHON` and fail
+  closed if selected but unavailable, broken, or misconfigured.
+- The main backend process must not import `nemoguardrails`; NeMo Guardrails adapter probing uses
+  the configured external Python subprocess.
 - The local policy engine remains the deterministic business-rule gate for Judge Demo Mode and
   tests, including spend, margin, vendor, and payment-before-spend decisions.
-- ScaleX must not claim real NeMo Guardrails is active unless runtime verification passes.
+- ScaleX must not claim the NeMo Guardrails adapter is active unless runtime verification passes.
 - ScaleX must not claim real NemoClaw integration.
+- Goal 7.15A recorded that `nemoclaw`, `nemohermes`, `openshell`, and Docker are missing/not
+  usable locally, while `node` v22.22.2, `npm` 10.9.7, `zstd`, and `strings` are present.
+- Goal 8D must preflight actual NemoClaw / NemoHermes before any MCP implementation.
+- Goal 8E may wire ScaleX to NemoClaw Hermes runtime only if Goal 8D proves it is safe.
+- Goal 8F may implement Telegram approval as a human approval gate; approval must not bypass
+  local policy, NeMo Guardrails, NemoClaw boundaries, or evidence recording.
 - No secrets are committed.
 - Hosted judge demo mode must not expose secrets to the browser.
 - Local full-proof mode may use ignored `.env` values for real isolated Hermes and Stripe test mode.
@@ -111,7 +127,9 @@
 - Goal 7.13A locked the Connection Hub / MCP architecture as docs-only planning:
   - Active connector concepts: Hermes Planning, Stripe Finance Proof, Local Policy, SQLite
     Evidence Ledger, and Prototype Auth.
-  - Planned connector concepts: NeMo Guardrails, Slack / Email approvals, CRM client context,
-    Docs / Notion workspace, and Calendar kickoff scheduling.
-  - Future MCP tools/resources/prompts must not expose secrets, bypass local policy or future NeMo
-    guardrails, use live money, or use real client data.
+  - Planned connector concepts now include NemoClaw / OpenShell Sandbox target, Telegram Approval
+    Gate, Slack / Email, CRM client context, Docs / Notion workspace, Calendar, and MCP local
+    prototype boundary.
+  - Future MCP tools/resources/prompts must not expose secrets, bypass local policy, bypass NeMo
+    Guardrails adapter checks, bypass future NemoClaw or approval gates, use live money, or use
+    real client data.

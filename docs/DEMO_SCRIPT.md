@@ -96,8 +96,10 @@ Full Proof Mode:
 - Shows visible errors if configured incorrectly.
 
 Truthfulness boundaries remain: Northstar is synthetic; no patient data; no PHI; no HIPAA claim;
-local policy active now; real NeMo is optional through `nemo_guardrails` only when runtime
-verification passes; no live-money support; no production auth claim.
+local policy active now; NeMo Guardrails adapter proof is optional through `nemo_guardrails` only
+when runtime verification passes; actual NemoClaw / OpenShell / `nemohermes` is not installed or
+wired; Telegram approval is planned and not implemented; no live-money support; no production auth
+claim.
 
 ## Full Proof Mode Real-Tool Demo Plan
 
@@ -112,15 +114,17 @@ configured:
 - no live money;
 - no real client email;
 - no patient data and no PHI;
-- real NeMo claim only when `nemo_guardrails` runtime verification has passed.
+- NeMo Guardrails adapter claim only when `nemo_guardrails` runtime verification has passed;
+- no NemoClaw claim until actual NemoClaw/OpenShell/`nemohermes` is installed, onboarded,
+  connected, and verified.
 
 What to say:
 
 > Judge Demo Mode works safely without secrets. Full Proof Mode shows real isolated Hermes
 > planning and real Stripe test-mode invoice creation. Both modes enforce local policy, block
 > risky spend, record evidence, and report protected profit. The configured Full Proof validation
-> also verified real NeMo runtime probing while local policy remained the deterministic
-> business-rule gate.
+> also verified the NeMo Guardrails adapter runtime while local policy remained the deterministic
+> business-rule gate. Actual NemoClaw is not wired yet.
 
 Hermes proof should show `used_real_hermes=true` only when real isolated Hermes ran. Stripe proof
 should show `used_real_stripe=true`, `stripe_mode=stripe_test`, `livemode=false`, invoice ID,
@@ -130,10 +134,11 @@ Goal 7.14B Full Proof local validation passed with synthetic Northstar data only
 `used_real_hermes=true`, `used_real_stripe=true`, `stripe_mode=stripe_test`, `livemode=false`,
 Stripe invoice ID present, hosted invoice URL present, `paid=false` preserved as unpaid, no real
 client email, `used_real_nemo=true`, `adapter_status=runtime_verified`, `fail_closed=false`, and
-local policy active. SQLite evidence recorded one planning run, four Stripe events, four policy
-checks, four guardrail evaluations, 19 orchestration calls, 14 events, one report, and four ledger
-entries. The blocked Unapproved Data Broker Enrichment spend created policy/evidence records but
-no spend ledger row.
+local policy active. This verified the NeMo Guardrails adapter through `nemoguardrails`, not actual
+NemoClaw. SQLite evidence recorded one planning run, four Stripe events, four policy checks, four
+guardrail evaluations, 19 orchestration calls, 14 events, one report, and four ledger entries. The
+blocked Unapproved Data Broker Enrichment spend created policy/evidence records but no spend
+ledger row.
 
 ## Invoice Lifecycle Clarity
 
@@ -156,5 +161,27 @@ blocked actions, missing configuration, planned-only boundaries, and recorded ev
 supports the ClientOps Autopilot story and should not become the demo centerpiece.
 
 MCP is a future access pattern only. Do not say ScaleX has an MCP server or external agent MCP
-access. Do not say real NeMo is active unless `nemo_guardrails` runtime verification passes.
-`nemo_compatible` must be described as a fallback and not real NeMo.
+access. MCP is paused until NemoClaw preflight, approval-gate planning/implementation or explicit
+deferral, product-story review, and guardrail/tool-boundary review. Do not say the NeMo Guardrails
+adapter is active unless `nemo_guardrails` runtime verification passes. `nemo_compatible` must be
+described as a fallback and not real NeMo. Do not say actual NemoClaw is active.
+
+## Future 90-Second Product Path
+
+Goal 7.15B should make the browser path feel like a repeatable enterprise product:
+
+1. Command Center with Northstar Dental Group, Client Implementation Launch, $8,500 revenue,
+   $1,150 approved setup spend, $3,200 blocked risk, $7,350 protected profit, 86.5% protected
+   margin, and `Start Governed Run`.
+2. Start Governed Run.
+3. Function Studio / Run timeline showing input rail, Hermes plan, planning rail, Stripe finance
+   proof, execution rail, policy block, Telegram approval if implemented, Evidence Ledger, output
+   rail, and Profit Outcome.
+4. Evidence Ledger drill-down showing guardrail truth, Stripe honesty, blocked risk, no blocked
+   spend ledger row, and profit outcome.
+5. Connection Hub showing ClientOps operating boundary: active today, Full Proof verified/capable,
+   evidence recorded, planned only, missing config, and fail closed.
+6. Profit Outcome close.
+
+Telegram should appear only as planned until Goal 8F implements it. Its role is a human approval
+gate for risky actions, not a chatbot-first surface.

@@ -1,17 +1,17 @@
 # STATUS - ScaleX ClientOps Autopilot
 
-Last updated: 2026-06-26
+Last updated: 2026-06-27
 
 ## Verified Current State
 
 - Project folder exists at `/home/ascabrya/dev/scalex-demo`.
-- Latest committed baseline before Goal 7.13B: `35c9acb Add guardrail execution rails`.
-- Last completed goal: Goal 7.13B - Connection Hub UI.
+- Latest committed baseline before Goal 7.15A: `c70ba17 Add Connection Hub UI`.
+- Last completed goal: Goal 7.15A - Product Depth, Demo-Winning UI Plan, Telegram Approval Gate
+  Plan, and NemoClaw Correction.
 - Last completed implementation/QA goal: Goal 7.13B - Connection Hub UI.
-- Last completed documentation/tracking update: Goal 7.13B closeout docs.
+- Last completed documentation/tracking update: Goal 7.15A docs-only alignment.
 - Last completed checkout cleanup: Open Source Checkout Cleanup for judge readiness.
-- Current priority: Goal 8D - Guardrail Proof UI in Workflow Canvas if a final demo pass exposes
-  a proof gap; otherwise Goal 7.13C - MCP Server Prototype only after the boundary remains strong.
+- Current priority: Goal 8D - Actual NemoClaw / NemoHermes Preflight.
 - Goal 7.11B replaced the legacy Harbor sample with Northstar Dental Group / Client Implementation Launch.
 - Goal 7.11C-followup replaced the remaining generated dashboard/card shell with a ClientOps
   operation-file workspace across Dashboard, Function Studio, Onboarding, Client Operations,
@@ -25,10 +25,10 @@ Last updated: 2026-06-26
 - Open Source Checkout Cleanup made Judge Demo Mode the safe `.env.example` default, taught
   `scripts/dev.sh` to load `.env` quietly when present, added checkout run/test commands to
   START_HERE, and clarified README/demo/submission checkout language.
-- Goal 8A preflight is complete. Real NeMo is installed locally outside the repo at
-  `/home/ascabrya/.venvs/scalex-nemo/bin/python` and imports `nemoguardrails`, `LLMRails`, and
-  `RailsConfig`; observed version is 0.21.0.
-- Goal 8B added the guardrail adapter boundary, optional real-NeMo runtime probing, SQLite
+- Goal 8A preflight is complete. The NeMo Guardrails Python package is installed locally outside
+  the repo at `/home/ascabrya/.venvs/scalex-nemo/bin/python` and imports `nemoguardrails`,
+  `LLMRails`, and `RailsConfig`; observed version is 0.21.0.
+- Goal 8B added the guardrail adapter boundary, optional NeMo Guardrails runtime probing, SQLite
   guardrail evaluation persistence, API/UI proof fields, and setup/check scripts.
 - Goal 8C strengthened guardrail execution rails around input, planning, protected finance
   requests, spend policy/ledger actions, and output honesty. Guardrail decisions are now recorded
@@ -38,8 +38,12 @@ Last updated: 2026-06-26
   allowed systems, connector modes, guardrails, missing config, blocked policy actions, planned
   connectors, and evidence duties.
 - Goal 7.14B passed Full Proof local validation in a configured local-only environment with real
-  isolated Hermes, real Stripe test-mode invoice proof, real NeMo runtime verification, local
-  policy active, and synthetic Northstar data only.
+  isolated Hermes, real Stripe test-mode invoice proof, NeMo Guardrails adapter runtime
+  verification, local policy active, and synthetic Northstar data only.
+- Goal 7.15A corrected the roadmap distinction between the implemented NeMo Guardrails adapter
+  through the Python `nemoguardrails` package and the not-yet-installed actual NVIDIA NemoClaw /
+  OpenShell / `nemohermes` runtime. It also added the product-depth UI plan, Telegram approval-gate
+  plan, and MCP pause/reorder.
 - Goal 9 remains final polish and submission assets.
 - Goal 7B remains future Verified Live Mode hardening.
 
@@ -71,11 +75,58 @@ a governed AI operations layer that can run those functions safely.
   and independent of NeMo.
 - Optional `nemo_guardrails` mode probes a configured external Python runtime through
   `SCALEX_NEMO_PYTHON` and fails closed if selected but unavailable, broken, or misconfigured.
+  This is the implemented NeMo Guardrails adapter and is useful as a guardrail layer.
 - Optional `nemo_compatible` mode is a labeled fallback only and does not set `used_real_nemo=true`.
+- Actual NVIDIA NemoClaw / OpenShell Sandbox / `nemohermes` is not installed, not wired into
+  ScaleX, and must not be claimed active. It is the next target integration after this docs-only
+  correction.
 - SQLite records evidence.
 - Profit Outcome reports protected profit and blocked risk.
 - MCP is documented as a future access pattern only. ScaleX does not currently expose an MCP
   server, external agents cannot yet call ScaleX through MCP, and no MCP implementation exists.
+  MCP is paused until the NemoClaw runtime boundary, Telegram approval boundary, and product story
+  are safe enough.
+
+## NeMo Guardrails vs NemoClaw Correction
+
+ScaleX currently has:
+
+- local policy engine: implemented.
+- Stripe test-mode Full Proof: validated in Goal 7.14B.
+- isolated local Hermes Full Proof: validated in Goal 7.14B.
+- NeMo Guardrails Python package / `nemoguardrails`: installed outside the repo and runtime
+  verified through the Goal 8B adapter path.
+- actual NVIDIA NemoClaw / OpenShell sandbox / `nemohermes` runtime: not installed and not wired
+  into ScaleX.
+
+The implemented NeMo Guardrails adapter is a useful guardrail layer and may report
+`used_real_nemo=true` only when `nemo_guardrails` runtime verification passes. It is not the same
+as actual NemoClaw.
+
+NemoClaw is the target sandboxed-agent runtime integration. The target path is to install and
+onboard actual NVIDIA NemoClaw with Hermes selected, use the local `nemohermes` sandbox runtime
+when safe, keep Judge Demo Mode safe without NemoClaw, keep the existing Full Proof local path
+working, and fail closed if a NemoClaw mode is selected but unavailable.
+
+Do not claim NemoClaw is active until it is installed, onboarded, connected, and verified.
+
+Local prerequisite probe to preserve for Goal 8D:
+
+- `nemoclaw`: missing.
+- `nemohermes`: missing.
+- `openshell`: missing.
+- `docker`: missing / not usable.
+- `node`: present, v22.22.2.
+- `npm`: present, 10.9.7.
+- `zstd`: present.
+- `strings`: present.
+- Repo clean at `c70ba17` before Goal 7.15A edits.
+
+Target future runtime settings may include:
+
+- `HERMES_MODE=nemohermes_api` or `HERMES_RUNTIME=nemoclaw`.
+- `HERMES_API_BASE_URL=http://127.0.0.1:8642/v1`.
+- `NEMOCLAW_SANDBOX_NAME=scalex-hermes`.
 
 ## Implemented Today
 
@@ -121,6 +172,31 @@ Functional product surfaces remain:
   policy checks, approved spend ledger rows, and post-execution blocked-spend consistency
 - API/UI proof fields for guardrail mode, adapter status, decision, `used_real_nemo`,
   `fail_closed`, evaluation stages, local policy active status, and blocked-spend ledger-row proof
+
+## Verified For Goal 7.15A
+
+Goal 7.15A was docs/tracking/roadmap only. No code implementation, frontend UI change, backend
+behavior change, dependency install, Docker install, Stripe run, Hermes run, NeMo run, NemoClaw
+run, Full Proof run, `.env` edit, `data/*.db` edit, `data/backups` edit, MCP server, commit, or
+new goal-tracking file was created.
+
+Recorded updates:
+
+- Corrected docs to distinguish the implemented `nemoguardrails` adapter from actual NVIDIA
+  NemoClaw / OpenShell / `nemohermes`, which is not installed or wired.
+- Recorded the local prerequisite probe result: `nemoclaw`, `nemohermes`, `openshell`, and Docker
+  missing/not usable; `node` v22.22.2, `npm` 10.9.7, `zstd`, and `strings` present.
+- Added the next sequence: Goal 8D actual NemoClaw / NemoHermes preflight; Goal 8E wire ScaleX to
+  NemoClaw Hermes runtime if safe; Goal 8F Telegram Human Approval Gate; Goal 7.15B Product Depth
+  + Demo-Winning UI Pass; Goal 7.13C MCP Server Prototype only after those boundaries are safe;
+  Goal 9 final polish.
+- Added the future Product Depth + Demo-Winning UI plan for polished local auth, Command Center
+  hero, Operation Catalog, Policy / Risk Library, run-story timeline, evidence drill-down,
+  guardrail proof, Stripe honesty, Connection Hub polish, and a 90-second recording path.
+- Added the future Telegram approval-gate plan as a human approval channel for risky actions, not
+  a chatbot-first feature.
+- Paused MCP implementation until the NemoClaw preflight, approval boundary, product-story review,
+  and guardrail/tool boundary are complete.
 
 ## Verified For Goal 7.13B
 
@@ -510,12 +586,18 @@ Research-to-Report, Ops Handoff, and Renewal Recommendation.
 
 ## Incomplete Items
 
-- Goal 8D Guardrail Proof UI in Workflow Canvas has not run yet.
+- Goal 8D Actual NemoClaw / NemoHermes Preflight has not run yet.
+- Goal 8E Wire ScaleX to NemoClaw Hermes Runtime has not run and may proceed only if Goal 8D
+  proves it is safe.
+- Goal 8F Telegram Human Approval Gate has not been implemented.
+- Goal 7.15B Product Depth + Demo-Winning UI Pass has not been implemented.
 - Goal 7.14B Full Proof local validation has passed; rerun it only before final recording or after
   relevant integration changes.
-- Goal 7.13C MCP Server Prototype has not been implemented yet.
+- Goal 7.13C MCP Server Prototype has not been implemented and is paused until after NemoClaw,
+  approval-gate, product-depth, and guardrail/tool-boundary review.
 - Real NeMo is not active by default; it is available only through optional `nemo_guardrails` mode
   after runtime verification.
+- Actual NemoClaw / OpenShell / `nemohermes` is not installed or wired.
 - Verified Live Mode live-money execution is not implemented.
 - License has not been selected; no `LICENSE` file exists yet.
 - Final demo recording and final submission assets are not complete.
@@ -525,14 +607,24 @@ Research-to-Report, Ops Handoff, and Renewal Recommendation.
 - Stripe webhooks remain deferred.
 - Checkout Session and Payment Link flows remain deferred; current Goal 7 path is invoice-first Stripe test mode.
 - Live-money payments remain deferred to Verified Live Mode.
-- Production auth, multi-tenant SaaS features, public deployment, real customer workflows, production Hermes,
-  Windows Hermes config, Prometheus production data, homelab OpenClaw, and Recall memory remain out of scope.
+- Production auth, multi-tenant SaaS features, public deployment, real customer workflows,
+  production Hermes, Windows Hermes config, Prometheus production data, homelab OpenClaw, Recall
+  memory, production NemoClaw/OpenClaw, and real client systems remain out of scope.
 
 ## Current Priority
 
-Goal 8D - Guardrail Proof UI in Workflow Canvas if the final demo pass exposes a remaining proof
-gap; otherwise Goal 7.13C - MCP Server Prototype only after the Connection Hub and guardrail
-boundary are confirmed strong enough.
+Goal 8D - Actual NemoClaw / NemoHermes Preflight.
+
+Recommended sequence:
+
+1. Goal 8D - Actual NemoClaw / NemoHermes Preflight.
+2. Goal 8E - Wire ScaleX to NemoClaw Hermes Runtime if safe.
+3. Goal 8F - Telegram Human Approval Gate.
+4. Goal 7.15B - Product Depth + Demo-Winning UI Pass.
+5. Goal 7.13C - MCP Server Prototype only after NemoClaw, guardrail, and approval boundaries are
+   safe.
+6. Goal 9 - final repo/video/submission polish.
 
 Goal 7.14B Full Proof validation has passed. Rerun it only before final recording or after changes
-that touch Hermes, Stripe, NeMo, policy, guardrail, ledger, or run-proof behavior.
+that touch Hermes, Stripe, NeMo Guardrails, NemoClaw, policy, guardrail, ledger, or run-proof
+behavior.

@@ -10,6 +10,51 @@ Use:
 
 ---
 
+## 2026-06-27 - Goal 7.15A: Product depth, Telegram gate plan, and NemoClaw correction
+
+Completed:
+- Corrected docs to distinguish the implemented NeMo Guardrails adapter through Python
+  `nemoguardrails` from actual NVIDIA NemoClaw / OpenShell / `nemohermes`.
+- Recorded that local policy is implemented, Stripe test-mode Full Proof is validated, isolated
+  local Hermes Full Proof is validated, and the NeMo Guardrails Python package is installed and
+  runtime verified through the adapter path.
+- Recorded that actual NemoClaw, OpenShell, and `nemohermes` are not installed and not wired into
+  ScaleX.
+- Recorded the local prerequisite probe: `nemoclaw`, `nemohermes`, `openshell`, and Docker
+  missing/not usable; `node` v22.22.2, `npm` 10.9.7, `zstd`, and `strings` present; repo clean at
+  `c70ba17` before Goal 7.15A edits.
+- Added the next roadmap sequence: Goal 8D actual NemoClaw / NemoHermes preflight; Goal 8E wire
+  ScaleX to the NemoClaw Hermes runtime if safe; Goal 8F Telegram Human Approval Gate; Goal 7.15B
+  Product Depth + Demo-Winning UI Pass; Goal 7.13C MCP Server Prototype only after the
+  NemoClaw/guardrail/approval boundaries are safe; Goal 9 final polish.
+- Added a future Product Depth + Demo-Winning UI plan covering polished local auth, Command Center
+  hero, Operation Catalog, Policy / Risk Library, run-story timeline, Evidence Ledger drill-down,
+  guardrail proof, Stripe honesty, Connection Hub polish, and the 90-second recording path.
+- Added a future Telegram Human Approval Gate plan as a human approve/deny channel for risky
+  actions, with fail-closed safety and evidence duties.
+- Paused MCP implementation until NemoClaw preflight, approval-gate planning/implementation or
+  explicit deferral, product-story review, and guardrail/tool-boundary review.
+
+Verified:
+- `git diff --check` passed.
+- Strict added-lines secret scan returned no matches.
+- Unsafe/generated path scan returned no matches.
+- `git status --short` was reviewed.
+
+Safety:
+- Docs/tracking/roadmap only.
+- No code implementation, frontend UI change, backend behavior change, dependency install, Docker
+  install, Stripe run, Hermes run, NeMo run, NemoClaw run, Full Proof run, MCP server, `.env` edit,
+  SQLite `.db` edit, `data/backups` edit, extra goal log, commit, or secret was added.
+
+Suggested commit message:
+Document NemoClaw correction and next integration plan
+
+Next:
+- Goal 8D - Actual NemoClaw / NemoHermes Preflight.
+
+---
+
 ## 2026-06-26 - Goal 7.13B: Connection Hub UI
 
 Completed:

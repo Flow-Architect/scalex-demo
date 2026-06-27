@@ -15,7 +15,8 @@ ScaleX UI
   -> Stripe finance proof in test mode
   -> ScaleX business-rule enforcement
   -> local policy active today
-  -> real NVIDIA NeMo Guardrails targeted in Goal 8
+  -> NeMo Guardrails adapter available when runtime verified
+  -> actual NVIDIA NemoClaw / OpenShell / nemohermes targeted next, not wired yet
   -> SQLite evidence ledger
   -> agent work
   -> Profit Outcome
@@ -29,9 +30,11 @@ ScaleX UI
 - Stripe provides finance proof through test invoice/payment state.
 - ScaleX executes the operation and enforces business rules.
 - Local policy is active now for spend, margin, vendor, and payment-before-spend enforcement.
-- Goal 8B added an optional real-NeMo-ready guardrail adapter boundary. Default mode is
-  `local_policy`; `nemo_guardrails` verifies a configured external Python runtime and fails closed
-  if selected but unavailable.
+- Goal 8B added an optional NeMo Guardrails adapter boundary. Default mode is `local_policy`;
+  `nemo_guardrails` verifies a configured external Python `nemoguardrails` runtime and fails
+  closed if selected but unavailable.
+- Actual NVIDIA NemoClaw / OpenShell / `nemohermes` is not installed or wired yet. It is the next
+  sandboxed Hermes runtime target, not the current guardrail adapter.
 - SQLite records evidence for planning, orchestration, finance proof, policy checks, ledger rows,
   agent outputs, and final reports.
 - Profit Outcome reports protected profit and blocked risk.
@@ -51,8 +54,9 @@ ScaleX UI
 - Hermes CLI invocation with `--skills scalex-operator`, `--toolsets skills`, provider `openai-codex`, and model `gpt-5.5`.
 - SQLite `planning_runs` and `orchestration_calls` audit tables.
 - Real Stripe test-mode customer and finalized invoice records through orchestration for Goal 7.
-- Local policy engine for spend governance until Goal 8 safely wires real NVIDIA NeMo Guardrails
-  or, only if blocked, a documented temporary NeMo-compatible adapter.
+- Local policy engine for spend governance, with optional NeMo Guardrails adapter proof when
+  configured.
+- No actual NemoClaw/OpenShell/`nemohermes` runtime integration yet.
 - Deterministic agent outputs.
 - Northstar Dental Group / Client Implementation Launch sample with persisted run history and proof inspection.
 - Judge Demo Mode as the default safe local execution mode without real secrets.
@@ -89,14 +93,41 @@ Active connector concepts:
 
 Planned connector concepts:
 
-- NeMo Guardrails
-- Slack / Email approvals
+- NemoClaw / OpenShell Sandbox target
+- Telegram Approval Gate
+- Slack / Email notifications or future approvals
 - CRM client context
 - Docs / Notion workspace
 - Calendar kickoff scheduling
+- MCP local prototype boundary
 
 Connection Hub is not the main product story. It is the operating boundary that makes ClientOps
 Autopilot safe to run.
+
+## NeMo Guardrails Adapter vs NemoClaw
+
+ScaleX currently has two distinct guardrail/sandbox concepts:
+
+- NeMo Guardrails adapter: implemented through Python `nemoguardrails`, invoked through the
+  configured `SCALEX_NEMO_PYTHON` subprocess, and runtime verified when selected. It may set
+  `used_real_nemo=true` only when verification passes.
+- NVIDIA NemoClaw / OpenShell / `nemohermes`: target sandboxed-agent runtime for Hermes. It is not
+  installed and not wired into ScaleX.
+
+Recorded local prerequisite probe:
+
+- `nemoclaw`: missing.
+- `nemohermes`: missing.
+- `openshell`: missing.
+- `docker`: missing / not usable.
+- `node`: present, v22.22.2.
+- `npm`: present, 10.9.7.
+- `zstd`: present.
+- `strings`: present.
+
+Target future NemoClaw mode may use settings such as `HERMES_MODE=nemohermes_api` or
+`HERMES_RUNTIME=nemoclaw`, `HERMES_API_BASE_URL=http://127.0.0.1:8642/v1`, and
+`NEMOCLAW_SANDBOX_NAME=scalex-hermes`. If selected but unavailable, the runtime must fail closed.
 
 ## Current Template Boundary
 
@@ -163,7 +194,7 @@ The target final local recording mode should use:
 - no live money;
 - no real client email;
 - no patient data and no PHI;
-- no real NeMo claim until wired and verified.
+- no NeMo Guardrails adapter claim until runtime verified.
 
 Expected proof:
 
@@ -191,7 +222,12 @@ Invoice lifecycle:
 ## Future MCP Boundary
 
 MCP is a future access pattern only. ScaleX does not currently expose an MCP server, external
-agents cannot yet call ScaleX through MCP, and this architecture does not claim NeMo is wired.
+agents cannot yet call ScaleX through MCP, and this architecture does not claim NemoClaw is
+wired.
+
+MCP is paused until actual NemoClaw preflight is complete, the Telegram approval gate is planned
+or implemented or explicitly deferred, the UI/product story is strong enough, and the
+guardrail/tool boundary remains safe.
 
 A future local ScaleX MCP server may expose safe tools, resources, and prompts so Hermes or other
 agents can request approved ScaleX actions without directly touching Stripe, policy, secrets, or
@@ -227,11 +263,14 @@ Future MCP governance:
 - Hermes and external agents may propose or request actions.
 - ScaleX validates actions before execution.
 - Guardrails decide allow/block/warn.
+- Human approval gates must approve risky actions when required.
 - MCP tools must not expose secrets.
-- MCP tools must not bypass local policy or future NeMo guardrails.
+- MCP tools must not bypass local policy, NeMo Guardrails adapter checks, future NemoClaw
+  boundaries, or Telegram approvals.
 - Every action writes evidence.
 - Action tools fail closed when configuration or policy is invalid.
-- No live-money tools, real client data, or unmanaged external credentials.
+- Start read-only first.
+- No live-money tools, real client data, PHI, secret exposure, or unmanaged external credentials.
 
 ## Governed Autonomy / Guardrails
 
@@ -242,12 +281,28 @@ evidence for input, planning, execution, and output stages.
 
 The main backend process does not import `nemoguardrails`. Real NeMo probing runs through the
 configured external `SCALEX_NEMO_PYTHON` subprocess and loads `SCALEX_NEMO_CONFIG_PATH`.
-`nemo_guardrails` may claim real NeMo only when runtime verification passes; if selected but
-unavailable, broken, or misconfigured, ScaleX fails closed. `nemo_compatible` is a labeled
-fallback only and must keep `used_real_nemo=false`.
+`nemo_guardrails` may claim NeMo Guardrails adapter proof only when runtime verification passes;
+if selected but unavailable, broken, or misconfigured, ScaleX fails closed. `nemo_compatible` is a
+labeled fallback only and must keep `used_real_nemo=false`.
 
-Goal 8C should deepen pre-action rail execution around protected actions. ScaleX does not claim
-real NemoClaw.
+Goal 8C deepened pre-action rail execution around protected actions. ScaleX does not claim real
+NemoClaw.
+
+## Telegram Approval Gate Target
+
+Telegram is planned as a human approval channel for risky actions, not as a chatbot-first feature.
+The target flow is pending approval request -> Telegram approval message -> authorized approve or
+deny -> ScaleX verification -> action resume or block -> Evidence Ledger decision record.
+
+Approval candidates include spend above threshold, vendor spend near the margin floor, real Stripe
+invoice send if ever enabled, real client email if ever enabled, external connector actions, and
+future MCP action requests. PHI/patient data, live-money attempts, disallowed real client data,
+direct secret exposure, and policy bypass attempts must be blocked outright.
+
+Safety rules: allowlisted chat IDs only, no secrets or PHI in messages, signed one-time approval
+token or approval ID, expiry, deny/expired fail closed, approval never bypasses local policy, NeMo
+Guardrails, or NemoClaw boundaries, re-check policy before execution, and record every approval or
+denial as evidence.
 
 ## Verified Live Mode
 
@@ -258,4 +313,6 @@ audit records before any live-money action.
 ## Safety Boundary
 
 Goal 7 work must not use live Stripe mode, production Hermes, Windows Hermes config, production
-Prometheus, homelab/OpenClaw, Recall memory, or real client data.
+Prometheus, homelab/OpenClaw, Recall memory, actual NemoClaw production paths, or real client
+data. No docs should claim NemoClaw, Telegram approval, MCP server, live-money support, real client
+email, PHI handling, or production auth until those paths are implemented and verified.
