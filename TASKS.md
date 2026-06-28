@@ -13,6 +13,26 @@ Northstar operation metrics, Control Stack, governed execution rails, blocked-ri
 labor-aware Economic Control, enterprise Evidence Ledger, and Why This Is Not Zapier comparison.
 Telegram approval remains deferred and was not implemented in Goal 8G.
 
+Goal 8H is complete. It was a frontend-first visual storytelling redesign for the final recording,
+not a new integration. The above-the-fold view now presents a premium control-room product
+surface that immediately shows:
+
+- Act 1 - Northstar Dental Group / Client Implementation Launch with $8,500 revenue, $1,150
+  approved setup spend, $261.60 labor cost, $3,200 blocked risk, $7,088.40 protected profit, and
+  83.4% protected margin.
+- Act 2 - governed AI execution: Hermes plans, Stripe proves finance state, NeMo/local policy
+  checks risky actions, and ScaleX approves safe actions while blocking unsafe execution.
+- Act 3 - enterprise proof: the evidence ledger records what happened, what was approved, what
+  was blocked, what proof exists, and the final protected-profit outcome.
+
+Goal 8H did not add Telegram, new external services, live Stripe, production Hermes, Full Proof
+runs, production payroll/HR behavior, live document extraction, or backend state-machine scope.
+
+Next recommended goal: Goal 9 - final repo/video/submission polish. Required outputs should be
+local browser smoke outside the sandbox, recording rehearsal against `docs/DEMO_SCRIPT.md`, final
+submission copy check, repo cleanliness, and final safety scan. Do not start Telegram, live Stripe,
+MCP, production payroll/HR, or new integration work before submission.
+
 Goal 8E is complete. ScaleX has an optional backend runtime adapter for the already validated
 local NemoHermes OpenAI-compatible API. It is selected with `HERMES_RUNTIME=nemoclaw`, records
 non-secret runtime evidence, and fails closed if selected but unavailable.
@@ -20,6 +40,43 @@ non-secret runtime evidence, and fails closed if selected but unavailable.
 Goal 7.13B is complete. The repo now has a product-facing Connection Hub view for allowed systems,
 connector modes, guardrails, evidence duties, missing config, blocked policy actions, and planned
 boundaries while preserving Judge Demo Mode and Full Proof compatibility.
+
+## Goal 8H Gate Result
+
+Goal 8H - Cinematic Enterprise Demo UI Redesign is complete.
+
+Completed:
+
+- Replaced the first dashboard viewport with a high-contrast control-room hero for governed
+  execution, Northstar Dental Group / Client Implementation Launch, Start Governed Run, Review
+  Evidence Ledger, and the Hermes -> Stripe -> NeMo -> ScaleX chain.
+- Reframed the page order so the main recording path comes before supporting intake/configuration:
+  hero, enterprise pain/control, Control Stack, Governed Run Stage, Blocked Risk Spotlight,
+  Economic Control, Evidence Ledger, Why This Is Not Zapier, and Profit Report.
+- Added an 11-card governed run stage covering Input Rail, Hermes Plan, Planning Rail, Stripe
+  Finance Proof, Revenue Gate, NeMo / Local Policy, Controlled Spend, Risky Vendor Action,
+  Evidence Ledger, Output Honesty Rail, and Profit Outcome.
+- Made blocked risk, money control, evidence, and the Zapier comparison more visually prominent.
+- Preserved Business Intake, Document Intake Review, Workforce Costing, deterministic Judge Demo
+  Mode, local policy, Stripe boundaries, isolated Hermes, optional NemoHermes, fail-closed
+  behavior, and evidence boundaries.
+
+Validation:
+
+- Phase 0 docs-first `git diff --check` passed.
+- `cd frontend && npm run build` passed.
+- `./scripts/test.sh` passed with 68 backend tests and a successful frontend build.
+- `./scripts/check-nemo.sh` passed with `nemoguardrails` 0.21.0 and `guardrails/scalex` loaded.
+- Post-implementation `git diff --check` passed.
+- Active frontend label scan found no stale Function Studio / Start Run / empty-state demo labels.
+- Unsafe/generated path scan returned no changed or staged matches.
+- Staged added-lines secret scan returned no matches.
+- Dev-server smoke was attempted with `/tmp/scalex-goal8h-smoke.db` and demo-safe flags, but
+  sandbox socket binding blocked uvicorn. Local browser smoke is required before recording.
+
+Suggested commit message:
+
+`Polish ScaleX cinematic enterprise demo`
 
 ## Goal 8E Gate Result
 

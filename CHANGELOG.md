@@ -10,6 +10,53 @@ Use:
 
 ---
 
+## 2026-06-28 - Goal 8H: Cinematic enterprise demo UI redesign
+
+Completed:
+- Redesign the judge-facing frontend so ScaleX reads as a premium enterprise control plane for
+  governed AI execution, not a form-first admin console.
+- Replaced the first dashboard viewport with a high-contrast control-room hero, Northstar primary
+  operation card, six high-impact metrics, Start Governed Run, Review Evidence Ledger, and the
+  Hermes -> Stripe -> NeMo -> ScaleX stack chain.
+- Reordered the dashboard so the recording path leads with hero, enterprise pain/control, Control
+  Stack, Governed Run Stage, Blocked Risk Spotlight, Economic Control, Evidence Ledger, Why This
+  Is Not Zapier, and Profit Report before supporting intake/configuration modules.
+- Added the 11-card governed run stage: Input Rail, Hermes Plan, Planning Rail, Stripe Finance
+  Proof, Revenue Gate, NeMo / Local Policy, Controlled Spend, Risky Vendor Action, Evidence
+  Ledger, Output Honesty Rail, and Profit Outcome.
+- Made blocked risk visually dramatic for Data broker enrichment / premium vendor spend,
+  requested amount $3,200, blocked decision, vendor/risk reason, protected-margin impact, and
+  fail-closed ledger behavior.
+- Promoted Economic Control into a central money panel with revenue secured, approved setup
+  spend, labor cost, blocked risky spend, protected profit, protected margin, margin floor, and
+  formulas.
+- Reworked Evidence Ledger into enterprise audit records and sharpened Why This Is Not Zapier
+  into a visual two-column comparison.
+- Kept Goal 8H frontend-first and visual-storytelling only. No Telegram, new external services,
+  live Stripe, production Hermes, Full Proof runs, production payroll/HR behavior, live document
+  extraction, or broad backend behavior was added.
+
+Verification:
+- Docs-first `git diff --check` passed.
+- `cd frontend && npm run build` passed.
+- `./scripts/test.sh` passed with 68 backend tests and a successful frontend build.
+- `./scripts/check-nemo.sh` passed with `nemoguardrails` 0.21.0 and `guardrails/scalex` loaded.
+- Post-implementation `git diff --check` passed.
+- Active frontend label scan found no stale Function Studio / Start Run / empty-state demo labels.
+- Unsafe/generated path scan returned no changed or staged matches.
+- Staged added-lines secret scan returned no matches.
+- Dev-server smoke was attempted with `/tmp/scalex-goal8h-smoke.db` and demo-safe flags, but
+  sandbox socket binding blocked uvicorn with `PermissionError: [Errno 1] Operation not
+  permitted`; operator local browser smoke is required before recording.
+
+Suggested commit message:
+Polish ScaleX cinematic enterprise demo
+
+Next:
+- Goal 9 - final repo/video/submission polish.
+
+---
+
 ## 2026-06-27 - Goal 8G: Enterprise governed execution demo lock
 
 Completed:

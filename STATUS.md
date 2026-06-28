@@ -1,17 +1,19 @@
 # STATUS - ScaleX ClientOps Autopilot
 
-Last updated: 2026-06-27
+Last updated: 2026-06-28
 
 ## Verified Current State
 
 - Project folder exists at `/home/ascabrya/dev/scalex-demo`.
 - Latest committed baseline before Goal 8E: `615a9bd Document NemoClaw correction and next
   integration plan`.
-- Last completed goal: Goal 8G - Enterprise Demo Narrative UI Lock.
-- Last completed implementation/QA goal: Goal 8G - judge-facing governed execution UI narrative lock.
-- Last completed documentation/tracking update: Goal 8G enterprise narrative UI closeout.
+- Last completed goal: Goal 8H - Cinematic Enterprise Demo UI Redesign.
+- Last completed implementation/QA goal: Goal 8H - frontend-first cinematic enterprise demo UI
+  redesign.
+- Last completed documentation/tracking update: Goal 8H visual storytelling closeout.
 - Last completed checkout cleanup: Open Source Checkout Cleanup for judge readiness.
-- Current priority: Goal 9 - final repo/video/submission polish.
+- Current priority: Goal 9 - final repo/video/submission polish, including local browser smoke
+  before recording.
 - Goal 7.11B replaced the legacy Harbor sample with Northstar Dental Group / Client Implementation Launch.
 - Goal 7.11C-followup replaced the remaining generated dashboard/card shell with a ClientOps
   operation-file workspace across Dashboard, Function Studio, Onboarding, Client Operations,
@@ -58,6 +60,14 @@ Last updated: 2026-06-27
   added the first-screen Control Stack, Enterprise Pain -> ScaleX Control panel, governed
   execution rails, blocked-risk spotlight, central Economic Control formula, enterprise Evidence
   Ledger table, and Why This Is Not Zapier comparison.
+- Goal 8H completed the frontend-first cinematic demo redesign. It was a visual storytelling
+  pass, not a new integration. The final recording story is:
+  Act 1 - Northstar Dental Group has a paid Client Implementation Launch with secured revenue,
+  approved setup spend, labor cost, blocked risk, protected profit, and protected margin.
+  Act 2 - Hermes creates the plan, Stripe proves finance state, NeMo/local policy checks risky
+  actions, and ScaleX approves safe actions while blocking unsafe ones.
+  Act 3 - the evidence ledger records approvals, blocks, proof, safety notes, and the final
+  protected-profit outcome.
 - Goal 9 remains final polish and submission assets.
 - Goal 7B remains future Verified Live Mode hardening.
 
@@ -238,6 +248,63 @@ Verification completed:
 Suggested commit message:
 
 `Deepen ScaleX command center with intake and labor costing`
+
+## Verified For Goal 8H
+
+Goal 8H completed the cinematic enterprise demo UI redesign without adding new integrations or
+changing protected execution behavior.
+
+Recorded updates:
+
+- Replaced the dashboard's first screen with a high-contrast control-room hero for "Governed
+  execution for revenue-backed client operations", the Northstar operation, Start Governed Run,
+  Review Evidence Ledger, and the Hermes -> Stripe -> NeMo -> ScaleX stack chain.
+- Moved Business Intake, Document Intake Review, Workforce Costing, and runtime details into a
+  supporting role below the main recording story.
+- Added a cinematic Governed Run Stage with 11 visible cards: Input Rail, Hermes Plan, Planning
+  Rail, Stripe Finance Proof, Revenue Gate, NeMo / Local Policy, Controlled Spend, Risky Vendor
+  Action, Evidence Ledger, Output Honesty Rail, and Profit Outcome.
+- Strengthened the blocked-risk moment for Data broker enrichment / premium vendor spend,
+  requested amount $3,200, blocked decision, policy/risk reason, margin impact, and fail-closed
+  ledger behavior.
+- Reworked Economic Control into a central money-control panel with revenue, approved setup spend,
+  labor cost, blocked risky spend, protected profit, protected margin, margin floor, and formulas.
+- Reworked the Evidence Ledger preview into enterprise audit records with order, actor/system,
+  action, result, evidence type, and safety note.
+- Made Why This Is Not Zapier a two-column visual comparison between trigger-action automation
+  and revenue-backed governed runs.
+
+Deterministic/demo-safe behavior preserved:
+
+- Judge Demo Mode, local policy, Stripe safety boundaries, isolated Hermes, optional NemoHermes,
+  intake/document review, workforce costing, evidence boundaries, and fail-closed behavior remain
+  intact.
+
+Intentionally not touched:
+
+- No Telegram, new external service, live Stripe, production Hermes, Full Proof run, Docker /
+  NemoClaw command, production payroll/HR behavior, live document extraction, real client data,
+  real `.env`, real database file, or secret setup was added.
+
+Verification completed:
+
+- Phase 0 docs-first `git diff --check` passed before implementation.
+- `cd frontend && npm run build` passed.
+- `./scripts/test.sh` passed with 68 backend tests and a successful frontend build.
+- `./scripts/check-nemo.sh` passed with `nemoguardrails` 0.21.0 and `guardrails/scalex` loaded.
+- Post-implementation `git diff --check` passed.
+- Active frontend label scan found no old UI wording for Function Studio, Start Run, ClientOps
+  Autopilot, No workflow selected, Create or select a workflow, Harbor Fleet Services, setup
+  required, or runtime probe pending.
+- Unsafe/generated path scan returned no changed or staged matches.
+- Staged added-lines secret scan returned no matches.
+- Local dev-server smoke was attempted with `/tmp/scalex-goal8h-smoke.db` and demo-safe
+  test-double flags, but sandbox socket binding blocked uvicorn with `PermissionError: [Errno 1]
+  Operation not permitted`. Operator local browser smoke remains required before recording.
+
+Suggested commit message:
+
+`Polish ScaleX cinematic enterprise demo`
 
 ## Verified For Goal 8G
 

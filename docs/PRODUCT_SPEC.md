@@ -36,6 +36,30 @@ Core demo line:
 > Hermes plans the work, Stripe proves the financial state, NeMo checks actions before execution,
 > and ScaleX records the evidence, blocks unsafe spend, and reports protected profit.
 
+## Goal 8H Scope - Cinematic Enterprise Demo UI Redesign
+
+Goal 8H completed a frontend-first visual storytelling redesign for the final hackathon recording. It is
+not a new integration goal and does not add Telegram, new external services, live Stripe,
+production Hermes, Full Proof runs, production payroll/HR behavior, live document extraction, or
+new backend state-machine scope.
+
+Final visual story:
+
+- Act 1 - The paid client operation: Northstar Dental Group has a Client Implementation Launch
+  with secured revenue, planned setup spend, labor cost, blocked risk, protected profit, and
+  protected margin.
+- Act 2 - Governed AI execution: Hermes creates the plan, Stripe proves finance state,
+  NeMo/local policy checks risky actions, and ScaleX approves safe actions while blocking unsafe
+  execution.
+- Act 3 - Enterprise proof: the Evidence Ledger records what happened, what was approved, what
+  was blocked, what proof exists, safety notes, no live-money mode, no secrets stored, and the
+  final protected-profit outcome.
+
+The first dashboard viewport now behaves like a premium enterprise control room: executive
+operation summary, live governed run status, money/risk/profit metrics, the control stack, and
+the Start Governed Run action. Business Intake, Document Review, and Workforce Costing remain
+available as supporting modules below the primary story.
+
 ## Goal 8G Scope - Enterprise Demo Narrative UI Lock
 
 Goal 8G rewrites and polishes the demo UI so the first 10 seconds clearly communicate:

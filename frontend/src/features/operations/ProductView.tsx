@@ -28,21 +28,17 @@ import {
 import type { LucideIcon } from "lucide-react";
 
 import { StatusBadge } from "../../components/ui/StatusBadge";
-import { softToneClass } from "../../components/ui/statusStyles";
+import { darkToneClass, softToneClass } from "../../components/ui/statusStyles";
 import type { Tone } from "../../components/ui/statusStyles";
 import {
   EmptyWorkspaceState,
-  OperationHero,
-  OperationTimeline,
   OutcomeRail,
   PlainTable,
   ProofRoute,
   TemplateShelf,
   WorkspacePage,
   WorkspaceSection,
-  type OperationStateItem,
   type RailItem,
-  type TimelineStep,
 } from "../../components/workspace/WorkspacePrimitives";
 import { formatCurrency, formatDateTime, formatPercent, humanize } from "../../format";
 import {
@@ -212,12 +208,6 @@ function DashboardView({
       : state?.guardrails.mode === "nemo_compatible"
         ? "amber"
         : "teal";
-  const stackSteps: TimelineStep[] = [
-    { icon: BrainCircuit, label: "Hermes plans", description: "Creates the client implementation plan and proposes next actions." },
-    { icon: CreditCard, label: "Stripe proves", description: "Provides test-mode finance proof and paid-state honesty." },
-    { icon: ShieldCheck, label: "NeMo checks", description: "NeMo/local policy reviews risky actions before execution." },
-    { icon: Database, label: "ScaleX records", description: "Evidence, decisions, blocked risk, and profit outcome are recorded." },
-  ];
   const plannedTemplates = [
     "Invoice-to-Cash",
     "Vendor Spend Approval",
@@ -329,14 +319,6 @@ function DashboardView({
     { label: "Protected profit", value: formatCurrency(profitAfterLaborCents), tone: marginNeedsReview ? "rose" : "teal" },
     { label: "Protected margin", value: formatPercent(marginAfterLaborPercent), tone: marginNeedsReview ? "rose" : "amber" },
   ];
-  const operationStates: OperationStateItem[] = [
-    { icon: CreditCard, label: "Revenue secured", value: formatCurrency(commandRevenueCents), tone: "emerald" },
-    { icon: ReceiptText, label: "Approved setup spend", value: formatCurrency(commandApprovedSpendCents), tone: "sky" },
-    { icon: Ban, label: "Blocked risk", value: formatCurrency(commandBlockedSpendCents), tone: "rose" },
-    { icon: Users, label: "Labor cost", value: formatCurrency(totalLaborCostCents), tone: "violet" },
-    { icon: TrendingUp, label: "Protected profit", value: formatCurrency(profitAfterLaborCents), tone: marginNeedsReview ? "rose" : "teal" },
-    { icon: ShieldCheck, label: "Protected margin", value: formatPercent(marginAfterLaborPercent), tone: marginNeedsReview ? "rose" : "amber" },
-  ];
   const controlStackItems = [
     {
       icon: BrainCircuit,
@@ -397,7 +379,11 @@ function DashboardView({
       scalex: "Revenue-backed operation -> governed run",
     },
     {
-      normal: "Tool-focused automation with little business context",
+      normal: "Tool-focused",
+      scalex: "Outcome-focused execution",
+    },
+    {
+      normal: "Little business context",
       scalex: "Client, money, margin, risk, and evidence in one control plane",
     },
     {
@@ -408,23 +394,15 @@ function DashboardView({
       normal: "Hard to audit deeply",
       scalex: "Evidence ledger records proof, safety notes, and protected profit",
     },
+    {
+      normal: "Not finance-aware",
+      scalex: "Stripe proof, protected profit, Hermes planning, and NeMo policy boundary",
+    },
   ];
 
   return (
-    <WorkspacePage
-      description="Hermes plans the work. Stripe proves the money. NeMo checks every risky action. ScaleX blocks unsafe execution, records evidence, and protects profit."
-      eyebrow="ScaleX Governed ClientOps"
-      meta={
-        <div className="flex flex-wrap gap-2">
-          <StatusBadge label="Hermes plans" tone="violet" />
-          <StatusBadge label="Stripe proves" tone="sky" />
-          <StatusBadge label="NeMo checks" tone={guardrailTone} />
-          <StatusBadge label="ScaleX records" tone="teal" />
-        </div>
-      }
-      title="Governed execution for revenue-backed client operations"
-    >
-      <OperationHero
+    <div className="mx-auto max-w-[94rem] space-y-8 text-zinc-950">
+      <CinematicControlRoomHero
         actions={
           <>
             <PrimaryButton
@@ -436,66 +414,38 @@ function DashboardView({
             <SecondaryButton icon={BookOpenCheck} label="Review Evidence Ledger" onClick={() => onNavigate("audit")} />
           </>
         }
-        client={clientName}
-        states={operationStates}
-        subtitle="Northstar Dental Group / Client Implementation Launch is preloaded as a paid client operation with money control, policy checks, blocked risk, labor cost, and audit proof."
-        title={operationName}
-      >
-        <p>{businessType}. Synthetic B2B implementation operations only: no patient data, no PHI, and no healthcare compliance claim.</p>
-        <div className="mt-4 flex flex-wrap items-center gap-2 text-xs font-semibold uppercase text-zinc-500">
-          <span>Hermes plans</span>
-          <span>-&gt;</span>
-          <span>Stripe proves</span>
-          <span>-&gt;</span>
-          <span>NeMo checks</span>
-          <span>-&gt;</span>
-          <span>ScaleX records</span>
-        </div>
-      </OperationHero>
-
-      <OutcomeRail items={commandOutcomeItems} />
+        businessType={businessType}
+        clientName={clientName}
+        guardrailTone={guardrailTone}
+        metrics={commandOutcomeItems}
+        operationName={operationName}
+        runStatus={runStatus}
+      />
 
       <WorkspaceSection
         description="Enterprise teams want AI agents to help run client operations, but raw agents cannot be trusted with money, vendors, client workflows, or internal systems without controls."
         title="Enterprise Pain -> ScaleX Control"
       >
-        <div className="grid gap-4 lg:grid-cols-2">
-          <article className="rounded-md bg-white p-5 shadow-sm ring-1 ring-zinc-200">
-            <StatusBadge label="enterprise pain" tone="amber" />
-            <p className="mt-4 text-lg font-semibold leading-7 text-zinc-950">
-              Agents can draft plans, but enterprises cannot let them touch spend, vendors, client workflow state, or finance proof without a control plane.
-            </p>
-          </article>
-          <article className="rounded-md bg-zinc-950 p-5 text-white shadow-sm">
-            <StatusBadge label="ScaleX control" tone="teal" />
-            <p className="mt-4 text-lg font-semibold leading-7">
-              ScaleX turns paid client work into a governed run: finance-backed, policy-checked, guardrailed, and recorded before the agent can move the operation forward.
-            </p>
-          </article>
-        </div>
+        <EnterpriseControlNarrative />
       </WorkspaceSection>
 
       <WorkspaceSection
         description="The control stack makes the agent boundary explicit before execution."
         title="Control Stack"
       >
-        <div className="grid gap-4 xl:grid-cols-4">
-          {controlStackItems.map((item) => (
-            <ControlStackCard key={item.name} {...item} />
-          ))}
-        </div>
+        <ControlStackFlow items={controlStackItems} />
       </WorkspaceSection>
 
       <WorkspaceSection
-        description="The run is not a generic task list. Each rail states what was checked and what proof was recorded."
-        title="Governed Execution Rails"
+        description="The run is not a generic task list. Each governed rail states the actor, decision, evidence, and proof boundary before the operation moves forward."
+        title="Governed Run Stage"
       >
-        <GovernedRailGrid rails={governedRails} />
+        <GovernedRailGrid rails={governedRails} running={busyAction === "run"} />
       </WorkspaceSection>
 
       <WorkspaceSection
         description="ScaleX is valuable because it does not just execute. It blocks unsafe spend before it reaches the ledger."
-        title="Blocked Risk Control"
+        title="Blocked Risk Spotlight"
       >
         <BlockedRiskSpotlight
           amountCents={commandBlockedSpendCents}
@@ -516,6 +466,56 @@ function DashboardView({
           protectedProfitCents={profitAfterLaborCents}
           revenueCents={commandRevenueCents}
         />
+      </WorkspaceSection>
+
+      <WorkspaceSection
+        description="Non-secret proof across planning, finance, policy checks, approved spend, blocked risk, labor costing, paid-state honesty, mode safety, and final protected profit."
+        title="Evidence Ledger"
+      >
+        <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_24rem]">
+          <div className="rounded-md bg-white p-5 shadow-sm ring-1 ring-zinc-200">
+            <EnterpriseEvidenceTable rows={evidenceRows} />
+          </div>
+          <div className="rounded-md bg-zinc-950 p-5 text-white shadow-sm">
+            <h3 className="font-semibold">Audit safety proof</h3>
+            <ul className="mt-4 space-y-3 text-sm text-zinc-200">
+              {commandSafetyProof.map((proof) => (
+                <li className="flex gap-2" key={proof}>
+                  <CheckCircle2 className="mt-0.5 h-4 w-4 flex-none text-emerald-300" aria-hidden="true" />
+                  <span>{proof}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      </WorkspaceSection>
+
+      <WorkspaceSection
+        description="ScaleX is not trigger-action automation. It is a governed run around client context, finance proof, policy, evidence, and margin."
+        title="Why This Is Not Zapier"
+      >
+        <ComparisonPanel rows={comparisonRows} />
+      </WorkspaceSection>
+
+      <WorkspaceSection
+        description="Final profit after approved setup spend and labor cost."
+        title="Profit Report"
+      >
+        <div className="rounded-md bg-white p-5 shadow-sm ring-1 ring-zinc-200">
+          <ConnectionFactGrid
+            facts={[
+              { label: "Client / job", value: `${currentClient.client_name} / ${currentClient.job_name}`, tone: "slate" },
+              { label: "Revenue secured", value: formatCurrency(commandRevenueCents), tone: "emerald" },
+              { label: "Approved setup spend", value: formatCurrency(commandApprovedSpendCents), tone: "sky" },
+              { label: "Blocked risky spend", value: formatCurrency(commandBlockedSpendCents), tone: "rose" },
+              { label: "Labor cost breakdown", value: currentEmployees.map((employee) => `${employee.employee_name}: ${formatCurrency(employee.labor_cost_cents)}`).join("; "), tone: "violet" },
+              { label: "Protected profit", value: formatCurrency(profitAfterLaborCents), tone: marginNeedsReview ? "rose" : "teal" },
+              { label: "Protected margin", value: formatPercent(marginAfterLaborPercent), tone: marginNeedsReview ? "rose" : "amber" },
+              { label: "Margin floor", value: formatPercent(marginFloorPercent), tone: "amber" },
+              { label: "Recommendation", value: marginNeedsReview ? "Review staffing or scope before more spend." : "Proceed while preserving labor and vendor-spend guardrails.", tone: marginNeedsReview ? "rose" : "emerald" },
+            ]}
+          />
+        </div>
       </WorkspaceSection>
 
       <WorkspaceSection
@@ -795,63 +795,6 @@ function DashboardView({
       </WorkspaceSection>
 
       <WorkspaceSection
-        description="Non-secret proof across onboarding, document review, runtime selection, finance proof, policy checks, labor costing, agents, and final report."
-        title="Evidence Ledger Preview"
-      >
-        <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_24rem]">
-          <div className="rounded-md bg-white p-5 shadow-sm ring-1 ring-zinc-200">
-            <EnterpriseEvidenceTable rows={evidenceRows} />
-          </div>
-          <div className="rounded-md bg-white p-5 shadow-sm ring-1 ring-zinc-200">
-            <h3 className="font-semibold text-zinc-950">Safety proof</h3>
-            <ul className="mt-4 space-y-2 text-sm text-zinc-700">
-              {commandSafetyProof.map((proof) => (
-                <li className="flex gap-2" key={proof}>
-                  <CheckCircle2 className="mt-0.5 h-4 w-4 flex-none text-emerald-600" aria-hidden="true" />
-                  <span>{proof}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-        </div>
-      </WorkspaceSection>
-
-      <WorkspaceSection
-        description="Final profit after approved vendor spend and labor cost."
-        title="Final Profit Report"
-      >
-        <div className="rounded-md bg-white p-5 shadow-sm ring-1 ring-zinc-200">
-          <ConnectionFactGrid
-            facts={[
-              { label: "Client / job", value: `${currentClient.client_name} / ${currentClient.job_name}`, tone: "slate" },
-              { label: "Revenue", value: formatCurrency(commandRevenueCents), tone: "emerald" },
-              { label: "Approved vendor spend", value: formatCurrency(commandApprovedSpendCents), tone: "sky" },
-              { label: "Blocked spend", value: formatCurrency(commandBlockedSpendCents), tone: "rose" },
-              { label: "Labor cost breakdown", value: currentEmployees.map((employee) => `${employee.employee_name}: ${formatCurrency(employee.labor_cost_cents)}`).join("; "), tone: "violet" },
-              { label: "Gross profit after labor", value: formatCurrency(profitAfterLaborCents), tone: marginNeedsReview ? "rose" : "teal" },
-              { label: "Final margin", value: formatPercent(marginAfterLaborPercent), tone: marginNeedsReview ? "rose" : "amber" },
-              { label: "Margin floor", value: formatPercent(marginFloorPercent), tone: "amber" },
-              { label: "Recommendation", value: marginNeedsReview ? "Review staffing or scope before more spend." : "Proceed while preserving labor and vendor-spend guardrails.", tone: marginNeedsReview ? "rose" : "emerald" },
-            ]}
-          />
-        </div>
-      </WorkspaceSection>
-
-      <WorkspaceSection
-        description="ScaleX is not trigger-action automation. It is a governed run around client context, finance proof, policy, evidence, and margin."
-        title="Why This Is Not Zapier"
-      >
-        <ComparisonPanel rows={comparisonRows} />
-      </WorkspaceSection>
-
-      <WorkspaceSection
-        description="The launch reads from left to right as a governed business process."
-        title="Execution Stack"
-      >
-        <OperationTimeline steps={stackSteps} />
-      </WorkspaceSection>
-
-      <WorkspaceSection
         description="One implemented function is available today. Additional ClientOps functions remain planned."
         title="Governed Operation Templates"
       >
@@ -889,7 +832,191 @@ function DashboardView({
           </button>
         </div>
       </WorkspaceSection>
-    </WorkspacePage>
+    </div>
+  );
+}
+
+function CinematicControlRoomHero({
+  actions,
+  businessType,
+  clientName,
+  guardrailTone,
+  metrics,
+  operationName,
+  runStatus,
+}: {
+  actions: ReactNode;
+  businessType: string;
+  clientName: string;
+  guardrailTone: Tone;
+  metrics: RailItem[];
+  operationName: string;
+  runStatus: string;
+}) {
+  return (
+    <section className="overflow-hidden rounded-md bg-zinc-950 text-white shadow-xl shadow-zinc-950/20 ring-1 ring-zinc-900">
+      <div className="grid gap-0 xl:grid-cols-[minmax(0,1.15fr)_minmax(340px,0.85fr)]">
+        <div className="px-5 py-6 sm:px-7 lg:px-9 lg:py-8">
+          <div className="flex flex-wrap gap-2">
+            <span className={`inline-flex items-center gap-2 rounded-md border px-3 py-1.5 text-sm font-semibold ${darkToneClass("emerald")}`}>
+              <ShieldCheck className="h-4 w-4" aria-hidden="true" />
+              ScaleX Governed ClientOps
+            </span>
+            <span className={`inline-flex items-center gap-2 rounded-md border px-3 py-1.5 text-sm font-semibold ${darkToneClass("sky")}`}>
+              <Activity className="h-4 w-4" aria-hidden="true" />
+              {runStatus}
+            </span>
+          </div>
+          <h1 className="mt-5 max-w-5xl text-4xl font-semibold leading-tight tracking-normal text-white lg:text-6xl">
+            Governed execution for revenue-backed client operations
+          </h1>
+          <p className="mt-5 max-w-4xl text-lg leading-8 text-zinc-200">
+            Hermes plans the work. Stripe proves the money. NeMo checks risky actions. ScaleX blocks unsafe execution, records evidence, and protects profit.
+          </p>
+          <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+            {actions}
+          </div>
+          <StackChain guardrailTone={guardrailTone} />
+        </div>
+
+        <aside className="border-t border-white/10 bg-white/[0.04] p-5 sm:p-6 xl:border-l xl:border-t-0">
+          <div className="rounded-md bg-white p-5 text-zinc-950 shadow-lg shadow-zinc-950/20">
+            <StatusBadge icon={Building2} label="Primary operation" tone="emerald" />
+            <p className="mt-5 text-sm font-semibold uppercase text-zinc-500">{clientName}</p>
+            <h2 className="mt-2 text-3xl font-semibold leading-tight tracking-normal text-zinc-950">
+              {operationName}
+            </h2>
+            <p className="mt-4 text-sm leading-6 text-zinc-600">
+              {businessType}. Synthetic B2B implementation operations only: no patient data, no PHI, and no healthcare compliance claim.
+            </p>
+            <div className="mt-5 grid gap-3 sm:grid-cols-2">
+              {metrics.slice(0, 4).map((metric) => (
+                <HeroCompactMetric key={metric.label} item={metric} />
+              ))}
+            </div>
+          </div>
+        </aside>
+      </div>
+
+      <div className="border-t border-white/10 bg-white/[0.03] p-4 sm:p-5">
+        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-6">
+          {metrics.map((metric) => (
+            <HeroMetricCard key={metric.label} item={metric} />
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function HeroMetricCard({ item }: { item: RailItem }) {
+  return (
+    <article className={`rounded-md border p-4 ${darkToneClass(item.tone ?? "slate")}`}>
+      <p className="text-xs font-semibold uppercase">{item.label}</p>
+      <p className="mt-2 break-words text-3xl font-semibold leading-none text-white">{item.value}</p>
+    </article>
+  );
+}
+
+function HeroCompactMetric({ item }: { item: RailItem }) {
+  return (
+    <div className={`rounded-md border px-3 py-2 ${softToneClass(item.tone ?? "slate")}`}>
+      <p className="text-xs font-semibold uppercase">{item.label}</p>
+      <p className="mt-1 break-words text-base font-semibold">{item.value}</p>
+    </div>
+  );
+}
+
+function StackChain({ guardrailTone }: { guardrailTone: Tone }) {
+  const steps = [
+    { icon: BrainCircuit, label: "Hermes plans", tone: "violet" as Tone },
+    { icon: CreditCard, label: "Stripe proves", tone: "sky" as Tone },
+    { icon: ShieldCheck, label: "NeMo checks", tone: guardrailTone },
+    { icon: Database, label: "ScaleX records", tone: "teal" as Tone },
+  ];
+  return (
+    <ol className="mt-6 grid gap-2 sm:grid-cols-2 xl:grid-cols-4">
+      {steps.map((step, index) => {
+        const Icon = step.icon;
+        return (
+          <li className="flex min-w-0 items-center gap-2" key={step.label}>
+            <span className={`flex min-h-11 min-w-0 flex-1 items-center gap-2 rounded-md border px-3 text-sm font-semibold ${darkToneClass(step.tone)}`}>
+              <Icon className="h-4 w-4 flex-none" aria-hidden="true" />
+              <span className="min-w-0 break-words">{step.label}</span>
+            </span>
+            {index < steps.length - 1 ? <span className="hidden text-zinc-500 xl:inline">-&gt;</span> : null}
+          </li>
+        );
+      })}
+    </ol>
+  );
+}
+
+function EnterpriseControlNarrative() {
+  return (
+    <div className="grid gap-4 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
+      <article className="rounded-md bg-white p-6 shadow-sm ring-1 ring-zinc-200">
+        <StatusBadge icon={AlertTriangle} label="enterprise pain" tone="amber" />
+        <h3 className="mt-4 text-2xl font-semibold leading-tight text-zinc-950">
+          Raw agents cannot be trusted with spend, vendors, client workflows, or internal systems.
+        </h3>
+        <p className="mt-3 text-sm leading-6 text-zinc-600">
+          Enterprise teams need proof, policy, money control, and audit before an AI agent can move paid work forward.
+        </p>
+      </article>
+      <article className="rounded-md bg-zinc-950 p-6 text-white shadow-sm">
+        <StatusBadge icon={ShieldCheck} label="ScaleX control" tone="teal" />
+        <h3 className="mt-4 text-2xl font-semibold leading-tight">
+          ScaleX turns paid client work into a governed run.
+        </h3>
+        <p className="mt-3 text-sm leading-6 text-zinc-200">
+          Finance-backed, policy-checked, guardrailed, and recorded before the agent can move the operation forward.
+        </p>
+      </article>
+    </div>
+  );
+}
+
+interface ControlStackItem {
+  description: string;
+  icon: LucideIcon;
+  name: string;
+  result: string;
+  role: string;
+  tone: Tone;
+}
+
+function ControlStackFlow({ items }: { items: ControlStackItem[] }) {
+  return (
+    <div className="rounded-md bg-zinc-950 p-4 text-white shadow-sm ring-1 ring-zinc-900 sm:p-5">
+      <ol className="grid gap-3 xl:grid-cols-4">
+        {items.map((item, index) => {
+          const Icon = item.icon;
+          return (
+            <li className="relative" key={item.name}>
+              <article className={`h-full rounded-md border p-4 ${darkToneClass(item.tone)}`}>
+                <div className="flex items-start gap-3">
+                  <span className="flex h-10 w-10 flex-none items-center justify-center rounded-md bg-white/10">
+                    <Icon className="h-5 w-5" aria-hidden="true" />
+                  </span>
+                  <div className="min-w-0">
+                    <h3 className="text-xl font-semibold text-white">{item.name}</h3>
+                    <p className="mt-1 text-xs font-semibold uppercase text-zinc-300">{item.role}</p>
+                  </div>
+                </div>
+                <p className="mt-4 text-sm leading-6 text-zinc-200">{item.description}</p>
+                <p className="mt-4 rounded-md bg-white/10 px-3 py-2 text-sm font-semibold text-white">{item.result}</p>
+              </article>
+              {index < items.length - 1 ? (
+                <span className="absolute -right-3 top-1/2 z-10 hidden h-8 w-8 -translate-y-1/2 items-center justify-center rounded-md border border-white/10 bg-zinc-900 text-sm font-semibold text-zinc-200 xl:flex">
+                  -&gt;
+                </span>
+              ) : null}
+            </li>
+          );
+        })}
+      </ol>
+    </div>
   );
 }
 
@@ -906,7 +1033,7 @@ function PrimaryButton({
 }) {
   return (
     <button
-      className="inline-flex min-h-12 items-center justify-center gap-2 rounded-md bg-zinc-950 px-5 text-sm font-semibold text-white transition hover:bg-zinc-800 disabled:cursor-not-allowed disabled:bg-zinc-300 disabled:text-zinc-500"
+      className="inline-flex min-h-12 items-center justify-center gap-2 rounded-md bg-emerald-400 px-5 text-sm font-semibold text-zinc-950 transition hover:bg-emerald-300 disabled:cursor-not-allowed disabled:bg-zinc-300 disabled:text-zinc-500"
       disabled={disabled}
       onClick={onClick}
       type="button"
@@ -975,38 +1102,52 @@ function ControlStackCard({
 }
 
 interface GovernedRailItem {
+  actor: string;
   checked: string;
   decision: string;
   proof: string;
   rail: string;
   status: string;
+  tag: string;
   tone: Tone;
 }
 
-function GovernedRailGrid({ rails }: { rails: GovernedRailItem[] }) {
+function GovernedRailGrid({ rails, running = false }: { rails: GovernedRailItem[]; running?: boolean }) {
   return (
-    <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
-      {rails.map((rail) => (
-        <article className="rounded-md bg-white p-4 shadow-sm ring-1 ring-zinc-200" key={`${rail.rail}-${rail.status}`}>
-          <div className="flex items-start justify-between gap-3">
-            <div>
-              <p className="text-xs font-semibold uppercase text-zinc-500">{rail.rail}</p>
-              <h3 className="mt-1 text-lg font-semibold text-zinc-950">{rail.status}</h3>
+    <div className="rounded-md bg-zinc-950 p-4 text-white shadow-sm ring-1 ring-zinc-900 sm:p-5">
+      <div className="flex flex-col gap-3 border-b border-white/10 pb-4 lg:flex-row lg:items-center lg:justify-between">
+        <div>
+          <p className="text-sm font-semibold uppercase text-emerald-300">Live governed run stage</p>
+          <p className="mt-1 max-w-3xl text-sm leading-6 text-zinc-300">
+            Every forward move is checked against proof, policy, money control, and audit duties.
+          </p>
+        </div>
+        <StatusBadge icon={running ? RefreshCw : ShieldCheck} label={running ? "running governed run" : "ready to execute"} tone={running ? "sky" : "emerald"} />
+      </div>
+      <ol className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
+        {rails.map((rail, index) => (
+          <li
+            className={`rounded-md border p-4 shadow-sm transition hover:-translate-y-0.5 ${darkToneClass(rail.tone)} ${rail.decision === "Blocked" ? "ring-2 ring-rose-400/80" : ""} ${running && index === 0 ? "animate-pulse" : ""}`}
+            key={`${rail.rail}-${rail.status}`}
+          >
+            <div className="flex items-start justify-between gap-3">
+              <div className="min-w-0">
+                <p className="text-xs font-semibold uppercase text-zinc-300">{String(index + 1).padStart(2, "0")} / {rail.actor}</p>
+                <h3 className="mt-2 text-xl font-semibold leading-tight text-white">{rail.rail}</h3>
+              </div>
+              <span className="rounded-md bg-white/10 px-2.5 py-1 text-xs font-semibold text-white">
+                {rail.decision}
+              </span>
             </div>
-            <StatusBadge label={rail.decision} tone={rail.tone} />
-          </div>
-          <dl className="mt-4 space-y-3 text-sm">
-            <div>
-              <dt className="font-semibold text-zinc-500">Checked</dt>
-              <dd className="mt-1 text-zinc-800">{rail.checked}</dd>
+            <p className="mt-3 text-sm font-semibold leading-6 text-white">{rail.status}</p>
+            <p className="mt-2 text-sm leading-6 text-zinc-200">{rail.checked}</p>
+            <div className="mt-4 grid gap-2 border-t border-white/10 pt-3 text-xs font-semibold uppercase text-zinc-300">
+              <span>{rail.tag}</span>
+              <span className="normal-case leading-5 text-zinc-200">{rail.proof}</span>
             </div>
-            <div>
-              <dt className="font-semibold text-zinc-500">Proof</dt>
-              <dd className="mt-1 text-zinc-800">{rail.proof}</dd>
-            </div>
-          </dl>
-        </article>
-      ))}
+          </li>
+        ))}
+      </ol>
     </div>
   );
 }
@@ -1019,29 +1160,47 @@ function BlockedRiskSpotlight({
   marginPercent: number;
 }) {
   return (
-    <article className="grid overflow-hidden rounded-md bg-rose-950 text-white shadow-sm lg:grid-cols-[minmax(0,1fr)_22rem]">
-      <div className="p-6 sm:p-7">
-        <StatusBadge label="blocked" tone="rose" />
-        <h3 className="mt-4 text-3xl font-semibold leading-tight">Blocked risky action: Data broker enrichment / premium vendor spend</h3>
-        <p className="mt-4 max-w-3xl text-base leading-7 text-rose-100">
-          ScaleX stopped uncontrolled vendor/data-enrichment spend before execution, preserved margin, and recorded evidence instead of blindly firing the action.
+    <article className="grid overflow-hidden rounded-md bg-zinc-950 text-white shadow-xl shadow-rose-950/20 ring-1 ring-rose-500/40 lg:grid-cols-[minmax(0,1fr)_24rem]">
+      <div className="p-6 sm:p-8">
+        <span className="inline-flex items-center gap-2 rounded-md border border-rose-300/30 bg-rose-300/10 px-3 py-1.5 text-sm font-semibold text-rose-100">
+          <Ban className="h-4 w-4" aria-hidden="true" />
+          Blocked risky action
+        </span>
+        <h3 className="mt-5 max-w-4xl text-4xl font-semibold leading-tight tracking-normal">
+          Data broker enrichment / premium vendor spend
+        </h3>
+        <p className="mt-5 max-w-3xl text-base leading-7 text-zinc-200">
+          ScaleX stopped the action before execution. The run preserved protected margin, prevented uncontrolled vendor exposure, and recorded audit proof instead of blindly firing the spend.
         </p>
+        <div className="mt-6 grid gap-3 sm:grid-cols-3">
+          <BlockedRiskSignal label="Requested amount" value={formatCurrency(amountCents)} />
+          <BlockedRiskSignal label="Decision" value="Blocked" />
+          <BlockedRiskSignal label="Protected margin" value={formatPercent(marginPercent)} />
+        </div>
       </div>
-      <dl className="grid divide-y divide-rose-800 border-t border-rose-800 bg-rose-900/60 lg:border-l lg:border-t-0">
-        <BlockedRiskFact label="Requested amount" value={formatCurrency(amountCents)} />
-        <BlockedRiskFact label="Decision" value="Blocked" />
-        <BlockedRiskFact label="Reason" value="Violates policy / margin / unsafe vendor rule" />
-        <BlockedRiskFact label="Impact" value={`Protected margin ${formatPercent(marginPercent)}`} />
+      <dl className="grid divide-y divide-rose-800 border-t border-rose-800 bg-rose-950/70 lg:border-l lg:border-t-0">
+        <BlockedRiskFact label="Reason" value="Violates vendor/risk policy and would create uncontrolled spend exposure." />
+        <BlockedRiskFact label="Impact" value="Protected margin, prevented risky vendor action, and recorded audit proof." />
+        <BlockedRiskFact label="Execution rule" value="Fail-closed before spend reaches the ledger." />
       </dl>
     </article>
   );
 }
 
+function BlockedRiskSignal({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-md border border-rose-300/30 bg-rose-300/10 p-4">
+      <p className="text-xs font-semibold uppercase text-rose-200">{label}</p>
+      <p className="mt-2 break-words text-2xl font-semibold text-white">{value}</p>
+    </div>
+  );
+}
+
 function BlockedRiskFact({ label, value }: { label: string; value: string }) {
   return (
-    <div className="px-5 py-4">
+    <div className="px-5 py-5">
       <dt className="text-xs font-semibold uppercase text-rose-200">{label}</dt>
-      <dd className="mt-1 break-words text-lg font-semibold text-white">{value}</dd>
+      <dd className="mt-2 break-words text-base font-semibold leading-6 text-white">{value}</dd>
     </div>
   );
 }
@@ -1064,31 +1223,49 @@ function EconomicControlPanel({
   revenueCents: number;
 }) {
   return (
-    <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_28rem]">
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-        <MetricTile label="Revenue secured" tone="emerald" value={formatCurrency(revenueCents)} />
-        <MetricTile label="Approved setup spend" tone="sky" value={formatCurrency(approvedSpendCents)} />
-        <MetricTile label="Blocked risky spend" tone="rose" value={formatCurrency(blockedSpendCents)} />
-        <MetricTile label="Labor cost" tone="violet" value={formatCurrency(laborCostCents)} />
-        <MetricTile label="Protected profit" tone="teal" value={formatCurrency(protectedProfitCents)} />
-        <MetricTile label="Protected margin" tone="amber" value={formatPercent(protectedMarginPercent)} />
+    <div className="grid overflow-hidden rounded-md bg-white shadow-sm ring-1 ring-zinc-200 xl:grid-cols-[minmax(0,1fr)_30rem]">
+      <div className="p-5 sm:p-6">
+        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+          <EconomicMetric label="Revenue secured" tone="emerald" value={formatCurrency(revenueCents)} />
+          <EconomicMetric label="Approved setup spend" tone="sky" value={formatCurrency(approvedSpendCents)} />
+          <EconomicMetric label="Labor cost" tone="violet" value={formatCurrency(laborCostCents)} />
+          <EconomicMetric label="Blocked risky spend" tone="rose" value={formatCurrency(blockedSpendCents)} />
+          <EconomicMetric label="Protected profit" tone="teal" value={formatCurrency(protectedProfitCents)} />
+          <EconomicMetric label="Protected margin" tone="amber" value={formatPercent(protectedMarginPercent)} />
+        </div>
       </div>
-      <div className="rounded-md bg-zinc-950 p-5 text-white">
-        <p className="text-xs font-semibold uppercase text-zinc-300">Money control formula</p>
-        <p className="mt-3 text-xl font-semibold leading-8">Protected profit = Revenue - Approved Spend - Labor Cost</p>
-        <p className="mt-3 text-xl font-semibold leading-8">Protected margin = Protected profit / Revenue</p>
-        <dl className="mt-5 grid gap-3 border-t border-zinc-700 pt-4 text-sm">
-          <div className="flex items-center justify-between gap-4">
-            <dt className="text-zinc-300">Margin floor</dt>
-            <dd className="font-semibold">{formatPercent(marginFloorPercent)}</dd>
+      <div className="bg-zinc-950 p-6 text-white">
+        <p className="text-xs font-semibold uppercase text-emerald-300">Enterprise money control</p>
+        <p className="mt-3 text-3xl font-semibold leading-tight text-white">{formatCurrency(protectedProfitCents)}</p>
+        <p className="mt-1 text-sm font-semibold text-zinc-300">protected profit after approved setup spend and labor cost</p>
+        <div className="mt-6 space-y-4 border-t border-white/10 pt-5">
+          <div>
+            <p className="text-xs font-semibold uppercase text-zinc-400">Formula</p>
+            <p className="mt-2 text-lg font-semibold leading-7">Protected profit = Revenue - Approved Spend - Labor Cost</p>
+            <p className="mt-2 text-lg font-semibold leading-7">Protected margin = Protected profit / Revenue</p>
           </div>
-          <div className="flex items-center justify-between gap-4">
-            <dt className="text-zinc-300">Decision</dt>
-            <dd className="font-semibold text-emerald-300">Safe / Profitable</dd>
-          </div>
-        </dl>
+          <dl className="grid gap-3 text-sm">
+            <div className="flex items-center justify-between gap-4 rounded-md bg-white/10 px-3 py-2">
+              <dt className="text-zinc-300">Margin floor</dt>
+              <dd className="font-semibold">{formatPercent(marginFloorPercent)}</dd>
+            </div>
+            <div className="flex items-center justify-between gap-4 rounded-md bg-emerald-300/10 px-3 py-2 text-emerald-100">
+              <dt>Decision</dt>
+              <dd className="font-semibold">Protected</dd>
+            </div>
+          </dl>
+        </div>
       </div>
     </div>
+  );
+}
+
+function EconomicMetric({ label, tone, value }: { label: string; tone: Tone; value: string }) {
+  return (
+    <article className={`rounded-md border p-4 ${softToneClass(tone)}`}>
+      <p className="text-xs font-semibold uppercase">{label}</p>
+      <p className="mt-2 break-words text-3xl font-semibold leading-none">{value}</p>
+    </article>
   );
 }
 
@@ -1104,41 +1281,49 @@ interface EnterpriseEvidenceRow {
 
 function EnterpriseEvidenceTable({ rows }: { rows: EnterpriseEvidenceRow[] }) {
   return (
-    <div className="overflow-x-auto">
-      <table className="min-w-full border-separate border-spacing-y-2 text-sm">
-        <thead className="text-left text-xs uppercase text-zinc-500">
-          <tr>
-            <th className="px-3 py-2">Order</th>
-            <th className="px-3 py-2">Actor / system</th>
-            <th className="px-3 py-2">Action</th>
-            <th className="px-3 py-2">Result</th>
-            <th className="px-3 py-2">Evidence type</th>
-            <th className="px-3 py-2">Safety note</th>
-          </tr>
-        </thead>
-        <tbody>
-          {rows.map((row) => (
-            <tr className="bg-zinc-50 align-top" key={`${row.order}-${row.action}`}>
-              <td className="whitespace-nowrap px-3 py-3 font-semibold text-zinc-500">{row.order}</td>
-              <td className="px-3 py-3 font-semibold text-zinc-950">{row.actor}</td>
-              <td className="px-3 py-3 text-zinc-700">{row.action}</td>
-              <td className="px-3 py-3"><StatusBadge label={row.result} tone={row.tone} /></td>
-              <td className="px-3 py-3 text-zinc-700">{row.evidenceType}</td>
-              <td className="px-3 py-3 text-zinc-600">{row.safetyNote}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
+    <ol className="grid gap-3">
+      {rows.map((row) => (
+        <li className="grid gap-4 rounded-md border border-zinc-200 bg-zinc-50 p-4 lg:grid-cols-[4.5rem_minmax(0,0.8fr)_minmax(0,1.35fr)_minmax(0,0.9fr)]" key={`${row.order}-${row.action}`}>
+          <div>
+            <p className="text-xs font-semibold uppercase text-zinc-500">Order</p>
+            <p className="mt-1 text-lg font-semibold text-zinc-950">{row.order}</p>
+          </div>
+          <div>
+            <p className="text-xs font-semibold uppercase text-zinc-500">Actor / system</p>
+            <p className="mt-1 font-semibold text-zinc-950">{row.actor}</p>
+            <div className="mt-2">
+              <StatusBadge label={row.result} tone={row.tone} />
+            </div>
+          </div>
+          <div>
+            <p className="text-xs font-semibold uppercase text-zinc-500">Action</p>
+            <p className="mt-1 text-sm font-semibold leading-6 text-zinc-800">{row.action}</p>
+            <p className="mt-2 text-xs font-semibold uppercase text-zinc-500">Evidence type: {row.evidenceType}</p>
+          </div>
+          <div>
+            <p className="text-xs font-semibold uppercase text-zinc-500">Safety note</p>
+            <p className="mt-1 text-sm leading-6 text-zinc-700">{row.safetyNote}</p>
+          </div>
+        </li>
+      ))}
+    </ol>
   );
 }
 
 function ComparisonPanel({ rows }: { rows: Array<{ normal: string; scalex: string }> }) {
   return (
-    <div className="grid overflow-hidden rounded-md bg-white shadow-sm ring-1 ring-zinc-200 lg:grid-cols-2">
-      <div className="border-b border-zinc-200 p-5 lg:border-b-0 lg:border-r">
-        <h3 className="text-lg font-semibold text-zinc-950">Normal automation</h3>
-        <ul className="mt-4 space-y-3 text-sm text-zinc-700">
+    <div className="grid gap-4 lg:grid-cols-2">
+      <article className="rounded-md bg-white p-6 shadow-sm ring-1 ring-zinc-200">
+        <div className="flex items-center gap-3">
+          <span className="flex h-10 w-10 items-center justify-center rounded-md border border-zinc-200 bg-zinc-50 text-zinc-600">
+            <CircleDashed className="h-5 w-5" aria-hidden="true" />
+          </span>
+          <div>
+            <p className="text-xs font-semibold uppercase text-zinc-500">Normal automation</p>
+            <h3 className="text-2xl font-semibold text-zinc-950">Trigger -&gt; action</h3>
+          </div>
+        </div>
+        <ul className="mt-5 space-y-3 text-sm text-zinc-700">
           {rows.map((row) => (
             <li className="flex gap-2" key={row.normal}>
               <CircleDashed className="mt-0.5 h-4 w-4 flex-none text-zinc-400" aria-hidden="true" />
@@ -1146,18 +1331,26 @@ function ComparisonPanel({ rows }: { rows: Array<{ normal: string; scalex: strin
             </li>
           ))}
         </ul>
-      </div>
-      <div className="p-5">
-        <h3 className="text-lg font-semibold text-zinc-950">ScaleX</h3>
-        <ul className="mt-4 space-y-3 text-sm text-zinc-700">
+      </article>
+      <article className="rounded-md bg-zinc-950 p-6 text-white shadow-sm ring-1 ring-zinc-900">
+        <div className="flex items-center gap-3">
+          <span className="flex h-10 w-10 items-center justify-center rounded-md border border-emerald-300/30 bg-emerald-300/10 text-emerald-100">
+            <ShieldCheck className="h-5 w-5" aria-hidden="true" />
+          </span>
+          <div>
+            <p className="text-xs font-semibold uppercase text-emerald-300">ScaleX</p>
+            <h3 className="text-2xl font-semibold">Revenue-backed operation -&gt; governed run</h3>
+          </div>
+        </div>
+        <ul className="mt-5 space-y-3 text-sm text-zinc-200">
           {rows.map((row) => (
             <li className="flex gap-2" key={row.scalex}>
-              <ShieldCheck className="mt-0.5 h-4 w-4 flex-none text-emerald-600" aria-hidden="true" />
+              <ShieldCheck className="mt-0.5 h-4 w-4 flex-none text-emerald-300" aria-hidden="true" />
               <span>{row.scalex}</span>
             </li>
           ))}
         </ul>
-      </div>
+      </article>
     </div>
   );
 }
@@ -1282,66 +1475,112 @@ function governedRailItems({
   return [
     {
       rail: "Input Rail",
-      status: "Input rail passed",
-      checked: "Northstar operation context, synthetic data boundary, revenue, spend cap, margin floor.",
+      actor: "ScaleX",
+      status: "Passed",
+      checked: "Northstar operation context, synthetic data boundary, revenue, spend cap, and margin floor checked.",
       proof: `${runProof}; no patient data or PHI.`,
       decision: "Passed",
+      tag: "operation context",
       tone: "emerald",
     },
     {
-      rail: "Planning Rail",
-      status: "Hermes plan created",
-      checked: "Hermes plan, proposed tool sequence, bounded client implementation work.",
-      proof: "Planning rail approved before protected actions.",
-      decision: "Approved",
+      rail: "Hermes Plan",
+      actor: "Hermes",
+      status: "Created",
+      checked: "Client implementation plan and proposed next actions created for bounded work.",
+      proof: "Planning proof recorded before protected execution.",
+      decision: "Created",
+      tag: "planner proof",
       tone: "violet",
     },
     {
-      rail: "Finance Rail",
-      status: "Stripe finance proof created",
-      checked: `Revenue secured ${formatCurrency(revenueCents)} and Stripe paid-state honesty.`,
-      proof: `${stripeLabel}; revenue gate verified.`,
+      rail: "Planning Rail",
+      actor: "ScaleX",
+      status: "Approved",
+      checked: "Plan reviewed against allowed client-implementation scope before execution.",
+      proof: "Planning rail approved before protected actions.",
+      decision: "Approved",
+      tag: "scope boundary",
+      tone: "violet",
+    },
+    {
+      rail: "Stripe Finance Proof",
+      actor: "Stripe",
+      status: "Verified",
+      checked: `Finance proof created for ${formatCurrency(revenueCents)} secured revenue.`,
+      proof: stripeLabel,
       decision: "Verified",
+      tag: "finance proof",
       tone: "sky",
     },
     {
-      rail: "Policy Rail",
-      status: "NeMo/local policy reviewed action",
-      checked: "Vendor allowlist, blocked vendor rule, spend cap, margin floor, and unsafe-data boundary.",
+      rail: "Revenue Gate",
+      actor: "ScaleX",
+      status: "Passed",
+      checked: "Revenue gate verified before setup spend or delivery work can proceed.",
+      proof: `Revenue secured ${formatCurrency(revenueCents)}.`,
+      decision: "Passed",
+      tag: "money gate",
+      tone: "emerald",
+    },
+    {
+      rail: "NeMo / Local Policy",
+      actor: "Guardrail Runtime",
+      status: "Checked",
+      checked: "Vendor allowlist, blocked vendor rule, spend cap, margin floor, and unsafe-data boundary reviewed.",
       proof: guardrailLabel,
-      decision: "Approved",
+      decision: "Checked",
+      tag: "policy runtime",
       tone: "teal",
     },
     {
-      rail: "Execution Rail",
-      status: "Spend approved and risk blocked",
-      checked: `${formatCurrency(approvedSpendCents)} controlled setup spend and ${formatCurrency(blockedSpendCents)} risky enrichment spend.`,
-      proof: "Approved setup spend recorded; blocked risk created no spend ledger row.",
+      rail: "Controlled Spend",
+      actor: "ScaleX",
+      status: "Approved",
+      checked: `${formatCurrency(approvedSpendCents)} setup spend checked against approved vendors and margin.`,
+      proof: "Approved setup spend recorded.",
+      decision: "Approved",
+      tag: "spend approval",
+      tone: "emerald",
+    },
+    {
+      rail: "Risky Vendor Action",
+      actor: "ScaleX Policy",
+      status: "Blocked",
+      checked: `${formatCurrency(blockedSpendCents)} data broker enrichment / premium vendor spend reviewed before execution.`,
+      proof: "Blocked action created no spend ledger row.",
       decision: "Blocked",
+      tag: "risk blocked",
       tone: "rose",
     },
     {
-      rail: "Evidence Rail",
-      status: "Evidence ledger recorded proof",
-      checked: "Planning, finance, policy, approved spend, blocked risk, labor cost, and safety proof.",
+      rail: "Evidence Ledger",
+      actor: "SQLite Ledger",
+      status: "Recorded",
+      checked: "Planning, finance, policy, approved spend, blocked risk, labor cost, and safety proof recorded.",
       proof: `${hasRun ? "SQLite evidence rows" : "Evidence preview"} available for audit.`,
       decision: "Recorded",
+      tag: "audit proof",
       tone: "teal",
     },
     {
-      rail: "Output Rail",
-      status: "Paid-state honesty verified",
-      checked: "No live-money claim, no false paid claim, no secrets, no real client data.",
+      rail: "Output Honesty Rail",
+      actor: "ScaleX",
+      status: "Verified",
+      checked: "No live-money claim, no false paid claim, no secrets, and no real client data.",
       proof: "Output rail verifies safe wording before report.",
       decision: "Verified",
+      tag: "honesty check",
       tone: "amber",
     },
     {
-      rail: "Profit Rail",
-      status: "Profit outcome recorded",
+      rail: "Profit Outcome",
+      actor: "ScaleX",
+      status: "Protected",
       checked: `Labor cost ${formatCurrency(laborCostCents)}, protected profit ${formatCurrency(profitCents)}, protected margin ${formatPercent(marginPercent)}.`,
       proof: hasReport ? "Final profit report recorded" : "Profit outcome preview ready.",
-      decision: "Recorded",
+      decision: "Protected",
+      tag: "margin proof",
       tone: "emerald",
     },
   ];
@@ -1403,7 +1642,7 @@ function enterpriseEvidenceRows({
     {
       order: "005",
       actor: "ScaleX Policy",
-      action: `Blocked risky spend ${formatCurrency(blockedSpendCents)}`,
+      action: `Risky vendor action blocked ${formatCurrency(blockedSpendCents)}`,
       result: "blocked",
       evidenceType: "policy_check",
       safetyNote: "Data broker enrichment / premium vendor spend created no spend ledger row.",
@@ -1420,15 +1659,6 @@ function enterpriseEvidenceRows({
     },
     {
       order: "007",
-      actor: "ScaleX Ledger",
-      action: "Final profit outcome recorded",
-      result: "recorded",
-      evidenceType: "profit_report",
-      safetyNote: `Protected profit ${formatCurrency(profitCents)} after approved spend and labor.`,
-      tone: "emerald",
-    },
-    {
-      order: "008",
       actor: "Output Rail",
       action: "Paid-state honesty verified",
       result: "verified",
@@ -1437,7 +1667,7 @@ function enterpriseEvidenceRows({
       tone: "amber",
     },
     {
-      order: "009",
+      order: "008",
       actor: "ScaleX Safety",
       action: "No live-money mode verified",
       result: "verified",
@@ -1446,13 +1676,22 @@ function enterpriseEvidenceRows({
       tone: "teal",
     },
     {
-      order: "010",
+      order: "009",
       actor: "ScaleX Safety",
       action: "No secrets stored verified",
       result: "verified",
       evidenceType: "secret_boundary",
       safetyNote: "No tokens, credential headers, or .env values are shown.",
       tone: "teal",
+    },
+    {
+      order: "010",
+      actor: "ScaleX Ledger",
+      action: "Final protected profit outcome recorded",
+      result: "recorded",
+      evidenceType: "profit_report",
+      safetyNote: `Protected profit ${formatCurrency(profitCents)} after approved spend and labor.`,
+      tone: "emerald",
     },
   ];
 }

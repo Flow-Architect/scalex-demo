@@ -219,3 +219,43 @@ Goal 8G should make the browser path feel like a repeatable enterprise product:
 
 Telegram should appear only as planned/deferred. Its future role is a human approval gate for
 risky actions, not a chatbot-first surface.
+
+## Goal 8H Cinematic Recording Path
+
+Goal 8H is complete as a visual storytelling redesign, not a new integration. The final recording
+should open on the premium governed-execution control room, not a form or configuration console.
+
+0:00-0:10 - Show the hero:
+Enterprise teams want AI agents, but cannot let raw agents touch money, vendors, client
+workflows, or systems without proof, policy, money control, and audit.
+
+0:10-0:25 - Show ScaleX:
+Governed execution for revenue-backed client operations. Hermes plans, Stripe proves, NeMo checks,
+ScaleX records evidence, blocks unsafe execution, and protects profit.
+
+0:25-0:45 - Show Northstar metrics:
+Northstar Dental Group / Client Implementation Launch, $8,500 revenue secured, $1,150 approved
+setup spend, $3,200 blocked risk, $261.60 labor cost, $7,088.40 protected profit, and 83.4%
+protected margin.
+
+0:45-1:10 - Show the Control Stack:
+Hermes creates the plan, Stripe proves finance state, NeMo/local policy checks risk, and ScaleX
+executes only what is allowed while recording proof.
+
+1:10-1:45 - Click Start Governed Run:
+The governed run stage should show Input Rail passed, Hermes Plan created, Planning Rail
+approved, Stripe Finance Proof verified, Revenue Gate passed, NeMo/local policy checked,
+Controlled Spend approved, Risky Vendor Action blocked, Evidence Ledger recorded, Output Honesty
+Rail verified, and Profit Outcome protected.
+
+1:45-2:15 - Show Evidence Ledger:
+What happened, what was approved, what was blocked, what proof exists, safety notes, no
+live-money mode, no secrets stored, and final protected profit.
+
+2:15-2:45 - Show Profit Report:
+Revenue, approved setup spend, labor cost, blocked risky spend, protected profit, protected
+margin, and margin floor.
+
+2:45-3:00 - Close:
+ScaleX gives enterprises a safe way to let AI execute paid client operations without losing
+control of money, margin, compliance boundaries, or audit.

@@ -23,6 +23,9 @@ The current proof is a functional live working product prototype, not a static m
 deepened the browser surface into a command center. Goal 8G locks the judge-facing product
 narrative around ScaleX as the enterprise control plane that lets AI safely execute paid client
 operations without losing control of money, margin, compliance boundaries, or audit proof.
+Goal 8H completed the frontend-first cinematic visual redesign for the recording. It does not add
+a new integration or backend feature; it turns the existing deterministic Northstar story into
+three visible acts: the paid client operation, governed AI execution, and enterprise proof.
 
 ScaleX Connection Hub is an implemented internal product layer that shows which
 systems the ClientOps Autopilot is allowed to use, what execution mode each connector is in, what
@@ -76,6 +79,10 @@ Demo-readiness note:
 - Goal 8G targets a docs-first enterprise narrative UI lock. It does not add Telegram, MCP, new
   integrations, real Stripe runs, Full Proof runs, production payroll/HR behavior, Docker/NemoClaw
   commands, external extraction services, live money, real client data, or secrets.
+- Goal 8H completed a cinematic enterprise demo UI. It keeps the same deterministic demo-safe
+  behavior and same integration truth while making the first screen, governed run stage, blocked
+  risk, economic control, control stack, evidence ledger, and comparison panel visually strong
+  enough for a three-minute judge recording.
 
 Demo story:
 
