@@ -30,7 +30,7 @@ export function Sidebar({
 
   return (
     <aside className="fixed inset-y-0 left-0 z-40 flex w-[200px] flex-col border-r border-[#232834] bg-[#050505] p-3 text-white">
-      <div className="border-b border-[#232834] pb-4">
+      <div className="border-b border-[#232834] bg-transparent pb-4">
         {logoFailed ? (
           <div className="flex items-center gap-2">
             <span className="flex h-9 w-9 items-center justify-center rounded-md border border-[#fcba03]/40 bg-[#fcba03]/10 text-[#fcba03]">
@@ -44,10 +44,10 @@ export function Sidebar({
             </div>
           </div>
         ) : (
-          <div>
+          <div className="bg-transparent px-1 pt-1">
             <img
               alt="ScaleX"
-              className="h-auto w-[142px] object-contain"
+              className="block h-auto max-h-[52px] w-[142px] object-contain object-left"
               onError={() => setLogoFailed(true)}
               src="/brand/scalex-logo.png"
             />

@@ -10,6 +10,31 @@ Use:
 
 ---
 
+## 2026-06-28 - Goal 8O: Logo transparency treatment
+
+Completed:
+- Inspected `frontend/public/brand/scalex-logo.png` and confirmed the current logo file is a
+  transparent RGBA PNG, not a baked-in checkerboard/white-background asset.
+- Kept the existing logo path and made the sidebar logo wrapper explicitly transparent.
+- Constrained the logo with `object-contain`, left alignment, and a restrained max height so it
+  blends into the dark sidebar without a white tile/card.
+- Preserved the black/white/#fcba03 brand treatment and did not change backend mechanics,
+  product layout, integrations, Telegram, live mode, Stripe, Hermes, or NemoClaw behavior.
+
+Verification:
+- `cd frontend && npm run build` passed.
+- Browser smoke at `http://127.0.0.1:5174/` verified the logo renders in bounds, uses
+  `object-fit: contain`, has a transparent wrapper background, sits on the dark sidebar
+  background, loads the dashboard, has no document overflow, and has no runtime exceptions.
+
+Suggested commit message:
+Fix ScaleX logo transparency treatment
+
+Next:
+- Goal 9 - final repo/video/submission polish.
+
+---
+
 ## 2026-06-28 - Goal 8N: Brand system, compact rails, and overflow fix
 
 Completed:

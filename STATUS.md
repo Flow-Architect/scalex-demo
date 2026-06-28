@@ -7,10 +7,10 @@ Last updated: 2026-06-28
 - Project folder exists at `/home/ascabrya/dev/scalex-demo`.
 - Latest committed baseline before Goal 8E: `615a9bd Document NemoClaw correction and next
   integration plan`.
-- Last completed goal: Goal 8N - brand system, compact rails, and overflow fix.
-- Last completed implementation/QA goal: Goal 8N - ScaleX logo/brand system, compact rails,
-  horizontal overflow fixes, and enterprise visual polish.
-- Last completed documentation/tracking update: Goal 8N brand/overflow closeout.
+- Last completed goal: Goal 8O - logo transparency and sidebar brand treatment.
+- Last completed implementation/QA goal: Goal 8O - transparent sidebar logo wrapper, compact
+  object-contained logo rendering, and browser smoke validation.
+- Last completed documentation/tracking update: Goal 8O logo treatment closeout.
 - Last completed checkout cleanup: Open Source Checkout Cleanup for judge readiness.
 - Current priority: Goal 9 - final repo/video/submission polish.
 - Goal 8I used the uploaded six-phase control-room visual prompt as a design specification only.
@@ -121,6 +121,15 @@ Last updated: 2026-06-28
 - Goal 8N validation passed `./scripts/test.sh`, `./scripts/check-nemo.sh`, browser smoke for all
   main views, strict browser overflow measurement with no page or uncontrolled element horizontal
   overflow at 1440x900, logo render bounds, blocked-risk animation, and no runtime exceptions.
+- Goal 8O completed the tiny frontend-only logo polish pass. Inspection confirmed
+  `frontend/public/brand/scalex-logo.png` is a transparent RGBA asset, so the change was limited
+  to the sidebar brand wrapper: explicit transparent background, compact object-contained logo
+  sizing, restrained spacing, and no white/checkerboard tile or card behind the logo. Backend
+  mechanics, product layout, integrations, and brand colors were not changed.
+- Goal 8O validation passed `cd frontend && npm run build` and local browser smoke at
+  `http://127.0.0.1:5174/`, confirming the logo renders at 142px by about 50px with
+  `object-fit: contain`, transparent wrapper background, dark sidebar background, dashboard
+  loaded, no document overflow, and no runtime exceptions.
 - Goal 9 remains final polish and submission assets.
 - Goal 7B remains future Verified Live Mode hardening.
 

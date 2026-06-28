@@ -4,7 +4,7 @@
 
 Goal 9 - final repo/video/submission polish.
 
-Goal 8N is complete. Return to final recording and submission readiness:
+Goal 8O is complete. Return to final recording and submission readiness:
 
 - Rehearse the three-minute recording against `docs/DEMO_SCRIPT.md`.
 - Confirm the local demo opens at `http://127.0.0.1:5174/` with the dark control-room UI.
@@ -17,6 +17,23 @@ new backend features, new external services, production payroll/HR behavior, MCP
 changes, database files, uploaded real files, or secrets.
 
 ## Recently Completed
+
+Goal 8O is complete. It was a tiny frontend-only logo/sidebar polish pass:
+
+- Confirmed `frontend/public/brand/scalex-logo.png` is a transparent RGBA PNG, not a baked-in
+  checkerboard/white-background asset.
+- Kept the current logo path and added an explicitly transparent, compact sidebar wrapper.
+- Constrained the logo with `object-contain`, `object-left`, and a restrained max height so it
+  blends into the dark sidebar without a white tile/card.
+- Preserved the black/white/#fcba03 brand treatment and did not change backend mechanics,
+  product layout, integrations, Telegram, live mode, Stripe, Hermes, or NemoClaw behavior.
+
+Goal 8O validation:
+
+- `cd frontend && npm run build` passed.
+- Browser smoke at `http://127.0.0.1:5174/` verified logo render bounds, transparent wrapper
+  background, dark sidebar background, dashboard render, no document overflow, and no runtime
+  exceptions.
 
 Goal 8N is complete. It kept the API-backed control-room shell and completed the brand/overflow
 polish pass:
