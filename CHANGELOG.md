@@ -10,6 +10,45 @@ Use:
 
 ---
 
+## 2026-06-28 - Goal 8J: Demo drama and Stripe mode clarity
+
+Completed:
+- Restored high-impact visual storytelling on top of the existing API-backed control-room UI.
+- Added deliberate governed-run animation state, blocked-risk metric count/flash, red blocked
+  card treatment, and rail 7 as the $3,200 Risky Vendor Action stop.
+- Added rail activity chips, proof artifact cards, stronger Evidence Drawer proof path, connected
+  Hermes -> Stripe -> NeMo -> ScaleX stack nodes, and sidebar active-operation pulse.
+- Made mode clarity visible in the dashboard, Connection Hub, and Settings: Judge Demo Mode is
+  deterministic/local, Stripe Sandbox Prototype is real test-mode capable only when configured
+  safely, and Verified Live Mode is locked/future.
+- Clarified NeMo Guardrails versus optional NemoClaw/NemoHermes runtime routing in product UI
+  language without claiming unverified runtime use.
+- Kept Goal 8J frontend-first: no Telegram, no new integrations, no live Stripe, no production
+  Hermes, no Full Proof run, no Docker/NemoClaw commands, no backend state-machine expansion, and
+  no static hardcoded app.
+
+Verification:
+- Docs-first `git diff --check` passed.
+- `cd frontend && npm run build` passed.
+- `./scripts/test.sh` passed with 68 backend tests and a successful frontend build.
+- `./scripts/check-nemo.sh` passed with `nemoguardrails` 0.21.0 and `guardrails/scalex` loaded.
+- Post-implementation `git diff --check` passed.
+- Unsafe/generated path scan returned no matches.
+- Staged added-lines secret scan returned no matches.
+- Local browser smoke at `http://127.0.0.1:5174/` passed after restarting the dev stack in
+  explicit Judge Demo Mode with `/tmp/scalex-goal8j-demo.db`, auth disabled, deterministic Hermes,
+  Stripe test-double proof, local policy active, and no Stripe secret exported.
+- Focused DOM smoke confirmed `Judge Demo active`, `Stripe Sandbox Prototype`, `Verified Live
+  locked`, `NeMo Guardrails`, `Start Governed Run`, and blocked-risk labels render.
+
+Suggested commit message:
+Restore ScaleX demo drama and sandbox mode clarity
+
+Next:
+- Goal 9 - final repo/video/submission polish.
+
+---
+
 ## 2026-06-28 - Goal 8I: Control-room frontend skin rewrite
 
 Completed:

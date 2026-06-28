@@ -7,11 +7,10 @@ Last updated: 2026-06-28
 - Project folder exists at `/home/ascabrya/dev/scalex-demo`.
 - Latest committed baseline before Goal 8E: `615a9bd Document NemoClaw correction and next
   integration plan`.
-- Last completed goal: Goal 8I - frontend visual skin rewrite into a premium dark enterprise
-  control-room UI.
-- Last completed implementation/QA goal: Goal 8I - API-backed control-room shell, metric strip,
-  governed rails, proof tabs, Evidence Ledger, Connection Hub, and Boundaries view.
-- Last completed documentation/tracking update: Goal 8I control-room closeout.
+- Last completed goal: Goal 8J - restored demo drama and Stripe sandbox prototype mode clarity.
+- Last completed implementation/QA goal: Goal 8J - governed-run animation polish, blocked-risk
+  drama, proof artifacts, rail activity, evidence drawer strengthening, and mode clarity.
+- Last completed documentation/tracking update: Goal 8J visual storytelling closeout.
 - Last completed checkout cleanup: Open Source Checkout Cleanup for judge readiness.
 - Current priority: Goal 9 - final repo/video/submission polish, recording rehearsal, submission
   copy check, and final safety scan.
@@ -79,6 +78,13 @@ Last updated: 2026-06-28
   Active Operation card, API-backed metric strip, governed execution rails, proof tabs for Hermes
   Plan / Stripe Proof / NeMo Guardrails, Governed Run Studio, Enterprise Audit Ledger,
   Connection Hub, Settings / Boundaries, and supporting modules behind the main story.
+- Goal 8J completed the final demo-drama polish pass. It restored higher-impact governed-run
+  animation, made the seventh rail the blocked $3,200 risky vendor action, added rail activity,
+  proof artifact cards, a stronger Evidence Drawer, clearer Connection Hub mode cards, and
+  explicit Judge Demo Mode / Stripe Sandbox Prototype / Verified Live Mode framing. It did not add
+  integrations or backend state-machine scope and preserved API-backed state, auth, Stripe safety
+  boundaries, isolated Hermes, optional NemoHermes, NeMo/local policy truthfulness, and fail-closed
+  behavior.
 - Goal 9 remains final polish and submission assets.
 - Goal 7B remains future Verified Live Mode hardening.
 

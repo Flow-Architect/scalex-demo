@@ -167,10 +167,10 @@ button {
 
 .rail-row {
   display: flex;
-  min-height: 2.9rem;
+  min-height: 2.25rem;
   align-items: center;
-  gap: 0.75rem;
-  padding: 0.5rem 0.65rem;
+  gap: 0.55rem;
+  padding: 0.36rem 0.58rem;
 }
 
 .rail-row:hover,
@@ -212,7 +212,7 @@ button {
 
 .rail-blocked,
 .rail-card-blocked {
-  min-height: 3.15rem;
+  min-height: 2.5rem;
   border-color: rgba(239, 68, 68, 0.54);
   background:
     linear-gradient(90deg, rgba(239, 68, 68, 0.14), transparent 45%),
@@ -232,7 +232,7 @@ button {
 }
 
 .proof-terminal {
-  max-height: calc(100vh - 304px);
+  max-height: 11.4rem;
   overflow: auto;
   border-radius: 0.5rem;
   border: 1px solid #1e2128;
@@ -259,6 +259,87 @@ button {
   animation: danger-pulse 1.25s ease-out infinite;
 }
 
+.blocked-card-flash {
+  animation: blocked-card-flash 1080ms ease-out;
+}
+
+.rail-summary-card,
+.artifact-card,
+.mode-card,
+.stack-node {
+  border-radius: 0.5rem;
+  border: 1px solid #1e2128;
+  background: #0a0b0e;
+}
+
+.rail-summary-card {
+  min-width: 0;
+  padding: 0.45rem 0.55rem;
+}
+
+.artifact-card {
+  min-width: 0;
+  padding: 0.65rem;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.025), transparent 60%),
+    #0a0b0e;
+}
+
+.mode-card {
+  min-width: 0;
+  padding: 0.55rem 0.65rem;
+}
+
+.mode-card-green {
+  border-color: rgba(0, 208, 132, 0.28);
+  background: rgba(0, 208, 132, 0.075);
+}
+
+.mode-card-blue {
+  border-color: rgba(59, 130, 246, 0.28);
+  background: rgba(59, 130, 246, 0.075);
+}
+
+.mode-card-amber {
+  border-color: rgba(245, 158, 11, 0.28);
+  background: rgba(245, 158, 11, 0.075);
+}
+
+.mode-card-red {
+  border-color: rgba(239, 68, 68, 0.28);
+  background: rgba(239, 68, 68, 0.075);
+}
+
+.mode-card-muted {
+  border-color: #1e2128;
+  background: #0a0b0e;
+}
+
+.stack-node {
+  position: relative;
+  min-width: 0;
+  padding: 0.55rem;
+}
+
+.stack-connector {
+  position: absolute;
+  top: 50%;
+  right: -0.75rem;
+  width: 0.75rem;
+  height: 1px;
+  background: linear-gradient(90deg, rgba(0, 208, 132, 0.55), rgba(59, 130, 246, 0.35));
+}
+
+.active-operation-dot {
+  display: inline-flex;
+  height: 0.48rem;
+  width: 0.48rem;
+  border-radius: 999px;
+  background: #00d084;
+  box-shadow: 0 0 0 4px rgba(0, 208, 132, 0.12);
+  animation: active-operation-beat 1.8s ease-in-out infinite;
+}
+
 @keyframes rail-enter {
   from {
     opacity: 0;
@@ -283,6 +364,23 @@ button {
   }
 }
 
+@keyframes blocked-card-flash {
+  0% {
+    border-color: rgba(239, 68, 68, 0.95);
+    box-shadow: 0 0 0 1px rgba(239, 68, 68, 0.65), 0 0 42px rgba(239, 68, 68, 0.42);
+    transform: translateX(-2px);
+  }
+
+  42% {
+    transform: translateX(2px);
+  }
+
+  100% {
+    box-shadow: none;
+    transform: translateX(0);
+  }
+}
+
 @keyframes danger-pulse {
   0% {
     box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.56), 0 0 24px rgba(239, 68, 68, 0.42);
@@ -294,5 +392,18 @@ button {
 
   100% {
     box-shadow: 0 0 0 0 rgba(239, 68, 68, 0), 0 0 24px rgba(239, 68, 68, 0.22);
+  }
+}
+
+@keyframes active-operation-beat {
+  0%,
+  100% {
+    opacity: 0.72;
+    box-shadow: 0 0 0 4px rgba(0, 208, 132, 0.12);
+  }
+
+  50% {
+    opacity: 1;
+    box-shadow: 0 0 0 7px rgba(0, 208, 132, 0.04), 0 0 22px rgba(0, 208, 132, 0.24);
   }
 }

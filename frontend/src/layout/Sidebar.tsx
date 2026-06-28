@@ -62,9 +62,12 @@ export function Sidebar({
       </nav>
 
       <div className="mt-auto rounded-md border border-[#1e2128] bg-[#111318] p-3 shadow-xl shadow-black/30">
-        <p className="text-[0.64rem] font-semibold uppercase tracking-wide text-zinc-500">
-          Active Operation
-        </p>
+        <div className="flex items-center justify-between gap-2">
+          <p className="text-[0.64rem] font-semibold uppercase tracking-wide text-zinc-500">
+            Active Operation
+          </p>
+          <span className="active-operation-dot" aria-hidden="true" />
+        </div>
         <p className="mt-2 text-sm font-semibold leading-5 text-white">{displayCustomer}</p>
         <p className="mt-1 text-xs leading-4 text-zinc-400">{displayJob}</p>
         <div className="mt-3 grid grid-cols-2 gap-2 text-xs">

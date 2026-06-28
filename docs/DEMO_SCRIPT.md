@@ -29,8 +29,9 @@ Implemented template:
 
 ## Recording Path
 
-Use this three-minute script for the recording. Goal 8I presents the same API-backed mechanics in
-a fixed dark control-room shell rather than a long scrolling page.
+Use this three-minute script for the recording. Goal 8J keeps the fixed API-backed control-room
+shell and adds the needed demo drama: mode clarity, proof artifacts, rail activity, and a more
+obvious blocked-risk moment.
 
 0:00-0:10
 Enterprises want AI agents, but cannot let raw agents touch money, vendors, client workflows, or
@@ -46,21 +47,26 @@ protected profit $7,350, and protected margin 86.5%.
 
 0:45-1:10
 Show the right-side proof tabs: Hermes Plan, Stripe Proof, and NeMo / Local Guardrails. Emphasize
-that Stripe is sandbox/test proof, `livemode=false` remains visible, and NeMo is claimed only when
-runtime evidence proves it; otherwise local policy is shown.
+that Judge Demo Mode is deterministic/local, Stripe Sandbox Prototype uses real test-mode objects
+only when configured safely, `livemode=false` remains visible, and NeMo is claimed only when
+runtime evidence proves it; otherwise local policy is shown. NemoClaw/NemoHermes routing is
+optional and shown only as selected/verified runtime proof.
 
 1:10-1:45
 Click `Start Governed Run` and show the governed rails animate: input rail, Hermes plan, planning
 rail, Stripe finance rail, revenue gate, policy rail, approved spend, blocked spend, execution
-rail, and profit rail. Pause on the blocked $3,200 risky vendor action.
+rail, and profit rail. Pause on the blocked $3,200 risky vendor action as the blocked-risk metric,
+rail badge, and evidence drawer make the stop decision obvious.
 
 1:45-2:15
-Open Evidence Ledger: enterprise audit rows show actor/system, action, evidence type, safety
-note, result badge, no live-money mode, no secrets stored, and paid-state honesty.
+Open Evidence Ledger: enterprise audit rows and proof artifacts show actor/system, action,
+evidence type, safety note, result badge, no live-money mode, no secrets stored, and paid-state
+honesty.
 
 2:15-2:45
-Open Connection Hub and Settings/Boundaries: Hermes, Stripe, NeMo/local policy, SQLite evidence,
-runtime mode, active operation, guardrails, money movement, and records remain truthfully labeled.
+Open Connection Hub and Settings/Boundaries: Hermes, Stripe, NeMo Guardrails/local policy,
+NemoClaw/NemoHermes optional routing, SQLite evidence, runtime mode, active operation,
+guardrails, money movement, and records remain truthfully labeled.
 
 2:45-3:00
 Close: ScaleX gives enterprises a safe way to let AI execute paid client operations without losing
@@ -128,6 +134,19 @@ Full Proof Mode:
 - Shows hosted invoice URL only when available.
 - Does not show `paid=false` as paid.
 - Shows visible errors if configured incorrectly.
+
+Stripe Sandbox Prototype:
+
+- Uses real Stripe test-mode objects only when a safe local test key is configured and product
+  settings allow test mode.
+- Keeps `livemode=false`, invoice status, paid state, and hosted invoice URL honest.
+- Falls back to clearly labeled Judge Demo Mode/test-double proof for the default recording path.
+- Never enables live-money behavior.
+
+Verified Live Mode:
+
+- Future-only and locked.
+- No live-money execution is implemented for the submission demo.
 
 Truthfulness boundaries remain: Northstar is synthetic; no patient data; no PHI; no HIPAA claim;
 local policy active now; NeMo Guardrails adapter proof is optional through `nemo_guardrails` only

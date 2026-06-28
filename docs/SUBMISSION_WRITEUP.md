@@ -29,6 +29,10 @@ three visible acts: the paid client operation, governed AI execution, and enterp
 Goal 8I completed the final control-room skin rewrite without replacing the app with a static
 prototype: the dashboard, governed run, evidence ledger, connection hub, and settings boundaries
 views remain API-backed while presenting a fixed dark enterprise shell for the recording.
+Goal 8J is the final visual storytelling polish pass on that shell. It restores stronger run
+animation, blocked-risk drama, rail activity, proof artifacts, evidence drawer clarity, and mode
+language for Judge Demo Mode, Stripe Sandbox Prototype, and future Verified Live Mode without
+adding new integrations or changing backend safety behavior.
 
 ScaleX Connection Hub is an implemented internal product layer that shows which
 systems the ClientOps Autopilot is allowed to use, what execution mode each connector is in, what
@@ -59,6 +63,8 @@ Demo-readiness note:
   execution, evidence ledger, and profit outcome.
 - Judge Demo Mode works without secrets using deterministic local proof/test-double records and
   clearly labels demo/sandbox proof.
+- Stripe Sandbox Prototype uses real Stripe test-mode objects only when a safe local test key is
+  configured; otherwise the recording remains in deterministic Judge Demo Mode.
 - Full Proof Mode preserves real isolated Hermes and real Stripe test-mode proof when local
   ignored `.env` values are safely configured.
 - Goal 7.14B passed Full Proof local validation with synthetic Northstar data only: real isolated
@@ -85,6 +91,9 @@ Demo-readiness note:
   behavior and same integration truth while making the first screen, governed run stage, blocked
   risk, economic control, control stack, evidence ledger, and comparison panel visually strong
   enough for a three-minute judge recording.
+- Goal 8J keeps the app API-backed and frontend-first while making the blocked $3,200 stop
+  decision, proof path, Stripe sandbox/test-mode status, NemoClaw/NemoHermes optional runtime
+  boundary, and final protected-profit story easier to understand from the screen.
 
 Demo story:
 

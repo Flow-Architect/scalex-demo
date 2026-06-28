@@ -4,7 +4,7 @@
 
 Goal 9 - final repo/video/submission polish.
 
-Goal 8I is complete. Next work should stay narrow and focus on final delivery readiness:
+Goal 8J is complete. Next work should stay narrow and focus on final delivery readiness:
 
 - Rehearse the three-minute recording against `docs/DEMO_SCRIPT.md`.
 - Confirm the local demo opens at `http://127.0.0.1:5174/` with the dark control-room UI.
@@ -52,6 +52,24 @@ boundaries, Stripe safety, isolated Hermes, optional NemoHermes, NeMo/local poli
 and fail-closed behavior. The local smoke state rendered the current API outcome as $8,500
 revenue, $1,150 approved spend, $3,200 blocked risk, $261.60 labor cost, $7,350 protected profit,
 and 86.5% protected margin.
+
+Goal 8J is complete. It kept the Goal 8I shell API-backed and added the final visual storytelling
+polish: stronger product sentence in the topbar, deliberate rail animation state, blocked-risk
+metric count/flash, rail 7 as the $3,200 risky vendor stop, rail activity chips, proof artifacts,
+Evidence Drawer proof path, Stripe Sandbox Prototype mode cards, Verified Live Mode locked state,
+and clearer NeMo Guardrails vs NemoClaw/NemoHermes boundary language.
+
+Goal 8J validation:
+
+- `cd frontend && npm run build` passed.
+- `./scripts/test.sh` passed with 68 backend tests and a successful frontend build.
+- `./scripts/check-nemo.sh` passed with `nemoguardrails` 0.21.0 and `guardrails/scalex` loaded.
+- Post-implementation `git diff --check` passed.
+- Unsafe/generated path scan returned no matches.
+- Staged added-lines secret scan returned no matches.
+- Live local smoke at `http://127.0.0.1:5174/` passed after restarting the dev stack in explicit
+  Judge Demo Mode with `/tmp/scalex-goal8j-demo.db`, auth disabled, deterministic Hermes,
+  Stripe test-double proof, local policy active, and no Stripe secret exported.
 
 Goal 8E is complete. ScaleX has an optional backend runtime adapter for the already validated
 local NemoHermes OpenAI-compatible API. It is selected with `HERMES_RUNTIME=nemoclaw`, records

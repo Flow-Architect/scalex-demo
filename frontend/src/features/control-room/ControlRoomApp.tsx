@@ -55,7 +55,10 @@ interface RailView {
   evidence: string;
   id: string;
   name: string;
+  proofTag: string;
+  riskTag: string;
   status: string;
+  subline: string;
   tone: Tone;
 }
 
@@ -90,6 +93,8 @@ export function ControlRoomApp({
   const [expandedRailId, setExpandedRailId] = useState("blocked-spend");
   const [animatedCount, setAnimatedCount] = useState(0);
   const [hasAnimatedRun, setHasAnimatedRun] = useState(Boolean(state?.report));
+  const [blockedFlash, setBlockedFlash] = useState(false);
+  const [displayedBlockedRiskCents, setDisplayedBlockedRiskCents] = useState(0);
 
   const model = useMemo(() => buildControlRoomModel(state, money, auditRows, displayCustomer, displayJob), [
     auditRows,
@@ -106,17 +111,40 @@ export function ControlRoomApp({
 
     setHasAnimatedRun(false);
     setAnimatedCount(0);
-    const timers = model.rails.map((_, index) => (
-      window.setTimeout(() => {
+    setBlockedFlash(false);
+    setDisplayedBlockedRiskCents(0);
+    const blockedIndex = model.rails.findIndex((rail) => rail.id === "blocked-spend");
+    const blockedTarget = model.blockedSpendCents;
+    const timers: number[] = [];
+    model.rails.forEach((_, index) => {
+      timers.push(window.setTimeout(() => {
         setAnimatedCount(index + 1);
+        if (index === blockedIndex) {
+          setBlockedFlash(true);
+          Array.from({ length: 16 }).forEach((__, stepIndex) => {
+            timers.push(window.setTimeout(() => {
+              setDisplayedBlockedRiskCents(Math.round(blockedTarget * ((stepIndex + 1) / 16)));
+            }, stepIndex * 34));
+          });
+          timers.push(window.setTimeout(() => setBlockedFlash(false), 1100));
+        }
         if (index === model.rails.length - 1) {
           setHasAnimatedRun(true);
         }
-      }, (index + 1) * 500)
-    ));
+      }, (index + 1) * 500));
+    });
 
     return () => timers.forEach((timer) => window.clearTimeout(timer));
-  }, [busyAction, model.rails.length]);
+  }, [busyAction, model.blockedSpendCents, model.rails.length]);
+
+  useEffect(() => {
+    if (busyAction === "run") {
+      return;
+    }
+
+    setDisplayedBlockedRiskCents(model.blockedSpendCents);
+    setBlockedFlash(false);
+  }, [busyAction, model.blockedSpendCents]);
 
   useEffect(() => {
     if (busyAction === "run") {
@@ -147,6 +175,7 @@ export function ControlRoomApp({
         onLogout={onLogout}
         onRefresh={onRefresh}
         onReset={onReset}
+        onNavigate={onNavigate}
         onRun={onRun}
         runActive={runActive}
         runStatus={runStatus}
@@ -155,6 +184,8 @@ export function ControlRoomApp({
         {activeView === "dashboard" ? (
           <DashboardView
             model={model}
+            blockedFlash={blockedFlash}
+            displayedBlockedRiskCents={displayedBlockedRiskCents}
             onNavigate={onNavigate}
             onRun={onRun}
             proofTab={proofTab}
@@ -168,6 +199,7 @@ export function ControlRoomApp({
             drawerTab={drawerTab}
             expandedRailId={expandedRailId}
             model={model}
+            blockedFlash={blockedFlash}
             setDrawerTab={setDrawerTab}
             setExpandedRailId={setExpandedRailId}
             visibleRailCount={visibleRailCount}
@@ -188,6 +220,7 @@ function ControlTopbar({
   model,
   notice,
   onLogout,
+  onNavigate,
   onRefresh,
   onReset,
   onRun,
@@ -200,6 +233,7 @@ function ControlTopbar({
   model: ControlRoomModel;
   notice: string | null;
   onLogout: () => void;
+  onNavigate: (view: AppView) => void;
   onRefresh: () => void;
   onReset: () => void;
   onRun: () => void;
@@ -208,21 +242,29 @@ function ControlTopbar({
 }) {
   const crumbByView: Record<string, string> = {
     audit: `Evidence Ledger / ${model.auditRows} evidence rows`,
-    dashboard: `Dashboard / ${model.clientName}`,
+    dashboard: "Governed execution for revenue-backed client operations",
     integrations: "Connection Hub / active systems · demo proof mode",
     settings: "Settings / Boundaries & Runtime",
     workflow: `Governed Run Studio / ${model.clientName} · ${model.operationName}`,
   };
+  const subline =
+    error ??
+    notice ??
+    (activeView === "dashboard"
+      ? "Hermes plans. Stripe proves. NeMo Guardrails and local policy check risk. ScaleX blocks unsafe execution and records proof."
+      : runStatus);
 
   return (
     <header className="flex h-14 flex-none items-center justify-between border-b border-[#1e2128] bg-[#0d0e12] px-4">
       <div className="min-w-0">
         <p className="truncate text-sm font-semibold text-[#f0f0f0]">{crumbByView[activeView] ?? crumbByView.dashboard}</p>
         <p className={`mt-0.5 truncate text-xs ${error ? "text-[#ef4444]" : "text-[#8a8f9e]"}`}>
-          {error ?? notice ?? runStatus}
+          {subline}
         </p>
       </div>
       <div className="flex items-center gap-2">
+        <StatusBadge label={model.primaryModeLabel} tone={model.primaryModeTone} />
+        <button className="control-btn" onClick={() => onNavigate("audit")} type="button">Review Ledger</button>
         <StatusBadge label={runActive ? "Run in progress..." : model.hasReport ? "Run complete · protected profit" : "Ready"} tone={runActive ? "blue" : "green"} />
         <button className="control-btn-primary" disabled={runActive} onClick={onRun} type="button">
           {runActive ? <RefreshCw className="h-4 w-4 animate-spin" /> : <Play className="h-4 w-4" />}
@@ -237,6 +279,8 @@ function ControlTopbar({
 }
 
 function DashboardView({
+  blockedFlash,
+  displayedBlockedRiskCents,
   model,
   onNavigate,
   onRun,
@@ -245,6 +289,8 @@ function DashboardView({
   setProofTab,
   visibleRailCount,
 }: {
+  blockedFlash: boolean;
+  displayedBlockedRiskCents: number;
   model: ControlRoomModel;
   onNavigate: (view: AppView) => void;
   onRun: () => void;
@@ -254,32 +300,46 @@ function DashboardView({
   visibleRailCount: number;
 }) {
   return (
-    <section className="grid h-full min-h-0 grid-rows-[auto_minmax(0,1fr)] gap-4">
-      <MetricStrip metrics={model.metrics} runActive={runActive} visibleRailCount={visibleRailCount} />
+    <section className="grid h-full min-h-0 grid-rows-[auto_minmax(0,1fr)_auto] gap-4">
+      <MetricStrip
+        blockedFlash={blockedFlash}
+        blockedRiskDisplayValue={formatCurrency(displayedBlockedRiskCents)}
+        metrics={model.metrics}
+        runActive={runActive}
+        visibleRailCount={visibleRailCount}
+      />
       <div className="grid min-h-0 grid-cols-2 gap-4">
         <Panel title="Governed Run" eyebrow="execution rails" action={<StatusBadge label={runActive ? "running" : model.hasReport ? "complete" : "ready"} tone={runActive ? "blue" : "green"} />}>
-          <RailList compact model={model} visibleRailCount={visibleRailCount} />
+          <RailList blockedFlash={blockedFlash} compact model={model} visibleRailCount={visibleRailCount} />
+          <RunOutcomeStrip model={model} visibleRailCount={visibleRailCount} />
         </Panel>
         <Panel title="Proof Panel" eyebrow="Hermes · Stripe · NeMo" action={<button className="control-link" onClick={() => onNavigate("audit")} type="button">Open Ledger</button>}>
+          <ControlStackChain model={model} />
+          <ModeStrip model={model} />
           <ProofTabs active={proofTab} model={model} onChange={setProofTab} />
           <div className="mt-3">
             {proofTab === "hermes" ? <HermesProof model={model} /> : null}
             {proofTab === "stripe" ? <StripeProof model={model} /> : null}
             {proofTab === "guardrails" ? <GuardrailProof model={model} /> : null}
           </div>
-          <div className="mt-3 flex items-center justify-between rounded-md border border-[#1e2128] bg-[#0a0b0e] p-3">
-            <p className="text-sm text-[#8a8f9e]">Blocked vendor spend is stopped before ledger write.</p>
+          <div className={`mt-3 flex items-center justify-between rounded-md border bg-[#0a0b0e] p-3 ${blockedFlash ? "blocked-card-flash border-[#ef4444]/70" : "border-[#1e2128]"}`}>
+            <div>
+              <p className="text-sm font-semibold text-[#f87171]">Blocked risky action: Data broker enrichment</p>
+              <p className="mt-1 text-xs text-[#8a8f9e]">Requested $3,200. No vendor call, no ledger spend row, proof recorded.</p>
+            </div>
             <button className="control-btn-primary" disabled={runActive} onClick={onRun} type="button">
               {runActive ? "Executing..." : "Start Governed Run"}
             </button>
           </div>
         </Panel>
       </div>
+      <RailActivityTimeline compact model={model} />
     </section>
   );
 }
 
 function GovernedRunView({
+  blockedFlash,
   drawerTab,
   expandedRailId,
   model,
@@ -287,6 +347,7 @@ function GovernedRunView({
   setExpandedRailId,
   visibleRailCount,
 }: {
+  blockedFlash: boolean;
   drawerTab: DrawerTab;
   expandedRailId: string;
   model: ControlRoomModel;
@@ -309,9 +370,10 @@ function GovernedRunView({
             {model.rails.map((rail, index) => {
               const expanded = expandedRailId === rail.id;
               const visible = visibleRailCount === 0 || index < visibleRailCount;
+              const active = visibleRailCount > 0 && index < visibleRailCount;
               return (
                 <button
-                  className={`rail-card text-left ${rail.tone === "red" ? "rail-card-blocked" : ""} ${visible ? "rail-enter" : "opacity-60"}`}
+                  className={`rail-card text-left ${rail.id === "blocked-spend" && active ? "rail-card-blocked" : ""} ${rail.id === "blocked-spend" && blockedFlash ? "blocked-card-flash danger-pulse-on-visible" : ""} ${visible ? "rail-enter" : "opacity-60"}`}
                   key={rail.id}
                   onClick={() => setExpandedRailId(expanded ? "" : rail.id)}
                   type="button"
@@ -320,9 +382,9 @@ function GovernedRunView({
                     <span className="rail-index">{String(index + 1).padStart(2, "0")}</span>
                     <div className="min-w-0 flex-1">
                       <p className="truncate text-sm font-semibold text-[#f0f0f0]">{rail.name}</p>
-                      <p className="truncate text-xs text-[#8a8f9e]">{rail.actor}</p>
+                      <p className="truncate text-xs text-[#8a8f9e]">{rail.subline}</p>
                     </div>
-                    <StatusBadge label={rail.status} tone={rail.tone} />
+                    <StatusBadge label={active ? rail.status : "Ready"} tone={active ? rail.tone : "muted"} />
                   </div>
                   {expanded ? (
                     <div className="mt-2 rounded-md border border-[#1e2128] bg-[#0a0b0e] p-3 text-xs leading-5 text-[#8a8f9e]">
@@ -361,11 +423,7 @@ function GovernedRunView({
               </div>
             ) : null}
             {drawerTab === "proof" ? (
-              <div className="flex flex-wrap gap-2">
-                {["Stripe test-double proof", "Local policy setup spend gate", "API-backed economics"].map((tag) => (
-                  <span className="rounded-md border border-[#1e2128] bg-[#0a0b0e] px-3 py-2 text-xs font-semibold text-[#f0f0f0]" key={tag}>{tag}</span>
-                ))}
-              </div>
+              <ProofArtifactGrid compact model={model} />
             ) : null}
           </div>
         </Panel>
@@ -416,6 +474,10 @@ function EvidenceLedgerView({ model }: { model: ControlRoomModel }) {
             </div>
           ))}
         </div>
+        <div className="mt-4">
+          <p className="mb-2 text-xs font-semibold uppercase text-[#8a8f9e]">Proof Artifacts</p>
+          <ProofArtifactGrid compact model={model} />
+        </div>
         <div className="mt-5 rounded-md border border-[#00d084]/30 bg-[#00d084]/10 p-3">
           <p className="text-xs font-semibold uppercase text-[#00d084]">Profit Outcome</p>
           <p className="mt-2 text-3xl font-semibold text-white">{model.protectedProfitLabel}</p>
@@ -440,10 +502,32 @@ function ConnectionHubView({ model }: { model: ControlRoomModel }) {
           ))}
         </div>
       </div>
-      <div className="grid min-h-0 grid-cols-2 grid-rows-2 gap-4">
+      <div className="grid min-h-0 grid-cols-[minmax(0,1fr)_320px] gap-4">
+        <div className="grid min-h-0 grid-cols-2 grid-rows-2 gap-4">
         {model.connectionCards.map((card) => (
           <ConnectorCard key={card.title} card={card} />
         ))}
+        </div>
+        <Panel title="Prototype Modes" eyebrow="truthful execution">
+          <div className="grid gap-3">
+            {model.modeCards.map((mode) => (
+              <article className={`mode-card mode-card-${mode.tone}`} key={mode.title}>
+                <div className="flex items-center justify-between gap-2">
+                  <p className="text-sm font-semibold text-white">{mode.title}</p>
+                  <StatusBadge label={mode.status} tone={mode.tone} />
+                </div>
+                <p className="mt-2 text-xs leading-5 text-[#8a8f9e]">{mode.detail}</p>
+              </article>
+            ))}
+          </div>
+          <div className="mt-4 rounded-md border border-[#1e2128] bg-[#0a0b0e] p-3">
+            <p className="text-xs font-semibold uppercase text-[#00d084]">NemoClaw / NeMo Guardrails</p>
+            <p className="mt-2 text-xs leading-5 text-[#8a8f9e]">
+              NeMo Guardrails proof is shown only when runtime verification passes. NemoClaw /
+              NemoHermes planning is optional routing and remains explicit in runtime status.
+            </p>
+          </div>
+        </Panel>
       </div>
       <div className="rounded-md border border-[#1e2128] bg-[#111318] p-4">
         <p className="text-xs font-semibold uppercase text-[#8a8f9e]">Full Proof Capable</p>
@@ -471,6 +555,9 @@ function SettingsView({
   const rows = [
     ["Prototype auth", auth?.auth_enabled ? auth.authenticated ? `Signed in as ${auth.username ?? "operator"}` : "Enabled" : "Disabled for local judge demo", "Local prototype auth only; not production identity."],
     ["Execution mode", state?.execution.label ?? "Judge Demo Mode", state?.execution.truthfulness_note ?? "Demo proof and Full Proof Mode stay explicitly labeled."],
+    ["Judge Demo Mode", model.modeCards[0]?.status ?? "Judge Demo active", model.modeCards[0]?.detail ?? "Deterministic local proof path."],
+    ["Stripe Sandbox Prototype", model.modeCards[1]?.status ?? "Prototype ready", model.modeCards[1]?.detail ?? "Real test-mode only when configured safely."],
+    ["Verified Live Mode", model.modeCards[2]?.status ?? "Verified Live locked", model.modeCards[2]?.detail ?? "Future live-money path, not enabled."],
     ["Runtime", `${health?.mode ?? state?.mode ?? "local"} / ${state?.execution.hermes_runtime ?? "isolated_cli"}`, "Local API and SQLite-backed product workspace."],
     ["Active operation", `${model.clientName} / ${model.operationName}`, "Synthetic Northstar B2B implementation operation only."],
     ["Data", "Synthetic sample", "No patient data, no PHI, no healthcare compliance or HIPAA claim."],
@@ -525,34 +612,48 @@ function SettingsView({
   );
 }
 
-function MetricStrip({ metrics, runActive, visibleRailCount }: { metrics: StatPill[]; runActive: boolean; visibleRailCount: number }) {
+function MetricStrip({
+  blockedFlash,
+  blockedRiskDisplayValue,
+  metrics,
+  runActive,
+  visibleRailCount,
+}: {
+  blockedFlash: boolean;
+  blockedRiskDisplayValue: string;
+  metrics: StatPill[];
+  runActive: boolean;
+  visibleRailCount: number;
+}) {
   return (
     <div className="grid grid-cols-5 gap-3">
       {metrics.map((metric) => (
         <article
-          className={`metric-card ${metric.label === "Blocked Risk" && visibleRailCount >= 8 ? "metric-flash-red" : ""} ${metric.label === "Protected Profit" ? "metric-hero" : ""}`}
+          className={`metric-card ${metric.label === "Blocked Risk" && (visibleRailCount >= 7 || blockedFlash) ? "metric-flash-red" : ""} ${metric.label === "Protected Profit" ? "metric-hero" : ""}`}
           key={metric.label}
         >
           <p className="text-xs font-semibold uppercase tracking-wide text-[#8a8f9e]">{metric.label}</p>
           <p className={`mt-2 font-semibold tabular-nums ${metricClass(metric.tone)} ${metric.label === "Protected Profit" ? "text-4xl" : metric.label === "Blocked Risk" ? "text-3xl" : "text-2xl"}`}>
-            {metric.label === "Blocked Risk" && runActive && visibleRailCount < 8 ? "$0" : metric.value}
+            {metric.label === "Blocked Risk" && runActive ? blockedRiskDisplayValue : metric.value}
           </p>
+          {metric.label === "Blocked Risk" ? <p className="mt-2 text-xs font-semibold text-[#f87171]">unsafe vendor spend stopped</p> : null}
+          {metric.label === "Protected Profit" ? <p className="mt-2 text-xs font-semibold text-[#00d084]">profit preserved after controls</p> : null}
         </article>
       ))}
     </div>
   );
 }
 
-function RailList({ compact, model, visibleRailCount }: { compact?: boolean; model: ControlRoomModel; visibleRailCount: number }) {
+function RailList({ blockedFlash = false, compact, model, visibleRailCount }: { blockedFlash?: boolean; compact?: boolean; model: ControlRoomModel; visibleRailCount: number }) {
   return (
-    <ol className="grid gap-2">
+    <ol className={`grid ${compact ? "gap-1" : "gap-2"}`}>
       {model.rails.map((rail, index) => {
         const visible = visibleRailCount === 0 || index < visibleRailCount;
         const active = visibleRailCount > 0 && index < visibleRailCount;
         const blocked = rail.id === "blocked-spend";
         return (
           <li
-            className={`rail-row ${active ? "rail-enter" : ""} ${!visible ? "opacity-55" : ""} ${blocked && active ? "rail-blocked danger-pulse-on-visible" : blocked ? "rail-blocked" : ""}`}
+            className={`rail-row ${active ? "rail-enter" : ""} ${!visible ? "opacity-55" : ""} ${blocked && active ? "rail-blocked danger-pulse-on-visible" : ""} ${blocked && blockedFlash ? "blocked-card-flash" : ""}`}
             key={rail.id}
             style={{ animationDelay: `${index * 60}ms` }}
           >
@@ -560,14 +661,82 @@ function RailList({ compact, model, visibleRailCount }: { compact?: boolean; mod
             <span className="status-dot" />
             <div className="min-w-0 flex-1">
               <p className="truncate text-sm font-semibold text-[#f0f0f0]">{rail.name}</p>
-              {!compact ? <p className="truncate text-xs text-[#8a8f9e]">{rail.evidence}</p> : null}
+              {!compact ? <p className="truncate text-xs text-[#8a8f9e]">{rail.evidence}</p> : <p className="truncate text-[0.68rem] text-[#8a8f9e]">{rail.subline}</p>}
             </div>
-            <span className="hidden rounded-md border border-[#1e2128] px-2 py-1 text-[0.64rem] font-semibold uppercase text-[#8a8f9e] xl:inline">{rail.actor}</span>
+            <span className="hidden rounded-md border border-[#1e2128] px-2 py-1 text-[0.64rem] font-semibold uppercase text-[#8a8f9e] xl:inline">{rail.proofTag}</span>
             <StatusBadge label={active ? rail.status : "ready"} tone={active ? rail.tone : "muted"} />
           </li>
         );
       })}
     </ol>
+  );
+}
+
+function RunOutcomeStrip({ model, visibleRailCount }: { model: ControlRoomModel; visibleRailCount: number }) {
+  const blockedVisible = visibleRailCount >= 7;
+  return (
+    <div className="mt-3 grid grid-cols-4 gap-2">
+      {[
+        { label: "Rails", value: visibleRailCount > 0 ? `${Math.min(visibleRailCount, model.rails.length)}/${model.rails.length}` : "Ready", tone: "blue" as Tone },
+        { label: "Blocked", value: blockedVisible ? model.blockedRiskLabel : "Pending", tone: blockedVisible ? "red" as Tone : "muted" as Tone },
+        { label: "Evidence", value: blockedVisible ? "Recorded" : "Ready", tone: blockedVisible ? "green" as Tone : "muted" as Tone },
+        { label: "Outcome", value: model.protectedProfitLabel, tone: "green" as Tone },
+      ].map((item) => (
+        <div className="rail-summary-card" key={item.label}>
+          <p className="text-[0.6rem] font-semibold uppercase text-[#4a4f5e]">{item.label}</p>
+          <p className={`mt-1 truncate text-xs font-semibold ${metricClass(item.tone)}`}>{item.value}</p>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function ControlStackChain({ model }: { model: ControlRoomModel }) {
+  return (
+    <div className="mb-3 grid grid-cols-4 gap-2">
+      {[
+        { label: "Hermes", value: "plans", tone: "purple" as Tone },
+        { label: "Stripe", value: model.state?.stripe.used_real_stripe ? "test proof" : "sandbox proof", tone: "blue" as Tone },
+        { label: "NeMo", value: model.state?.guardrails.used_real_nemo ? "verified" : "local gate", tone: "green" as Tone },
+        { label: "ScaleX", value: "records", tone: "green" as Tone },
+      ].map((item, index) => (
+        <div className="stack-node" key={item.label}>
+          <StatusBadge label={item.label} tone={item.tone} />
+          <p className="mt-1 text-[0.68rem] font-semibold text-[#f0f0f0]">{item.value}</p>
+          {index < 3 ? <span className="stack-connector" aria-hidden="true" /> : null}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function ModeStrip({ model }: { model: ControlRoomModel }) {
+  return (
+    <div className="mb-3 grid grid-cols-3 gap-2">
+      {model.modeCards.map((mode) => (
+        <article className={`mode-card mode-card-${mode.tone}`} key={mode.title}>
+          <p className="truncate text-[0.62rem] font-semibold uppercase text-[#8a8f9e]">{mode.title}</p>
+          <p className={`mt-1 truncate text-xs font-semibold ${metricClass(mode.tone)}`}>{mode.status}</p>
+        </article>
+      ))}
+    </div>
+  );
+}
+
+function ProofArtifactGrid({ compact = false, model }: { compact?: boolean; model: ControlRoomModel }) {
+  return (
+    <div className={`grid gap-2 ${compact ? "" : "grid-cols-2"}`}>
+      {model.proofArtifacts.map((artifact) => (
+        <article className="artifact-card" key={artifact.title}>
+          <div className="flex items-center justify-between gap-2">
+            <p className="truncate text-xs font-semibold text-white">{artifact.title}</p>
+            <StatusBadge label={artifact.status} tone={artifact.tone} />
+          </div>
+          <p className="mt-2 text-xs leading-5 text-[#8a8f9e]">{artifact.detail}</p>
+          <p className="mt-2 truncate font-mono text-[0.66rem] text-[#4a4f5e]">{artifact.meta}</p>
+        </article>
+      ))}
+    </div>
   );
 }
 
@@ -625,7 +794,7 @@ function StripeProof({ model }: { model: ControlRoomModel }) {
 
 function GuardrailProof({ model }: { model: ControlRoomModel }) {
   return (
-    <div className="grid max-h-[calc(100vh-305px)] gap-2 overflow-auto pr-1">
+    <div className="grid max-h-[11.4rem] gap-2 overflow-auto pr-1">
       {model.guardrailChecks.map((check) => (
         <div className="flex items-center justify-between gap-3 rounded-md border border-[#1e2128] bg-[#0a0b0e] px-3 py-2" key={check.label}>
           <p className="text-sm text-[#f0f0f0]">{check.label}</p>
@@ -636,13 +805,16 @@ function GuardrailProof({ model }: { model: ControlRoomModel }) {
   );
 }
 
-function RailActivityTimeline({ model }: { model: ControlRoomModel }) {
+function RailActivityTimeline({ compact = false, model }: { compact?: boolean; model: ControlRoomModel }) {
   return (
-    <div className="rounded-md border border-[#1e2128] bg-[#111318] p-3">
-      <p className="text-xs font-semibold uppercase text-[#8a8f9e]">Rail Activity</p>
-      <div className="mt-2 flex gap-2 overflow-hidden">
+    <div className={`rounded-md border border-[#1e2128] bg-[#111318] ${compact ? "p-2.5" : "p-3"}`}>
+      <div className="flex items-center justify-between gap-3">
+        <p className="text-xs font-semibold uppercase text-[#8a8f9e]">Rail Activity</p>
+        <StatusBadge label="API-backed timeline" tone="blue" />
+      </div>
+      <div className={`${compact ? "mt-2" : "mt-2"} flex gap-2 overflow-hidden`}>
         {model.timelineChips.map((chip) => (
-          <span className="min-w-0 rounded-md border border-[#1e2128] bg-[#0a0b0e] px-3 py-2 text-xs font-semibold text-[#f0f0f0]" key={chip.label}>
+          <span className="min-w-0 flex-1 rounded-md border border-[#1e2128] bg-[#0a0b0e] px-3 py-2 text-xs font-semibold text-[#f0f0f0]" key={chip.label}>
             {chip.label} <span className="text-[#8a8f9e]">{chip.time}</span>
           </span>
         ))}
@@ -685,7 +857,7 @@ function Panel({ action, children, eyebrow, title }: { action?: ReactNode; child
         </div>
         {action}
       </div>
-      <div className="h-[calc(100%-3.5rem)] overflow-hidden p-4">{children}</div>
+      <div className="h-[calc(100%-3.5rem)] overflow-auto p-4">{children}</div>
     </section>
   );
 }
@@ -748,6 +920,9 @@ function buildControlRoomModel(
   const guardrailLabel = state?.execution.guardrail_label ?? (state?.guardrails.used_real_nemo ? "NeMo Guardrails verified" : "Local policy active");
   const rails = buildRails({ approvedSpendCents, blockedSpendCents, guardrailLabel, hasReport, laborCostCents, marginPercent, protectedProfitCents, revenueCents, stripeLabel });
   const auditRowsData = buildAuditRows({ approvedSpendCents, blockedSpendCents, guardrailLabel, laborCostCents, protectedProfitCents, state });
+  const modeCards = buildModeCards(state);
+  const proofArtifacts = buildProofArtifacts({ approvedSpendCents, blockedSpendCents, guardrailLabel, laborCostCents, protectedProfitCents, state, stripeLabel });
+  const primaryMode = modeCards.find((mode) => mode.primary) ?? modeCards[0];
 
   return {
     auditPills: [
@@ -761,6 +936,7 @@ function buildControlRoomModel(
     auditRows,
     auditRowsData,
     blockedRiskLabel: formatCurrency(blockedSpendCents),
+    blockedSpendCents,
     clientName: displayCustomer,
     connectionCards: buildConnectionCards(state, auditRows, guardrailLabel, hermesLabel, stripeLabel),
     guardrailChecks: buildGuardrailChecks(policyChecks, guardrailEvaluations),
@@ -776,6 +952,7 @@ function buildControlRoomModel(
       { label: "Labor Cost", value: formatCurrency(laborCostCents), tone: "white" },
       { label: "Protected Profit", value: formatCurrency(protectedProfitCents), tone: "green" },
     ],
+    modeCards,
     operationFacts: [
       { label: "Client", value: displayCustomer },
       { label: "Operation", value: displayJob },
@@ -787,6 +964,9 @@ function buildControlRoomModel(
       { label: "Floor", value: formatPercent(marginFloorPercent), tone: "amber" },
     ],
     operationName: displayJob,
+    primaryModeLabel: primaryMode.status,
+    primaryModeTone: primaryMode.tone,
+    proofArtifacts,
     protectedProfitLabel: formatCurrency(protectedProfitCents),
     rails,
     safetyProof: state?.command_center?.safety_proof ?? ["fake/demo clients only", "no live money", "no credentials", "uploaded data requires review"],
@@ -802,6 +982,7 @@ interface ControlRoomModel {
   auditRows: number;
   auditRowsData: AuditRowModel[];
   blockedRiskLabel: string;
+  blockedSpendCents: number;
   clientName: string;
   connectionCards: ConnectorCardModel[];
   guardrailChecks: Array<{ label: string; status: "Allow" | "Warn" | "Block" }>;
@@ -811,8 +992,12 @@ interface ControlRoomModel {
   hermesTasks: string[];
   marginLabel: string;
   metrics: StatPill[];
+  modeCards: ModeCardModel[];
   operationFacts: StatPill[];
   operationName: string;
+  primaryModeLabel: string;
+  primaryModeTone: Tone;
+  proofArtifacts: ProofArtifactModel[];
   protectedProfitLabel: string;
   rails: RailView[];
   safetyProof: string[];
@@ -841,6 +1026,125 @@ interface ConnectorCardModel {
   title: string;
 }
 
+interface ModeCardModel {
+  detail: string;
+  primary?: boolean;
+  status: string;
+  title: string;
+  tone: Tone;
+}
+
+interface ProofArtifactModel {
+  detail: string;
+  meta: string;
+  status: string;
+  title: string;
+  tone: Tone;
+}
+
+function buildModeCards(state: DemoState | null): ModeCardModel[] {
+  const executionMode = state?.execution.mode ?? "demo";
+  const usedRealStripe = Boolean(state?.stripe.used_real_stripe ?? state?.execution.used_real_stripe);
+  const stripeHasError = Boolean(state?.stripe.error);
+  const stripeSandboxStatus = usedRealStripe
+    ? "Real test-mode proof"
+    : stripeHasError
+      ? "Needs safe test config"
+      : "Prototype ready";
+
+  return [
+    {
+      detail: "Default deterministic/local path; no external credentials required.",
+      primary: executionMode === "demo",
+      status: executionMode === "demo" ? "Judge Demo active" : "Available",
+      title: "Judge Demo Mode",
+      tone: executionMode === "demo" ? "green" : "muted",
+    },
+    {
+      detail: "Uses real Stripe test-mode objects only when configured with safe local test credentials.",
+      primary: executionMode === "full_proof" && usedRealStripe,
+      status: stripeSandboxStatus,
+      title: "Stripe Sandbox Prototype",
+      tone: usedRealStripe ? "green" : stripeHasError ? "amber" : "blue",
+    },
+    {
+      detail: "Future production live-money path; not enabled in this demo.",
+      status: "Verified Live locked",
+      title: "Verified Live Mode",
+      tone: "red",
+    },
+  ];
+}
+
+function buildProofArtifacts({
+  approvedSpendCents,
+  blockedSpendCents,
+  guardrailLabel,
+  laborCostCents,
+  protectedProfitCents,
+  state,
+  stripeLabel,
+}: {
+  approvedSpendCents: number;
+  blockedSpendCents: number;
+  guardrailLabel: string;
+  laborCostCents: number;
+  protectedProfitCents: number;
+  state: DemoState | null;
+  stripeLabel: string;
+}): ProofArtifactModel[] {
+  const invoiceId = state?.stripe.invoice_id ?? "in_demo_northstar";
+  const stripeStatus = state?.stripe.used_real_stripe ? "Test-mode" : "Demo proof";
+  const nemoRuntime = state?.execution.hermes_runtime === "nemoclaw" || state?.execution.hermes_runtime === "nemohermes_api"
+    ? "NemoClaw/NemoHermes route selected"
+    : "NemoClaw route not selected";
+
+  return [
+    {
+      detail: "Implementation plan and next actions recorded before ScaleX allows execution.",
+      meta: state?.planning_run?.id ?? "planning_run:demo_northstar",
+      status: "Recorded",
+      title: "Hermes planning proof",
+      tone: "purple",
+    },
+    {
+      detail: `${stripeLabel}; livemode=${String(state?.stripe.livemode ?? false)}; paid=${String(state?.stripe.paid ?? false)}.`,
+      meta: `invoice:${invoiceId}`,
+      status: stripeStatus,
+      title: "Stripe finance proof",
+      tone: state?.stripe.used_real_stripe ? "green" : "blue",
+    },
+    {
+      detail: `${guardrailLabel}. Vendor, margin, live-money, and unsafe-data rules checked before action.`,
+      meta: `${nemoRuntime}; NeMo Guardrails claim only with runtime proof`,
+      status: "Checked",
+      title: "NeMo/local policy proof",
+      tone: "green",
+    },
+    {
+      detail: `${formatCurrency(approvedSpendCents)} approved setup spend recorded after policy approval.`,
+      meta: "ledger:approved_setup_spend",
+      status: "Approved",
+      title: "Approved spend proof",
+      tone: "green",
+    },
+    {
+      detail: `${formatCurrency(blockedSpendCents)} data broker enrichment request blocked before vendor execution.`,
+      meta: "policy:block_no_ledger_spend_row",
+      status: "BLOCKED",
+      title: "Blocked risk proof",
+      tone: "red",
+    },
+    {
+      detail: `${formatCurrency(laborCostCents)} labor cost and ${formatCurrency(protectedProfitCents)} protected profit recorded.`,
+      meta: "profit_report:protected_margin",
+      status: "Recorded",
+      title: "Profit outcome proof",
+      tone: "green",
+    },
+  ];
+}
+
 function buildRails({
   approvedSpendCents,
   blockedSpendCents,
@@ -863,16 +1167,16 @@ function buildRails({
   stripeLabel: string;
 }): RailView[] {
   return [
-    { actor: "SCALEX", badge: "01", detail: "Synthetic Northstar operation, revenue, spend cap, margin floor, and data boundary checked.", evidence: "Input rail passed", id: "input", name: "ScaleX Input Rail", status: "Passed", tone: "green" },
-    { actor: "HERMES", badge: "02", detail: "Hermes creates the implementation launch plan and proposes next actions.", evidence: "Planning proof recorded", id: "hermes", name: "Hermes Plan", status: "Created", tone: "purple" },
-    { actor: "SCALEX", badge: "03", detail: "Plan stays inside the allowed client-implementation scope.", evidence: "Planning rail approved", id: "planning", name: "Planning Rail", status: "Approved", tone: "purple" },
-    { actor: "STRIPE", badge: "04", detail: `Finance proof created for ${formatCurrency(revenueCents)}. ${stripeLabel}.`, evidence: "Stripe sandbox/test proof", id: "stripe", name: "Finance Rail", status: "Verified", tone: "blue" },
-    { actor: "SCALEX", badge: "05", detail: "Revenue gate verifies money state before setup spend or delivery work proceeds.", evidence: `${formatCurrency(revenueCents)} revenue secured`, id: "revenue", name: "Revenue Gate", status: "Passed", tone: "green" },
-    { actor: "NEMO / LOCAL", badge: "06", detail: "Vendor allowlist, blocked vendor, spend cap, margin floor, and unsafe-data rules checked.", evidence: guardrailLabel, id: "policy", name: "Policy Rail", status: "Checked", tone: "green" },
-    { actor: "SCALEX", badge: "07", detail: `${formatCurrency(approvedSpendCents)} setup spend stays inside approved vendor and margin rules.`, evidence: "Approved setup spend recorded", id: "approved-spend", name: "Approved Spend", status: "Approved", tone: "green" },
-    { actor: "SCALEX", badge: "08", detail: `Data broker enrichment / premium vendor spend requested ${formatCurrency(blockedSpendCents)} and created no spend ledger row.`, evidence: "Unsafe vendor spend blocked", id: "blocked-spend", name: `Risky Vendor Action ${formatCurrency(blockedSpendCents)}`, status: "BLOCKED", tone: "red" },
-    { actor: "SCALEX", badge: "09", detail: "Allowed work execution completes only after policy gates pass.", evidence: hasReport ? "Execution evidence recorded" : "Execution ready", id: "execution", name: "Execution Rail", status: hasReport ? "Complete" : "Ready", tone: "green" },
-    { actor: "SCALEX", badge: "10", detail: `Labor ${formatCurrency(laborCostCents)}, profit ${formatCurrency(protectedProfitCents)}, margin ${formatPercent(marginPercent)}.`, evidence: "Protected profit outcome recorded", id: "profit", name: "Profit Rail", status: "Protected", tone: "green" },
+    { actor: "SCALEX", badge: "01", detail: "Synthetic Northstar operation, revenue, spend cap, margin floor, and data boundary checked.", evidence: "Input rail passed", id: "input", name: "Input Rail", proofTag: "client context", riskTag: "data safe", status: "Passed", subline: "Northstar context accepted", tone: "green" },
+    { actor: "HERMES", badge: "02", detail: "Hermes creates the implementation launch plan and proposes next actions.", evidence: "Planning proof recorded", id: "hermes", name: "Hermes Plan", proofTag: "planner proof", riskTag: "bounded plan", status: "Created", subline: "Planner / operator brain", tone: "purple" },
+    { actor: "SCALEX", badge: "03", detail: "Plan stays inside the allowed client-implementation scope.", evidence: "Planning rail approved", id: "planning", name: "Planning Rail", proofTag: "scope check", riskTag: "approved", status: "Approved", subline: "Allowed work only", tone: "purple" },
+    { actor: "STRIPE", badge: "04", detail: `Finance proof created for ${formatCurrency(revenueCents)}. ${stripeLabel}.`, evidence: "Stripe sandbox/test proof", id: "stripe", name: "Stripe Finance Proof", proofTag: "livemode=false", riskTag: "money proof", status: "Verified", subline: "Finance state grounded", tone: "blue" },
+    { actor: "SCALEX", badge: "05", detail: "Revenue gate verifies money state before setup spend or delivery work proceeds.", evidence: `${formatCurrency(revenueCents)} revenue secured`, id: "revenue", name: "Revenue Gate", proofTag: "invoice state", riskTag: "passed", status: "Passed", subline: `${formatCurrency(revenueCents)} secured`, tone: "green" },
+    { actor: "NEMO / LOCAL", badge: "06", detail: "Vendor allowlist, blocked vendor, spend cap, margin floor, and unsafe-data rules checked.", evidence: guardrailLabel, id: "policy", name: "NeMo / Local Policy", proofTag: "13 checks", riskTag: "guardrail", status: "Checked", subline: "Risk reviewed before action", tone: "green" },
+    { actor: "SCALEX", badge: "07", detail: `Data broker enrichment / premium vendor spend requested ${formatCurrency(blockedSpendCents)} and created no spend ledger row.`, evidence: "Unsafe vendor spend blocked", id: "blocked-spend", name: `Risky Vendor Action ${formatCurrency(blockedSpendCents)}`, proofTag: "no spend row", riskTag: "blocked", status: "BLOCKED", subline: "Data broker enrichment stopped", tone: "red" },
+    { actor: "SCALEX", badge: "08", detail: `${formatCurrency(approvedSpendCents)} setup spend stays inside approved vendor and margin rules.`, evidence: "Approved setup spend recorded", id: "approved-spend", name: "Controlled Setup Spend", proofTag: "policy pass", riskTag: "approved", status: "Approved", subline: `${formatCurrency(approvedSpendCents)} allowed`, tone: "green" },
+    { actor: "SCALEX", badge: "09", detail: "Allowed work execution completes only after policy gates pass and evidence is recorded.", evidence: hasReport ? "Execution and ledger evidence recorded" : "Execution ready", id: "execution", name: "Execution + Evidence", proofTag: "audit trail", riskTag: "recorded", status: hasReport ? "Recorded" : "Ready", subline: "Allowed work only", tone: "green" },
+    { actor: "SCALEX", badge: "10", detail: `Labor ${formatCurrency(laborCostCents)}, profit ${formatCurrency(protectedProfitCents)}, margin ${formatPercent(marginPercent)}.`, evidence: "Protected profit outcome recorded", id: "profit", name: "Profit Outcome", proofTag: "margin report", riskTag: "protected", status: "Protected", subline: `${formatCurrency(protectedProfitCents)} protected`, tone: "green" },
   ];
 }
 
@@ -974,18 +1278,20 @@ function buildAuditRows({ approvedSpendCents, blockedSpendCents, guardrailLabel,
 
 function buildConnectionCards(state: DemoState | null, auditRows: number, guardrailLabel: string, hermesLabel: string, stripeLabel: string): ConnectorCardModel[] {
   const guardrails = state?.guardrails ?? null;
+  const hermesRuntime = state?.execution.hermes_runtime ?? "isolated_cli";
+  const nemoClawSelected = hermesRuntime === "nemoclaw" || hermesRuntime === "nemohermes_api";
   return [
     {
-      badges: [{ label: "active", tone: "green" }, { label: state?.hermes.used_real_hermes ? "runtime verified" : "demo mode", tone: state?.hermes.used_real_hermes ? "green" : "amber" }, { label: "full proof capable", tone: "blue" }],
-      boundary: "No production Hermes config is used. Optional NemoHermes routing is selected only by environment configuration.",
+      badges: [{ label: "active", tone: "green" }, { label: state?.hermes.used_real_hermes ? "runtime verified" : "demo mode", tone: state?.hermes.used_real_hermes ? "green" : "amber" }, { label: nemoClawSelected ? "NemoClaw route selected" : "NemoClaw optional", tone: nemoClawSelected ? "green" : "blue" }],
+      boundary: "No production Hermes config is used. Optional NemoClaw/NemoHermes routing is selected only by environment configuration and fails closed if unavailable.",
       description: "Creates the client implementation plan and proposes the controlled tool sequence.",
-      facts: [{ label: "Current mode", value: hermesLabel, tone: "purple" }, { label: "Runtime", value: state?.execution.hermes_runtime ?? "isolated_cli", tone: "white" }, { label: "used_real_hermes", value: String(Boolean(state?.hermes.used_real_hermes)), tone: state?.hermes.used_real_hermes ? "green" : "amber" }, { label: "Planning runs", value: String(state?.planning_runs.length ?? 0), tone: "white" }],
+      facts: [{ label: "Current mode", value: hermesLabel, tone: "purple" }, { label: "Runtime", value: hermesRuntime, tone: "white" }, { label: "NemoClaw route", value: nemoClawSelected ? "selected" : "not selected", tone: nemoClawSelected ? "green" : "blue" }, { label: "Planning runs", value: String(state?.planning_runs.length ?? 0), tone: "white" }],
       icon: BrainCircuit,
       title: "Hermes Planning",
     },
     {
-      badges: [{ label: state?.stripe.used_real_stripe ? "real test mode" : "demo mode", tone: state?.stripe.used_real_stripe ? "green" : "amber" }, { label: "sandbox proof", tone: "blue" }, { label: "live blocked", tone: "red" }],
-      boundary: "Live money is unsupported. Paid state is shown only when Stripe reports it.",
+      badges: [{ label: state?.stripe.used_real_stripe ? "real test mode" : "demo mode", tone: state?.stripe.used_real_stripe ? "green" : "amber" }, { label: "Stripe Sandbox Prototype", tone: "blue" }, { label: "live blocked", tone: "red" }],
+      boundary: "Judge Demo uses labeled sandbox/test-double proof. Stripe Sandbox Prototype uses real test-mode objects only when configured safely. Live money is unsupported.",
       description: "Provides finance proof through sandbox/test-mode invoice records.",
       facts: [{ label: "Current mode", value: stripeLabel, tone: "blue" }, { label: "livemode", value: String(state?.stripe.livemode ?? false), tone: "green" }, { label: "paid", value: String(state?.stripe.paid ?? false), tone: "amber" }, { label: "invoice", value: state?.stripe.invoice_id ? "Available" : "Demo proof", tone: "white" }],
       icon: CreditCard,
@@ -993,11 +1299,11 @@ function buildConnectionCards(state: DemoState | null, auditRows: number, guardr
     },
     {
       badges: [{ label: "active", tone: "green" }, { label: guardrails?.used_real_nemo ? "real NeMo" : "local_policy_active", tone: guardrails?.used_real_nemo ? "green" : "amber" }, { label: "13 evaluations", tone: "blue" }],
-      boundary: "Real NeMo is claimed only when used_real_nemo=true. Local policy remains visible otherwise.",
+      boundary: "NeMo Guardrails is claimed only when used_real_nemo=true. Local policy remains visible otherwise. This is separate from NemoClaw planning runtime routing.",
       description: "Checks risky actions before execution and blocks unsafe behavior.",
       facts: [{ label: "Current mode", value: guardrailLabel, tone: "green" }, { label: "used_real_nemo", value: String(Boolean(guardrails?.used_real_nemo)), tone: guardrails?.used_real_nemo ? "green" : "amber" }, { label: "fail_closed", value: String(Boolean(guardrails?.fail_closed)), tone: guardrails?.fail_closed ? "red" : "green" }, { label: "adapter", value: guardrails?.adapter_status ?? "local policy", tone: "white" }],
       icon: ShieldCheck,
-      title: "NeMo / Local Policy",
+      title: "NeMo Guardrails / Local Policy",
     },
     {
       badges: [{ label: "active", tone: "green" }, { label: "demo mode", tone: "amber" }, { label: `${auditRows} evidence rows`, tone: "blue" }],
