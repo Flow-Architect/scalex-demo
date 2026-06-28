@@ -7,14 +7,13 @@ Last updated: 2026-06-28
 - Project folder exists at `/home/ascabrya/dev/scalex-demo`.
 - Latest committed baseline before Goal 8E: `615a9bd Document NemoClaw correction and next
   integration plan`.
-- Last completed goal: Goal 8K - motion storytelling and label clarity pass.
-- Last completed implementation/QA goal: Goal 8K - local visual run state, active/completed rails,
-  blocked-risk climax, progressive proof artifacts, activity chips, stack glow, metric glow, and
-  Evidence Ledger motion.
-- Last completed documentation/tracking update: Goal 8K motion-storytelling closeout.
+- Last completed goal: Goal 8L - demo choreography and copy cleanup.
+- Last completed implementation/QA goal: Goal 8L - collapsed dashboard activity noise,
+  context-aware Live Run Detail, compact run signals, reduced proof/blocked/queued repetition,
+  simplified control artifacts, and one clear blocked-risk climax.
+- Last completed documentation/tracking update: Goal 8L choreography/copy closeout.
 - Last completed checkout cleanup: Open Source Checkout Cleanup for judge readiness.
-- Current priority: Goal 9 - final repo/video/submission polish, recording rehearsal, submission
-  copy check, and final safety scan.
+- Current priority: Goal 9 - final repo/video/submission polish.
 - Goal 8I used the uploaded six-phase control-room visual prompt as a design specification only.
   It did not become a hardcoded single-file prototype, did not remove API calls, and preserved
   deterministic Judge Demo Mode, auth behavior, backend state, evidence boundaries, Stripe
@@ -91,6 +90,20 @@ Last updated: 2026-06-28
   metric glow, control-stack glow, Evidence Ledger row motion, and judge-friendly labels without
   changing backend mechanics, adding Telegram, adding live mode, adding integrations, or replacing
   the API-backed app.
+- Goal 8L completed the frontend-only signal-to-noise pass. It removed the dashboard Rail
+  Activity ticker, added an Active Operation identity bar, kept all ten execution rails visible
+  in the dashboard viewport, replaced the old proof tabs with context-aware Live Run Detail,
+  added four compact run signals, reduced repeated proof/blocked/queued wording, simplified
+  artifacts to five control records, and preserved all backend mechanics and truthfulness
+  boundaries.
+- Goal 8L validation passed `cd frontend && npm run build`, `./scripts/test.sh`,
+  `./scripts/check-nemo.sh`, and `git diff --check`. Browser smoke at
+  `http://127.0.0.1:5174/` verified the redesigned dashboard render, no default dashboard Rail
+  Activity ticker, compact ten-rail map, Live Run Detail, run signals, and protected-profit
+  outcome in one viewport. An isolated temp-stack click smoke confirmed the UI enters the running
+  state and keeps the blocked-risk/Live Run Detail story visible; its temp backend POST hit a
+  readonly `/tmp` SQLite file, so backend completion remains validated by `./scripts/test.sh` and
+  the direct deterministic runner against `/tmp/scalex-goal8l-direct.db`.
 - Goal 9 remains final polish and submission assets.
 - Goal 7B remains future Verified Live Mode hardening.
 

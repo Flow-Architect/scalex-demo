@@ -10,6 +10,47 @@ Use:
 
 ---
 
+## 2026-06-28 - Goal 8L: Choreography and copy cleanup
+
+Completed:
+- Removed the full-width dashboard Rail Activity ticker from the default recording view.
+- Added a compact Active Operation identity bar above the metric strip and kept the first screen
+  focused on operation identity, money/risk/profit metrics, execution rails, and Live Run Detail.
+- Replaced the dashboard proof tabs with a context-aware Live Run Detail panel for ready state,
+  Hermes plan, Stripe finance state, NeMo/local policy, blocked risky spend, audit record, and
+  profit outcome.
+- Added four compact run signals: input loaded, finance verified, risk contained, and profit
+  protected.
+- Reduced repeated proof/blocked/queued wording and simplified artifacts to five control records:
+  Operator Plan, Finance State, Guardrail Decision, Labor Costing, and Profit Outcome.
+- Kept one strong blocked-risk moment through the red metric, blocked rail, Live Run Detail risk
+  stop, and ledger row.
+- Preserved backend mechanics, existing run/reset/API behavior, integration truthfulness, Judge
+  Demo Mode, Stripe Sandbox Prototype wording, Verified Live Mode locked state, local policy
+  truthfulness, no live money, no Telegram, and no new integrations.
+
+Verification:
+- `cd frontend && npm run build` passed.
+- `./scripts/test.sh` passed with 68 backend tests and a successful frontend build.
+- `./scripts/check-nemo.sh` passed with `nemoguardrails` 0.21.0 and `guardrails/scalex` loaded.
+- `git diff --check` passed.
+- Browser render smoke at `http://127.0.0.1:5174/` verified the dashboard fits in one viewport
+  with no default Rail Activity ticker, all ten rails visible, Live Run Detail, run signals, and
+  protected-profit outcome.
+- Isolated temp-stack click smoke confirmed frontend running state, blocked-risk visibility, Live
+  Run Detail visibility, and no dashboard Rail Activity ticker. The temp backend POST hit a
+  readonly `/tmp` SQLite file, so backend completion was validated through `./scripts/test.sh`
+  and a direct deterministic runner against `/tmp/scalex-goal8l-direct.db`.
+- Unsafe/generated path scan and staged added-lines secret scan returned no matches.
+
+Suggested commit message:
+Clean ScaleX demo choreography and copy
+
+Next:
+- Goal 9 - final repo/video/submission polish.
+
+---
+
 ## 2026-06-28 - Goal 8K: Motion storytelling and label clarity
 
 Completed:

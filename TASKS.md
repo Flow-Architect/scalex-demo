@@ -4,7 +4,7 @@
 
 Goal 9 - final repo/video/submission polish.
 
-Goal 8K is complete. Next work should stay narrow and focus on final delivery readiness:
+Goal 8L is complete. Goal 9 should stay narrow and submission-focused:
 
 - Rehearse the three-minute recording against `docs/DEMO_SCRIPT.md`.
 - Confirm the local demo opens at `http://127.0.0.1:5174/` with the dark control-room UI.
@@ -64,6 +64,35 @@ local visual run state, active/completed rail status, approved-then-blocked rail
 blocked $3,200 data broker enrichment climax, progressive proof artifact reveal, live rail
 activity chips, metric glow, control-stack glow, Evidence Ledger row motion, and clearer
 judge-facing labels.
+
+Goal 8L is complete. It kept the API-backed shell and reduced recording noise:
+
+- Removed the full-width dashboard Rail Activity ticker and replaced that role with compact run
+  signals inside Live Run Detail.
+- Added the Active Operation identity bar above metrics and kept the first screen focused on
+  operation identity, metrics, rails, run signals, and the context-aware detail panel.
+- Replaced the dashboard proof tabs with Live Run Detail states for ready, Hermes, Stripe,
+  NeMo/local policy, blocked risky spend, audit record, and profit outcome.
+- Reduced repeated proof/blocked/queued wording across the dashboard and simplified artifacts to
+  five control records: Operator Plan, Finance State, Guardrail Decision, Labor Costing, and
+  Profit Outcome.
+- Preserved API-backed auth, health/demo state, run/reset behavior, evidence state, Stripe/Hermes/
+  NeMo truthfulness, Judge Demo Mode, Stripe Sandbox Prototype wording, Verified Live Mode locked,
+  local policy truthfulness, and no live money.
+
+Goal 8L validation:
+
+- `cd frontend && npm run build` passed.
+- `./scripts/test.sh` passed with 68 backend tests and a successful frontend build.
+- `./scripts/check-nemo.sh` passed with `nemoguardrails` 0.21.0 and `guardrails/scalex` loaded.
+- `git diff --check` passed.
+- Browser render smoke at `http://127.0.0.1:5174/` verified the dashboard fits in one viewport
+  with no default Rail Activity ticker, all ten rails visible, Live Run Detail, run signals, and
+  protected-profit outcome.
+- Isolated temp-stack click smoke confirmed the frontend enters running state and keeps
+  blocked-risk/Live Run Detail visible. The temp backend POST hit a readonly `/tmp` SQLite file,
+  so backend run completion is covered by `./scripts/test.sh` and direct deterministic runner
+  validation.
 
 Goal 8K validation:
 
