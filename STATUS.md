@@ -7,11 +7,12 @@ Last updated: 2026-06-28
 - Project folder exists at `/home/ascabrya/dev/scalex-demo`.
 - Latest committed baseline before Goal 8E: `615a9bd Document NemoClaw correction and next
   integration plan`.
-- Last completed goal: Goal 8L - demo choreography and copy cleanup.
+- Last completed goal: Goal 8M - enterprise polish, tool rails, intake/cost basis, Stripe flow,
+  and NemoClaw/NeMo visibility.
 - Last completed implementation/QA goal: Goal 8L - collapsed dashboard activity noise,
   context-aware Live Run Detail, compact run signals, reduced proof/blocked/queued repetition,
   simplified control artifacts, and one clear blocked-risk climax.
-- Last completed documentation/tracking update: Goal 8L choreography/copy closeout.
+- Last completed documentation/tracking update: Goal 8M enterprise polish closeout.
 - Last completed checkout cleanup: Open Source Checkout Cleanup for judge readiness.
 - Current priority: Goal 9 - final repo/video/submission polish.
 - Goal 8I used the uploaded six-phase control-room visual prompt as a design specification only.
@@ -104,6 +105,15 @@ Last updated: 2026-06-28
   state and keeps the blocked-risk/Live Run Detail story visible; its temp backend POST hit a
   readonly `/tmp` SQLite file, so backend completion remains validated by `./scripts/test.sh` and
   the direct deterministic runner against `/tmp/scalex-goal8l-direct.db`.
+- Goal 8M completed the frontend-first enterprise polish pass. It slowed visual rail pacing,
+  toned down overly shiny animation, resurfaced Business Intake & Cost Basis, added an MCP-ready /
+  skill Tool Action Rail, made Stripe invoice/payment flow explicit, made NemoClaw / NeMo
+  guardrail boundaries judge-facing, shortened the first-screen product copy, and preserved
+  backend mechanics and truthfulness.
+- Goal 8M validation passed `./scripts/test.sh`, `./scripts/check-nemo.sh`, `git diff --check`,
+  unsafe/generated path scan, staged added-lines secret scan, and browser smoke at
+  `http://127.0.0.1:5174/` for Dashboard, Governed Run, Evidence Ledger, Connection Hub,
+  Settings, and the blocked-risk animation moment.
 - Goal 9 remains final polish and submission assets.
 - Goal 7B remains future Verified Live Mode hardening.
 

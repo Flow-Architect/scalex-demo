@@ -4,7 +4,7 @@
 
 Goal 9 - final repo/video/submission polish.
 
-Goal 8L is complete. Goal 9 should stay narrow and submission-focused:
+Goal 8M is complete. Return to final recording and submission readiness:
 
 - Rehearse the three-minute recording against `docs/DEMO_SCRIPT.md`.
 - Confirm the local demo opens at `http://127.0.0.1:5174/` with the dark control-room UI.
@@ -17,6 +17,33 @@ new backend features, new external services, production payroll/HR behavior, MCP
 changes, database files, uploaded real files, or secrets.
 
 ## Recently Completed
+
+Goal 8M is complete. It kept the API-backed control-room shell and completed the enterprise
+polish pass:
+
+- Slowed frontend-only governed-run pacing and reduced game-like flashing/bounce.
+- Resurfaced Business Intake & Cost Basis in the dashboard with client/document review,
+  workforce costing, labor workers, labor cost, and margin-impact context.
+- Added a truthful MCP-ready / skill Tool Action Rail showing intake, Hermes, Stripe, policy /
+  NemoClaw, and ledger actions without claiming a real MCP server executed calls.
+- Made Stripe Finance Flow explicit: create customer, create invoice, send invoice/payment link,
+  retrieve invoice/payment status, record finance state, and gate spend on finance state.
+- Made NemoClaw / NeMo Guardrail Layer judge-facing with local policy truth, `used_real_nemo`,
+  fail-closed state, checked risk categories, and no Docker/NemoClaw commands invoked.
+- Kept the top recording view clear with Northstar operation identity, money/risk/profit metrics,
+  support chips, after-sale story strip, governed rails, Live Run Detail, and Enterprise Rails.
+- Preserved API-backed auth, health/demo state, run/reset behavior, evidence state, Stripe/Hermes/
+  NeMo truthfulness, Judge Demo Mode, Stripe Sandbox Prototype wording, Verified Live Mode locked,
+  local policy truthfulness, no live money, no Telegram, and no new integrations.
+
+Goal 8M validation:
+
+- `./scripts/test.sh` passed with 68 backend tests and a successful frontend build.
+- `./scripts/check-nemo.sh` passed with `nemoguardrails` 0.21.0 and `guardrails/scalex` loaded.
+- Browser smoke at `http://127.0.0.1:5174/` verified Dashboard, Governed Run, Evidence Ledger,
+  Connection Hub, Settings, and the slower blocked-risk animation moment with no runtime
+  exceptions.
+- `git diff --check`, unsafe/generated path scan, and staged added-lines secret scan passed.
 
 Goal 8F is complete. ScaleX now has a docs-first command-center UI, deterministic client and
 employee intake proof, demo-safe document review states, labor costing, economic controls, policy

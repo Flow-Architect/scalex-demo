@@ -23,6 +23,16 @@ type Tone = "green" | "red" | "amber" | "blue" | "purple" | "cyan" | "muted" | "
 type DrawerTab = "summary" | "operation" | "control";
 type RunVisualState = "idle" | "running" | "complete";
 
+const DEMO_RAIL_DELAY_MS = 160;
+const DEMO_RAIL_GAP_MS = 150;
+const DEMO_DEFAULT_RAIL_HOLD_MS = 1050;
+const DEMO_STRIPE_HOLD_MS = 1320;
+const DEMO_NEMO_HOLD_MS = 1340;
+const DEMO_BLOCKED_HOLD_MS = 2050;
+const DEMO_PROFIT_HOLD_MS = 1220;
+const DEMO_BLOCKED_FLASH_MS = 1250;
+const DEMO_BLOCKED_COUNT_MS = 980;
+
 interface ControlRoomAppProps {
   activeView: AppView;
   auth: AuthStatus | null;
@@ -62,6 +72,32 @@ interface StatPill {
   label: string;
   value: string;
   tone?: Tone;
+}
+
+interface LaborWorkerView {
+  cost: string;
+  hours: string;
+  rate: string;
+  role: string;
+  worker: string;
+}
+
+interface ToolActionView {
+  name: string;
+  status: string;
+  tone: Tone;
+}
+
+interface ToolActionGroupView {
+  actions: ToolActionView[];
+  title: string;
+}
+
+interface FlowStepView {
+  detail: string;
+  label: string;
+  status: string;
+  tone: Tone;
 }
 
 export function ControlRoomApp({
@@ -114,26 +150,26 @@ export function ControlRoomApp({
     setDisplayedBlockedRiskCents(0);
     const blockedTarget = model.blockedSpendCents;
     const timers: number[] = [];
-    let cursorMs = 120;
+    let cursorMs = DEMO_RAIL_DELAY_MS;
     model.rails.forEach((_, index) => {
       const rail = model.rails[index];
-      const durationMs = rail.id === "blocked-spend" ? 920 : 580;
+      const durationMs = railHoldMs(rail.id);
       timers.push(window.setTimeout(() => {
         setActiveRailId(rail.id);
-      }, cursorMs));
-
-      timers.push(window.setTimeout(() => {
-        setCompletedRailIds((current) => (current.includes(rail.id) ? current : [...current, rail.id]));
-        setEvidenceRevealStep(index + 1);
         if (rail.id === "blocked-spend") {
           setBlockedFlash(true);
           Array.from({ length: 16 }).forEach((__, stepIndex) => {
             timers.push(window.setTimeout(() => {
               setDisplayedBlockedRiskCents(Math.round(blockedTarget * ((stepIndex + 1) / 16)));
-            }, stepIndex * 34));
+            }, stepIndex * (DEMO_BLOCKED_COUNT_MS / 16)));
           });
-          timers.push(window.setTimeout(() => setBlockedFlash(false), 1100));
+          timers.push(window.setTimeout(() => setBlockedFlash(false), DEMO_BLOCKED_FLASH_MS));
         }
+      }, cursorMs));
+
+      timers.push(window.setTimeout(() => {
+        setCompletedRailIds((current) => (current.includes(rail.id) ? current : [...current, rail.id]));
+        setEvidenceRevealStep(index + 1);
         if (index === model.rails.length - 1) {
           setActiveRailId(null);
           setRunVisualState("complete");
@@ -141,11 +177,11 @@ export function ControlRoomApp({
           setActiveRailId(null);
         }
       }, cursorMs + durationMs));
-      cursorMs += durationMs + (rail.id === "blocked-spend" ? 220 : 110);
+      cursorMs += durationMs + DEMO_RAIL_GAP_MS;
     });
 
     return () => timers.forEach((timer) => window.clearTimeout(timer));
-  }, [busyAction, model.blockedSpendCents, model.rails.length]);
+  }, [busyAction, model.blockedSpendCents, model.rails]);
 
   useEffect(() => {
     if (busyAction === "run" || runVisualState === "running") {
@@ -270,7 +306,7 @@ function ControlTopbar({
     error ??
     notice ??
     (activeView === "dashboard"
-      ? "Hermes plans. Stripe verifies finance state. NeMo Guardrails or local policy checks risk. ScaleX controls execution and records the audit trail."
+      ? "Hermes plans. Stripe proves money. NemoClaw/NeMo checks risk. ScaleX blocks, records, protects profit."
       : runStatus);
   const statusLabel = runVisualState === "running"
     ? "Running"
@@ -279,9 +315,7 @@ function ControlTopbar({
       : "Ready";
   const buttonLabel = runVisualState === "running"
     ? "Executing governed run..."
-    : runVisualState === "complete" || model.hasReport
-      ? "Run Again"
-      : "Start Governed Run";
+    : "Start Governed Run";
 
   return (
     <header className="flex h-14 flex-none items-center justify-between border-b border-[#1e2128] bg-[#0d0e12] px-4">
@@ -340,7 +374,7 @@ function DashboardView({
         runActive={runActive}
         runVisualState={runVisualState}
       />
-      <div className="grid min-h-0 grid-cols-2 gap-4">
+      <div className="grid min-h-0 grid-cols-[minmax(360px,0.9fr)_minmax(340px,0.85fr)_300px] gap-4">
         <Panel title="Governed Run" eyebrow="execution rails" action={<StatusBadge label={runVisualState === "running" ? "running" : runVisualState === "complete" ? "complete" : "ready"} tone={runVisualState === "running" ? "blue" : "green"} />}>
           <RailList activeRailId={activeRailId} blockedFlash={blockedFlash} compact completedRailIds={completedRailIds} model={model} />
         </Panel>
@@ -354,6 +388,9 @@ function DashboardView({
             runActive={runActive}
             runVisualState={runVisualState}
           />
+        </Panel>
+        <Panel title="Enterprise Rails" eyebrow="intake · tools · guardrails" action={<StatusBadge label="MCP-ready" tone="blue" />}>
+          <EnterpriseControlPanel model={model} />
         </Panel>
       </div>
     </section>
@@ -369,14 +406,21 @@ function OperationIdentityBar({ model }: { model: ControlRoomModel }) {
           <h1 className="truncate text-2xl font-semibold text-white">{model.clientName}</h1>
           <p className="truncate text-sm font-semibold text-[#8a8f9e]">{model.operationName}</p>
         </div>
+        <div className="operation-support-chips">
+          {["Intake reviewed", "Stripe sandbox/test finance", "NemoClaw boundary", "Labor cost included", "Evidence ledger active"].map((item) => (
+            <span key={item}>{item}</span>
+          ))}
+        </div>
       </div>
-      <div className="operation-chain" aria-label="ScaleX control stack">
-        {["Hermes plan", "Stripe finance", "NeMo policy", "ScaleX audit"].map((item, index) => (
-          <div className="operation-chain-step" key={item}>
-            <span>{item}</span>
-            {index < 3 ? <span className="operation-chain-arrow" aria-hidden="true">→</span> : null}
-          </div>
-        ))}
+      <div className="after-sale-strip" aria-label="After the sale operating model">
+        <div>
+          <span className="after-sale-label">Before ScaleX</span>
+          <p>Sales → Finance → Ops → Vendors → Legal/Security → CS → Leadership → Audit</p>
+        </div>
+        <div>
+          <span className="after-sale-label after-sale-label-green">With ScaleX</span>
+          <p>Paid client operation → governed run → blockers + protected profit</p>
+        </div>
       </div>
     </div>
   );
@@ -386,7 +430,7 @@ function RunSignals({ completedRailIds, runVisualState }: { completedRailIds: st
   const isComplete = (railId: string) => completedRailIds.includes(railId) || runVisualState === "complete";
   const signals = [
     { label: "Input loaded", ready: isComplete("input"), tone: "green" as Tone },
-    { label: "Finance verified", ready: isComplete("stripe") || isComplete("revenue"), tone: "purple" as Tone },
+    { label: "Finance verified", ready: isComplete("stripe-status"), tone: "purple" as Tone },
     { label: "Risk contained", ready: isComplete("blocked-spend"), tone: "red" as Tone },
     { label: "Profit protected", ready: isComplete("profit"), tone: "green" as Tone },
   ];
@@ -422,13 +466,36 @@ function LiveRunDetail({
 }) {
   const focusId = activeRailId ?? (runVisualState === "complete" || completedRailIds.includes("profit") ? "profit" : "idle");
   const marginFloor = model.operationFacts.find((fact) => fact.label === "Floor")?.value ?? "50%";
-  const invoiceId = model.state?.stripe.invoice_id ?? "in_demo_northstar";
-  const livemode = String(model.state?.stripe.livemode ?? false);
-  const paid = String(model.state?.stripe.paid ?? false);
-  const hermesRuntime = model.state?.execution.hermes_runtime ?? "isolated_cli";
-  const nemoRuntimeVerified = Boolean(model.state?.guardrails.used_real_nemo);
+  const invoiceId = model.state?.stripe?.invoice_id ?? "in_demo_northstar";
+  const livemode = String(model.state?.stripe?.livemode ?? false);
+  const paid = String(model.state?.stripe?.paid ?? false);
+  const hermesRuntime = model.state?.execution?.hermes_runtime ?? "isolated_cli";
+  const nemoRuntimeVerified = Boolean(model.state?.guardrails?.used_real_nemo);
   const renderDetail = () => {
-    if (focusId === "hermes" || focusId === "planning") {
+    if (focusId === "input" || focusId === "cost-basis") {
+      return (
+        <section className="live-detail-card live-detail-enter">
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <p className="text-[0.68rem] font-semibold uppercase text-[#8a8f9e]">Business Intake & Cost Basis</p>
+              <h2 className="mt-1 text-xl font-semibold text-white">{focusId === "input" ? "Client context is reviewed" : "Labor cost is loaded"}</h2>
+            </div>
+            <StatusBadge label={focusId === "input" ? "reviewed" : "costed"} tone="green" />
+          </div>
+          <dl className="mt-3 grid grid-cols-2 gap-2">
+            <FactRow label="Client" value={model.clientName} tone="white" />
+            <FactRow label="Document review" value="review before save" tone="green" />
+            <FactRow label="Workers" value={`${model.laborWorkers.length} workers`} tone="white" />
+            <FactRow label="Labor cost" value={model.laborCostLabel} tone="green" />
+          </dl>
+          <p className="mt-3 rounded-md border border-[#1e2128] bg-[#0a0b0e] p-3 text-xs leading-5 text-[#8a8f9e]">
+            Intake and workforce costing establish the business context and cost basis before Hermes proposes tool actions.
+          </p>
+        </section>
+      );
+    }
+
+    if (focusId === "hermes") {
       return (
         <section className="live-detail-card live-detail-enter">
           <div className="flex items-start justify-between gap-3">
@@ -436,7 +503,7 @@ function LiveRunDetail({
               <p className="text-[0.68rem] font-semibold uppercase text-[#8a8f9e]">Hermes Plan</p>
               <h2 className="mt-1 text-xl font-semibold text-white">Implementation plan is being created</h2>
             </div>
-            <StatusBadge label={focusId === "planning" ? "approved" : "created"} tone="blue" />
+            <StatusBadge label="created" tone="blue" />
           </div>
           <pre className="proof-terminal mt-3">
 {model.hermesTasks.slice(0, 5).map((task, index) => `$ ${index + 1}. ${task}`).join("\n")}
@@ -446,13 +513,13 @@ function LiveRunDetail({
       );
     }
 
-    if (focusId === "stripe" || focusId === "revenue") {
+    if (focusId === "stripe-invoice" || focusId === "stripe-status") {
       return (
         <section className="live-detail-card live-detail-enter">
           <div className="flex items-start justify-between gap-3">
             <div>
               <p className="text-[0.68rem] font-semibold uppercase text-[#8a8f9e]">Stripe Finance State</p>
-              <h2 className="mt-1 text-xl font-semibold text-white">Revenue gate is financially grounded</h2>
+              <h2 className="mt-1 text-xl font-semibold text-white">{focusId === "stripe-invoice" ? "Invoice tool action is prepared" : "Payment state is checked honestly"}</h2>
             </div>
             <StatusBadge label="livemode=false" tone="green" />
           </div>
@@ -463,7 +530,7 @@ function LiveRunDetail({
             <FactRow label="paid" value={paid} tone={paid === "true" ? "green" : "amber"} />
           </dl>
           <p className="mt-3 rounded-md border border-[#1e2128] bg-[#0a0b0e] p-3 text-xs leading-5 text-[#8a8f9e]">
-            ScaleX keeps the run finance-aware without live-money movement in Judge Demo Mode.
+            Judge Demo Mode uses deterministic/test finance state. Stripe Sandbox Prototype can create real test-mode objects only when configured safely.
           </p>
         </section>
       );
@@ -474,7 +541,7 @@ function LiveRunDetail({
         <section className="live-detail-card live-detail-enter">
           <div className="flex items-start justify-between gap-3">
             <div>
-              <p className="text-[0.68rem] font-semibold uppercase text-[#8a8f9e]">NeMo Guardrails / Local Policy</p>
+              <p className="text-[0.68rem] font-semibold uppercase text-[#8a8f9e]">NemoClaw / NeMo Guardrails</p>
               <h2 className="mt-1 text-xl font-semibold text-white">{focusId === "approved-spend" ? "Allowed setup spend can proceed" : "Risk is checked before execution"}</h2>
             </div>
             <StatusBadge label={focusId === "approved-spend" ? "approved" : "checked"} tone={focusId === "approved-spend" ? "green" : "cyan"} />
@@ -580,7 +647,7 @@ function LiveRunDetail({
           ))}
         </div>
         <button className="control-btn-primary mt-4 w-full" disabled={runActive} onClick={onRun} type="button">
-          {runActive ? "Executing governed run..." : runVisualState === "complete" ? "Run Again" : "Start Governed Run"}
+          {runActive ? "Executing governed run..." : "Start Governed Run"}
         </button>
       </section>
     );
@@ -594,6 +661,155 @@ function LiveRunDetail({
         {renderDetail()}
       </div>
     </div>
+  );
+}
+
+function EnterpriseControlPanel({ model }: { model: ControlRoomModel }) {
+  return (
+    <div className="enterprise-control-stack">
+      <BusinessCostBasisCard model={model} />
+      <ToolActionRailCard model={model} />
+      <StripeFinanceFlowCard model={model} />
+      <NemoGuardrailLayerCard model={model} />
+    </div>
+  );
+}
+
+function BusinessCostBasisCard({ model }: { model: ControlRoomModel }) {
+  const clientSource = model.state?.command_center?.client_onboarding?.saved_record?.source ?? "manual_entry";
+  const reviewEditable = model.state?.command_center?.client_onboarding?.extracted_review?.editable_before_save ?? true;
+  return (
+    <article className="enterprise-card">
+      <div className="enterprise-card-head">
+        <div>
+          <p className="enterprise-eyebrow">Business Intake & Cost Basis</p>
+          <h2>{model.clientName}</h2>
+        </div>
+        <StatusBadge label="reviewed" tone="green" />
+      </div>
+      <dl className="enterprise-fact-grid">
+        <FactRow label="Source" value={clientSource.includes("manual") ? "manual + document" : clientSource} tone="white" />
+        <FactRow label="Editable" value={reviewEditable ? "yes" : "locked"} tone={reviewEditable ? "green" : "amber"} />
+        <FactRow label="Workers" value={`${model.laborWorkers.length} workers`} tone="white" />
+        <FactRow label="Labor cost" value={model.laborCostLabel} tone="green" />
+      </dl>
+      <details className="enterprise-details" open>
+        <summary>View cost basis</summary>
+        <table className="cost-basis-table">
+          <thead>
+            <tr>
+              {["Worker", "Role", "Rate", "Hours", "Cost"].map((heading) => <th key={heading}>{heading}</th>)}
+            </tr>
+          </thead>
+          <tbody>
+            {model.laborWorkers.map((worker) => (
+              <tr key={worker.worker}>
+                <td>{worker.worker}</td>
+                <td>{worker.role}</td>
+                <td>{worker.rate}</td>
+                <td>{worker.hours}</td>
+                <td>{worker.cost}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </details>
+      <p className="enterprise-note">{model.marginImpactLabel}; document review remains review-before-save.</p>
+    </article>
+  );
+}
+
+function ToolActionRailCard({ model }: { model: ControlRoomModel }) {
+  return (
+    <article className="enterprise-card">
+      <div className="enterprise-card-head">
+        <div>
+          <p className="enterprise-eyebrow">ScaleX tool action rail / MCP-ready skill path</p>
+          <h2>Governed tool sequence</h2>
+        </div>
+        <StatusBadge label="not real MCP" tone="amber" />
+      </div>
+      <div className="tool-action-groups">
+        {model.toolActionGroups.map((group) => (
+          <div className="tool-action-group" key={group.title}>
+            <p>{group.title}</p>
+            <div>
+              {group.actions.map((action) => (
+                <div className="tool-action-row" key={action.name}>
+                  <span>{action.name}</span>
+                  <StatusBadge label={action.status} tone={action.tone} />
+                </div>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+      <p className="enterprise-note">Hermes proposes tool calls; ScaleX governs, routes, blocks, and records.</p>
+    </article>
+  );
+}
+
+function StripeFinanceFlowCard({ model }: { model: ControlRoomModel }) {
+  const invoiceId = model.state?.stripe?.invoice_id ?? "test-double/local finance state";
+  return (
+    <article className="enterprise-card">
+      <div className="enterprise-card-head">
+        <div>
+          <p className="enterprise-eyebrow">Stripe Finance Flow</p>
+          <h2>Invoice and payment state</h2>
+        </div>
+        <StatusBadge label={model.state?.stripe?.used_real_stripe ? "test mode" : "demo/test-double"} tone="purple" />
+      </div>
+      <ol className="finance-flow-list">
+        {model.stripeFlowSteps.map((step, index) => (
+          <li key={step.label}>
+            <span className="finance-flow-index">{index + 1}</span>
+            <div>
+              <p>{step.label}</p>
+              <span>{step.detail}</span>
+            </div>
+            <StatusBadge label={step.status} tone={step.tone} />
+          </li>
+        ))}
+      </ol>
+      <p className="enterprise-note">Invoice: {invoiceId}. Invoice exists/open only when backend says so; paid=true is never claimed unless returned by Stripe state.</p>
+    </article>
+  );
+}
+
+function NemoGuardrailLayerCard({ model }: { model: ControlRoomModel }) {
+  const guardrails = model.state?.guardrails;
+  const hermesRuntime = model.state?.execution?.hermes_runtime ?? "isolated_cli";
+  const usedRealNemo = Boolean(guardrails?.used_real_nemo ?? model.state?.execution?.used_real_nemo);
+  const checks = [
+    "live money attempt",
+    "PHI/client sensitive data",
+    "vendor allowlist",
+    "margin floor",
+    "payment-state honesty",
+    "tool/action policy",
+    "output claims",
+  ];
+  return (
+    <article className="enterprise-card">
+      <div className="enterprise-card-head">
+        <div>
+          <p className="enterprise-eyebrow">NemoClaw / NeMo Guardrail Layer</p>
+          <h2>{usedRealNemo ? "NeMo runtime verified" : "Boundary visible; local policy active"}</h2>
+        </div>
+        <StatusBadge label={usedRealNemo ? "used_real_nemo=true" : "used_real_nemo=false"} tone={usedRealNemo ? "green" : "amber"} />
+      </div>
+      <dl className="enterprise-fact-grid">
+        <FactRow label="Guardrail mode" value={guardrails?.mode ?? "local_policy"} tone="cyan" />
+        <FactRow label="Adapter" value={guardrails?.adapter_status ?? "local policy"} tone="white" />
+        <FactRow label="NemoClaw route" value={hermesRuntime} tone="white" />
+        <FactRow label="Fail closed" value={String(Boolean(guardrails?.fail_closed))} tone={guardrails?.fail_closed ? "red" : "green"} />
+      </dl>
+      <div className="guardrail-checks">
+        {checks.map((check) => <span key={check}>{check}</span>)}
+      </div>
+      <p className="enterprise-note">NemoHermes API runtime is available only when configured; local policy remains deterministic fallback. Docker/NemoClaw commands are not invoked in demo.</p>
+    </article>
   );
 }
 
@@ -831,16 +1047,21 @@ function SettingsView({
 }) {
   const rows = [
     ["Prototype auth", auth?.auth_enabled ? auth.authenticated ? `Signed in as ${auth.username ?? "operator"}` : "Enabled" : "Disabled for local judge demo", "Local prototype auth only; not production identity."],
-    ["Execution mode", state?.execution.label ?? "Judge Demo Mode", state?.execution.truthfulness_note ?? "Demo mode and Full Proof Mode stay explicitly labeled."],
+    ["Execution mode", state?.execution?.label ?? "Judge Demo Mode", state?.execution?.truthfulness_note ?? "Demo mode and Full Proof Mode stay explicitly labeled."],
     ["Judge Demo Mode", model.modeCards[0]?.status ?? "Judge Demo active", model.modeCards[0]?.detail ?? "Deterministic local path."],
     ["Stripe Sandbox Prototype", model.modeCards[1]?.status ?? "Prototype ready", model.modeCards[1]?.detail ?? "Real test-mode only when configured safely."],
     ["Verified Live Mode", model.modeCards[2]?.status ?? "Verified Live locked", model.modeCards[2]?.detail ?? "Future live-money path, not enabled."],
-    ["Runtime", `${health?.mode ?? state?.mode ?? "local"} / ${state?.execution.hermes_runtime ?? "isolated_cli"}`, "Local API and SQLite-backed product workspace."],
+    ["MCP-ready tool path", "ScaleX tool action rail / skill path", "No real MCP server execution is claimed in the current app."],
+    ["Runtime", `${health?.mode ?? state?.mode ?? "local"} / ${state?.execution?.hermes_runtime ?? "isolated_cli"}`, "Local API and SQLite-backed product workspace."],
     ["Active operation", `${model.clientName} / ${model.operationName}`, "Synthetic Northstar B2B implementation operation only."],
     ["Data", "Synthetic sample", "No patient data, no PHI, no healthcare compliance or HIPAA claim."],
-    ["Money movement", model.stripeLabel, "No live-money support; future live execution requires Verified Live Mode."],
-    ["Guardrails", `${state?.guardrails.mode ?? "local_policy"} / used_real_nemo=${String(Boolean(state?.guardrails.used_real_nemo))}`, state?.guardrails.truthfulness_note ?? "Local policy active now; real NeMo requires runtime proof."],
-    ["Records", `${state?.runs.length ?? 0} runs / ${model.auditRows} evidence rows`, "SQLite evidence is local; no production customer workflow claim."],
+    ["Stripe test mode only", model.stripeLabel, "Judge Demo uses deterministic/test-double finance; real Stripe test objects only when safely configured."],
+    ["Money movement", `livemode=${String(Boolean(state?.stripe?.livemode))}`, "No live-money support; future live execution requires Verified Live Mode."],
+    ["NemoClaw / NeMo truth", `${state?.guardrails?.mode ?? "local_policy"} / used_real_nemo=${String(Boolean(state?.guardrails?.used_real_nemo))}`, state?.guardrails?.truthfulness_note ?? "Local policy active now; real NeMo requires runtime proof."],
+    ["NemoClaw commands", "not invoked", "No Docker, NemoClaw, or production sandbox commands are run by this demo."],
+    ["Production Hermes", "not used", "Optional NemoHermes/Hermes runtime routing is configuration-gated and fail-closed."],
+    ["Secrets", "not displayed", "No tokens, .env values, credential headers, or live keys are shown or stored in UI state."],
+    ["Records", `${state?.runs?.length ?? 0} runs / ${model.auditRows} evidence rows`, "SQLite evidence is local; no production customer workflow claim."],
   ];
 
   return (
@@ -982,23 +1203,23 @@ function RailList({
 function ControlStackChain({ activeRailId, completedRailIds, model }: { activeRailId: string | null; completedRailIds: string[]; model: ControlRoomModel }) {
   const isNodeActive = (node: "hermes" | "stripe" | "nemo" | "scalex") => {
     if (node === "hermes") {
-      return activeRailId === "hermes" || activeRailId === "planning";
+      return activeRailId === "hermes";
     }
     if (node === "stripe") {
-      return activeRailId === "stripe" || activeRailId === "revenue";
+      return activeRailId === "stripe-invoice" || activeRailId === "stripe-status";
     }
     if (node === "nemo") {
       return activeRailId === "policy" || activeRailId === "blocked-spend" || activeRailId === "approved-spend";
     }
-    return activeRailId === "input" || activeRailId === "evidence" || activeRailId === "profit" || activeRailId === "blocked-spend";
+    return activeRailId === "input" || activeRailId === "cost-basis" || activeRailId === "evidence" || activeRailId === "profit" || activeRailId === "blocked-spend";
   };
   const hasCompleted = (ids: string[]) => ids.some((id) => completedRailIds.includes(id));
   return (
     <div className="mb-3 grid grid-cols-4 gap-2">
       {[
-        { id: "hermes" as const, label: "Hermes", value: hasCompleted(["hermes", "planning"]) ? "plan created" : "plans", tone: "blue" as Tone },
-        { id: "stripe" as const, label: "Stripe", value: model.state?.stripe.used_real_stripe ? "test finance" : "sandbox finance", tone: "purple" as Tone },
-        { id: "nemo" as const, label: "NeMo / Policy", value: model.state?.guardrails.used_real_nemo ? "verified" : "risk gate", tone: "cyan" as Tone },
+        { id: "hermes" as const, label: "Hermes", value: hasCompleted(["hermes"]) ? "plan created" : "plans", tone: "blue" as Tone },
+        { id: "stripe" as const, label: "Stripe", value: hasCompleted(["stripe-status"]) ? "state checked" : model.state?.stripe?.used_real_stripe ? "test finance" : "sandbox finance", tone: "purple" as Tone },
+        { id: "nemo" as const, label: "NeMo / Policy", value: model.state?.guardrails?.used_real_nemo ? "verified" : "risk gate", tone: "cyan" as Tone },
         { id: "scalex" as const, label: "ScaleX", value: hasCompleted(["evidence", "profit"]) ? "audit recorded" : "records", tone: "green" as Tone },
       ].map((item, index) => (
         <div className={`stack-node ${isNodeActive(item.id) ? `stack-node-active stack-node-active-${item.tone}` : ""}`} key={item.label}>
@@ -1189,6 +1410,22 @@ function railResult(rail: RailView, active: boolean, complete: boolean): { label
   return { label: "Ready", tone: "muted" };
 }
 
+function railHoldMs(railId: string): number {
+  if (railId === "stripe-invoice" || railId === "stripe-status") {
+    return DEMO_STRIPE_HOLD_MS;
+  }
+  if (railId === "policy") {
+    return DEMO_NEMO_HOLD_MS;
+  }
+  if (railId === "blocked-spend") {
+    return DEMO_BLOCKED_HOLD_MS;
+  }
+  if (railId === "profit") {
+    return DEMO_PROFIT_HOLD_MS;
+  }
+  return DEMO_DEFAULT_RAIL_HOLD_MS;
+}
+
 function buildControlRoomModel(
   state: DemoState | null,
   money: MoneySnapshot,
@@ -1200,7 +1437,7 @@ function buildControlRoomModel(
   const revenueCents = money.revenueCents ?? mission?.invoice_amount_cents ?? 850_000;
   const approvedSpendCents = money.approvedSpendCents ?? mission?.approved_vendor_spend_cents ?? 115_000;
   const blockedSpendCents = money.blockedSpendCents ?? mission?.blocked_spend_cents ?? 320_000;
-  const laborCostCents = state?.command_center?.labor_costing.total_labor_cost_cents ?? mission?.labor_cost_cents ?? 26_160;
+  const laborCostCents = state?.command_center?.labor_costing?.total_labor_cost_cents ?? mission?.labor_cost_cents ?? 26_160;
   const protectedProfitCents = money.grossProfitCents ?? mission?.projected_profit_cents ?? revenueCents - approvedSpendCents - laborCostCents;
   const marginPercent = money.marginPercent ?? mission?.final_margin_after_labor_percent ?? (revenueCents > 0 ? protectedProfitCents / revenueCents * 100 : 0);
   const marginFloorPercent = money.marginFloorPercent ?? mission?.margin_floor_percent ?? 50;
@@ -1208,24 +1445,25 @@ function buildControlRoomModel(
   const policyChecks = state?.policy_checks ?? [];
   const guardrailEvaluations = state?.guardrail_evaluations ?? [];
   const events = state?.timeline_events ?? state?.events ?? [];
-  const hermesLabel = state?.execution.planning_label ?? (state?.hermes.used_real_hermes ? "Runtime Hermes plan" : "Deterministic Hermes plan");
-  const stripeLabel = state?.execution.finance_label ?? (state?.stripe.used_real_stripe ? "Real Stripe test finance" : "Stripe sandbox finance");
-  const guardrailLabel = state?.execution.guardrail_label ?? (state?.guardrails.used_real_nemo ? "NeMo Guardrails verified" : "Local policy active");
+  const hermesLabel = state?.execution?.planning_label ?? (state?.hermes?.used_real_hermes ? "Runtime Hermes plan" : "Deterministic Hermes plan");
+  const stripeLabel = state?.execution?.finance_label ?? (state?.stripe?.used_real_stripe ? "Real Stripe test finance" : "Stripe sandbox finance");
+  const guardrailLabel = state?.execution?.guardrail_label ?? (state?.guardrails?.used_real_nemo ? "NeMo Guardrails verified" : "Local policy active");
   const rails = buildRails({ approvedSpendCents, blockedSpendCents, guardrailLabel, hasReport, laborCostCents, marginPercent, protectedProfitCents, revenueCents, stripeLabel });
   const auditRowsData = buildAuditRows({ approvedSpendCents, blockedSpendCents, guardrailLabel, laborCostCents, protectedProfitCents, state });
   const modeCards = buildModeCards(state);
   const proofArtifacts = buildProofArtifacts({ approvedSpendCents, blockedSpendCents, guardrailLabel, laborCostCents, protectedProfitCents, state, stripeLabel });
   const primaryMode = modeCards.find((mode) => mode.primary) ?? modeCards[0];
+  const laborWorkers = buildLaborWorkers(state);
 
   return {
     activityChips: buildActivityChips({ approvedSpendCents, blockedSpendCents, protectedProfitCents }),
     auditPills: [
       { label: "Timeline", value: String(events.length || 14), tone: "muted" },
-      { label: "Finance", value: String(state?.stripe_events.length || 4), tone: "blue" },
+      { label: "Finance", value: String(state?.stripe_events?.length || 4), tone: "blue" },
       { label: "Guardrails", value: String(guardrailEvaluations.length || 13), tone: "green" },
-      { label: "Ledger", value: String(state?.ledger.entries.length || 4), tone: "green" },
-      { label: "Hermes", value: String(state?.orchestration_calls.length || 19), tone: "purple" },
-      { label: "Profit", value: String(state?.reports.length || 1), tone: "green" },
+      { label: "Ledger", value: String(state?.ledger?.entries?.length || 4), tone: "green" },
+      { label: "Hermes", value: String(state?.orchestration_calls?.length || 19), tone: "purple" },
+      { label: "Profit", value: String(state?.reports?.length || 1), tone: "green" },
     ],
     auditRows,
     auditRowsData,
@@ -1238,7 +1476,10 @@ function buildControlRoomModel(
     hasReport,
     hermesLabel,
     hermesTasks: buildHermesTasks(state),
+    laborCostLabel: formatCurrency(laborCostCents),
+    laborWorkers,
     marginLabel: formatPercent(marginPercent),
+    marginImpactLabel: `${formatCurrency(laborCostCents)} included in protected profit`,
     metrics: [
       { label: "Revenue secured", value: formatCurrency(revenueCents), tone: "white" },
       { label: "Approved spend", value: formatCurrency(approvedSpendCents), tone: "green" },
@@ -1265,7 +1506,9 @@ function buildControlRoomModel(
     safetyProof: state?.command_center?.safety_proof ?? ["fake/demo clients only", "no live money", "no credentials", "uploaded data requires review"],
     state,
     stripeLabel,
+    stripeFlowSteps: buildStripeFlowSteps(state),
     supportingModules: buildSupportingModules(state, laborCostCents),
+    toolActionGroups: buildToolActionGroups(state),
   };
 }
 
@@ -1283,7 +1526,10 @@ interface ControlRoomModel {
   hasReport: boolean;
   hermesLabel: string;
   hermesTasks: string[];
+  laborCostLabel: string;
+  laborWorkers: LaborWorkerView[];
   marginLabel: string;
+  marginImpactLabel: string;
   metrics: StatPill[];
   modeCards: ModeCardModel[];
   operationFacts: StatPill[];
@@ -1295,7 +1541,9 @@ interface ControlRoomModel {
   safetyProof: string[];
   state: DemoState | null;
   stripeLabel: string;
+  stripeFlowSteps: FlowStepView[];
   supportingModules: Array<{ description: string; status: string; title: string; tone: Tone; value: string }>;
+  toolActionGroups: ToolActionGroupView[];
 }
 
 interface ActivityChipModel {
@@ -1344,9 +1592,9 @@ interface ProofArtifactModel {
 }
 
 function buildModeCards(state: DemoState | null): ModeCardModel[] {
-  const executionMode = state?.execution.mode ?? "demo";
-  const usedRealStripe = Boolean(state?.stripe.used_real_stripe ?? state?.execution.used_real_stripe);
-  const stripeHasError = Boolean(state?.stripe.error);
+  const executionMode = state?.execution?.mode ?? "demo";
+  const usedRealStripe = Boolean(state?.stripe?.used_real_stripe ?? state?.execution?.used_real_stripe);
+  const stripeHasError = Boolean(state?.stripe?.error);
   const stripeSandboxStatus = usedRealStripe
     ? "Real test-mode finance"
     : stripeHasError
@@ -1377,6 +1625,93 @@ function buildModeCards(state: DemoState | null): ModeCardModel[] {
   ];
 }
 
+function buildLaborWorkers(state: DemoState | null): LaborWorkerView[] {
+  const employees = state?.command_center?.labor_costing?.employees
+    ?? state?.command_center?.employee_onboarding?.saved_records
+    ?? [
+      { employee_name: "Maria Lopez", role_title: "Technician", fully_loaded_hourly_rate_cents: 2880, assigned_hours: 5, labor_cost_cents: 14400 },
+      { employee_name: "James Carter", role_title: "Service Assistant", fully_loaded_hourly_rate_cents: 2160, assigned_hours: 3, labor_cost_cents: 6480 },
+      { employee_name: "Avery Smith", role_title: "Campaign/Ops Assistant", fully_loaded_hourly_rate_cents: 2640, assigned_hours: 2, labor_cost_cents: 5280 },
+    ];
+
+  return employees.slice(0, 3).map((employee) => ({
+    cost: formatCurrency(employee.labor_cost_cents),
+    hours: `${employee.assigned_hours}`,
+    rate: `${formatCurrency(employee.fully_loaded_hourly_rate_cents)}/hr`,
+    role: employee.role_title,
+    worker: employee.employee_name,
+  }));
+}
+
+function buildToolActionGroups(state: DemoState | null): ToolActionGroupView[] {
+  const usedRealStripe = Boolean(state?.stripe?.used_real_stripe ?? state?.execution?.used_real_stripe);
+  const usedRealNemo = Boolean(state?.guardrails?.used_real_nemo ?? state?.execution?.used_real_nemo);
+  const hasReport = Boolean(state?.report || state?.command_center?.final_profit_report);
+  const planningStatus = state?.planning_run || state?.planning_runs?.length ? "Executed in demo" : "Proposed";
+  const stripeStatus = usedRealStripe ? "Sandbox-ready" : "Executed in demo";
+  const guardrailStatus = usedRealNemo ? "Allowed" : "Executed in demo";
+
+  return [
+    {
+      title: "Client / Intake",
+      actions: [
+        { name: "intake.parse_client_document", status: "Allowed", tone: "green" },
+        { name: "intake.review_client_record", status: "Executed in demo", tone: "green" },
+        { name: "workforce.calculate_labor_cost", status: "Executed in demo", tone: "green" },
+      ],
+    },
+    {
+      title: "Hermes / Planning",
+      actions: [
+        { name: "hermes.plan_operation", status: planningStatus, tone: "blue" },
+        { name: "hermes.propose_tool_sequence", status: planningStatus, tone: "blue" },
+      ],
+    },
+    {
+      title: "Stripe / Finance",
+      actions: [
+        { name: "stripe.create_customer", status: stripeStatus, tone: "purple" },
+        { name: "stripe.create_invoice", status: stripeStatus, tone: "purple" },
+        { name: "stripe.send_invoice", status: stripeStatus, tone: "purple" },
+        { name: "stripe.retrieve_payment_status", status: state?.stripe?.paid ? "Verified" : "Recorded", tone: state?.stripe?.paid ? "green" : "amber" },
+      ],
+    },
+    {
+      title: "Policy / NemoClaw",
+      actions: [
+        { name: usedRealNemo ? "nemo.guardrail_check" : "nemoclaw.guardrail_check", status: guardrailStatus, tone: "cyan" },
+        { name: "policy.check_vendor", status: "Allowed", tone: "green" },
+        { name: "policy.check_margin_floor", status: "Allowed", tone: "green" },
+        { name: "policy.block_unapproved_spend", status: "Blocked", tone: "red" },
+      ],
+    },
+    {
+      title: "Ledger",
+      actions: [
+        { name: "ledger.record_finance_event", status: hasReport ? "Recorded" : "Ready", tone: hasReport ? "green" : "muted" },
+        { name: "ledger.record_policy_decision", status: hasReport ? "Recorded" : "Ready", tone: hasReport ? "green" : "muted" },
+        { name: "ledger.record_profit_outcome", status: hasReport ? "Recorded" : "Ready", tone: hasReport ? "green" : "muted" },
+      ],
+    },
+  ];
+}
+
+function buildStripeFlowSteps(state: DemoState | null): FlowStepView[] {
+  const usedRealStripe = Boolean(state?.stripe?.used_real_stripe ?? state?.execution?.used_real_stripe);
+  const livemode = Boolean(state?.stripe?.livemode);
+  const paid = Boolean(state?.stripe?.paid);
+  const financeMode = usedRealStripe ? "Sandbox-ready" : "Demo/test-double";
+
+  return [
+    { label: "Create customer", status: financeMode, tone: usedRealStripe ? "purple" : "amber", detail: usedRealStripe ? "Real Stripe test object when configured." : "Deterministic local customer state." },
+    { label: "Create invoice", status: financeMode, tone: usedRealStripe ? "purple" : "amber", detail: state?.stripe?.invoice_id ?? "test-double/local invoice object" },
+    { label: "Send invoice / payment link", status: usedRealStripe ? "Sandbox-ready" : "Demo/test-double", tone: "purple", detail: state?.stripe?.hosted_invoice_url ? "Hosted invoice URL available." : "No live send in Judge Demo Mode." },
+    { label: "Retrieve invoice/payment status", status: paid ? "Verified paid" : "Not paid", tone: paid ? "green" : "amber", detail: `paid=${String(state?.stripe?.paid ?? false)}` },
+    { label: "Record finance state", status: "Recorded", tone: "green", detail: `livemode=${String(livemode)}; no live money.` },
+    { label: "Gate spend on finance state", status: "Verified", tone: "green", detail: "Spend remains governed by invoice/payment state and policy." },
+  ];
+}
+
 function buildProofArtifacts({
   approvedSpendCents,
   blockedSpendCents,
@@ -1394,9 +1729,9 @@ function buildProofArtifacts({
   state: DemoState | null;
   stripeLabel: string;
 }): ProofArtifactModel[] {
-  const invoiceId = state?.stripe.invoice_id ?? "in_demo_northstar";
-  const stripeStatus = state?.stripe.used_real_stripe ? "Test-mode" : "Demo state";
-  const nemoRuntime = state?.execution.hermes_runtime === "nemoclaw" || state?.execution.hermes_runtime === "nemohermes_api"
+  const invoiceId = state?.stripe?.invoice_id ?? "in_demo_northstar";
+  const stripeStatus = state?.stripe?.used_real_stripe ? "Test-mode" : "Demo state";
+  const nemoRuntime = state?.execution?.hermes_runtime === "nemoclaw" || state?.execution?.hermes_runtime === "nemohermes_api"
     ? "NemoClaw/NemoHermes route selected"
     : "NemoClaw route not selected";
 
@@ -1412,10 +1747,10 @@ function buildProofArtifacts({
       tone: "blue",
     },
     {
-      detail: `${stripeLabel}; livemode=${String(state?.stripe.livemode ?? false)}; paid=${String(state?.stripe.paid ?? false)}.`,
+      detail: `${stripeLabel}; livemode=${String(state?.stripe?.livemode ?? false)}; paid=${String(state?.stripe?.paid ?? false)}.`,
       icon: CreditCard,
       meta: `invoice:${invoiceId}`,
-      railId: "stripe",
+      railId: "stripe-status",
       status: stripeStatus,
       system: "Stripe",
       title: "Finance State",
@@ -1476,16 +1811,16 @@ function buildRails({
   stripeLabel: string;
 }): RailView[] {
   return [
-    { actor: "SCALEX", badge: "01", detail: "Synthetic Northstar operation, revenue, spend cap, margin floor, and data boundary checked.", evidence: "Input rail passed", id: "input", name: "Input Rail", proofTag: "client context", riskTag: "data safe", status: "Passed", subline: "Client operation selected · revenue context loaded", tone: "green" },
-    { actor: "HERMES", badge: "02", detail: "Hermes creates the implementation launch plan and proposes next actions. ScaleX governs what can execute.", evidence: "Hermes plan recorded", id: "hermes", name: "Hermes Plan", proofTag: "operator plan", riskTag: "bounded plan", status: "Created", subline: "Implementation plan created · ScaleX governs", tone: "blue" },
-    { actor: "SCALEX", badge: "03", detail: "Plan stays inside the allowed client-implementation scope and contains no policy conflict.", evidence: "Planning rail approved", id: "planning", name: "Planning Rail", proofTag: "scope check", riskTag: "approved", status: "Approved", subline: "Scope approved · no policy conflicts detected", tone: "green" },
-    { actor: "STRIPE", badge: "04", detail: `Finance state checked for ${formatCurrency(revenueCents)}. ${stripeLabel}.`, evidence: "Stripe finance state verified", id: "stripe", name: "Stripe Finance State", proofTag: "livemode=false", riskTag: "money state", status: "Verified", subline: "Sandbox finance verified · livemode=false", tone: "purple" },
-    { actor: "SCALEX", badge: "05", detail: "Revenue gate verifies money state before setup spend or delivery work proceeds.", evidence: `${formatCurrency(revenueCents)} revenue secured`, id: "revenue", name: "Revenue Gate", proofTag: "invoice state", riskTag: "passed", status: "Passed", subline: "Revenue secured before spend allowed", tone: "green" },
-    { actor: "NEMO / LOCAL", badge: "06", detail: "Vendor allowlist, blocked vendor, spend cap, margin floor, and unsafe-data rules checked before execution.", evidence: guardrailLabel, id: "policy", name: "NeMo / Local Policy", proofTag: "13 checks", riskTag: "guardrail", status: "Checked", subline: "Risk checked before execution", tone: "cyan" },
-    { actor: "SCALEX", badge: "07", detail: `${formatCurrency(approvedSpendCents)} setup spend stays inside approved vendor and margin rules.`, evidence: "Approved setup spend recorded", id: "approved-spend", name: "Approved Setup Spend", proofTag: "policy pass", riskTag: "approved", status: "Approved", subline: "Allowed vendor spend approved within policy", tone: "green" },
-    { actor: "SCALEX", badge: "08", detail: `Unapproved vendor · ${formatCurrency(blockedSpendCents)} requested · no spend ledger row created.`, evidence: "Policy blocked data broker enrichment", id: "blocked-spend", name: "Blocked Risky Spend", proofTag: "no spend row", riskTag: "blocked", status: "BLOCKED", subline: "Data broker enrichment blocked by policy", tone: "red" },
-    { actor: "SCALEX", badge: "09", detail: "Audit records are stored without secrets or live-money credentials.", evidence: hasReport ? "Evidence ledger recorded audit trail" : "Evidence ledger ready", id: "evidence", name: "Evidence Ledger", proofTag: "audit trail", riskTag: "recorded", status: "Recorded", subline: "Audit trail recorded", tone: "green" },
-    { actor: "SCALEX", badge: "10", detail: `Protected profit ${formatCurrency(protectedProfitCents)} after approved spend and ${formatCurrency(laborCostCents)} labor; margin ${formatPercent(marginPercent)}.`, evidence: "Protected profit outcome recorded", id: "profit", name: "Profit Outcome", proofTag: "margin report", riskTag: "protected", status: "Protected", subline: "Protected profit and margin reported", tone: "green" },
+    { actor: "SCALEX", badge: "01", detail: "Client onboarding and reviewed document intake load the synthetic Northstar operation before any agent action.", evidence: "Business intake loaded", id: "input", name: "Business Intake Loaded", proofTag: "intake", riskTag: "data safe", status: "Loaded", subline: "Client record reviewed · document intake supported", tone: "green" },
+    { actor: "SCALEX", badge: "02", detail: `${formatCurrency(laborCostCents)} labor cost is loaded into the margin model before execution begins.`, evidence: "Cost basis loaded", id: "cost-basis", name: "Cost Basis Loaded", proofTag: "labor model", riskTag: "margin basis", status: "Loaded", subline: "Worker cost basis included in margin", tone: "green" },
+    { actor: "HERMES", badge: "03", detail: "Hermes creates the implementation launch plan and proposes next tool actions. ScaleX governs what can execute.", evidence: "Hermes operation plan recorded", id: "hermes", name: "Hermes Operation Plan", proofTag: "operator plan", riskTag: "bounded plan", status: "Created", subline: "Implementation plan created · ScaleX governs", tone: "blue" },
+    { actor: "STRIPE", badge: "04", detail: "Stripe customer, invoice, and payment-link actions are prepared as controlled tool calls, not raw agent autonomy.", evidence: "Stripe invoice tool prepared", id: "stripe-invoice", name: "Stripe Invoice Tool", proofTag: "tool call", riskTag: "sandbox", status: "Prepared", subline: "Invoice/payment-link action prepared", tone: "purple" },
+    { actor: "STRIPE", badge: "05", detail: `Finance state checked for ${formatCurrency(revenueCents)}. ${stripeLabel}.`, evidence: "Stripe payment status retrieved", id: "stripe-status", name: "Stripe Payment Status", proofTag: "livemode=false", riskTag: "money state", status: "Verified", subline: "Invoice state retrieved · paid-state honest", tone: "purple" },
+    { actor: "NEMOCLAW / NEMO", badge: "06", detail: "NemoClaw boundary is visible while NeMo Guardrails/local policy checks vendor, margin, live-money, data, and tool-action rules.", evidence: guardrailLabel, id: "policy", name: "NemoClaw / NeMo Check", proofTag: "risk decision", riskTag: "guardrail", status: "Checked", subline: "Policy checked before execution", tone: "cyan" },
+    { actor: "SCALEX", badge: "07", detail: `${formatCurrency(approvedSpendCents)} setup spend stays inside approved vendor and margin rules.`, evidence: "Approved setup spend recorded", id: "approved-spend", name: "Setup Spend Approved", proofTag: "policy pass", riskTag: "approved", status: "Approved", subline: "Allowed setup spend inside policy", tone: "green" },
+    { actor: "SCALEX", badge: "08", detail: `Unapproved vendor · ${formatCurrency(blockedSpendCents)} requested · no spend ledger row created.`, evidence: "Policy blocked data broker enrichment", id: "blocked-spend", name: "Risky Vendor Action Blocked", proofTag: "no spend row", riskTag: "blocked", status: "BLOCKED", subline: "Data broker enrichment blocked", tone: "red" },
+    { actor: "SCALEX", badge: "09", detail: "Audit records are stored without secrets, live-money credentials, or production customer data.", evidence: hasReport ? "Evidence ledger recorded audit trail" : "Evidence ledger ready", id: "evidence", name: "Evidence Ledger Recorded", proofTag: "audit trail", riskTag: "recorded", status: "Recorded", subline: "Audit trail recorded", tone: "green" },
+    { actor: "SCALEX", badge: "10", detail: `Protected profit ${formatCurrency(protectedProfitCents)} after approved spend and ${formatCurrency(laborCostCents)} labor; margin ${formatPercent(marginPercent)}.`, evidence: "Protected profit outcome recorded", id: "profit", name: "Profit Outcome Reported", proofTag: "margin report", riskTag: "protected", status: "Protected", subline: "Protected profit and margin reported", tone: "green" },
   ];
 }
 
@@ -1533,9 +1868,9 @@ function buildGuardrailChecks(policyChecks: PolicyCheck[], evaluations: DemoStat
 
 function buildSupportingModules(state: DemoState | null, laborCostCents: number): ControlRoomModel["supportingModules"] {
   const commandCenter = state?.command_center ?? null;
-  const clientReview = commandCenter?.client_onboarding.extracted_review;
-  const employeeReview = commandCenter?.employee_onboarding.extracted_review;
-  const documentStates = commandCenter?.document_intake.states ?? [];
+  const clientReview = commandCenter?.client_onboarding?.extracted_review;
+  const employeeReview = commandCenter?.employee_onboarding?.extracted_review;
+  const documentStates = commandCenter?.document_intake?.states ?? [];
 
   return [
     {
@@ -1543,14 +1878,14 @@ function buildSupportingModules(state: DemoState | null, laborCostCents: number)
       status: clientReview?.editable_before_save ? "review gate" : "ready",
       title: "Business Intake",
       tone: "blue",
-      value: commandCenter?.client_onboarding.saved_record.source ?? "Synthetic Northstar sample",
+      value: commandCenter?.client_onboarding?.saved_record?.source ?? "Synthetic Northstar sample",
     },
     {
       description: "Uploaded and manual records stay review-before-save; no live extraction service is introduced.",
       status: documentStates.length > 0 ? `${documentStates.length} states` : "ready",
       title: "Document Review",
       tone: "purple",
-      value: commandCenter?.document_intake.storage_policy ?? "Local demo review only",
+      value: commandCenter?.document_intake?.storage_policy ?? "Local demo review only",
     },
     {
       description: "Employee intake and assignments reveal true delivery cost before actions proceed.",
@@ -1570,7 +1905,7 @@ function buildAuditRows({ approvedSpendCents, blockedSpendCents, guardrailLabel,
   protectedProfitCents: number;
   state: DemoState | null;
 }): AuditRowModel[] {
-  const stripeResult = state?.stripe.used_real_stripe ? "real Stripe test" : "sandbox finance";
+  const stripeResult = state?.stripe?.used_real_stripe ? "real Stripe test" : "sandbox finance";
   return [
     { order: "001", actor: "Hermes", action: "Implementation plan recorded", evidenceType: "planning_run", safetyNote: "Hermes plans only; ScaleX executes approved actions.", status: "Recorded", tone: "purple" },
     { order: "002", actor: "Stripe", action: "Finance state recorded", evidenceType: "stripe_event", safetyNote: `Finance state is ${stripeResult}; livemode is not live money.`, status: "Verified", tone: "blue" },
@@ -1587,22 +1922,22 @@ function buildAuditRows({ approvedSpendCents, blockedSpendCents, guardrailLabel,
 
 function buildConnectionCards(state: DemoState | null, auditRows: number, guardrailLabel: string, hermesLabel: string, stripeLabel: string): ConnectorCardModel[] {
   const guardrails = state?.guardrails ?? null;
-  const hermesRuntime = state?.execution.hermes_runtime ?? "isolated_cli";
+  const hermesRuntime = state?.execution?.hermes_runtime ?? "isolated_cli";
   const nemoClawSelected = hermesRuntime === "nemoclaw" || hermesRuntime === "nemohermes_api";
   return [
     {
-      badges: [{ label: "active", tone: "green" }, { label: state?.hermes.used_real_hermes ? "runtime verified" : "demo mode", tone: state?.hermes.used_real_hermes ? "green" : "amber" }, { label: nemoClawSelected ? "NemoClaw route selected" : "NemoClaw optional", tone: nemoClawSelected ? "green" : "blue" }],
+      badges: [{ label: "active", tone: "green" }, { label: state?.hermes?.used_real_hermes ? "runtime verified" : "demo mode", tone: state?.hermes?.used_real_hermes ? "green" : "amber" }, { label: nemoClawSelected ? "NemoClaw route selected" : "NemoClaw optional", tone: nemoClawSelected ? "green" : "blue" }],
       boundary: "No production Hermes config is used. Optional NemoClaw/NemoHermes routing is selected only by environment configuration and fails closed if unavailable.",
       description: "Creates the client implementation plan and proposes the controlled tool sequence.",
-      facts: [{ label: "Current mode", value: hermesLabel, tone: "purple" }, { label: "Runtime", value: hermesRuntime, tone: "white" }, { label: "NemoClaw route", value: nemoClawSelected ? "selected" : "not selected", tone: nemoClawSelected ? "green" : "blue" }, { label: "Planning runs", value: String(state?.planning_runs.length ?? 0), tone: "white" }],
+      facts: [{ label: "Current mode", value: hermesLabel, tone: "purple" }, { label: "Runtime", value: hermesRuntime, tone: "white" }, { label: "NemoClaw route", value: nemoClawSelected ? "selected" : "not selected", tone: nemoClawSelected ? "green" : "blue" }, { label: "Planning runs", value: String(state?.planning_runs?.length ?? 0), tone: "white" }],
       icon: BrainCircuit,
       title: "Hermes Planning",
     },
     {
-      badges: [{ label: state?.stripe.used_real_stripe ? "real test mode" : "demo mode", tone: state?.stripe.used_real_stripe ? "green" : "amber" }, { label: "Stripe Sandbox Prototype", tone: "blue" }, { label: "live blocked", tone: "red" }],
+      badges: [{ label: state?.stripe?.used_real_stripe ? "real test mode" : "demo mode", tone: state?.stripe?.used_real_stripe ? "green" : "amber" }, { label: "Stripe Sandbox Prototype", tone: "blue" }, { label: "live blocked", tone: "red" }],
       boundary: "Judge Demo uses labeled sandbox/test-double finance. Stripe Sandbox Prototype uses real test-mode objects only when configured safely. Live money is unsupported.",
       description: "Provides finance state through sandbox/test-mode invoice records.",
-      facts: [{ label: "Current mode", value: stripeLabel, tone: "blue" }, { label: "livemode", value: String(state?.stripe.livemode ?? false), tone: "green" }, { label: "paid", value: String(state?.stripe.paid ?? false), tone: "amber" }, { label: "invoice", value: state?.stripe.invoice_id ? "Available" : "Demo state", tone: "white" }],
+      facts: [{ label: "Current mode", value: stripeLabel, tone: "blue" }, { label: "livemode", value: String(state?.stripe?.livemode ?? false), tone: "green" }, { label: "paid", value: String(state?.stripe?.paid ?? false), tone: "amber" }, { label: "invoice", value: state?.stripe?.invoice_id ? "Available" : "Demo state", tone: "white" }],
       icon: CreditCard,
       title: "Stripe Finance State",
     },
@@ -1618,7 +1953,7 @@ function buildConnectionCards(state: DemoState | null, auditRows: number, guardr
       badges: [{ label: "active", tone: "green" }, { label: "demo mode", tone: "amber" }, { label: `${auditRows} evidence rows`, tone: "blue" }],
       boundary: "Local SQLite evidence only; no production customer data or external ledger is connected.",
       description: "Persists run events, ledger rows, planning records, policy checks, guardrail evaluations, and reports.",
-      facts: [{ label: "Ledger entries", value: String(state?.ledger.entries.length ?? 4), tone: "green" }, { label: "Evidence rows", value: String(auditRows || 64), tone: "white" }, { label: "Reports", value: String(state?.reports.length ?? 1), tone: "green" }, { label: "Blocked spend rows", value: "0", tone: "green" }],
+      facts: [{ label: "Ledger entries", value: String(state?.ledger?.entries?.length ?? 4), tone: "green" }, { label: "Evidence rows", value: String(auditRows || 64), tone: "white" }, { label: "Reports", value: String(state?.reports?.length ?? 1), tone: "green" }, { label: "Blocked spend rows", value: "0", tone: "green" }],
       icon: Database,
       title: "SQLite Evidence Ledger",
     },
@@ -1635,15 +1970,14 @@ function buildActivityChips({
   protectedProfitCents: number;
 }): ActivityChipModel[] {
   return [
-    { label: "Input context loaded", railId: "input", time: "T+01", tone: "green" },
-    { label: "Hermes plan created", railId: "hermes", time: "T+02", tone: "blue" },
-    { label: "Stripe finance state verified", railId: "stripe", time: "T+03", tone: "purple" },
-    { label: "Revenue gate passed", railId: "revenue", time: "T+04", tone: "green" },
-    { label: "Policy checks completed", railId: "policy", time: "T+05", tone: "cyan" },
-    { label: "Spend approved: Workspace Pack", railId: "approved-spend", time: "T+06", tone: "green" },
-    { label: "Spend approved: Data Migration Sandbox", railId: "approved-spend", time: "T+07", tone: "green" },
-    { label: "Spend approved: Launch Asset Kit", railId: "approved-spend", time: formatCurrency(approvedSpendCents), tone: "green" },
-    { label: `Spend BLOCKED: Data Broker ${formatCurrency(blockedSpendCents)}`, railId: "blocked-spend", time: "T+08", tone: "red" },
+    { label: "Business intake loaded", railId: "input", time: "T+01", tone: "green" },
+    { label: "Cost basis loaded", railId: "cost-basis", time: "T+02", tone: "green" },
+    { label: "Hermes plan created", railId: "hermes", time: "T+03", tone: "blue" },
+    { label: "Stripe invoice action prepared", railId: "stripe-invoice", time: "T+04", tone: "purple" },
+    { label: "Payment status retrieved", railId: "stripe-status", time: "T+05", tone: "purple" },
+    { label: "NemoClaw/NeMo check completed", railId: "policy", time: "T+06", tone: "cyan" },
+    { label: "Setup spend approved", railId: "approved-spend", time: formatCurrency(approvedSpendCents), tone: "green" },
+    { label: `Risk contained: Data Broker ${formatCurrency(blockedSpendCents)}`, railId: "blocked-spend", time: "T+08", tone: "red" },
     { label: "Evidence ledger recorded audit trail", railId: "evidence", time: "T+09", tone: "green" },
     { label: `Profit report protected ${formatCurrency(protectedProfitCents)}`, railId: "profit", time: "T+10", tone: "green" },
   ];

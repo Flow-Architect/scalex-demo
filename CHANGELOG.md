@@ -10,6 +10,44 @@ Use:
 
 ---
 
+## 2026-06-28 - Goal 8M: Enterprise tool rails and guardrail visibility
+
+Completed:
+- Slowed the frontend-only governed-run animation pacing without changing backend timing or
+  mechanics.
+- Tuned the control-room visual language toward calmer enterprise surfaces, softer glow, less
+  game-like flashing, and clearer hierarchy.
+- Resurfaced Business Intake & Cost Basis with client onboarding, document review, worker table,
+  labor cost, and margin-impact context.
+- Added a truthful MCP-ready / skill Tool Action Rail for intake, Hermes planning, Stripe finance,
+  policy / NemoClaw, and ledger actions without claiming a real MCP server executed calls.
+- Made Stripe invoice/payment flow explicit with deterministic/test-double, sandbox-ready,
+  paid-state honesty, and no-live-money boundaries.
+- Made NemoClaw / NeMo guardrail visibility judge-facing while preserving local policy truth,
+  `used_real_nemo` truthfulness, fail-closed behavior, and no Docker/NemoClaw commands.
+- Shortened the first-screen product copy so the dashboard clearly reads: Hermes plans, Stripe
+  proves money, NemoClaw/NeMo checks risk, and ScaleX blocks, records, and protects profit.
+- Preserved API-backed auth, health/demo state, run/reset behavior, evidence state, Stripe/Hermes/
+  NeMo truthfulness, Judge Demo Mode, Stripe Sandbox Prototype wording, Verified Live Mode locked,
+  no Telegram, no live mode, no new integrations, and no secrets.
+
+Verification:
+- `./scripts/test.sh` passed with 68 backend tests and a successful frontend build.
+- `./scripts/check-nemo.sh` passed with `nemoguardrails` 0.21.0 and `guardrails/scalex` loaded.
+- Browser smoke at `http://127.0.0.1:5174/` verified Dashboard, Governed Run, Evidence Ledger,
+  Connection Hub, Settings, and the blocked-risk animation moment with no runtime exceptions.
+- `git diff --check` passed.
+- Unsafe/generated path scan returned no matches.
+- Staged added-lines secret scan returned no matches.
+
+Suggested commit message:
+Polish ScaleX enterprise tool rails and guardrails
+
+Next:
+- Goal 9 - final repo/video/submission polish.
+
+---
+
 ## 2026-06-28 - Goal 8L: Choreography and copy cleanup
 
 Completed:
