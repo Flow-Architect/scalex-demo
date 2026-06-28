@@ -19,7 +19,7 @@ import { isApproved } from "../../lib/demoSelectors";
 import type { AppView } from "../../layout/navigation";
 import type { AuthStatus, DemoState, HealthResponse, PolicyCheck } from "../../types";
 
-type Tone = "green" | "red" | "amber" | "blue" | "purple" | "cyan" | "muted" | "white";
+type Tone = "brand" | "green" | "red" | "amber" | "blue" | "purple" | "cyan" | "muted" | "white";
 type DrawerTab = "summary" | "operation" | "control";
 type RunVisualState = "idle" | "running" | "complete";
 
@@ -214,7 +214,7 @@ export function ControlRoomApp({
   const runActive = busyAction === "run" || runVisualState === "running";
 
   return (
-    <div className="flex h-screen min-w-0 flex-col overflow-hidden bg-[#0a0b0e] text-[#f0f0f0]">
+    <div className="flex h-screen min-w-0 flex-col overflow-hidden bg-[#050505] text-white">
       <ControlTopbar
         activeView={activeView}
         error={error}
@@ -230,7 +230,7 @@ export function ControlRoomApp({
         runVisualState={runVisualState}
         runStatus={runStatus}
       />
-      <div className="min-h-0 flex-1 overflow-hidden p-4">
+      <div className="min-h-0 flex-1 overflow-x-hidden p-4">
         {activeView === "dashboard" ? (
           <DashboardView
             model={model}
@@ -318,14 +318,14 @@ function ControlTopbar({
     : "Start Governed Run";
 
   return (
-    <header className="flex h-14 flex-none items-center justify-between border-b border-[#1e2128] bg-[#0d0e12] px-4">
-      <div className="min-w-0">
-        <p className="truncate text-sm font-semibold text-[#f0f0f0]">{crumbByView[activeView] ?? crumbByView.dashboard}</p>
-        <p className={`mt-0.5 truncate text-xs ${error ? "text-[#ef4444]" : "text-[#8a8f9e]"}`}>
+    <header className="flex h-14 flex-none items-center justify-between gap-3 overflow-hidden border-b border-[#232834] bg-[#0D0E12] px-4">
+      <div className="min-w-0 flex-1">
+        <p className="truncate text-sm font-semibold text-white">{crumbByView[activeView] ?? crumbByView.dashboard}</p>
+        <p className={`mt-0.5 truncate text-xs ${error ? "text-[#ef4444]" : "text-[#A1A1AA]"}`}>
           {subline}
         </p>
       </div>
-      <div className="flex items-center gap-2">
+      <div className="flex flex-none items-center gap-2">
         <StatusBadge label="Judge Demo Mode" tone={model.primaryModeTone} />
         <StatusBadge label={statusLabel} tone={runVisualState === "running" ? "blue" : runVisualState === "complete" || model.hasReport ? "green" : "muted"} />
         <button className="control-btn" onClick={() => onNavigate("audit")} type="button">Review Ledger</button>
@@ -333,8 +333,8 @@ function ControlTopbar({
           {runActive ? <RefreshCw className="h-4 w-4 animate-spin" /> : <Play className="h-4 w-4" />}
           {buttonLabel}
         </button>
-        <button className="control-btn" onClick={onRefresh} type="button">Refresh</button>
-        <button className="control-btn" onClick={onReset} type="button">Reset</button>
+        <button className="control-btn hidden xl:inline-flex" onClick={onRefresh} type="button">Refresh</button>
+        <button className="control-btn hidden xl:inline-flex" onClick={onReset} type="button">Reset</button>
         {auth?.auth_enabled ? <button className="control-btn" onClick={onLogout} type="button">Logout</button> : null}
       </div>
     </header>
@@ -374,8 +374,8 @@ function DashboardView({
         runActive={runActive}
         runVisualState={runVisualState}
       />
-      <div className="grid min-h-0 grid-cols-[minmax(360px,0.9fr)_minmax(340px,0.85fr)_300px] gap-4">
-        <Panel title="Governed Run" eyebrow="execution rails" action={<StatusBadge label={runVisualState === "running" ? "running" : runVisualState === "complete" ? "complete" : "ready"} tone={runVisualState === "running" ? "blue" : "green"} />}>
+      <div className="grid min-h-0 grid-cols-[minmax(320px,0.92fr)_minmax(320px,0.86fr)_minmax(260px,0.58fr)] gap-3 overflow-hidden">
+        <Panel title="Governed Run" eyebrow="execution rails" action={<StatusBadge label={runVisualState === "running" ? "running" : runVisualState === "complete" ? "complete" : "ready"} tone={runVisualState === "running" ? "blue" : runVisualState === "complete" ? "green" : "brand"} />}>
           <RailList activeRailId={activeRailId} blockedFlash={blockedFlash} compact completedRailIds={completedRailIds} model={model} />
         </Panel>
         <Panel title="Live Run Detail" eyebrow="active decision context" action={<button className="control-link" onClick={() => onNavigate("audit")} type="button">Open Ledger</button>}>
@@ -401,10 +401,10 @@ function OperationIdentityBar({ model }: { model: ControlRoomModel }) {
   return (
     <div className="operation-identity-bar">
       <div className="min-w-0">
-        <p className="text-[0.68rem] font-semibold uppercase tracking-wide text-[#00d084]">Active operation</p>
+        <p className="text-[0.68rem] font-semibold uppercase tracking-wide text-[#fcba03]">Active operation</p>
         <div className="mt-1 flex min-w-0 flex-wrap items-end gap-x-3 gap-y-1">
           <h1 className="truncate text-2xl font-semibold text-white">{model.clientName}</h1>
-          <p className="truncate text-sm font-semibold text-[#8a8f9e]">{model.operationName}</p>
+          <p className="truncate text-sm font-semibold text-[#A1A1AA]">{model.operationName}</p>
         </div>
         <div className="operation-support-chips">
           {["Intake reviewed", "Stripe sandbox/test finance", "NemoClaw boundary", "Labor cost included", "Evidence ledger active"].map((item) => (
@@ -429,8 +429,9 @@ function OperationIdentityBar({ model }: { model: ControlRoomModel }) {
 function RunSignals({ completedRailIds, runVisualState }: { completedRailIds: string[]; runVisualState: RunVisualState }) {
   const isComplete = (railId: string) => completedRailIds.includes(railId) || runVisualState === "complete";
   const signals = [
-    { label: "Input loaded", ready: isComplete("input"), tone: "green" as Tone },
+    { label: "Intake loaded", ready: isComplete("input"), tone: "green" as Tone },
     { label: "Finance verified", ready: isComplete("stripe-status"), tone: "purple" as Tone },
+    { label: "Guardrails checked", ready: isComplete("policy"), tone: "cyan" as Tone },
     { label: "Risk contained", ready: isComplete("blocked-spend"), tone: "red" as Tone },
     { label: "Profit protected", ready: isComplete("profit"), tone: "green" as Tone },
   ];
@@ -477,7 +478,7 @@ function LiveRunDetail({
         <section className="live-detail-card live-detail-enter">
           <div className="flex items-start justify-between gap-3">
             <div>
-              <p className="text-[0.68rem] font-semibold uppercase text-[#8a8f9e]">Business Intake & Cost Basis</p>
+              <p className="text-[0.68rem] font-semibold uppercase text-[#A1A1AA]">Business Intake & Cost Basis</p>
               <h2 className="mt-1 text-xl font-semibold text-white">{focusId === "input" ? "Client context is reviewed" : "Labor cost is loaded"}</h2>
             </div>
             <StatusBadge label={focusId === "input" ? "reviewed" : "costed"} tone="green" />
@@ -488,7 +489,7 @@ function LiveRunDetail({
             <FactRow label="Workers" value={`${model.laborWorkers.length} workers`} tone="white" />
             <FactRow label="Labor cost" value={model.laborCostLabel} tone="green" />
           </dl>
-          <p className="mt-3 rounded-md border border-[#1e2128] bg-[#0a0b0e] p-3 text-xs leading-5 text-[#8a8f9e]">
+          <p className="mt-3 rounded-md border border-[#232834] bg-[#0a0b0e] p-3 text-xs leading-5 text-[#A1A1AA]">
             Intake and workforce costing establish the business context and cost basis before Hermes proposes tool actions.
           </p>
         </section>
@@ -500,7 +501,7 @@ function LiveRunDetail({
         <section className="live-detail-card live-detail-enter">
           <div className="flex items-start justify-between gap-3">
             <div>
-              <p className="text-[0.68rem] font-semibold uppercase text-[#8a8f9e]">Hermes Plan</p>
+              <p className="text-[0.68rem] font-semibold uppercase text-[#A1A1AA]">Hermes Plan</p>
               <h2 className="mt-1 text-xl font-semibold text-white">Implementation plan is being created</h2>
             </div>
             <StatusBadge label="created" tone="blue" />
@@ -518,7 +519,7 @@ function LiveRunDetail({
         <section className="live-detail-card live-detail-enter">
           <div className="flex items-start justify-between gap-3">
             <div>
-              <p className="text-[0.68rem] font-semibold uppercase text-[#8a8f9e]">Stripe Finance State</p>
+              <p className="text-[0.68rem] font-semibold uppercase text-[#A1A1AA]">Stripe Finance State</p>
               <h2 className="mt-1 text-xl font-semibold text-white">{focusId === "stripe-invoice" ? "Invoice tool action is prepared" : "Payment state is checked honestly"}</h2>
             </div>
             <StatusBadge label="livemode=false" tone="green" />
@@ -529,7 +530,7 @@ function LiveRunDetail({
             <FactRow label="livemode" value={livemode} tone="green" />
             <FactRow label="paid" value={paid} tone={paid === "true" ? "green" : "amber"} />
           </dl>
-          <p className="mt-3 rounded-md border border-[#1e2128] bg-[#0a0b0e] p-3 text-xs leading-5 text-[#8a8f9e]">
+          <p className="mt-3 rounded-md border border-[#232834] bg-[#0a0b0e] p-3 text-xs leading-5 text-[#A1A1AA]">
             Judge Demo Mode uses deterministic/test finance state. Stripe Sandbox Prototype can create real test-mode objects only when configured safely.
           </p>
         </section>
@@ -541,7 +542,7 @@ function LiveRunDetail({
         <section className="live-detail-card live-detail-enter">
           <div className="flex items-start justify-between gap-3">
             <div>
-              <p className="text-[0.68rem] font-semibold uppercase text-[#8a8f9e]">NemoClaw / NeMo Guardrails</p>
+              <p className="text-[0.68rem] font-semibold uppercase text-[#A1A1AA]">NemoClaw / NeMo Guardrails</p>
               <h2 className="mt-1 text-xl font-semibold text-white">{focusId === "approved-spend" ? "Allowed setup spend can proceed" : "Risk is checked before execution"}</h2>
             </div>
             <StatusBadge label={focusId === "approved-spend" ? "approved" : "checked"} tone={focusId === "approved-spend" ? "green" : "cyan"} />
@@ -552,7 +553,7 @@ function LiveRunDetail({
             <FactRow label="Margin floor" value={marginFloor} tone="amber" />
             <FactRow label="NemoClaw route" value={hermesRuntime} tone="white" />
           </dl>
-          <p className="mt-3 rounded-md border border-[#1e2128] bg-[#0a0b0e] p-3 text-xs leading-5 text-[#8a8f9e]">
+          <p className="mt-3 rounded-md border border-[#232834] bg-[#0a0b0e] p-3 text-xs leading-5 text-[#A1A1AA]">
             Real NeMo Guardrails is shown only when runtime verification is present. Local policy remains active otherwise; NemoClaw/NemoHermes routing is explicit and fail-closed.
           </p>
         </section>
@@ -587,7 +588,7 @@ function LiveRunDetail({
         <section className="live-detail-card live-detail-enter">
           <div className="flex items-start justify-between gap-3">
             <div>
-              <p className="text-[0.68rem] font-semibold uppercase text-[#8a8f9e]">ScaleX Audit Record</p>
+              <p className="text-[0.68rem] font-semibold uppercase text-[#A1A1AA]">ScaleX Audit Record</p>
               <h2 className="mt-1 text-xl font-semibold text-white">What happened is now ledgered</h2>
             </div>
             <StatusBadge label="recorded" tone="green" />
@@ -598,7 +599,7 @@ function LiveRunDetail({
               "Approved setup spend is recorded with policy context.",
               "Risk stop is stored without secrets or live-money credentials.",
             ].map((line) => (
-              <p className="rounded-md border border-[#1e2128] bg-[#0a0b0e] px-3 py-2 text-sm text-[#f0f0f0]" key={line}>{line}</p>
+              <p className="rounded-md border border-[#232834] bg-[#0a0b0e] px-3 py-2 text-sm text-[#FFFFFF]" key={line}>{line}</p>
             ))}
           </div>
         </section>
@@ -610,7 +611,7 @@ function LiveRunDetail({
         <section className="live-detail-card live-detail-enter live-detail-profit">
           <div className="flex items-start justify-between gap-3">
             <div>
-              <p className="text-[0.68rem] font-semibold uppercase text-[#00d084]">Profit Outcome</p>
+              <p className="text-[0.68rem] font-semibold uppercase text-[#10B981]">Profit Outcome</p>
               <h2 className="mt-1 text-2xl font-semibold text-white">{model.protectedProfitLabel}</h2>
             </div>
             <StatusBadge label="protected" tone="green" />
@@ -620,7 +621,7 @@ function LiveRunDetail({
               <FactRow key={metric.label} label={metric.label} value={metric.value} tone={metric.tone} />
             ))}
           </dl>
-          <p className="mt-3 rounded-md border border-[#00d084]/30 bg-[#00d084]/10 p-3 text-sm font-semibold text-[#00d084]">
+          <p className="mt-3 rounded-md border border-[#10B981]/30 bg-[#10B981]/10 p-3 text-sm font-semibold text-[#10B981]">
             Protected margin: {model.marginLabel}. Formula: revenue - approved spend - labor cost.
           </p>
         </section>
@@ -631,7 +632,7 @@ function LiveRunDetail({
       <section className="live-detail-card live-detail-enter">
         <div className="flex items-start justify-between gap-3">
           <div>
-            <p className="text-[0.68rem] font-semibold uppercase text-[#8a8f9e]">Ready to govern</p>
+            <p className="text-[0.68rem] font-semibold uppercase text-[#A1A1AA]">Ready to govern</p>
             <h2 className="mt-1 text-xl font-semibold text-white">Start the Northstar operation</h2>
           </div>
           <StatusBadge label={nemoRuntimeVerified ? "NeMo verified" : "local policy active"} tone={nemoRuntimeVerified ? "green" : "cyan"} />
@@ -643,7 +644,7 @@ function LiveRunDetail({
             "NeMo Guardrails or local policy will check risky actions.",
             "ScaleX will record the audit trail and report protected margin.",
           ].map((line) => (
-            <p className="rounded-md border border-[#1e2128] bg-[#0a0b0e] px-3 py-2 text-sm text-[#f0f0f0]" key={line}>{line}</p>
+            <p className="rounded-md border border-[#232834] bg-[#0a0b0e] px-3 py-2 text-sm text-[#FFFFFF]" key={line}>{line}</p>
           ))}
         </div>
         <button className="control-btn-primary mt-4 w-full" disabled={runActive} onClick={onRun} type="button">
@@ -797,11 +798,11 @@ function NemoGuardrailLayerCard({ model }: { model: ControlRoomModel }) {
           <p className="enterprise-eyebrow">NemoClaw / NeMo Guardrail Layer</p>
           <h2>{usedRealNemo ? "NeMo runtime verified" : "Boundary visible; local policy active"}</h2>
         </div>
-        <StatusBadge label={usedRealNemo ? "used_real_nemo=true" : "used_real_nemo=false"} tone={usedRealNemo ? "green" : "amber"} />
+        <StatusBadge label={usedRealNemo ? "real NeMo" : "local policy"} tone={usedRealNemo ? "green" : "amber"} />
       </div>
       <dl className="enterprise-fact-grid">
         <FactRow label="Guardrail mode" value={guardrails?.mode ?? "local_policy"} tone="cyan" />
-        <FactRow label="Adapter" value={guardrails?.adapter_status ?? "local policy"} tone="white" />
+        <FactRow label="used_real_nemo" value={String(usedRealNemo)} tone={usedRealNemo ? "green" : "amber"} />
         <FactRow label="NemoClaw route" value={hermesRuntime} tone="white" />
         <FactRow label="Fail closed" value={String(Boolean(guardrails?.fail_closed))} tone={guardrails?.fail_closed ? "red" : "green"} />
       </dl>
@@ -863,14 +864,14 @@ function GovernedRunView({
                   <div className="flex min-h-12 items-center gap-3">
                     <span className="rail-index">{String(index + 1).padStart(2, "0")}</span>
                     <div className="min-w-0 flex-1">
-                      <p className="truncate text-sm font-semibold text-[#f0f0f0]">{rail.name}</p>
-                      <p className="truncate text-xs text-[#8a8f9e]">{rail.subline}</p>
+                      <p className="truncate text-sm font-semibold text-[#FFFFFF]">{rail.name}</p>
+                      <p className="truncate text-xs text-[#A1A1AA]">{rail.subline}</p>
                     </div>
                     <StatusBadge label={result.label} tone={result.tone} />
                   </div>
                   {expanded ? (
-                    <div className="mt-2 rounded-md border border-[#1e2128] bg-[#0a0b0e] p-3 text-xs leading-5 text-[#8a8f9e]">
-                      <p className="font-semibold text-[#f0f0f0]">{rail.evidence}</p>
+                    <div className="mt-2 rounded-md border border-[#232834] bg-[#0a0b0e] p-3 text-xs leading-5 text-[#A1A1AA]">
+                      <p className="font-semibold text-[#FFFFFF]">{rail.evidence}</p>
                       <p className="mt-1">{rail.detail}</p>
                     </div>
                   ) : null}
@@ -898,8 +899,8 @@ function GovernedRunView({
               </dl>
             ) : null}
             {drawerTab === "operation" ? (
-              <div className="space-y-3 text-sm leading-6 text-[#8a8f9e]">
-                <p className="font-semibold text-[#f0f0f0]">{model.clientName}</p>
+              <div className="space-y-3 text-sm leading-6 text-[#A1A1AA]">
+                <p className="font-semibold text-[#FFFFFF]">{model.clientName}</p>
                 <p>{model.operationName}</p>
                 <p>Synthetic B2B implementation only. No patient data, no PHI, no live money.</p>
               </div>
@@ -910,7 +911,7 @@ function GovernedRunView({
           </div>
         </Panel>
       </div>
-      <RailActivityTimeline activeRailId={activeRailId} completedRailIds={completedRailIds} model={model} runVisualState={runVisualState} />
+      <RailActivityTimeline activeRailId={activeRailId} completedRailIds={completedRailIds} runVisualState={runVisualState} />
     </section>
   );
 }
@@ -923,12 +924,12 @@ function EvidenceLedgerView({ model, runVisualState }: { model: ControlRoomModel
         eyebrow="actor · action · evidence · safety"
         action={<div className="flex flex-wrap gap-2">{model.auditPills.map((pill) => <StatusBadge key={pill.label} label={`${pill.label}: ${pill.value}`} tone={pill.tone ?? "muted"} />)}</div>}
       >
-        <div className="h-[calc(100vh-174px)] overflow-auto rounded-md border border-[#1e2128]">
+        <div className="h-[calc(100vh-174px)] overflow-auto rounded-md border border-[#232834]">
           <table className="min-w-full border-separate border-spacing-0 text-sm">
-            <thead className="sticky top-0 bg-[#0d0e12] text-left text-xs uppercase text-[#8a8f9e]">
+            <thead className="sticky top-0 bg-[#0d0e12] text-left text-xs uppercase text-[#A1A1AA]">
               <tr>
                 {["Order", "Actor", "Action", "Evidence Type", "Safety Note", "Status"].map((header) => (
-                  <th className="border-b border-[#1e2128] px-3 py-3 font-semibold" key={header}>{header}</th>
+                  <th className="border-b border-[#232834] px-3 py-3 font-semibold" key={header}>{header}</th>
                 ))}
               </tr>
             </thead>
@@ -939,12 +940,12 @@ function EvidenceLedgerView({ model, runVisualState }: { model: ControlRoomModel
                   key={row.order}
                   style={{ animationDelay: `${index * 45}ms` }}
                 >
-                  <td className={`border-b border-[#1e2128] px-3 py-3 font-mono text-xs ${row.order === "005" ? "border-l-4 border-l-[#ef4444]" : ""}`}>{row.order}</td>
-                  <td className="border-b border-[#1e2128] px-3 py-3 font-semibold text-[#f0f0f0]">{row.actor}</td>
-                  <td className="border-b border-[#1e2128] px-3 py-3 text-[#8a8f9e]">{row.action}</td>
-                  <td className="border-b border-[#1e2128] px-3 py-3 font-mono text-xs text-[#8a8f9e]">{row.evidenceType}</td>
-                  <td className="border-b border-[#1e2128] px-3 py-3 text-[#8a8f9e]">{row.safetyNote}</td>
-                  <td className="border-b border-[#1e2128] px-3 py-3"><StatusBadge label={row.status} tone={row.tone} /></td>
+                  <td className={`border-b border-[#232834] px-3 py-3 font-mono text-xs ${row.order === "005" ? "border-l-4 border-l-[#ef4444]" : ""}`}>{row.order}</td>
+                  <td className="border-b border-[#232834] px-3 py-3 font-semibold text-[#FFFFFF]">{row.actor}</td>
+                  <td className="border-b border-[#232834] px-3 py-3 text-[#A1A1AA]">{row.action}</td>
+                  <td className="border-b border-[#232834] px-3 py-3 font-mono text-xs text-[#A1A1AA]">{row.evidenceType}</td>
+                  <td className="border-b border-[#232834] px-3 py-3 text-[#A1A1AA]">{row.safetyNote}</td>
+                  <td className="border-b border-[#232834] px-3 py-3"><StatusBadge label={row.status} tone={row.tone} /></td>
                 </tr>
               ))}
             </tbody>
@@ -954,14 +955,14 @@ function EvidenceLedgerView({ model, runVisualState }: { model: ControlRoomModel
       <Panel title="Audit Safety" eyebrow="demo boundaries">
         <div className="grid gap-3">
           {model.safetyProof.map((proof) => (
-            <div className="flex items-start gap-2 text-sm text-[#f0f0f0]" key={proof}>
-              <CheckCircle2 className="mt-0.5 h-4 w-4 flex-none text-[#00d084]" />
+            <div className="flex items-start gap-2 text-sm text-[#FFFFFF]" key={proof}>
+              <CheckCircle2 className="mt-0.5 h-4 w-4 flex-none text-[#10B981]" />
               <span>{proof}</span>
             </div>
           ))}
         </div>
         <div className="mt-4">
-          <p className="mb-2 text-xs font-semibold uppercase text-[#8a8f9e]">Control Artifacts</p>
+          <p className="mb-2 text-xs font-semibold uppercase text-[#A1A1AA]">Control Artifacts</p>
           <ProofArtifactGrid
             activeRailId={null}
             compact
@@ -971,10 +972,10 @@ function EvidenceLedgerView({ model, runVisualState }: { model: ControlRoomModel
             runVisualState={runVisualState}
           />
         </div>
-        <div className="mt-5 rounded-md border border-[#00d084]/30 bg-[#00d084]/10 p-3">
-          <p className="text-xs font-semibold uppercase text-[#00d084]">Profit Outcome</p>
+        <div className="mt-5 rounded-md border border-[#10B981]/30 bg-[#10B981]/10 p-3">
+          <p className="text-xs font-semibold uppercase text-[#10B981]">Profit Outcome</p>
           <p className="mt-2 text-3xl font-semibold text-white">{model.protectedProfitLabel}</p>
-          <p className="mt-1 text-sm text-[#8a8f9e]">{model.marginLabel} protected margin</p>
+          <p className="mt-1 text-sm text-[#A1A1AA]">{model.marginLabel} protected margin</p>
         </div>
       </Panel>
     </section>
@@ -984,14 +985,19 @@ function EvidenceLedgerView({ model, runVisualState }: { model: ControlRoomModel
 function ConnectionHubView({ model }: { model: ControlRoomModel }) {
   return (
     <section className="grid h-full min-h-0 grid-rows-[auto_minmax(0,1fr)_auto] gap-4">
-      <div className="flex items-center justify-between rounded-md border border-[#1e2128] bg-[#111318] p-4">
+      <div className="flex items-center justify-between rounded-md border border-[#232834] bg-[#111318] p-4">
         <div>
-          <p className="text-xs font-semibold uppercase text-[#00d084]">Connection Hub</p>
+          <p className="text-xs font-semibold uppercase text-[#fcba03]">Connection Hub</p>
           <h1 className="text-2xl font-semibold text-white">Allowed Systems & Truth Boundaries</h1>
         </div>
         <div className="flex flex-wrap justify-end gap-2">
-          {["Governed demo mode", model.hermesLabel, model.stripeLabel, model.guardrailLabel].map((label) => (
-            <StatusBadge key={label} label={label} tone="green" />
+          {[
+            { label: "Governed demo mode", tone: "brand" as Tone },
+            { label: model.hermesLabel, tone: "blue" as Tone },
+            { label: model.stripeLabel, tone: "purple" as Tone },
+            { label: model.guardrailLabel, tone: "cyan" as Tone },
+          ].map((item) => (
+            <StatusBadge key={item.label} label={item.label} tone={item.tone} />
           ))}
         </div>
       </div>
@@ -1009,21 +1015,21 @@ function ConnectionHubView({ model }: { model: ControlRoomModel }) {
                   <p className="text-sm font-semibold text-white">{mode.title}</p>
                   <StatusBadge label={mode.status} tone={mode.tone} />
                 </div>
-                <p className="mt-2 text-xs leading-5 text-[#8a8f9e]">{mode.detail}</p>
+                <p className="mt-2 text-xs leading-5 text-[#A1A1AA]">{mode.detail}</p>
               </article>
             ))}
           </div>
-          <div className="mt-4 rounded-md border border-[#1e2128] bg-[#0a0b0e] p-3">
-            <p className="text-xs font-semibold uppercase text-[#00d084]">NemoClaw / NeMo Guardrails</p>
-            <p className="mt-2 text-xs leading-5 text-[#8a8f9e]">
+          <div className="mt-4 rounded-md border border-[#232834] bg-[#0a0b0e] p-3">
+            <p className="text-xs font-semibold uppercase text-[#06B6D4]">NemoClaw / NeMo Guardrails</p>
+            <p className="mt-2 text-xs leading-5 text-[#A1A1AA]">
               NeMo Guardrails is shown only when runtime verification passes. NemoClaw /
               NemoHermes planning is optional routing and remains explicit in runtime status.
             </p>
           </div>
         </Panel>
       </div>
-      <div className="rounded-md border border-[#1e2128] bg-[#111318] p-4">
-        <p className="text-xs font-semibold uppercase text-[#8a8f9e]">Full Proof Capable</p>
+      <div className="rounded-md border border-[#232834] bg-[#111318] p-4">
+        <p className="text-xs font-semibold uppercase text-[#A1A1AA]">Full Proof Capable</p>
         <div className="mt-3 flex flex-wrap gap-2">
           {["Isolated Hermes planning", "Stripe test-mode finance", "Real NeMo only when verified", "NemoClaw Docker not invoked in demo"].map((item) => (
             <StatusBadge label={item} tone="blue" key={item} />
@@ -1067,9 +1073,9 @@ function SettingsView({
   return (
     <section className="grid h-full min-h-0 grid-cols-[minmax(0,1fr)_320px] gap-4">
       <Panel title="Boundaries & Runtime" eyebrow="confidence view">
-        <div className="overflow-hidden rounded-md border border-[#1e2128]">
+        <div className="overflow-hidden rounded-md border border-[#232834]">
           <table className="min-w-full text-sm">
-            <thead className="bg-[#0d0e12] text-left text-xs uppercase text-[#8a8f9e]">
+            <thead className="bg-[#0d0e12] text-left text-xs uppercase text-[#A1A1AA]">
               <tr>
                 <th className="px-4 py-3">Area</th>
                 <th className="px-4 py-3">Current value</th>
@@ -1078,10 +1084,10 @@ function SettingsView({
             </thead>
             <tbody>
               {rows.map(([area, value, boundary]) => (
-                <tr className="border-t border-[#1e2128] bg-[#111318]" key={area}>
+                <tr className="border-t border-[#232834] bg-[#111318]" key={area}>
                   <td className="px-4 py-4 font-semibold text-white">{area}</td>
-                  <td className="px-4 py-4 text-[#f0f0f0]">{value}</td>
-                  <td className="px-4 py-4 text-[#8a8f9e]">{boundary}</td>
+                  <td className="px-4 py-4 text-[#FFFFFF]">{value}</td>
+                  <td className="px-4 py-4 text-[#A1A1AA]">{boundary}</td>
                 </tr>
               ))}
             </tbody>
@@ -1091,15 +1097,15 @@ function SettingsView({
       <Panel title="Supporting Modules" eyebrow="kept behind story">
         <div className="grid gap-3">
           {model.supportingModules.map((module) => (
-            <article className="rounded-md border border-[#1e2128] bg-[#0a0b0e] p-3" key={module.title}>
+            <article className="rounded-md border border-[#232834] bg-[#0a0b0e] p-3" key={module.title}>
               <div className="flex items-start justify-between gap-3">
                 <div>
                   <h2 className="text-sm font-semibold text-white">{module.title}</h2>
-                  <p className="mt-1 text-xs leading-5 text-[#8a8f9e]">{module.description}</p>
+                  <p className="mt-1 text-xs leading-5 text-[#A1A1AA]">{module.description}</p>
                 </div>
                 <StatusBadge label={module.status} tone={module.tone} />
               </div>
-              <p className="mt-3 rounded-md border border-[#1e2128] bg-[#111318] px-3 py-2 text-xs font-semibold text-[#f0f0f0]">
+              <p className="mt-3 rounded-md border border-[#232834] bg-[#111318] px-3 py-2 text-xs font-semibold text-[#FFFFFF]">
                 {module.value}
               </p>
             </article>
@@ -1143,15 +1149,15 @@ function MetricStrip({
             className={`metric-card ${isApprovedMetric && approvedActive ? "metric-glow-green" : ""} ${isRiskMetric && blockedActive ? "metric-flash-red" : ""} ${isProfitMetric ? "metric-hero" : ""} ${isProfitMetric && profitActive ? "metric-glow-green" : ""}`}
             key={metric.label}
           >
-            <p className="text-xs font-semibold uppercase tracking-wide text-[#8a8f9e]">{displayLabel}</p>
+            <p className="text-xs font-semibold uppercase tracking-wide text-[#A1A1AA]">{displayLabel}</p>
             <p className={`mt-2 font-semibold tabular-nums ${metricClass(metric.tone)} ${isProfitMetric ? "text-4xl" : isRiskMetric ? "text-3xl" : "text-2xl"}`}>
               {isRiskMetric && runActive ? blockedRiskDisplayValue : metric.value}
             </p>
-            {metric.label === "Revenue secured" ? <p className="mt-2 text-xs font-semibold text-[#8a8f9e]">client revenue context loaded</p> : null}
-            {isApprovedMetric ? <p className="mt-2 text-xs font-semibold text-[#00d084]">allowed setup spend</p> : null}
+            {metric.label === "Revenue secured" ? <p className="mt-2 text-xs font-semibold text-[#A1A1AA]">client revenue context loaded</p> : null}
+            {isApprovedMetric ? <p className="mt-2 text-xs font-semibold text-[#10B981]">allowed setup spend</p> : null}
             {isRiskMetric ? <p className="mt-2 text-xs font-semibold text-[#f87171]">unsafe vendor exposure contained</p> : null}
-            {metric.label === "Labor cost" ? <p className="mt-2 text-xs font-semibold text-[#8a8f9e]">delivery cost included</p> : null}
-            {isProfitMetric ? <p className="mt-2 text-xs font-semibold text-[#00d084]">revenue minus approved spend and labor</p> : null}
+            {metric.label === "Labor cost" ? <p className="mt-2 text-xs font-semibold text-[#A1A1AA]">delivery cost included</p> : null}
+            {isProfitMetric ? <p className="mt-2 text-xs font-semibold text-[#10B981]">revenue minus approved spend and labor</p> : null}
           </article>
         );
       })}
@@ -1188,10 +1194,10 @@ function RailList({
             <span className="rail-index">{String(index + 1).padStart(2, "0")}</span>
             <span className="status-dot" />
             <div className="min-w-0 flex-1">
-              <p className="truncate text-sm font-semibold text-[#f0f0f0]">{rail.name}</p>
-              {!compact ? <p className="truncate text-xs text-[#8a8f9e]">{rail.evidence}</p> : <p className="truncate text-[0.68rem] text-[#8a8f9e]">{rail.subline}</p>}
+              <p className="truncate text-sm font-semibold text-[#FFFFFF]">{rail.name}</p>
+              {!compact ? <p className="truncate text-xs text-[#A1A1AA]">{rail.evidence}</p> : <p className="truncate text-[0.68rem] text-[#A1A1AA]">{rail.subline}</p>}
             </div>
-            <span className="hidden rounded-md border border-[#1e2128] px-2 py-1 text-[0.64rem] font-semibold uppercase text-[#8a8f9e] xl:inline">{rail.proofTag}</span>
+            {!compact ? <span className="hidden rounded border border-[#232834] px-2 py-1 text-[0.64rem] font-semibold uppercase text-[#A1A1AA] xl:inline">{rail.proofTag}</span> : null}
             <StatusBadge label={result.label} tone={result.tone} />
           </li>
         );
@@ -1220,12 +1226,12 @@ function ControlStackChain({ activeRailId, completedRailIds, model }: { activeRa
         { id: "hermes" as const, label: "Hermes", value: hasCompleted(["hermes"]) ? "plan created" : "plans", tone: "blue" as Tone },
         { id: "stripe" as const, label: "Stripe", value: hasCompleted(["stripe-status"]) ? "state checked" : model.state?.stripe?.used_real_stripe ? "test finance" : "sandbox finance", tone: "purple" as Tone },
         { id: "nemo" as const, label: "NeMo / Policy", value: model.state?.guardrails?.used_real_nemo ? "verified" : "risk gate", tone: "cyan" as Tone },
-        { id: "scalex" as const, label: "ScaleX", value: hasCompleted(["evidence", "profit"]) ? "audit recorded" : "records", tone: "green" as Tone },
+        { id: "scalex" as const, label: "ScaleX", value: hasCompleted(["evidence", "profit"]) ? "audit recorded" : "records", tone: "brand" as Tone },
       ].map((item, index) => (
         <div className={`stack-node ${isNodeActive(item.id) ? `stack-node-active stack-node-active-${item.tone}` : ""}`} key={item.label}>
           {isNodeActive(item.id) ? <span className="stack-active-dot" aria-hidden="true" /> : null}
           <StatusBadge label={item.label} tone={item.tone} />
-          <p className="mt-1 text-[0.68rem] font-semibold text-[#f0f0f0]">{item.value}</p>
+          <p className="mt-1 text-[0.68rem] font-semibold text-[#FFFFFF]">{item.value}</p>
           {index < 3 ? <span className="stack-connector" aria-hidden="true" /> : null}
         </div>
       ))}
@@ -1238,7 +1244,7 @@ function ModeStrip({ model }: { model: ControlRoomModel }) {
     <div className="mb-3 grid grid-cols-3 gap-2">
       {model.modeCards.map((mode) => (
         <article className={`mode-card mode-card-${mode.tone}`} key={mode.title}>
-          <p className="truncate text-[0.62rem] font-semibold uppercase text-[#8a8f9e]">{mode.title}</p>
+          <p className="truncate text-[0.62rem] font-semibold uppercase text-[#A1A1AA]">{mode.title}</p>
           <p className={`mt-1 truncate text-xs font-semibold ${metricClass(mode.tone)}`}>{mode.status}</p>
         </article>
       ))}
@@ -1279,13 +1285,13 @@ function ProofArtifactGrid({
               </span>
               <div className="min-w-0">
                 <p className="truncate text-xs font-semibold text-white">{artifact.title}</p>
-                <p className="truncate text-[0.62rem] font-semibold uppercase text-[#4a4f5e]">{artifact.system}</p>
+                <p className="truncate text-[0.62rem] font-semibold uppercase text-[#52525B]">{artifact.system}</p>
               </div>
             </div>
             <StatusBadge label={statusLabel} tone={statusTone} />
           </div>
-          <p className="mt-2 text-xs leading-5 text-[#8a8f9e]">{artifact.detail}</p>
-          <p className="mt-2 truncate font-mono text-[0.66rem] text-[#4a4f5e]">{artifact.meta}</p>
+          <p className="mt-2 text-xs leading-5 text-[#A1A1AA]">{artifact.detail}</p>
+          <p className="mt-2 truncate font-mono text-[0.66rem] text-[#52525B]">{artifact.meta}</p>
         </article>
         );
       })}
@@ -1297,28 +1303,34 @@ function RailActivityTimeline({
   activeRailId,
   compact = false,
   completedRailIds,
-  model,
   runVisualState,
 }: {
   activeRailId: string | null;
   compact?: boolean;
   completedRailIds: string[];
-  model: ControlRoomModel;
   runVisualState: RunVisualState;
 }) {
+  const isComplete = (railId: string) => completedRailIds.includes(railId) || runVisualState === "complete";
+  const signals = [
+    { label: "Intake loaded", railId: "input", tone: "green" as Tone },
+    { label: "Finance verified", railId: "stripe-status", tone: "purple" as Tone },
+    { label: "Guardrails checked", railId: "policy", tone: "cyan" as Tone },
+    { label: "Risk contained", railId: "blocked-spend", tone: "red" as Tone },
+    { label: "Profit protected", railId: "profit", tone: "green" as Tone },
+  ];
   return (
-    <div className={`rounded-md border border-[#1e2128] bg-[#111318] ${compact ? "p-2.5" : "p-3"}`}>
+    <div className={`rounded-md border border-[#232834] bg-[#111318] ${compact ? "p-2.5" : "p-3"}`}>
       <div className="flex items-center justify-between gap-3">
-        <p className="text-xs font-semibold uppercase text-[#8a8f9e]">Rail Activity</p>
-        <StatusBadge label={runVisualState === "running" ? "live governance trace" : "API-backed timeline"} tone="blue" />
+        <p className="text-xs font-semibold uppercase text-[#fcba03]">Run Signals</p>
+        <StatusBadge label={runVisualState === "running" ? "live governance trace" : "API-backed"} tone={runVisualState === "running" ? "blue" : "brand"} />
       </div>
-      <div className={`${compact ? "mt-2" : "mt-2"} flex gap-2 overflow-hidden`}>
-        {model.activityChips.map((chip) => {
-          const revealed = runVisualState === "complete" || completedRailIds.includes(chip.railId);
-          const active = activeRailId === chip.railId;
+      <div className="run-signal-summary-grid mt-2">
+        {signals.map((signal) => {
+          const revealed = isComplete(signal.railId);
+          const active = activeRailId === signal.railId;
           return (
-          <span className={`activity-chip activity-chip-${chip.tone} ${revealed ? "activity-chip-revealed" : active ? "activity-chip-live" : "activity-chip-queued"}`} key={chip.label}>
-            {chip.label} <span className="text-[#8a8f9e]">{revealed ? chip.time : active ? "running" : "ready"}</span>
+          <span className={`activity-chip activity-chip-${signal.tone} ${revealed ? "activity-chip-revealed" : active ? "activity-chip-live" : "activity-chip-queued"}`} key={signal.label}>
+            {signal.label} <span className="text-[#A1A1AA]">{revealed ? "done" : active ? "running" : "ready"}</span>
           </span>
           );
         })}
@@ -1330,14 +1342,14 @@ function RailActivityTimeline({
 function ConnectorCard({ card }: { card: ConnectorCardModel }) {
   const Icon = card.icon;
   return (
-    <article className="rounded-md border border-[#1e2128] bg-[#111318] p-4 transition hover:border-[#2a2f3a]">
+    <article className="rounded-md border border-[#232834] bg-[#111318] p-4 transition hover:border-[#343A46]">
       <div className="flex items-start gap-3">
-        <span className="flex h-10 w-10 items-center justify-center rounded-md border border-[#1e2128] bg-[#0a0b0e] text-[#00d084]">
+        <span className="flex h-10 w-10 items-center justify-center rounded-md border border-[#232834] bg-[#0a0b0e] text-[#fcba03]">
           <Icon className="h-5 w-5" />
         </span>
         <div className="min-w-0">
           <h2 className="text-lg font-semibold text-white">{card.title}</h2>
-          <p className="mt-1 text-sm leading-6 text-[#8a8f9e]">{card.description}</p>
+          <p className="mt-1 text-sm leading-6 text-[#A1A1AA]">{card.description}</p>
         </div>
       </div>
       <div className="mt-4 flex flex-wrap gap-2">
@@ -1346,32 +1358,32 @@ function ConnectorCard({ card }: { card: ConnectorCardModel }) {
       <dl className="mt-4 grid grid-cols-2 gap-2">
         {card.facts.map((fact) => <FactRow key={fact.label} label={fact.label} value={fact.value} tone={fact.tone} />)}
       </dl>
-      <p className="mt-4 border-t border-[#1e2128] pt-3 text-xs leading-5 text-[#8a8f9e]">{card.boundary}</p>
+      <p className="mt-4 border-t border-[#232834] pt-3 text-xs leading-5 text-[#A1A1AA]">{card.boundary}</p>
     </article>
   );
 }
 
 function Panel({ action, children, eyebrow, title }: { action?: ReactNode; children: ReactNode; eyebrow: string; title: string }) {
   return (
-    <section className="min-h-0 overflow-hidden rounded-md border border-[#1e2128] bg-[#111318] shadow-xl shadow-black/20">
-      <div className="flex h-14 items-center justify-between border-b border-[#1e2128] px-4">
-        <div>
-          <p className="text-[0.64rem] font-semibold uppercase tracking-wide text-[#00d084]">{eyebrow}</p>
+    <section className="min-h-0 max-w-full overflow-hidden rounded-lg border border-[#232834] bg-[#111318] shadow-xl shadow-black/20">
+      <div className="flex h-14 items-center justify-between gap-3 border-b border-[#232834] px-4">
+        <div className="min-w-0">
+          <p className="truncate text-[0.64rem] font-semibold uppercase tracking-wide text-[#fcba03]">{eyebrow}</p>
           <h1 className="text-lg font-semibold text-white">{title}</h1>
         </div>
         {action}
       </div>
-      <div className="h-[calc(100%-3.5rem)] overflow-auto p-4">{children}</div>
+      <div className="h-[calc(100%-3.5rem)] overflow-y-auto overflow-x-hidden p-4">{children}</div>
     </section>
   );
 }
 
 function SegmentedTabs({ active, items, onChange }: { active: string; items: Array<{ id: string; label: string }>; onChange: (id: string) => void }) {
   return (
-    <div className="grid grid-cols-3 rounded-md border border-[#1e2128] bg-[#0a0b0e] p-1">
+    <div className="grid grid-cols-3 rounded-md border border-[#232834] bg-[#0D0E12] p-1">
       {items.map((item) => (
         <button
-          className={`rounded px-2 py-2 text-xs font-semibold transition ${active === item.id ? "bg-[#00d084] text-[#07110d]" : "text-[#8a8f9e] hover:bg-[#111318] hover:text-white"}`}
+          className={`rounded px-2 py-2 text-xs font-semibold transition ${active === item.id ? "bg-[#fcba03] text-[#050505]" : "text-[#A1A1AA] hover:bg-[#111318] hover:text-white"}`}
           key={item.id}
           onClick={() => onChange(item.id)}
           type="button"
@@ -1385,8 +1397,8 @@ function SegmentedTabs({ active, items, onChange }: { active: string; items: Arr
 
 function FactRow({ label, tone = "white", value }: { label: string; tone?: Tone; value: string }) {
   return (
-    <div className="rounded-md border border-[#1e2128] bg-[#0a0b0e] p-2">
-      <dt className="text-[0.64rem] font-semibold uppercase tracking-wide text-[#4a4f5e]">{label}</dt>
+    <div className="rounded-md border border-[#232834] bg-[#0a0b0e] p-2">
+      <dt className="text-[0.64rem] font-semibold uppercase tracking-wide text-[#52525B]">{label}</dt>
       <dd className={`mt-1 truncate text-sm font-semibold ${metricClass(tone)}`}>{value}</dd>
     </div>
   );
@@ -1394,7 +1406,7 @@ function FactRow({ label, tone = "white", value }: { label: string; tone?: Tone;
 
 function StatusBadge({ label, tone = "muted" }: { label: string; tone?: Tone }) {
   return (
-    <span className={`inline-flex max-w-full items-center rounded-md border px-2 py-1 text-[0.64rem] font-semibold uppercase tracking-wide ${badgeClass(tone)}`}>
+    <span className={`status-badge inline-flex max-w-full items-center rounded border px-2 py-1 text-[0.64rem] font-semibold uppercase tracking-wide ${badgeClass(tone)}`}>
       <span className="truncate">{label}</span>
     </span>
   );
@@ -1607,7 +1619,7 @@ function buildModeCards(state: DemoState | null): ModeCardModel[] {
       primary: executionMode === "demo",
       status: executionMode === "demo" ? "Judge Demo active" : "Available",
       title: "Judge Demo Mode",
-      tone: executionMode === "demo" ? "green" : "muted",
+      tone: executionMode === "demo" ? "brand" : "muted",
     },
     {
       detail: "Test-mode finance · no live money.",
@@ -1985,8 +1997,10 @@ function buildActivityChips({
 
 function badgeClass(tone: Tone): string {
   switch (tone) {
+    case "brand":
+      return "border-[#fcba03]/40 bg-[#fcba03]/10 text-[#fcba03]";
     case "green":
-      return "border-[#00d084]/35 bg-[#00d084]/10 text-[#00d084]";
+      return "border-[#10B981]/35 bg-[#10B981]/10 text-[#10B981]";
     case "red":
       return "border-[#ef4444]/40 bg-[#ef4444]/10 text-[#f87171]";
     case "amber":
@@ -1998,17 +2012,19 @@ function badgeClass(tone: Tone): string {
     case "cyan":
       return "border-[#06b6d4]/40 bg-[#06b6d4]/10 text-[#67e8f9]";
     case "white":
-      return "border-[#f0f0f0]/20 bg-white/5 text-[#f0f0f0]";
+      return "border-[#FFFFFF]/20 bg-white/5 text-[#FFFFFF]";
     case "muted":
     default:
-      return "border-[#1e2128] bg-[#0a0b0e] text-[#8a8f9e]";
+      return "border-[#232834] bg-[#0a0b0e] text-[#A1A1AA]";
   }
 }
 
 function metricClass(tone: Tone = "white"): string {
   switch (tone) {
+    case "brand":
+      return "text-[#fcba03]";
     case "green":
-      return "text-[#00d084]";
+      return "text-[#10B981]";
     case "red":
       return "text-[#ef4444]";
     case "amber":
@@ -2020,9 +2036,9 @@ function metricClass(tone: Tone = "white"): string {
     case "cyan":
       return "text-[#06b6d4]";
     case "muted":
-      return "text-[#8a8f9e]";
+      return "text-[#A1A1AA]";
     case "white":
     default:
-      return "text-[#f0f0f0]";
+      return "text-[#FFFFFF]";
   }
 }

@@ -7,12 +7,10 @@ Last updated: 2026-06-28
 - Project folder exists at `/home/ascabrya/dev/scalex-demo`.
 - Latest committed baseline before Goal 8E: `615a9bd Document NemoClaw correction and next
   integration plan`.
-- Last completed goal: Goal 8M - enterprise polish, tool rails, intake/cost basis, Stripe flow,
-  and NemoClaw/NeMo visibility.
-- Last completed implementation/QA goal: Goal 8L - collapsed dashboard activity noise,
-  context-aware Live Run Detail, compact run signals, reduced proof/blocked/queued repetition,
-  simplified control artifacts, and one clear blocked-risk climax.
-- Last completed documentation/tracking update: Goal 8M enterprise polish closeout.
+- Last completed goal: Goal 8N - brand system, compact rails, and overflow fix.
+- Last completed implementation/QA goal: Goal 8N - ScaleX logo/brand system, compact rails,
+  horizontal overflow fixes, and enterprise visual polish.
+- Last completed documentation/tracking update: Goal 8N brand/overflow closeout.
 - Last completed checkout cleanup: Open Source Checkout Cleanup for judge readiness.
 - Current priority: Goal 9 - final repo/video/submission polish.
 - Goal 8I used the uploaded six-phase control-room visual prompt as a design specification only.
@@ -114,6 +112,15 @@ Last updated: 2026-06-28
   unsafe/generated path scan, staged added-lines secret scan, and browser smoke at
   `http://127.0.0.1:5174/` for Dashboard, Governed Run, Evidence Ledger, Connection Hub,
   Settings, and the blocked-risk animation moment.
+- Goal 8N completed the frontend-only brand and overflow polish pass. It uses the provided ScaleX
+  logo asset as a cleaned transparent sidebar logo, locks the control-room brand to
+  black/white/#fcba03 with semantic colors reserved for status meaning, sharpens corner radii and
+  visual treatment, removes page-level horizontal overflow, compacts governed and enterprise
+  rails, replaces horizontal activity styling with fixed Run Signals, and preserves backend
+  mechanics, API-backed state, truthfulness, and all safety boundaries.
+- Goal 8N validation passed `./scripts/test.sh`, `./scripts/check-nemo.sh`, browser smoke for all
+  main views, strict browser overflow measurement with no page or uncontrolled element horizontal
+  overflow at 1440x900, logo render bounds, blocked-risk animation, and no runtime exceptions.
 - Goal 9 remains final polish and submission assets.
 - Goal 7B remains future Verified Live Mode hardening.
 

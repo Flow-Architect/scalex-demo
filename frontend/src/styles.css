@@ -3,13 +3,13 @@
 @tailwind utilities;
 
 html {
-  background: #0a0b0e;
+  background: #050505;
 }
 
 body {
   margin: 0;
   min-width: 320px;
-  background: #0a0b0e;
+  background: #050505;
   overflow-x: hidden;
   font-family:
     Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
@@ -23,14 +23,28 @@ button {
   font: inherit;
 }
 
+dl > div,
+dt,
+dd {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+dt,
+dd {
+  white-space: nowrap;
+}
+
 #root {
   min-height: 100vh;
+  overflow-x: hidden;
 }
 
 .scalex-grid-surface {
   background-image:
-    linear-gradient(rgba(16, 185, 129, 0.08) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(14, 165, 233, 0.06) 1px, transparent 1px);
+    linear-gradient(rgba(252, 186, 3, 0.07) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
   background-size: 36px 36px;
 }
 
@@ -79,26 +93,26 @@ button {
 }
 
 .control-btn {
-  border: 1px solid #1e2128;
+  border: 1px solid #232834;
   background: #111318;
-  color: #8a8f9e;
+  color: #A1A1AA;
 }
 
 .control-btn:hover {
-  border-color: #2a2f3a;
+  border-color: #343A46;
   background: #151821;
-  color: #f0f0f0;
+  color: #FFFFFF;
 }
 
 .control-btn-primary {
-  border: 1px solid rgba(0, 208, 132, 0.45);
-  background: #00d084;
-  color: #07110d;
-  box-shadow: 0 0 0 1px rgba(0, 208, 132, 0.1), 0 16px 32px rgba(0, 208, 132, 0.13);
+  border: 1px solid #fcba03;
+  background: #fcba03;
+  color: #050505;
+  box-shadow: 0 0 0 1px rgba(252, 186, 3, 0.12), 0 16px 32px rgba(252, 186, 3, 0.12);
 }
 
 .control-btn-primary:hover {
-  background: #28e39b;
+  background: #ffd257;
   transform: translateY(-1px);
 }
 
@@ -111,14 +125,14 @@ button {
 
 .control-link {
   min-height: 2rem;
-  border: 1px solid rgba(0, 208, 132, 0.26);
-  background: rgba(0, 208, 132, 0.08);
-  color: #00d084;
+  border: 1px solid rgba(252, 186, 3, 0.36);
+  background: rgba(252, 186, 3, 0.1);
+  color: #fcba03;
 }
 
 .control-link:hover {
-  border-color: rgba(0, 208, 132, 0.5);
-  background: rgba(0, 208, 132, 0.12);
+  border-color: rgba(252, 186, 3, 0.55);
+  background: rgba(252, 186, 3, 0.14);
 }
 
 .operation-identity-bar {
@@ -129,9 +143,9 @@ button {
   gap: 1rem;
   overflow: hidden;
   border-radius: 0.5rem;
-  border: 1px solid #1e2128;
+  border: 1px solid #232834;
   background:
-    linear-gradient(90deg, rgba(0, 208, 132, 0.055), transparent 38%),
+    linear-gradient(90deg, rgba(252, 186, 3, 0.08), transparent 38%),
     #111318;
   padding: 0.75rem 1rem;
   box-shadow: 0 18px 34px rgba(0, 0, 0, 0.18);
@@ -146,10 +160,10 @@ button {
 
 .operation-support-chips span {
   border-radius: 0.375rem;
-  border: 1px solid #1e2128;
+  border: 1px solid #232834;
   background: #0a0b0e;
   padding: 0.25rem 0.45rem;
-  color: #8a8f9e;
+  color: #A1A1AA;
   font-size: 0.62rem;
   font-weight: 800;
   text-transform: uppercase;
@@ -157,28 +171,29 @@ button {
 
 .after-sale-strip {
   display: grid;
-  min-width: 25rem;
+  min-width: 0;
+  flex: 0 1 34rem;
   max-width: 34rem;
   gap: 0.35rem;
 }
 
 .after-sale-strip > div {
   border-radius: 0.375rem;
-  border: 1px solid #1e2128;
+  border: 1px solid #232834;
   background: #0a0b0e;
   padding: 0.42rem 0.55rem;
 }
 
 .after-sale-strip p {
   margin-top: 0.12rem;
-  color: #f0f0f0;
+  color: #FFFFFF;
   font-size: 0.7rem;
   font-weight: 750;
   line-height: 1.25;
 }
 
 .after-sale-label {
-  color: #8a8f9e;
+  color: #A1A1AA;
   font-size: 0.58rem;
   font-weight: 800;
   letter-spacing: 0.02em;
@@ -186,7 +201,7 @@ button {
 }
 
 .after-sale-label-green {
-  color: #00d084;
+  color: #fcba03;
 }
 
 .operation-chain {
@@ -202,8 +217,8 @@ button {
   align-items: center;
   gap: 0.45rem;
   border-radius: 0.375rem;
-  border: 1px solid rgba(0, 208, 132, 0.2);
-  background: rgba(0, 208, 132, 0.055);
+  border: 1px solid rgba(252, 186, 3, 0.26);
+  background: rgba(252, 186, 3, 0.08);
   padding: 0.5rem 0.65rem;
   color: #c8ffe6;
   font-size: 0.72rem;
@@ -212,7 +227,7 @@ button {
 }
 
 .operation-chain-arrow {
-  color: #00d084;
+  color: #fcba03;
   font-weight: 900;
 }
 
@@ -220,7 +235,7 @@ button {
   min-height: 6.6rem;
   overflow: hidden;
   border-radius: 0.5rem;
-  border: 1px solid #1e2128;
+  border: 1px solid #232834;
   background:
     linear-gradient(180deg, rgba(255, 255, 255, 0.035), transparent 42%),
     #111318;
@@ -234,22 +249,22 @@ button {
 }
 
 .metric-card:hover {
-  border-color: #2a2f3a;
+  border-color: #343A46;
   transform: translateY(-1px);
 }
 
 .metric-hero {
-  border-color: rgba(0, 208, 132, 0.38);
+  border-color: rgba(16, 185, 129, 0.38);
   background:
-    linear-gradient(135deg, rgba(0, 208, 132, 0.1), transparent 48%),
+    linear-gradient(135deg, rgba(16, 185, 129, 0.1), transparent 48%),
     #111318;
-  box-shadow: 0 18px 36px rgba(0, 208, 132, 0.06);
+  box-shadow: 0 18px 36px rgba(16, 185, 129, 0.06);
 }
 
 .rail-row,
 .rail-card {
   border-radius: 0.5rem;
-  border: 1px solid #1e2128;
+  border: 1px solid #232834;
   background: #0d0e12;
   transition:
     border-color 180ms ease,
@@ -261,6 +276,8 @@ button {
 
 .rail-row {
   display: flex;
+  max-width: 100%;
+  min-width: 0;
   min-height: 2.25rem;
   align-items: center;
   gap: 0.55rem;
@@ -269,7 +286,7 @@ button {
 
 .rail-row:hover,
 .rail-card:hover {
-  border-color: #2a2f3a;
+  border-color: #343A46;
   background: #111318;
 }
 
@@ -303,6 +320,10 @@ button {
   font-size: 0.58rem;
 }
 
+.rail-list-compact .rail-row > .status-badge {
+  flex-basis: 4.8rem;
+}
+
 .rail-card {
   width: 100%;
   padding: 0.55rem 0.65rem;
@@ -315,9 +336,9 @@ button {
   align-items: center;
   justify-content: center;
   border-radius: 0.375rem;
-  border: 1px solid #1e2128;
+  border: 1px solid #232834;
   background: #0a0b0e;
-  color: #8a8f9e;
+  color: #A1A1AA;
   font-family:
     ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
   font-size: 0.68rem;
@@ -330,7 +351,7 @@ button {
   width: 0.55rem;
   flex: none;
   border-radius: 999px;
-  background: #4a4f5e;
+  background: #52525B;
   box-shadow: 0 0 0 4px rgba(74, 79, 94, 0.12);
 }
 
@@ -369,17 +390,17 @@ button {
 }
 
 .rail-complete:not(.rail-blocked) .status-dot {
-  background: #00d084;
-  box-shadow: 0 0 0 4px rgba(0, 208, 132, 0.13);
+  background: #10B981;
+  box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.13);
 }
 
 .proof-terminal {
   max-height: 11.4rem;
   overflow: auto;
   border-radius: 0.5rem;
-  border: 1px solid #1e2128;
+  border: 1px solid #232834;
   background:
-    linear-gradient(180deg, rgba(0, 208, 132, 0.06), transparent 35%),
+    linear-gradient(180deg, rgba(16, 185, 129, 0.06), transparent 35%),
     #050607;
   padding: 1rem;
   color: #c8ffe6;
@@ -408,10 +429,10 @@ button {
   justify-content: space-between;
   gap: 0.5rem;
   border-radius: 0.5rem;
-  border: 1px solid #1e2128;
+  border: 1px solid #232834;
   background: #0a0b0e;
   padding: 0.5rem 0.55rem;
-  color: #f0f0f0;
+  color: #FFFFFF;
   font-size: 0.76rem;
   font-weight: 800;
   transition:
@@ -420,23 +441,33 @@ button {
     box-shadow 180ms ease;
 }
 
+.run-signal .status-badge {
+  flex: 0 0 3.5rem;
+  justify-content: center;
+}
+
 .run-signal-dot {
   height: 0.5rem;
   width: 0.5rem;
   flex: none;
   border-radius: 999px;
-  background: #4a4f5e;
+  background: #52525B;
   box-shadow: 0 0 0 4px rgba(74, 79, 94, 0.12);
 }
 
 .run-signal-ready.run-signal-green {
-  border-color: rgba(0, 208, 132, 0.34);
-  background: rgba(0, 208, 132, 0.07);
+  border-color: rgba(16, 185, 129, 0.34);
+  background: rgba(16, 185, 129, 0.07);
 }
 
 .run-signal-ready.run-signal-purple {
   border-color: rgba(139, 92, 246, 0.35);
   background: rgba(139, 92, 246, 0.07);
+}
+
+.run-signal-ready.run-signal-cyan {
+  border-color: rgba(6, 182, 212, 0.35);
+  background: rgba(6, 182, 212, 0.07);
 }
 
 .run-signal-ready.run-signal-red {
@@ -446,8 +477,8 @@ button {
 }
 
 .run-signal-ready .run-signal-dot {
-  background: #00d084;
-  box-shadow: 0 0 0 4px rgba(0, 208, 132, 0.13);
+  background: #10B981;
+  box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.13);
 }
 
 .run-signal-ready.run-signal-red .run-signal-dot {
@@ -455,9 +486,19 @@ button {
   box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.14);
 }
 
+.run-signal-ready.run-signal-purple .run-signal-dot {
+  background: #8b5cf6;
+  box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.14);
+}
+
+.run-signal-ready.run-signal-cyan .run-signal-dot {
+  background: #06B6D4;
+  box-shadow: 0 0 0 4px rgba(6, 182, 212, 0.14);
+}
+
 .live-detail-card {
   border-radius: 0.5rem;
-  border: 1px solid #1e2128;
+  border: 1px solid #232834;
   background:
     linear-gradient(180deg, rgba(255, 255, 255, 0.035), transparent 48%),
     #0a0b0e;
@@ -473,9 +514,9 @@ button {
 }
 
 .live-detail-profit {
-  border-color: rgba(0, 208, 132, 0.38);
+  border-color: rgba(16, 185, 129, 0.38);
   background:
-    linear-gradient(135deg, rgba(0, 208, 132, 0.14), transparent 52%),
+    linear-gradient(135deg, rgba(16, 185, 129, 0.14), transparent 52%),
     #0a0b0e;
 }
 
@@ -502,8 +543,10 @@ button {
 
 .enterprise-card {
   min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
   border-radius: 0.5rem;
-  border: 1px solid #1e2128;
+  border: 1px solid #232834;
   background: #0a0b0e;
   padding: 0.75rem;
 }
@@ -515,8 +558,16 @@ button {
   gap: 0.75rem;
 }
 
+.enterprise-card-head > div {
+  min-width: 0;
+}
+
+.enterprise-card-head .status-badge {
+  flex: 0 0 auto;
+}
+
 .enterprise-eyebrow {
-  color: #8a8f9e;
+  color: #A1A1AA;
   font-size: 0.58rem;
   font-weight: 800;
   letter-spacing: 0.03em;
@@ -525,7 +576,7 @@ button {
 
 .enterprise-card h2 {
   margin-top: 0.2rem;
-  color: #f0f0f0;
+  color: #FFFFFF;
   font-size: 0.9rem;
   font-weight: 800;
   line-height: 1.25;
@@ -538,8 +589,16 @@ button {
   margin-top: 0.65rem;
 }
 
+.enterprise-fact-grid > div {
+  min-width: 0;
+  overflow: hidden;
+}
+
 .enterprise-fact-grid dt {
   font-size: 0.54rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .enterprise-fact-grid dd {
@@ -552,13 +611,14 @@ button {
 
 .enterprise-details summary {
   cursor: pointer;
-  color: #00d084;
+  color: #fcba03;
   font-size: 0.68rem;
   font-weight: 800;
   text-transform: uppercase;
 }
 
 .cost-basis-table {
+  table-layout: fixed;
   width: 100%;
   margin-top: 0.5rem;
   border-collapse: collapse;
@@ -567,26 +627,30 @@ button {
 
 .cost-basis-table th,
 .cost-basis-table td {
-  border-bottom: 1px solid #1e2128;
+  border-bottom: 1px solid #232834;
+  max-width: 0;
+  overflow: hidden;
   padding: 0.34rem 0.25rem;
   text-align: left;
+  text-overflow: ellipsis;
   vertical-align: top;
+  white-space: nowrap;
 }
 
 .cost-basis-table th {
-  color: #4a4f5e;
+  color: #52525B;
   font-weight: 800;
   text-transform: uppercase;
 }
 
 .cost-basis-table td {
-  color: #f0f0f0;
+  color: #FFFFFF;
   font-weight: 700;
 }
 
 .enterprise-note {
   margin-top: 0.65rem;
-  color: #8a8f9e;
+  color: #A1A1AA;
   font-size: 0.68rem;
   font-weight: 650;
   line-height: 1.45;
@@ -600,14 +664,15 @@ button {
 
 .tool-action-group {
   border-radius: 0.375rem;
-  border: 1px solid #1e2128;
+  border: 1px solid #232834;
   background: #111318;
   padding: 0.55rem;
+  overflow: hidden;
 }
 
 .tool-action-group > p {
   margin-bottom: 0.35rem;
-  color: #8a8f9e;
+  color: #A1A1AA;
   font-size: 0.6rem;
   font-weight: 800;
   text-transform: uppercase;
@@ -623,8 +688,9 @@ button {
 }
 
 .tool-action-row span:first-child {
+  min-width: 0;
   overflow: hidden;
-  color: #f0f0f0;
+  color: #FFFFFF;
   font-family:
     ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
   font-size: 0.62rem;
@@ -633,21 +699,33 @@ button {
   white-space: nowrap;
 }
 
+.tool-action-row > .status-badge {
+  flex: 0 0 4.9rem;
+  justify-content: center;
+}
+
 .finance-flow-list {
   display: grid;
   gap: 0.45rem;
   margin-top: 0.7rem;
+  overflow: hidden;
 }
 
 .finance-flow-list li {
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto;
+  grid-template-columns: 1.35rem minmax(0, 1fr) 5rem;
   align-items: center;
   gap: 0.45rem;
   border-radius: 0.375rem;
-  border: 1px solid #1e2128;
+  border: 1px solid #232834;
   background: #111318;
+  overflow: hidden;
   padding: 0.45rem;
+}
+
+.finance-flow-list li > div {
+  min-width: 0;
+  overflow: hidden;
 }
 
 .finance-flow-index {
@@ -657,25 +735,34 @@ button {
   align-items: center;
   justify-content: center;
   border-radius: 0.3rem;
-  border: 1px solid #1e2128;
-  color: #8a8f9e;
+  border: 1px solid #232834;
+  color: #A1A1AA;
   font-size: 0.62rem;
   font-weight: 900;
 }
 
 .finance-flow-list p {
   overflow: hidden;
-  color: #f0f0f0;
+  color: #FFFFFF;
   font-size: 0.7rem;
   font-weight: 800;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.finance-flow-list span:not(.finance-flow-index) {
-  color: #8a8f9e;
+.finance-flow-list li > div > span {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: #A1A1AA;
   font-size: 0.62rem;
   font-weight: 650;
+}
+
+.finance-flow-list .status-badge {
+  flex: 0 0 5rem;
+  justify-content: center;
 }
 
 .guardrail-checks {
@@ -704,8 +791,8 @@ button {
 }
 
 .metric-glow-green {
-  border-color: rgba(0, 208, 132, 0.44);
-  box-shadow: 0 0 0 1px rgba(0, 208, 132, 0.18), 0 22px 46px rgba(0, 208, 132, 0.1);
+  border-color: rgba(16, 185, 129, 0.44);
+  box-shadow: 0 0 0 1px rgba(16, 185, 129, 0.18), 0 22px 46px rgba(16, 185, 129, 0.1);
 }
 
 .rail-running.danger-pulse-on-visible .status-dot,
@@ -727,7 +814,7 @@ button {
 .mode-card,
 .stack-node {
   border-radius: 0.5rem;
-  border: 1px solid #1e2128;
+  border: 1px solid #232834;
   background: #0a0b0e;
 }
 
@@ -749,9 +836,14 @@ button {
   padding: 0.55rem 0.65rem;
 }
 
+.mode-card-brand {
+  border-color: rgba(252, 186, 3, 0.36);
+  background: rgba(252, 186, 3, 0.1);
+}
+
 .mode-card-green {
-  border-color: rgba(0, 208, 132, 0.28);
-  background: rgba(0, 208, 132, 0.075);
+  border-color: rgba(16, 185, 129, 0.28);
+  background: rgba(16, 185, 129, 0.075);
 }
 
 .mode-card-blue {
@@ -770,7 +862,7 @@ button {
 }
 
 .mode-card-muted {
-  border-color: #1e2128;
+  border-color: #232834;
   background: #0a0b0e;
 }
 
@@ -782,6 +874,7 @@ button {
 .stack-node {
   position: relative;
   min-width: 0;
+  overflow: hidden;
   padding: 0.55rem;
 }
 
@@ -809,8 +902,13 @@ button {
 }
 
 .stack-node-active-green {
-  border-color: rgba(0, 208, 132, 0.5);
-  box-shadow: 0 0 0 1px rgba(0, 208, 132, 0.14), 0 14px 30px rgba(0, 208, 132, 0.1);
+  border-color: rgba(16, 185, 129, 0.5);
+  box-shadow: 0 0 0 1px rgba(16, 185, 129, 0.14), 0 14px 30px rgba(16, 185, 129, 0.1);
+}
+
+.stack-node-active-brand {
+  border-color: rgba(252, 186, 3, 0.55);
+  box-shadow: 0 0 0 1px rgba(252, 186, 3, 0.14), 0 14px 30px rgba(252, 186, 3, 0.1);
 }
 
 .stack-active-dot {
@@ -820,8 +918,8 @@ button {
   height: 0.45rem;
   width: 0.45rem;
   border-radius: 999px;
-  background: #00d084;
-  box-shadow: 0 0 0 4px rgba(0, 208, 132, 0.12);
+  background: #fcba03;
+  box-shadow: 0 0 0 4px rgba(252, 186, 3, 0.12);
 }
 
 .stack-connector {
@@ -830,7 +928,7 @@ button {
   right: -0.75rem;
   width: 0.75rem;
   height: 1px;
-  background: linear-gradient(90deg, rgba(0, 208, 132, 0.55), rgba(59, 130, 246, 0.35));
+  background: linear-gradient(90deg, rgba(252, 186, 3, 0.56), rgba(59, 130, 246, 0.32));
 }
 
 .active-operation-dot {
@@ -838,8 +936,8 @@ button {
   height: 0.48rem;
   width: 0.48rem;
   border-radius: 999px;
-  background: #00d084;
-  box-shadow: 0 0 0 4px rgba(0, 208, 132, 0.12);
+  background: #fcba03;
+  box-shadow: 0 0 0 4px rgba(252, 186, 3, 0.12);
   animation: active-operation-beat 1.8s ease-in-out infinite;
 }
 
@@ -878,12 +976,12 @@ button {
   align-items: center;
   justify-content: center;
   border-radius: 0.375rem;
-  border: 1px solid #1e2128;
+  border: 1px solid #232834;
   background: #111318;
 }
 
 .artifact-icon-green {
-  color: #00d084;
+  color: #10B981;
 }
 
 .artifact-icon-red {
@@ -908,20 +1006,35 @@ button {
 
 .activity-chip {
   min-width: 0;
-  flex: 1 1 0%;
   border-radius: 0.375rem;
-  border: 1px solid #1e2128;
+  border: 1px solid #232834;
   background: #0a0b0e;
   padding: 0.5rem 0.75rem;
-  color: #f0f0f0;
+  color: #FFFFFF;
   font-size: 0.72rem;
   font-weight: 700;
-  white-space: nowrap;
+  white-space: normal;
   transition:
     border-color 180ms ease,
     opacity 180ms ease,
     transform 180ms ease,
     box-shadow 180ms ease;
+}
+
+.run-signal-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 0.5rem;
+}
+
+.status-badge {
+  flex: 0 1 auto;
+  min-width: 0;
+}
+
+.rail-row > .status-badge {
+  flex: 0 0 5.1rem;
+  justify-content: center;
 }
 
 .activity-chip-queued {
@@ -943,7 +1056,7 @@ button {
 }
 
 .activity-chip-green {
-  border-color: rgba(0, 208, 132, 0.3);
+  border-color: rgba(16, 185, 129, 0.3);
 }
 
 .activity-chip-red {
@@ -975,7 +1088,7 @@ button {
 
 .ledger-row-profit {
   background:
-    linear-gradient(90deg, rgba(0, 208, 132, 0.1), transparent 34%),
+    linear-gradient(90deg, rgba(16, 185, 129, 0.1), transparent 34%),
     #111318;
 }
 
@@ -998,7 +1111,7 @@ button {
   }
 
   100% {
-    border-color: #1e2128;
+    border-color: #232834;
     box-shadow: 0 24px 48px rgba(0, 0, 0, 0.22);
   }
 }
@@ -1100,11 +1213,11 @@ button {
   0%,
   100% {
     opacity: 0.72;
-    box-shadow: 0 0 0 4px rgba(0, 208, 132, 0.12);
+    box-shadow: 0 0 0 4px rgba(252, 186, 3, 0.12);
   }
 
   50% {
     opacity: 1;
-    box-shadow: 0 0 0 7px rgba(0, 208, 132, 0.04), 0 0 22px rgba(0, 208, 132, 0.24);
+    box-shadow: 0 0 0 7px rgba(252, 186, 3, 0.04), 0 0 22px rgba(252, 186, 3, 0.22);
   }
 }

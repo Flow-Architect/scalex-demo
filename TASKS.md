@@ -4,7 +4,7 @@
 
 Goal 9 - final repo/video/submission polish.
 
-Goal 8M is complete. Return to final recording and submission readiness:
+Goal 8N is complete. Return to final recording and submission readiness:
 
 - Rehearse the three-minute recording against `docs/DEMO_SCRIPT.md`.
 - Confirm the local demo opens at `http://127.0.0.1:5174/` with the dark control-room UI.
@@ -17,6 +17,33 @@ new backend features, new external services, production payroll/HR behavior, MCP
 changes, database files, uploaded real files, or secrets.
 
 ## Recently Completed
+
+Goal 8N is complete. It kept the API-backed control-room shell and completed the brand/overflow
+polish pass:
+
+- Added the provided ScaleX logo asset to the sidebar with a safe text fallback; the checked-in
+  logo was cleaned into a transparent cropped asset for dark-shell rendering.
+- Locked the visible brand treatment to black/dark surfaces, white typography, and #fcba03 for
+  active navigation, primary CTA, product labels, selected controls, and brand dividers.
+- Reserved semantic colors for meaning: green for approved/protected, red for blocked/risk,
+  purple for Stripe finance, cyan for NemoClaw/NeMo/policy, and amber for locked/warning states.
+- Sharpened/toned down control surfaces, hover borders, badges, and glow so the UI reads more like
+  enterprise control software.
+- Fixed dashboard/rail horizontal overflow with min-width guards, overflow clipping, compact fixed
+  status badges, table clipping, and responsive panel columns.
+- Replaced the horizontal activity-strip behavior with fixed Run Signals and kept the blocked-risk
+  animation readable.
+- Preserved API-backed auth, health/demo state, run/reset behavior, evidence state,
+  Stripe/Hermes/NeMo truthfulness, Judge Demo Mode, Stripe Sandbox Prototype wording, Verified
+  Live Mode locked, local policy truthfulness, no live money, no Telegram, and no new integrations.
+
+Goal 8N validation:
+
+- `./scripts/test.sh` passed with 68 backend tests and a successful frontend build.
+- `./scripts/check-nemo.sh` passed with `nemoguardrails` 0.21.0 and `guardrails/scalex` loaded.
+- Browser smoke at `http://127.0.0.1:5174/` verified Dashboard, Governed Run, Evidence Ledger,
+  Connection Hub, Settings, logo render bounds, no page or uncontrolled element horizontal
+  overflow at 1440x900, and the blocked-risk animation moment with no runtime exceptions.
 
 Goal 8M is complete. It kept the API-backed control-room shell and completed the enterprise
 polish pass:

@@ -2,6 +2,7 @@ import {
   Play,
   ShieldCheck,
 } from "lucide-react";
+import { useState } from "react";
 
 import { NAV_ITEMS } from "./navigation";
 import type { AppView } from "./navigation";
@@ -25,18 +26,37 @@ export function Sidebar({
   profitLabel: string;
   revenueLabel: string;
 }) {
+  const [logoFailed, setLogoFailed] = useState(false);
+
   return (
-    <aside className="fixed inset-y-0 left-0 z-40 flex w-[200px] flex-col border-r border-[#1e2128] bg-[#0a0b0e] p-3 text-white">
-      <div className="flex items-center gap-2 border-b border-[#1e2128] pb-4">
-        <span className="flex h-9 w-9 items-center justify-center rounded-md border border-[#00d084]/40 bg-[#00d084]/10 text-[#00d084]">
-          <ShieldCheck className="h-4 w-4" aria-hidden="true" />
-        </span>
-        <div>
-          <p className="text-lg font-semibold leading-5">ScaleX</p>
-          <p className="text-[0.62rem] font-semibold uppercase tracking-wide text-[#00d084]">
-            Control Plane
-          </p>
-        </div>
+    <aside className="fixed inset-y-0 left-0 z-40 flex w-[200px] flex-col border-r border-[#232834] bg-[#050505] p-3 text-white">
+      <div className="border-b border-[#232834] pb-4">
+        {logoFailed ? (
+          <div className="flex items-center gap-2">
+            <span className="flex h-9 w-9 items-center justify-center rounded-md border border-[#fcba03]/40 bg-[#fcba03]/10 text-[#fcba03]">
+              <ShieldCheck className="h-4 w-4" aria-hidden="true" />
+            </span>
+            <div>
+              <p className="text-lg font-semibold leading-5">ScaleX</p>
+              <p className="text-[0.62rem] font-semibold uppercase tracking-wide text-[#fcba03]">
+                Governed ClientOps
+              </p>
+            </div>
+          </div>
+        ) : (
+          <div>
+            <img
+              alt="ScaleX"
+              className="h-auto w-[142px] object-contain"
+              onError={() => setLogoFailed(true)}
+              src="/brand/scalex-logo.png"
+            />
+            <div className="mt-3 h-px w-full bg-[#fcba03]/70" aria-hidden="true" />
+            <p className="mt-2 text-[0.62rem] font-semibold uppercase tracking-wide text-[#A1A1AA]">
+              Governed ClientOps
+            </p>
+          </div>
+        )}
       </div>
 
       <nav className="mt-4 grid gap-1.5">
@@ -47,8 +67,8 @@ export function Sidebar({
             <button
               className={`flex min-h-10 items-center gap-2 rounded-md border px-2.5 text-left text-sm font-semibold transition ${
                 active
-                  ? "border-[#00d084]/50 bg-[#00d084]/10 text-white"
-                  : "border-transparent text-zinc-400 hover:border-[#1e2128] hover:bg-[#111318] hover:text-white"
+                  ? "border-[#fcba03]/45 bg-[#fcba03]/10 text-white shadow-[inset_3px_0_0_#fcba03]"
+                  : "border-transparent text-zinc-400 hover:border-[#343A46] hover:bg-[#111318] hover:text-white"
               }`}
               key={item.view}
               onClick={() => onNavigate(item.view)}
@@ -61,7 +81,7 @@ export function Sidebar({
         })}
       </nav>
 
-      <div className="mt-auto rounded-md border border-[#1e2128] bg-[#111318] p-3 shadow-xl shadow-black/30">
+      <div className="mt-auto rounded-md border border-[#232834] bg-[#111318] p-3 shadow-xl shadow-black/30">
         <div className="flex items-center justify-between gap-2">
           <p className="text-[0.64rem] font-semibold uppercase tracking-wide text-zinc-500">
             Active Operation
@@ -71,17 +91,17 @@ export function Sidebar({
         <p className="mt-2 text-sm font-semibold leading-5 text-white">{displayCustomer}</p>
         <p className="mt-1 text-xs leading-4 text-zinc-400">{displayJob}</p>
         <div className="mt-3 grid grid-cols-2 gap-2 text-xs">
-          <div className="rounded-md border border-[#1e2128] bg-[#0a0b0e] p-2">
+          <div className="rounded-md border border-[#232834] bg-[#0D0E12] p-2">
             <p className="text-zinc-500">Revenue</p>
             <p className="mt-1 font-semibold text-white">{revenueLabel}</p>
           </div>
-          <div className="rounded-md border border-[#00d084]/30 bg-[#00d084]/10 p-2">
-            <p className="text-[#00d084]">Profit</p>
+          <div className="rounded-md border border-[#10B981]/30 bg-[#10B981]/10 p-2">
+            <p className="text-[#10B981]">Profit</p>
             <p className="mt-1 font-semibold text-white">{profitLabel}</p>
           </div>
         </div>
         <button
-          className="mt-3 inline-flex min-h-10 w-full items-center justify-center gap-2 rounded-md bg-[#00d084] px-3 text-sm font-semibold text-[#07110d] transition hover:bg-[#28e39b] disabled:cursor-not-allowed disabled:bg-zinc-700 disabled:text-zinc-400"
+          className="mt-3 inline-flex min-h-10 w-full items-center justify-center gap-2 rounded-md border border-[#fcba03] bg-[#fcba03] px-3 text-sm font-semibold text-[#050505] transition hover:bg-[#ffd257] disabled:cursor-not-allowed disabled:border-zinc-700 disabled:bg-zinc-700 disabled:text-zinc-400"
           disabled={busy}
           onClick={onRun}
           type="button"

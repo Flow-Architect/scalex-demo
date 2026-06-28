@@ -10,6 +10,42 @@ Use:
 
 ---
 
+## 2026-06-28 - Goal 8N: Brand system, compact rails, and overflow fix
+
+Completed:
+- Added the provided ScaleX logo asset to the sidebar with a safe text fallback; the asset is
+  cleaned/cropped for transparent dark-shell rendering.
+- Locked the visible brand system to black/dark surfaces, white typography, and #fcba03 brand
+  accents for active navigation, primary CTA, product labels, selected controls, and dividers.
+- Preserved semantic color meanings: green for approved/protected, red for blocked/risk, purple
+  for Stripe finance, cyan for NemoClaw/NeMo/policy, and amber for locked/warning states.
+- Sharpened corners and toned down overly soft/generated styling, glow, and green-as-brand usage.
+- Fixed horizontal page and internal element overflow across Dashboard, Governed Run, Evidence
+  Ledger, Connection Hub, and Settings.
+- Compact governed and enterprise rail rows with shrink-safe labels, fixed status badges,
+  clipped fact/table content, and responsive panel columns.
+- Replaced horizontal activity-strip behavior with fixed Run Signals.
+- Preserved backend mechanics, API-backed state, truthfulness boundaries, Judge Demo Mode, no live
+  money, no Telegram, and no new integrations.
+
+Verification:
+- `./scripts/test.sh` passed with 68 backend tests and a successful frontend build.
+- `./scripts/check-nemo.sh` passed with `nemoguardrails` 0.21.0 and `guardrails/scalex` loaded.
+- Browser smoke at `http://127.0.0.1:5174/` verified Dashboard, Governed Run, Evidence Ledger,
+  Connection Hub, Settings, logo render bounds, no page or uncontrolled element horizontal
+  overflow at 1440x900, blocked-risk animation, and no runtime exceptions.
+- `git diff --check` passed.
+- Unsafe/generated path scan returned no matches.
+- Staged added-lines secret scan returned no matches.
+
+Suggested commit message:
+Lock ScaleX brand and compact enterprise layout
+
+Next:
+- Goal 9 - final repo/video/submission polish.
+
+---
+
 ## 2026-06-28 - Goal 8M: Enterprise tool rails and guardrail visibility
 
 Completed:

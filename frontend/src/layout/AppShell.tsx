@@ -25,7 +25,7 @@ export function AppShell({
   revenueLabel: string;
 }) {
   return (
-    <main className="h-screen overflow-hidden bg-[#0a0b0e] text-white">
+    <main className="h-screen overflow-hidden bg-[#050505] text-white">
       <Sidebar
         activeView={activeView}
         busy={busy}
@@ -36,7 +36,7 @@ export function AppShell({
         profitLabel={profitLabel}
         revenueLabel={revenueLabel}
       />
-      <section className="ml-[200px] h-screen overflow-hidden bg-[#0a0b0e]">
+      <section className="ml-[200px] h-screen overflow-x-hidden bg-[#050505]">
         {children}
       </section>
     </main>
