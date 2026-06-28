@@ -231,6 +231,24 @@ button {
   box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.15), 0 0 22px rgba(239, 68, 68, 0.4);
 }
 
+.rail-running {
+  border-color: rgba(59, 130, 246, 0.55);
+  background:
+    linear-gradient(90deg, rgba(59, 130, 246, 0.13), transparent 45%),
+    #111318;
+  box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.12), 0 14px 30px rgba(59, 130, 246, 0.08);
+}
+
+.rail-running .status-dot {
+  background: #3b82f6;
+  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.16), 0 0 20px rgba(59, 130, 246, 0.28);
+}
+
+.rail-complete:not(.rail-blocked) .status-dot {
+  background: #00d084;
+  box-shadow: 0 0 0 4px rgba(0, 208, 132, 0.13);
+}
+
 .proof-terminal {
   max-height: 11.4rem;
   overflow: auto;
@@ -255,12 +273,22 @@ button {
   animation: metric-flash-red 900ms ease-out;
 }
 
+.metric-glow-green {
+  border-color: rgba(0, 208, 132, 0.44);
+  box-shadow: 0 0 0 1px rgba(0, 208, 132, 0.18), 0 22px 46px rgba(0, 208, 132, 0.1);
+}
+
 .danger-pulse-on-visible .status-dot {
   animation: danger-pulse 1.25s ease-out infinite;
 }
 
 .blocked-card-flash {
   animation: blocked-card-flash 1080ms ease-out;
+}
+
+.blocked-scale {
+  transform-origin: center;
+  animation: blocked-card-flash 1080ms ease-out, blocked-scale 880ms ease-out;
 }
 
 .rail-summary-card,
@@ -315,10 +343,54 @@ button {
   background: #0a0b0e;
 }
 
+.mode-card-cyan {
+  border-color: rgba(6, 182, 212, 0.28);
+  background: rgba(6, 182, 212, 0.075);
+}
+
 .stack-node {
   position: relative;
   min-width: 0;
   padding: 0.55rem;
+}
+
+.stack-node-active {
+  transform: translateY(-1px);
+  transition:
+    border-color 180ms ease,
+    box-shadow 180ms ease,
+    transform 180ms ease;
+}
+
+.stack-node-active-blue {
+  border-color: rgba(59, 130, 246, 0.5);
+  box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.14), 0 14px 30px rgba(59, 130, 246, 0.1);
+}
+
+.stack-node-active-purple {
+  border-color: rgba(139, 92, 246, 0.5);
+  box-shadow: 0 0 0 1px rgba(139, 92, 246, 0.14), 0 14px 30px rgba(139, 92, 246, 0.1);
+}
+
+.stack-node-active-cyan {
+  border-color: rgba(6, 182, 212, 0.5);
+  box-shadow: 0 0 0 1px rgba(6, 182, 212, 0.14), 0 14px 30px rgba(6, 182, 212, 0.1);
+}
+
+.stack-node-active-green {
+  border-color: rgba(0, 208, 132, 0.5);
+  box-shadow: 0 0 0 1px rgba(0, 208, 132, 0.14), 0 14px 30px rgba(0, 208, 132, 0.1);
+}
+
+.stack-active-dot {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  height: 0.45rem;
+  width: 0.45rem;
+  border-radius: 999px;
+  background: #00d084;
+  box-shadow: 0 0 0 4px rgba(0, 208, 132, 0.12);
 }
 
 .stack-connector {
@@ -338,6 +410,142 @@ button {
   background: #00d084;
   box-shadow: 0 0 0 4px rgba(0, 208, 132, 0.12);
   animation: active-operation-beat 1.8s ease-in-out infinite;
+}
+
+.artifact-card {
+  transition:
+    border-color 180ms ease,
+    opacity 180ms ease,
+    transform 180ms ease,
+    box-shadow 180ms ease;
+}
+
+.artifact-card-queued {
+  opacity: 0.48;
+  filter: saturate(0.55);
+}
+
+.artifact-card-revealed {
+  animation: artifact-reveal 320ms ease-out both;
+}
+
+.artifact-card-active {
+  border-color: rgba(59, 130, 246, 0.48);
+  box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.14), 0 16px 30px rgba(59, 130, 246, 0.08);
+}
+
+.artifact-card-blocked {
+  border-color: rgba(239, 68, 68, 0.42);
+  box-shadow: inset 3px 0 0 #ef4444;
+}
+
+.artifact-icon {
+  display: inline-flex;
+  height: 1.55rem;
+  width: 1.55rem;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.375rem;
+  border: 1px solid #1e2128;
+  background: #111318;
+}
+
+.artifact-icon-green {
+  color: #00d084;
+}
+
+.artifact-icon-red {
+  color: #f87171;
+}
+
+.artifact-icon-amber {
+  color: #fbbf24;
+}
+
+.artifact-icon-blue {
+  color: #93c5fd;
+}
+
+.artifact-icon-purple {
+  color: #c4b5fd;
+}
+
+.artifact-icon-cyan {
+  color: #67e8f9;
+}
+
+.activity-chip {
+  min-width: 0;
+  flex: 1 1 0%;
+  border-radius: 0.375rem;
+  border: 1px solid #1e2128;
+  background: #0a0b0e;
+  padding: 0.5rem 0.75rem;
+  color: #f0f0f0;
+  font-size: 0.72rem;
+  font-weight: 700;
+  white-space: nowrap;
+  transition:
+    border-color 180ms ease,
+    opacity 180ms ease,
+    transform 180ms ease,
+    box-shadow 180ms ease;
+}
+
+.activity-chip-queued {
+  opacity: 0.38;
+  transform: translateY(2px);
+}
+
+.activity-chip-revealed {
+  opacity: 1;
+  transform: translateY(0);
+  animation: activity-chip-reveal 280ms ease-out both;
+}
+
+.activity-chip-live {
+  opacity: 1;
+  transform: translateY(0);
+  border-color: rgba(59, 130, 246, 0.48);
+  box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.12), 0 12px 24px rgba(59, 130, 246, 0.08);
+}
+
+.activity-chip-green {
+  border-color: rgba(0, 208, 132, 0.3);
+}
+
+.activity-chip-red {
+  border-color: rgba(239, 68, 68, 0.42);
+  box-shadow: inset 3px 0 0 #ef4444;
+}
+
+.activity-chip-purple {
+  border-color: rgba(139, 92, 246, 0.35);
+}
+
+.activity-chip-cyan {
+  border-color: rgba(6, 182, 212, 0.35);
+}
+
+.activity-chip-blue {
+  border-color: rgba(59, 130, 246, 0.35);
+}
+
+.ledger-row-enter {
+  animation: ledger-row-enter 320ms ease-out both;
+}
+
+.ledger-row-blocked {
+  background:
+    linear-gradient(90deg, rgba(239, 68, 68, 0.13), transparent 38%),
+    #111318;
+}
+
+.ledger-row-profit {
+  background:
+    linear-gradient(90deg, rgba(0, 208, 132, 0.1), transparent 34%),
+    #111318;
 }
 
 @keyframes rail-enter {
@@ -377,6 +585,56 @@ button {
 
   100% {
     box-shadow: none;
+    transform: translateX(0);
+  }
+}
+
+@keyframes blocked-scale {
+  0% {
+    transform: scale(1);
+  }
+
+  36% {
+    transform: scale(1.018);
+  }
+
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes artifact-reveal {
+  from {
+    opacity: 0.45;
+    transform: translateY(4px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes activity-chip-reveal {
+  from {
+    opacity: 0;
+    transform: translateX(-8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes ledger-row-enter {
+  from {
+    opacity: 0;
+    transform: translateX(-6px);
+  }
+
+  to {
+    opacity: 1;
     transform: translateX(0);
   }
 }

@@ -4,7 +4,7 @@
 
 Goal 9 - final repo/video/submission polish.
 
-Goal 8J is complete. Next work should stay narrow and focus on final delivery readiness:
+Goal 8K is complete. Next work should stay narrow and focus on final delivery readiness:
 
 - Rehearse the three-minute recording against `docs/DEMO_SCRIPT.md`.
 - Confirm the local demo opens at `http://127.0.0.1:5174/` with the dark control-room UI.
@@ -58,6 +58,24 @@ polish: stronger product sentence in the topbar, deliberate rail animation state
 metric count/flash, rail 7 as the $3,200 risky vendor stop, rail activity chips, proof artifacts,
 Evidence Drawer proof path, Stripe Sandbox Prototype mode cards, Verified Live Mode locked state,
 and clearer NeMo Guardrails vs NemoClaw/NemoHermes boundary language.
+
+Goal 8K is complete. It kept the existing API-backed shell and added the motion storytelling pass:
+local visual run state, active/completed rail status, approved-then-blocked rail ordering, the
+blocked $3,200 data broker enrichment climax, progressive proof artifact reveal, live rail
+activity chips, metric glow, control-stack glow, Evidence Ledger row motion, and clearer
+judge-facing labels.
+
+Goal 8K validation:
+
+- `cd frontend && npm run build` passed.
+- `./scripts/test.sh` passed with 68 backend tests and a successful frontend build.
+- `./scripts/check-nemo.sh` passed with `nemoguardrails` 0.21.0 and `guardrails/scalex` loaded.
+- Post-implementation `git diff --check` passed.
+- Unsafe/generated path scan returned no matches.
+- Staged added-lines secret scan returned no matches.
+- Browser animation smoke passed at `http://127.0.0.1:5174/`: initial labels, running labels,
+  blocked-risk climax, progressive proof labels, and complete state were verified through Chrome
+  DevTools.
 
 Goal 8J validation:
 

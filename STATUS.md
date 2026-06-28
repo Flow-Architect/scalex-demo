@@ -7,10 +7,11 @@ Last updated: 2026-06-28
 - Project folder exists at `/home/ascabrya/dev/scalex-demo`.
 - Latest committed baseline before Goal 8E: `615a9bd Document NemoClaw correction and next
   integration plan`.
-- Last completed goal: Goal 8J - restored demo drama and Stripe sandbox prototype mode clarity.
-- Last completed implementation/QA goal: Goal 8J - governed-run animation polish, blocked-risk
-  drama, proof artifacts, rail activity, evidence drawer strengthening, and mode clarity.
-- Last completed documentation/tracking update: Goal 8J visual storytelling closeout.
+- Last completed goal: Goal 8K - motion storytelling and label clarity pass.
+- Last completed implementation/QA goal: Goal 8K - local visual run state, active/completed rails,
+  blocked-risk climax, progressive proof artifacts, activity chips, stack glow, metric glow, and
+  Evidence Ledger motion.
+- Last completed documentation/tracking update: Goal 8K motion-storytelling closeout.
 - Last completed checkout cleanup: Open Source Checkout Cleanup for judge readiness.
 - Current priority: Goal 9 - final repo/video/submission polish, recording rehearsal, submission
   copy check, and final safety scan.
@@ -85,6 +86,11 @@ Last updated: 2026-06-28
   integrations or backend state-machine scope and preserved API-backed state, auth, Stripe safety
   boundaries, isolated Hermes, optional NemoHermes, NeMo/local policy truthfulness, and fail-closed
   behavior.
+- Goal 8K completed the frontend-only motion storytelling pass. It added local visual rail state
+  for Ready -> Running -> final outcomes, progressive proof artifact reveal, live activity chips,
+  metric glow, control-stack glow, Evidence Ledger row motion, and judge-friendly labels without
+  changing backend mechanics, adding Telegram, adding live mode, adding integrations, or replacing
+  the API-backed app.
 - Goal 9 remains final polish and submission assets.
 - Goal 7B remains future Verified Live Mode hardening.
 

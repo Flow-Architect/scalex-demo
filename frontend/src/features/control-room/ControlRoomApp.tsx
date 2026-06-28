@@ -17,15 +17,16 @@ import {
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
-import { formatCurrency, formatDateTime, formatPercent, humanize } from "../../format";
+import { formatCurrency, formatPercent } from "../../format";
 import type { BusyAction, MoneySnapshot } from "../../lib/demoSelectors";
 import { isApproved } from "../../lib/demoSelectors";
 import type { AppView } from "../../layout/navigation";
 import type { AuthStatus, DemoState, HealthResponse, PolicyCheck } from "../../types";
 
-type Tone = "green" | "red" | "amber" | "blue" | "purple" | "muted" | "white";
+type Tone = "green" | "red" | "amber" | "blue" | "purple" | "cyan" | "muted" | "white";
 type ProofTab = "hermes" | "stripe" | "guardrails";
 type DrawerTab = "summary" | "operation" | "proof";
+type RunVisualState = "idle" | "running" | "complete";
 
 interface ControlRoomAppProps {
   activeView: AppView;
@@ -91,10 +92,12 @@ export function ControlRoomApp({
   const [proofTab, setProofTab] = useState<ProofTab>("hermes");
   const [drawerTab, setDrawerTab] = useState<DrawerTab>("summary");
   const [expandedRailId, setExpandedRailId] = useState("blocked-spend");
-  const [animatedCount, setAnimatedCount] = useState(0);
-  const [hasAnimatedRun, setHasAnimatedRun] = useState(Boolean(state?.report));
+  const [runVisualState, setRunVisualState] = useState<RunVisualState>(state?.report ? "complete" : "idle");
+  const [activeRailId, setActiveRailId] = useState<string | null>(null);
+  const [completedRailIds, setCompletedRailIds] = useState<string[]>([]);
   const [blockedFlash, setBlockedFlash] = useState(false);
   const [displayedBlockedRiskCents, setDisplayedBlockedRiskCents] = useState(0);
+  const [evidenceRevealStep, setEvidenceRevealStep] = useState(0);
 
   const model = useMemo(() => buildControlRoomModel(state, money, auditRows, displayCustomer, displayJob), [
     auditRows,
@@ -109,17 +112,26 @@ export function ControlRoomApp({
       return undefined;
     }
 
-    setHasAnimatedRun(false);
-    setAnimatedCount(0);
+    setRunVisualState("running");
+    setActiveRailId(null);
+    setCompletedRailIds([]);
+    setEvidenceRevealStep(0);
     setBlockedFlash(false);
     setDisplayedBlockedRiskCents(0);
-    const blockedIndex = model.rails.findIndex((rail) => rail.id === "blocked-spend");
     const blockedTarget = model.blockedSpendCents;
     const timers: number[] = [];
+    let cursorMs = 120;
     model.rails.forEach((_, index) => {
+      const rail = model.rails[index];
+      const durationMs = rail.id === "blocked-spend" ? 920 : 580;
       timers.push(window.setTimeout(() => {
-        setAnimatedCount(index + 1);
-        if (index === blockedIndex) {
+        setActiveRailId(rail.id);
+      }, cursorMs));
+
+      timers.push(window.setTimeout(() => {
+        setCompletedRailIds((current) => (current.includes(rail.id) ? current : [...current, rail.id]));
+        setEvidenceRevealStep(index + 1);
+        if (rail.id === "blocked-spend") {
           setBlockedFlash(true);
           Array.from({ length: 16 }).forEach((__, stepIndex) => {
             timers.push(window.setTimeout(() => {
@@ -129,16 +141,20 @@ export function ControlRoomApp({
           timers.push(window.setTimeout(() => setBlockedFlash(false), 1100));
         }
         if (index === model.rails.length - 1) {
-          setHasAnimatedRun(true);
+          setActiveRailId(null);
+          setRunVisualState("complete");
+        } else {
+          setActiveRailId(null);
         }
-      }, (index + 1) * 500));
+      }, cursorMs + durationMs));
+      cursorMs += durationMs + (rail.id === "blocked-spend" ? 220 : 110);
     });
 
     return () => timers.forEach((timer) => window.clearTimeout(timer));
   }, [busyAction, model.blockedSpendCents, model.rails.length]);
 
   useEffect(() => {
-    if (busyAction === "run") {
+    if (busyAction === "run" || runVisualState === "running") {
       return;
     }
 
@@ -152,17 +168,20 @@ export function ControlRoomApp({
     }
 
     if (state?.report || runCompletedMoment) {
-      setAnimatedCount(model.rails.length);
-      setHasAnimatedRun(true);
+      setRunVisualState("complete");
+      setActiveRailId(null);
+      setCompletedRailIds(model.rails.map((rail) => rail.id));
+      setEvidenceRevealStep(model.rails.length);
       return;
     }
 
-    setAnimatedCount(0);
-    setHasAnimatedRun(false);
-  }, [busyAction, model.rails.length, runCompletedMoment, state?.report]);
+    setRunVisualState("idle");
+    setActiveRailId(null);
+    setCompletedRailIds([]);
+    setEvidenceRevealStep(0);
+  }, [busyAction, model.rails.length, runCompletedMoment, runVisualState, state?.report]);
 
-  const runActive = busyAction === "run";
-  const visibleRailCount = runActive || hasAnimatedRun ? animatedCount : 0;
+  const runActive = busyAction === "run" || runVisualState === "running";
 
   return (
     <div className="flex h-screen min-w-0 flex-col overflow-hidden bg-[#0a0b0e] text-[#f0f0f0]">
@@ -178,6 +197,7 @@ export function ControlRoomApp({
         onNavigate={onNavigate}
         onRun={onRun}
         runActive={runActive}
+        runVisualState={runVisualState}
         runStatus={runStatus}
       />
       <div className="min-h-0 flex-1 overflow-hidden p-4">
@@ -186,12 +206,15 @@ export function ControlRoomApp({
             model={model}
             blockedFlash={blockedFlash}
             displayedBlockedRiskCents={displayedBlockedRiskCents}
+            activeRailId={activeRailId}
+            completedRailIds={completedRailIds}
+            evidenceRevealStep={evidenceRevealStep}
             onNavigate={onNavigate}
             onRun={onRun}
             proofTab={proofTab}
             runActive={runActive}
+            runVisualState={runVisualState}
             setProofTab={setProofTab}
-            visibleRailCount={visibleRailCount}
           />
         ) : null}
         {activeView === "workflow" ? (
@@ -200,12 +223,15 @@ export function ControlRoomApp({
             expandedRailId={expandedRailId}
             model={model}
             blockedFlash={blockedFlash}
+            activeRailId={activeRailId}
+            completedRailIds={completedRailIds}
+            evidenceRevealStep={evidenceRevealStep}
             setDrawerTab={setDrawerTab}
             setExpandedRailId={setExpandedRailId}
-            visibleRailCount={visibleRailCount}
+            runVisualState={runVisualState}
           />
         ) : null}
-        {activeView === "audit" ? <EvidenceLedgerView model={model} /> : null}
+        {activeView === "audit" ? <EvidenceLedgerView model={model} runVisualState={runVisualState} /> : null}
         {activeView === "integrations" ? <ConnectionHubView model={model} /> : null}
         {activeView === "settings" ? <SettingsView auth={auth} health={health} model={model} state={state} /> : null}
       </div>
@@ -225,6 +251,7 @@ function ControlTopbar({
   onReset,
   onRun,
   runActive,
+  runVisualState,
   runStatus,
 }: {
   activeView: AppView;
@@ -238,6 +265,7 @@ function ControlTopbar({
   onReset: () => void;
   onRun: () => void;
   runActive: boolean;
+  runVisualState: RunVisualState;
   runStatus: string;
 }) {
   const crumbByView: Record<string, string> = {
@@ -253,6 +281,16 @@ function ControlTopbar({
     (activeView === "dashboard"
       ? "Hermes plans. Stripe proves. NeMo Guardrails and local policy check risk. ScaleX blocks unsafe execution and records proof."
       : runStatus);
+  const statusLabel = runVisualState === "running"
+    ? "Run in progress..."
+    : runVisualState === "complete" || model.hasReport
+      ? "Run complete · protected profit recorded"
+      : "Judge Demo Mode · ready";
+  const buttonLabel = runVisualState === "running"
+    ? "Executing governed run..."
+    : runVisualState === "complete" || model.hasReport
+      ? "Run Again"
+      : "Start Governed Run";
 
   return (
     <header className="flex h-14 flex-none items-center justify-between border-b border-[#1e2128] bg-[#0d0e12] px-4">
@@ -265,10 +303,10 @@ function ControlTopbar({
       <div className="flex items-center gap-2">
         <StatusBadge label={model.primaryModeLabel} tone={model.primaryModeTone} />
         <button className="control-btn" onClick={() => onNavigate("audit")} type="button">Review Ledger</button>
-        <StatusBadge label={runActive ? "Run in progress..." : model.hasReport ? "Run complete · protected profit" : "Ready"} tone={runActive ? "blue" : "green"} />
+        <StatusBadge label={statusLabel} tone={runVisualState === "running" ? "blue" : "green"} />
         <button className="control-btn-primary" disabled={runActive} onClick={onRun} type="button">
           {runActive ? <RefreshCw className="h-4 w-4 animate-spin" /> : <Play className="h-4 w-4" />}
-          {runActive ? "Executing..." : model.hasReport ? "Run Again" : "Start Governed Run"}
+          {buttonLabel}
         </button>
         <button className="control-btn" onClick={onRefresh} type="button">Refresh</button>
         <button className="control-btn" onClick={onReset} type="button">Reset</button>
@@ -279,42 +317,50 @@ function ControlTopbar({
 }
 
 function DashboardView({
+  activeRailId,
   blockedFlash,
+  completedRailIds,
   displayedBlockedRiskCents,
+  evidenceRevealStep,
   model,
   onNavigate,
   onRun,
   proofTab,
   runActive,
+  runVisualState,
   setProofTab,
-  visibleRailCount,
 }: {
+  activeRailId: string | null;
   blockedFlash: boolean;
+  completedRailIds: string[];
   displayedBlockedRiskCents: number;
+  evidenceRevealStep: number;
   model: ControlRoomModel;
   onNavigate: (view: AppView) => void;
   onRun: () => void;
   proofTab: ProofTab;
   runActive: boolean;
+  runVisualState: RunVisualState;
   setProofTab: (tab: ProofTab) => void;
-  visibleRailCount: number;
 }) {
   return (
     <section className="grid h-full min-h-0 grid-rows-[auto_minmax(0,1fr)_auto] gap-4">
       <MetricStrip
+        activeRailId={activeRailId}
         blockedFlash={blockedFlash}
         blockedRiskDisplayValue={formatCurrency(displayedBlockedRiskCents)}
+        completedRailIds={completedRailIds}
         metrics={model.metrics}
         runActive={runActive}
-        visibleRailCount={visibleRailCount}
+        runVisualState={runVisualState}
       />
       <div className="grid min-h-0 grid-cols-2 gap-4">
-        <Panel title="Governed Run" eyebrow="execution rails" action={<StatusBadge label={runActive ? "running" : model.hasReport ? "complete" : "ready"} tone={runActive ? "blue" : "green"} />}>
-          <RailList blockedFlash={blockedFlash} compact model={model} visibleRailCount={visibleRailCount} />
-          <RunOutcomeStrip model={model} visibleRailCount={visibleRailCount} />
+        <Panel title="Governed Run" eyebrow="execution rails" action={<StatusBadge label={runVisualState === "running" ? "running" : runVisualState === "complete" ? "complete" : "ready"} tone={runVisualState === "running" ? "blue" : "green"} />}>
+          <RailList activeRailId={activeRailId} blockedFlash={blockedFlash} compact completedRailIds={completedRailIds} model={model} />
+          <RunOutcomeStrip completedRailIds={completedRailIds} model={model} runVisualState={runVisualState} />
         </Panel>
         <Panel title="Proof Panel" eyebrow="Hermes · Stripe · NeMo" action={<button className="control-link" onClick={() => onNavigate("audit")} type="button">Open Ledger</button>}>
-          <ControlStackChain model={model} />
+          <ControlStackChain activeRailId={activeRailId} completedRailIds={completedRailIds} model={model} />
           <ModeStrip model={model} />
           <ProofTabs active={proofTab} model={model} onChange={setProofTab} />
           <div className="mt-3">
@@ -324,36 +370,46 @@ function DashboardView({
           </div>
           <div className={`mt-3 flex items-center justify-between rounded-md border bg-[#0a0b0e] p-3 ${blockedFlash ? "blocked-card-flash border-[#ef4444]/70" : "border-[#1e2128]"}`}>
             <div>
-              <p className="text-sm font-semibold text-[#f87171]">Blocked risky action: Data broker enrichment</p>
-              <p className="mt-1 text-xs text-[#8a8f9e]">Requested $3,200. No vendor call, no ledger spend row, proof recorded.</p>
+              <p className="text-sm font-semibold text-[#f87171]">Policy blocked data broker enrichment</p>
+              <p className="mt-1 text-xs text-[#8a8f9e]">Unapproved vendor · $3,200 requested · no spend ledger row created.</p>
+              <p className="mt-1 text-xs font-semibold text-[#f87171]">$3,200 risk contained · unsafe vendor action blocked · margin protected · evidence recorded</p>
             </div>
             <button className="control-btn-primary" disabled={runActive} onClick={onRun} type="button">
-              {runActive ? "Executing..." : "Start Governed Run"}
+              {runActive ? "Executing governed run..." : runVisualState === "complete" ? "Run Again" : "Start Governed Run"}
             </button>
+          </div>
+          <div className="mt-3">
+            <ProofArtifactGrid activeRailId={activeRailId} completedRailIds={completedRailIds} evidenceRevealStep={evidenceRevealStep} model={model} runVisualState={runVisualState} />
           </div>
         </Panel>
       </div>
-      <RailActivityTimeline compact model={model} />
+      <RailActivityTimeline activeRailId={activeRailId} compact completedRailIds={completedRailIds} model={model} runVisualState={runVisualState} />
     </section>
   );
 }
 
 function GovernedRunView({
+  activeRailId,
   blockedFlash,
+  completedRailIds,
   drawerTab,
+  evidenceRevealStep,
   expandedRailId,
   model,
+  runVisualState,
   setDrawerTab,
   setExpandedRailId,
-  visibleRailCount,
 }: {
+  activeRailId: string | null;
   blockedFlash: boolean;
+  completedRailIds: string[];
   drawerTab: DrawerTab;
+  evidenceRevealStep: number;
   expandedRailId: string;
   model: ControlRoomModel;
+  runVisualState: RunVisualState;
   setDrawerTab: (tab: DrawerTab) => void;
   setExpandedRailId: (id: string) => void;
-  visibleRailCount: number;
 }) {
   return (
     <section className="grid h-full min-h-0 grid-rows-[minmax(0,1fr)_auto] gap-4">
@@ -369,11 +425,12 @@ function GovernedRunView({
           <div className="grid gap-2">
             {model.rails.map((rail, index) => {
               const expanded = expandedRailId === rail.id;
-              const visible = visibleRailCount === 0 || index < visibleRailCount;
-              const active = visibleRailCount > 0 && index < visibleRailCount;
+              const active = activeRailId === rail.id;
+              const complete = completedRailIds.includes(rail.id);
+              const result = railResult(rail, active, complete);
               return (
                 <button
-                  className={`rail-card text-left ${rail.id === "blocked-spend" && active ? "rail-card-blocked" : ""} ${rail.id === "blocked-spend" && blockedFlash ? "blocked-card-flash danger-pulse-on-visible" : ""} ${visible ? "rail-enter" : "opacity-60"}`}
+                  className={`rail-card text-left ${active ? "rail-running" : ""} ${complete ? "rail-complete" : ""} ${rail.id === "blocked-spend" && (active || complete) ? "rail-card-blocked" : ""} ${rail.id === "blocked-spend" && blockedFlash ? "blocked-card-flash danger-pulse-on-visible" : ""}`}
                   key={rail.id}
                   onClick={() => setExpandedRailId(expanded ? "" : rail.id)}
                   type="button"
@@ -384,7 +441,7 @@ function GovernedRunView({
                       <p className="truncate text-sm font-semibold text-[#f0f0f0]">{rail.name}</p>
                       <p className="truncate text-xs text-[#8a8f9e]">{rail.subline}</p>
                     </div>
-                    <StatusBadge label={active ? rail.status : "Ready"} tone={active ? rail.tone : "muted"} />
+                    <StatusBadge label={result.label} tone={result.tone} />
                   </div>
                   {expanded ? (
                     <div className="mt-2 rounded-md border border-[#1e2128] bg-[#0a0b0e] p-3 text-xs leading-5 text-[#8a8f9e]">
@@ -423,17 +480,17 @@ function GovernedRunView({
               </div>
             ) : null}
             {drawerTab === "proof" ? (
-              <ProofArtifactGrid compact model={model} />
+              <ProofArtifactGrid activeRailId={activeRailId} compact completedRailIds={completedRailIds} evidenceRevealStep={evidenceRevealStep} model={model} runVisualState={runVisualState} />
             ) : null}
           </div>
         </Panel>
       </div>
-      <RailActivityTimeline model={model} />
+      <RailActivityTimeline activeRailId={activeRailId} completedRailIds={completedRailIds} model={model} runVisualState={runVisualState} />
     </section>
   );
 }
 
-function EvidenceLedgerView({ model }: { model: ControlRoomModel }) {
+function EvidenceLedgerView({ model, runVisualState }: { model: ControlRoomModel; runVisualState: RunVisualState }) {
   return (
     <section className="grid h-full min-h-0 grid-cols-[minmax(0,1fr)_240px] gap-4">
       <Panel
@@ -451,8 +508,12 @@ function EvidenceLedgerView({ model }: { model: ControlRoomModel }) {
               </tr>
             </thead>
             <tbody>
-              {model.auditRowsData.map((row) => (
-                <tr className={`bg-[#111318] ${row.order === "005" ? "border-l-4 border-[#ef4444]" : ""}`} key={row.order}>
+              {model.auditRowsData.map((row, index) => (
+                <tr
+                  className={`ledger-row-enter bg-[#111318] ${row.order === "005" ? "ledger-row-blocked border-l-4 border-[#ef4444]" : ""} ${row.order === "010" ? "ledger-row-profit" : ""}`}
+                  key={row.order}
+                  style={{ animationDelay: `${index * 45}ms` }}
+                >
                   <td className={`border-b border-[#1e2128] px-3 py-3 font-mono text-xs ${row.order === "005" ? "border-l-4 border-l-[#ef4444]" : ""}`}>{row.order}</td>
                   <td className="border-b border-[#1e2128] px-3 py-3 font-semibold text-[#f0f0f0]">{row.actor}</td>
                   <td className="border-b border-[#1e2128] px-3 py-3 text-[#8a8f9e]">{row.action}</td>
@@ -476,7 +537,14 @@ function EvidenceLedgerView({ model }: { model: ControlRoomModel }) {
         </div>
         <div className="mt-4">
           <p className="mb-2 text-xs font-semibold uppercase text-[#8a8f9e]">Proof Artifacts</p>
-          <ProofArtifactGrid compact model={model} />
+          <ProofArtifactGrid
+            activeRailId={null}
+            compact
+            completedRailIds={runVisualState === "complete" ? model.rails.map((rail) => rail.id) : []}
+            evidenceRevealStep={runVisualState === "complete" ? model.rails.length : 0}
+            model={model}
+            runVisualState={runVisualState}
+          />
         </div>
         <div className="mt-5 rounded-md border border-[#00d084]/30 bg-[#00d084]/10 p-3">
           <p className="text-xs font-semibold uppercase text-[#00d084]">Profit Outcome</p>
@@ -613,47 +681,71 @@ function SettingsView({
 }
 
 function MetricStrip({
+  activeRailId,
   blockedFlash,
   blockedRiskDisplayValue,
+  completedRailIds,
   metrics,
   runActive,
-  visibleRailCount,
+  runVisualState,
 }: {
+  activeRailId: string | null;
   blockedFlash: boolean;
   blockedRiskDisplayValue: string;
+  completedRailIds: string[];
   metrics: StatPill[];
   runActive: boolean;
-  visibleRailCount: number;
+  runVisualState: RunVisualState;
 }) {
+  const approvedActive = activeRailId === "approved-spend" || completedRailIds.includes("approved-spend");
+  const blockedActive = activeRailId === "blocked-spend" || completedRailIds.includes("blocked-spend") || blockedFlash;
+  const profitActive = activeRailId === "profit" || completedRailIds.includes("profit") || runVisualState === "complete";
+
   return (
     <div className="grid grid-cols-5 gap-3">
       {metrics.map((metric) => (
         <article
-          className={`metric-card ${metric.label === "Blocked Risk" && (visibleRailCount >= 7 || blockedFlash) ? "metric-flash-red" : ""} ${metric.label === "Protected Profit" ? "metric-hero" : ""}`}
+          className={`metric-card ${metric.label === "Approved Spend" && approvedActive ? "metric-glow-green" : ""} ${metric.label === "Blocked Risk" && blockedActive ? "metric-flash-red" : ""} ${metric.label === "Protected Profit" ? "metric-hero" : ""} ${metric.label === "Protected Profit" && profitActive ? "metric-glow-green" : ""}`}
           key={metric.label}
         >
           <p className="text-xs font-semibold uppercase tracking-wide text-[#8a8f9e]">{metric.label}</p>
           <p className={`mt-2 font-semibold tabular-nums ${metricClass(metric.tone)} ${metric.label === "Protected Profit" ? "text-4xl" : metric.label === "Blocked Risk" ? "text-3xl" : "text-2xl"}`}>
             {metric.label === "Blocked Risk" && runActive ? blockedRiskDisplayValue : metric.value}
           </p>
-          {metric.label === "Blocked Risk" ? <p className="mt-2 text-xs font-semibold text-[#f87171]">unsafe vendor spend stopped</p> : null}
-          {metric.label === "Protected Profit" ? <p className="mt-2 text-xs font-semibold text-[#00d084]">profit preserved after controls</p> : null}
+          {metric.label === "Revenue Secured" ? <p className="mt-2 text-xs font-semibold text-[#8a8f9e]">revenue-backed context loaded</p> : null}
+          {metric.label === "Approved Spend" ? <p className="mt-2 text-xs font-semibold text-[#00d084]">allowed vendor spend approved</p> : null}
+          {metric.label === "Blocked Risk" ? <p className="mt-2 text-xs font-semibold text-[#f87171]">unsafe spend request prevented before execution</p> : null}
+          {metric.label === "Labor Cost" ? <p className="mt-2 text-xs font-semibold text-[#8a8f9e]">delivery cost included</p> : null}
+          {metric.label === "Protected Profit" ? <p className="mt-2 text-xs font-semibold text-[#00d084]">revenue minus approved spend and labor</p> : null}
         </article>
       ))}
     </div>
   );
 }
 
-function RailList({ blockedFlash = false, compact, model, visibleRailCount }: { blockedFlash?: boolean; compact?: boolean; model: ControlRoomModel; visibleRailCount: number }) {
+function RailList({
+  activeRailId,
+  blockedFlash = false,
+  compact,
+  completedRailIds,
+  model,
+}: {
+  activeRailId: string | null;
+  blockedFlash?: boolean;
+  compact?: boolean;
+  completedRailIds: string[];
+  model: ControlRoomModel;
+}) {
   return (
     <ol className={`grid ${compact ? "gap-1" : "gap-2"}`}>
       {model.rails.map((rail, index) => {
-        const visible = visibleRailCount === 0 || index < visibleRailCount;
-        const active = visibleRailCount > 0 && index < visibleRailCount;
+        const active = activeRailId === rail.id;
+        const complete = completedRailIds.includes(rail.id);
         const blocked = rail.id === "blocked-spend";
+        const result = railResult(rail, active, complete);
         return (
           <li
-            className={`rail-row ${active ? "rail-enter" : ""} ${!visible ? "opacity-55" : ""} ${blocked && active ? "rail-blocked danger-pulse-on-visible" : ""} ${blocked && blockedFlash ? "blocked-card-flash" : ""}`}
+            className={`rail-row ${active ? "rail-running rail-enter" : ""} ${complete ? "rail-complete" : ""} ${blocked && (active || complete) ? "rail-blocked danger-pulse-on-visible" : ""} ${blocked && blockedFlash ? "blocked-card-flash blocked-scale" : ""}`}
             key={rail.id}
             style={{ animationDelay: `${index * 60}ms` }}
           >
@@ -664,7 +756,7 @@ function RailList({ blockedFlash = false, compact, model, visibleRailCount }: { 
               {!compact ? <p className="truncate text-xs text-[#8a8f9e]">{rail.evidence}</p> : <p className="truncate text-[0.68rem] text-[#8a8f9e]">{rail.subline}</p>}
             </div>
             <span className="hidden rounded-md border border-[#1e2128] px-2 py-1 text-[0.64rem] font-semibold uppercase text-[#8a8f9e] xl:inline">{rail.proofTag}</span>
-            <StatusBadge label={active ? rail.status : "ready"} tone={active ? rail.tone : "muted"} />
+            <StatusBadge label={result.label} tone={result.tone} />
           </li>
         );
       })}
@@ -672,15 +764,15 @@ function RailList({ blockedFlash = false, compact, model, visibleRailCount }: { 
   );
 }
 
-function RunOutcomeStrip({ model, visibleRailCount }: { model: ControlRoomModel; visibleRailCount: number }) {
-  const blockedVisible = visibleRailCount >= 7;
+function RunOutcomeStrip({ completedRailIds, model, runVisualState }: { completedRailIds: string[]; model: ControlRoomModel; runVisualState: RunVisualState }) {
+  const blockedVisible = completedRailIds.includes("blocked-spend") || runVisualState === "complete";
   return (
     <div className="mt-3 grid grid-cols-4 gap-2">
       {[
-        { label: "Rails", value: visibleRailCount > 0 ? `${Math.min(visibleRailCount, model.rails.length)}/${model.rails.length}` : "Ready", tone: "blue" as Tone },
-        { label: "Blocked", value: blockedVisible ? model.blockedRiskLabel : "Pending", tone: blockedVisible ? "red" as Tone : "muted" as Tone },
-        { label: "Evidence", value: blockedVisible ? "Recorded" : "Ready", tone: blockedVisible ? "green" as Tone : "muted" as Tone },
-        { label: "Outcome", value: model.protectedProfitLabel, tone: "green" as Tone },
+        { label: "Rails", value: completedRailIds.length > 0 ? `${Math.min(completedRailIds.length, model.rails.length)}/${model.rails.length}` : "Ready", tone: "blue" as Tone },
+        { label: "Risk Contained", value: blockedVisible ? model.blockedRiskLabel : "Pending", tone: blockedVisible ? "red" as Tone : "muted" as Tone },
+        { label: "Evidence", value: completedRailIds.includes("evidence") ? "Recorded" : "Queued", tone: completedRailIds.includes("evidence") ? "green" as Tone : "muted" as Tone },
+        { label: "Margin", value: runVisualState === "complete" ? "Protected" : "Ready", tone: runVisualState === "complete" ? "green" as Tone : "muted" as Tone },
       ].map((item) => (
         <div className="rail-summary-card" key={item.label}>
           <p className="text-[0.6rem] font-semibold uppercase text-[#4a4f5e]">{item.label}</p>
@@ -691,16 +783,30 @@ function RunOutcomeStrip({ model, visibleRailCount }: { model: ControlRoomModel;
   );
 }
 
-function ControlStackChain({ model }: { model: ControlRoomModel }) {
+function ControlStackChain({ activeRailId, completedRailIds, model }: { activeRailId: string | null; completedRailIds: string[]; model: ControlRoomModel }) {
+  const isNodeActive = (node: "hermes" | "stripe" | "nemo" | "scalex") => {
+    if (node === "hermes") {
+      return activeRailId === "hermes" || activeRailId === "planning";
+    }
+    if (node === "stripe") {
+      return activeRailId === "stripe" || activeRailId === "revenue";
+    }
+    if (node === "nemo") {
+      return activeRailId === "policy" || activeRailId === "blocked-spend" || activeRailId === "approved-spend";
+    }
+    return activeRailId === "input" || activeRailId === "evidence" || activeRailId === "profit" || activeRailId === "blocked-spend";
+  };
+  const hasCompleted = (ids: string[]) => ids.some((id) => completedRailIds.includes(id));
   return (
     <div className="mb-3 grid grid-cols-4 gap-2">
       {[
-        { label: "Hermes", value: "plans", tone: "purple" as Tone },
-        { label: "Stripe", value: model.state?.stripe.used_real_stripe ? "test proof" : "sandbox proof", tone: "blue" as Tone },
-        { label: "NeMo", value: model.state?.guardrails.used_real_nemo ? "verified" : "local gate", tone: "green" as Tone },
-        { label: "ScaleX", value: "records", tone: "green" as Tone },
+        { id: "hermes" as const, label: "Hermes", value: hasCompleted(["hermes", "planning"]) ? "plan created" : "plans", tone: "blue" as Tone },
+        { id: "stripe" as const, label: "Stripe", value: model.state?.stripe.used_real_stripe ? "test proof" : "sandbox proof", tone: "purple" as Tone },
+        { id: "nemo" as const, label: "NeMo / Policy", value: model.state?.guardrails.used_real_nemo ? "verified" : "risk gate", tone: "cyan" as Tone },
+        { id: "scalex" as const, label: "ScaleX", value: hasCompleted(["evidence", "profit"]) ? "proof recorded" : "records", tone: "green" as Tone },
       ].map((item, index) => (
-        <div className="stack-node" key={item.label}>
+        <div className={`stack-node ${isNodeActive(item.id) ? `stack-node-active stack-node-active-${item.tone}` : ""}`} key={item.label}>
+          {isNodeActive(item.id) ? <span className="stack-active-dot" aria-hidden="true" /> : null}
           <StatusBadge label={item.label} tone={item.tone} />
           <p className="mt-1 text-[0.68rem] font-semibold text-[#f0f0f0]">{item.value}</p>
           {index < 3 ? <span className="stack-connector" aria-hidden="true" /> : null}
@@ -723,19 +829,49 @@ function ModeStrip({ model }: { model: ControlRoomModel }) {
   );
 }
 
-function ProofArtifactGrid({ compact = false, model }: { compact?: boolean; model: ControlRoomModel }) {
+function ProofArtifactGrid({
+  activeRailId,
+  compact = false,
+  completedRailIds,
+  evidenceRevealStep,
+  model,
+  runVisualState,
+}: {
+  activeRailId: string | null;
+  compact?: boolean;
+  completedRailIds: string[];
+  evidenceRevealStep: number;
+  model: ControlRoomModel;
+  runVisualState: RunVisualState;
+}) {
   return (
     <div className={`grid gap-2 ${compact ? "" : "grid-cols-2"}`}>
-      {model.proofArtifacts.map((artifact) => (
-        <article className="artifact-card" key={artifact.title}>
+      {model.proofArtifacts.map((artifact, index) => {
+        const active = activeRailId === artifact.railId;
+        const revealed = runVisualState === "complete" || completedRailIds.includes(artifact.railId) || index < evidenceRevealStep;
+        const queued = !active && !revealed;
+        const statusLabel = queued ? "Queued" : active ? "Recording" : artifact.status;
+        const statusTone = queued ? "muted" : active ? "blue" : artifact.tone;
+        const Icon = artifact.icon;
+        return (
+        <article className={`artifact-card ${queued ? "artifact-card-queued" : "artifact-card-revealed"} ${active ? "artifact-card-active" : ""} ${artifact.tone === "red" && revealed ? "artifact-card-blocked" : ""}`} key={artifact.title}>
           <div className="flex items-center justify-between gap-2">
-            <p className="truncate text-xs font-semibold text-white">{artifact.title}</p>
-            <StatusBadge label={artifact.status} tone={artifact.tone} />
+            <div className="flex min-w-0 items-center gap-2">
+              <span className={`artifact-icon artifact-icon-${artifact.tone}`}>
+                <Icon className="h-3.5 w-3.5" />
+              </span>
+              <div className="min-w-0">
+                <p className="truncate text-xs font-semibold text-white">{artifact.title}</p>
+                <p className="truncate text-[0.62rem] font-semibold uppercase text-[#4a4f5e]">{artifact.system}</p>
+              </div>
+            </div>
+            <StatusBadge label={statusLabel} tone={statusTone} />
           </div>
           <p className="mt-2 text-xs leading-5 text-[#8a8f9e]">{artifact.detail}</p>
           <p className="mt-2 truncate font-mono text-[0.66rem] text-[#4a4f5e]">{artifact.meta}</p>
         </article>
-      ))}
+        );
+      })}
     </div>
   );
 }
@@ -805,19 +941,35 @@ function GuardrailProof({ model }: { model: ControlRoomModel }) {
   );
 }
 
-function RailActivityTimeline({ compact = false, model }: { compact?: boolean; model: ControlRoomModel }) {
+function RailActivityTimeline({
+  activeRailId,
+  compact = false,
+  completedRailIds,
+  model,
+  runVisualState,
+}: {
+  activeRailId: string | null;
+  compact?: boolean;
+  completedRailIds: string[];
+  model: ControlRoomModel;
+  runVisualState: RunVisualState;
+}) {
   return (
     <div className={`rounded-md border border-[#1e2128] bg-[#111318] ${compact ? "p-2.5" : "p-3"}`}>
       <div className="flex items-center justify-between gap-3">
         <p className="text-xs font-semibold uppercase text-[#8a8f9e]">Rail Activity</p>
-        <StatusBadge label="API-backed timeline" tone="blue" />
+        <StatusBadge label={runVisualState === "running" ? "live governance trace" : "API-backed timeline"} tone="blue" />
       </div>
       <div className={`${compact ? "mt-2" : "mt-2"} flex gap-2 overflow-hidden`}>
-        {model.timelineChips.map((chip) => (
-          <span className="min-w-0 flex-1 rounded-md border border-[#1e2128] bg-[#0a0b0e] px-3 py-2 text-xs font-semibold text-[#f0f0f0]" key={chip.label}>
-            {chip.label} <span className="text-[#8a8f9e]">{chip.time}</span>
+        {model.activityChips.map((chip) => {
+          const revealed = runVisualState === "complete" || completedRailIds.includes(chip.railId);
+          const active = activeRailId === chip.railId;
+          return (
+          <span className={`activity-chip activity-chip-${chip.tone} ${revealed ? "activity-chip-revealed" : active ? "activity-chip-live" : "activity-chip-queued"}`} key={chip.label}>
+            {chip.label} <span className="text-[#8a8f9e]">{revealed ? chip.time : active ? "running" : "queued"}</span>
           </span>
-        ))}
+          );
+        })}
       </div>
     </div>
   );
@@ -896,6 +1048,16 @@ function StatusBadge({ label, tone = "muted" }: { label: string; tone?: Tone }) 
   );
 }
 
+function railResult(rail: RailView, active: boolean, complete: boolean): { label: string; tone: Tone } {
+  if (active) {
+    return { label: "Running", tone: "blue" };
+  }
+  if (complete) {
+    return { label: rail.status, tone: rail.tone };
+  }
+  return { label: "Ready", tone: "muted" };
+}
+
 function buildControlRoomModel(
   state: DemoState | null,
   money: MoneySnapshot,
@@ -925,6 +1087,7 @@ function buildControlRoomModel(
   const primaryMode = modeCards.find((mode) => mode.primary) ?? modeCards[0];
 
   return {
+    activityChips: buildActivityChips({ approvedSpendCents, blockedSpendCents, protectedProfitCents }),
     auditPills: [
       { label: "Timeline", value: String(events.length || 14), tone: "muted" },
       { label: "Finance", value: String(state?.stripe_events.length || 4), tone: "blue" },
@@ -973,11 +1136,11 @@ function buildControlRoomModel(
     state,
     stripeLabel,
     supportingModules: buildSupportingModules(state, laborCostCents),
-    timelineChips: buildTimelineChips(events),
   };
 }
 
 interface ControlRoomModel {
+  activityChips: ActivityChipModel[];
   auditPills: StatPill[];
   auditRows: number;
   auditRowsData: AuditRowModel[];
@@ -1004,7 +1167,13 @@ interface ControlRoomModel {
   state: DemoState | null;
   stripeLabel: string;
   supportingModules: Array<{ description: string; status: string; title: string; tone: Tone; value: string }>;
-  timelineChips: Array<{ label: string; time: string }>;
+}
+
+interface ActivityChipModel {
+  label: string;
+  railId: string;
+  time: string;
+  tone: Tone;
 }
 
 interface AuditRowModel {
@@ -1036,8 +1205,11 @@ interface ModeCardModel {
 
 interface ProofArtifactModel {
   detail: string;
+  icon: LucideIcon;
   meta: string;
+  railId: string;
   status: string;
+  system: string;
   title: string;
   tone: Tone;
 }
@@ -1054,21 +1226,21 @@ function buildModeCards(state: DemoState | null): ModeCardModel[] {
 
   return [
     {
-      detail: "Default deterministic/local path; no external credentials required.",
+      detail: "Deterministic proof · no external credentials required.",
       primary: executionMode === "demo",
       status: executionMode === "demo" ? "Judge Demo active" : "Available",
       title: "Judge Demo Mode",
       tone: executionMode === "demo" ? "green" : "muted",
     },
     {
-      detail: "Uses real Stripe test-mode objects only when configured with safe local test credentials.",
+      detail: "Test-mode finance proof · no live money.",
       primary: executionMode === "full_proof" && usedRealStripe,
       status: stripeSandboxStatus,
       title: "Stripe Sandbox Prototype",
       tone: usedRealStripe ? "green" : stripeHasError ? "amber" : "blue",
     },
     {
-      detail: "Future production live-money path; not enabled in this demo.",
+      detail: "Locked future mode · live execution disabled.",
       status: "Verified Live locked",
       title: "Verified Live Mode",
       tone: "red",
@@ -1102,43 +1274,81 @@ function buildProofArtifacts({
   return [
     {
       detail: "Implementation plan and next actions recorded before ScaleX allows execution.",
+      icon: BrainCircuit,
       meta: state?.planning_run?.id ?? "planning_run:demo_northstar",
+      railId: "hermes",
       status: "Recorded",
+      system: "Hermes",
       title: "Hermes planning proof",
-      tone: "purple",
+      tone: "blue",
     },
     {
       detail: `${stripeLabel}; livemode=${String(state?.stripe.livemode ?? false)}; paid=${String(state?.stripe.paid ?? false)}.`,
+      icon: CreditCard,
       meta: `invoice:${invoiceId}`,
+      railId: "stripe",
       status: stripeStatus,
+      system: "Stripe",
       title: "Stripe finance proof",
-      tone: state?.stripe.used_real_stripe ? "green" : "blue",
+      tone: "purple",
     },
     {
       detail: `${guardrailLabel}. Vendor, margin, live-money, and unsafe-data rules checked before action.`,
+      icon: ShieldCheck,
       meta: `${nemoRuntime}; NeMo Guardrails claim only with runtime proof`,
+      railId: "policy",
       status: "Checked",
+      system: "NeMo / Local Policy",
       title: "NeMo/local policy proof",
-      tone: "green",
+      tone: "cyan",
     },
     {
       detail: `${formatCurrency(approvedSpendCents)} approved setup spend recorded after policy approval.`,
+      icon: CheckCircle2,
       meta: "ledger:approved_setup_spend",
+      railId: "approved-spend",
       status: "Approved",
+      system: "ScaleX Policy",
       title: "Approved spend proof",
       tone: "green",
     },
     {
       detail: `${formatCurrency(blockedSpendCents)} data broker enrichment request blocked before vendor execution.`,
+      icon: Ban,
       meta: "policy:block_no_ledger_spend_row",
+      railId: "blocked-spend",
       status: "BLOCKED",
+      system: "ScaleX Policy",
       title: "Blocked risk proof",
       tone: "red",
     },
     {
-      detail: `${formatCurrency(laborCostCents)} labor cost and ${formatCurrency(protectedProfitCents)} protected profit recorded.`,
-      meta: "profit_report:protected_margin",
+      detail: `${formatCurrency(laborCostCents)} labor cost included before protected margin is reported.`,
+      icon: Activity,
+      meta: "job_costing:demo_labor_cost",
+      railId: "evidence",
       status: "Recorded",
+      system: "Workforce Costing",
+      title: "Labor-cost proof",
+      tone: "green",
+    },
+    {
+      detail: "Stripe proof is not represented as paid unless the backend says paid=true.",
+      icon: BookOpenCheck,
+      meta: `paid:${String(state?.stripe.paid ?? false)}`,
+      railId: "evidence",
+      status: "Verified",
+      system: "Output Honesty Rail",
+      title: "Paid-state honesty proof",
+      tone: "amber",
+    },
+    {
+      detail: `${formatCurrency(protectedProfitCents)} protected profit report recorded after approved spend and labor.`,
+      icon: FileText,
+      meta: "profit_report:protected_margin",
+      railId: "profit",
+      status: "Recorded",
+      system: "ScaleX Profit Outcome",
       title: "Profit outcome proof",
       tone: "green",
     },
@@ -1167,16 +1377,16 @@ function buildRails({
   stripeLabel: string;
 }): RailView[] {
   return [
-    { actor: "SCALEX", badge: "01", detail: "Synthetic Northstar operation, revenue, spend cap, margin floor, and data boundary checked.", evidence: "Input rail passed", id: "input", name: "Input Rail", proofTag: "client context", riskTag: "data safe", status: "Passed", subline: "Northstar context accepted", tone: "green" },
-    { actor: "HERMES", badge: "02", detail: "Hermes creates the implementation launch plan and proposes next actions.", evidence: "Planning proof recorded", id: "hermes", name: "Hermes Plan", proofTag: "planner proof", riskTag: "bounded plan", status: "Created", subline: "Planner / operator brain", tone: "purple" },
-    { actor: "SCALEX", badge: "03", detail: "Plan stays inside the allowed client-implementation scope.", evidence: "Planning rail approved", id: "planning", name: "Planning Rail", proofTag: "scope check", riskTag: "approved", status: "Approved", subline: "Allowed work only", tone: "purple" },
-    { actor: "STRIPE", badge: "04", detail: `Finance proof created for ${formatCurrency(revenueCents)}. ${stripeLabel}.`, evidence: "Stripe sandbox/test proof", id: "stripe", name: "Stripe Finance Proof", proofTag: "livemode=false", riskTag: "money proof", status: "Verified", subline: "Finance state grounded", tone: "blue" },
-    { actor: "SCALEX", badge: "05", detail: "Revenue gate verifies money state before setup spend or delivery work proceeds.", evidence: `${formatCurrency(revenueCents)} revenue secured`, id: "revenue", name: "Revenue Gate", proofTag: "invoice state", riskTag: "passed", status: "Passed", subline: `${formatCurrency(revenueCents)} secured`, tone: "green" },
-    { actor: "NEMO / LOCAL", badge: "06", detail: "Vendor allowlist, blocked vendor, spend cap, margin floor, and unsafe-data rules checked.", evidence: guardrailLabel, id: "policy", name: "NeMo / Local Policy", proofTag: "13 checks", riskTag: "guardrail", status: "Checked", subline: "Risk reviewed before action", tone: "green" },
-    { actor: "SCALEX", badge: "07", detail: `Data broker enrichment / premium vendor spend requested ${formatCurrency(blockedSpendCents)} and created no spend ledger row.`, evidence: "Unsafe vendor spend blocked", id: "blocked-spend", name: `Risky Vendor Action ${formatCurrency(blockedSpendCents)}`, proofTag: "no spend row", riskTag: "blocked", status: "BLOCKED", subline: "Data broker enrichment stopped", tone: "red" },
-    { actor: "SCALEX", badge: "08", detail: `${formatCurrency(approvedSpendCents)} setup spend stays inside approved vendor and margin rules.`, evidence: "Approved setup spend recorded", id: "approved-spend", name: "Controlled Setup Spend", proofTag: "policy pass", riskTag: "approved", status: "Approved", subline: `${formatCurrency(approvedSpendCents)} allowed`, tone: "green" },
-    { actor: "SCALEX", badge: "09", detail: "Allowed work execution completes only after policy gates pass and evidence is recorded.", evidence: hasReport ? "Execution and ledger evidence recorded" : "Execution ready", id: "execution", name: "Execution + Evidence", proofTag: "audit trail", riskTag: "recorded", status: hasReport ? "Recorded" : "Ready", subline: "Allowed work only", tone: "green" },
-    { actor: "SCALEX", badge: "10", detail: `Labor ${formatCurrency(laborCostCents)}, profit ${formatCurrency(protectedProfitCents)}, margin ${formatPercent(marginPercent)}.`, evidence: "Protected profit outcome recorded", id: "profit", name: "Profit Outcome", proofTag: "margin report", riskTag: "protected", status: "Protected", subline: `${formatCurrency(protectedProfitCents)} protected`, tone: "green" },
+    { actor: "SCALEX", badge: "01", detail: "Synthetic Northstar operation, revenue, spend cap, margin floor, and data boundary checked.", evidence: "Input rail passed", id: "input", name: "Input Rail", proofTag: "client context", riskTag: "data safe", status: "Passed", subline: "Client operation selected · revenue-backed context loaded", tone: "green" },
+    { actor: "HERMES", badge: "02", detail: "Hermes creates the implementation launch plan and proposes next actions. ScaleX governs what can execute.", evidence: "Hermes planning proof recorded", id: "hermes", name: "Hermes Plan", proofTag: "planner proof", riskTag: "bounded plan", status: "Created", subline: "Implementation plan created · Hermes proposes, ScaleX governs", tone: "blue" },
+    { actor: "SCALEX", badge: "03", detail: "Plan stays inside the allowed client-implementation scope and contains no policy conflict.", evidence: "Planning rail approved", id: "planning", name: "Planning Rail", proofTag: "scope check", riskTag: "approved", status: "Approved", subline: "Scope approved · no policy conflicts detected", tone: "green" },
+    { actor: "STRIPE", badge: "04", detail: `Finance proof created for ${formatCurrency(revenueCents)}. ${stripeLabel}.`, evidence: "Stripe sandbox/test proof", id: "stripe", name: "Stripe Finance Proof", proofTag: "livemode=false", riskTag: "money proof", status: "Verified", subline: "Test/sandbox finance proof verified · livemode=false", tone: "purple" },
+    { actor: "SCALEX", badge: "05", detail: "Revenue gate verifies money state before setup spend or delivery work proceeds.", evidence: `${formatCurrency(revenueCents)} revenue secured`, id: "revenue", name: "Revenue Gate", proofTag: "invoice state", riskTag: "passed", status: "Passed", subline: "Revenue secured before spend allowed", tone: "green" },
+    { actor: "NEMO / LOCAL", badge: "06", detail: "Vendor allowlist, blocked vendor, spend cap, margin floor, and unsafe-data rules checked before execution.", evidence: guardrailLabel, id: "policy", name: "NeMo / Local Policy", proofTag: "13 checks", riskTag: "guardrail", status: "Checked", subline: "Risk checked before execution", tone: "cyan" },
+    { actor: "SCALEX", badge: "07", detail: `${formatCurrency(approvedSpendCents)} setup spend stays inside approved vendor and margin rules.`, evidence: "Approved setup spend proof recorded", id: "approved-spend", name: "Approved Setup Spend", proofTag: "policy pass", riskTag: "approved", status: "Approved", subline: "Allowed vendor spend approved within policy", tone: "green" },
+    { actor: "SCALEX", badge: "08", detail: `Unapproved vendor · ${formatCurrency(blockedSpendCents)} requested · no spend ledger row created.`, evidence: "Policy blocked data broker enrichment", id: "blocked-spend", name: "Blocked Risky Spend", proofTag: "no spend row", riskTag: "blocked", status: "BLOCKED", subline: "Data broker enrichment blocked by policy", tone: "red" },
+    { actor: "SCALEX", badge: "09", detail: "Proof is recorded for the audit trail without storing secrets or live-money credentials.", evidence: hasReport ? "Evidence ledger recorded proof" : "Evidence ledger ready", id: "evidence", name: "Evidence Ledger", proofTag: "audit trail", riskTag: "recorded", status: "Recorded", subline: "Proof recorded for audit", tone: "green" },
+    { actor: "SCALEX", badge: "10", detail: `Protected profit ${formatCurrency(protectedProfitCents)} after approved spend and ${formatCurrency(laborCostCents)} labor; margin ${formatPercent(marginPercent)}.`, evidence: "Protected profit outcome recorded", id: "profit", name: "Profit Outcome", proofTag: "margin report", riskTag: "protected", status: "Protected", subline: "Protected profit and margin reported", tone: "green" },
   ];
 }
 
@@ -1316,18 +1526,28 @@ function buildConnectionCards(state: DemoState | null, auditRows: number, guardr
   ];
 }
 
-function buildTimelineChips(events: DemoState["events"]): Array<{ label: string; time: string }> {
-  const source = events.length > 0 ? events.slice(-6).map((event) => ({
-    label: event.title,
-    time: formatDateTime(event.created_at),
-  })) : [];
-  if (source.length > 0) {
-    return source;
-  }
-  return ["Input passed", "Hermes plan", "Stripe proof", "Policy check", "Spend blocked", "Profit protected"].map((label, index) => ({
-    label,
-    time: `T+${index + 1}`,
-  }));
+function buildActivityChips({
+  approvedSpendCents,
+  blockedSpendCents,
+  protectedProfitCents,
+}: {
+  approvedSpendCents: number;
+  blockedSpendCents: number;
+  protectedProfitCents: number;
+}): ActivityChipModel[] {
+  return [
+    { label: "Input context loaded", railId: "input", time: "T+01", tone: "green" },
+    { label: "Hermes plan created", railId: "hermes", time: "T+02", tone: "blue" },
+    { label: "Stripe finance proof verified", railId: "stripe", time: "T+03", tone: "purple" },
+    { label: "Revenue gate passed", railId: "revenue", time: "T+04", tone: "green" },
+    { label: "Policy checks completed", railId: "policy", time: "T+05", tone: "cyan" },
+    { label: "Spend approved: Workspace Pack", railId: "approved-spend", time: "T+06", tone: "green" },
+    { label: "Spend approved: Data Migration Sandbox", railId: "approved-spend", time: "T+07", tone: "green" },
+    { label: "Spend approved: Launch Asset Kit", railId: "approved-spend", time: formatCurrency(approvedSpendCents), tone: "green" },
+    { label: `Spend BLOCKED: Data Broker ${formatCurrency(blockedSpendCents)}`, railId: "blocked-spend", time: "T+08", tone: "red" },
+    { label: "Evidence ledger recorded proof", railId: "evidence", time: "T+09", tone: "green" },
+    { label: `Profit report protected ${formatCurrency(protectedProfitCents)}`, railId: "profit", time: "T+10", tone: "green" },
+  ];
 }
 
 function badgeClass(tone: Tone): string {
@@ -1342,6 +1562,8 @@ function badgeClass(tone: Tone): string {
       return "border-[#3b82f6]/40 bg-[#3b82f6]/10 text-[#93c5fd]";
     case "purple":
       return "border-[#8b5cf6]/40 bg-[#8b5cf6]/10 text-[#c4b5fd]";
+    case "cyan":
+      return "border-[#06b6d4]/40 bg-[#06b6d4]/10 text-[#67e8f9]";
     case "white":
       return "border-[#f0f0f0]/20 bg-white/5 text-[#f0f0f0]";
     case "muted":
@@ -1362,6 +1584,8 @@ function metricClass(tone: Tone = "white"): string {
       return "text-[#3b82f6]";
     case "purple":
       return "text-[#8b5cf6]";
+    case "cyan":
+      return "text-[#06b6d4]";
     case "muted":
       return "text-[#8a8f9e]";
     case "white":

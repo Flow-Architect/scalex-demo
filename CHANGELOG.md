@@ -10,6 +10,43 @@ Use:
 
 ---
 
+## 2026-06-28 - Goal 8K: Motion storytelling and label clarity
+
+Completed:
+- Added frontend-only motion storytelling on top of the existing API-backed control-room shell.
+- Replaced count-only rail animation with local visual run state: idle, running, complete,
+  active rail, completed rails, blocked flash, blocked-risk count-up, and proof reveal state.
+- Updated the rail story to the approved-then-blocked sequence: Input, Hermes, Planning, Stripe,
+  Revenue, NeMo/local policy, Approved Setup Spend, Blocked Risky Spend, Evidence Ledger, and
+  Profit Outcome.
+- Made the $3,200 data broker enrichment block the visual climax with red rail treatment, metric
+  count/flash, blocked card emphasis, and explicit risk contained summary copy.
+- Added progressive proof artifacts, live rail activity chips, control-stack glow, metric glow,
+  Evidence Ledger row motion, and clearer judge-friendly labels for modes, policy, audit, blocked
+  risk, and protected profit.
+- Preserved backend mechanics, existing run/reset/API behavior, integration truthfulness, Judge
+  Demo Mode, Stripe Sandbox Prototype wording, Verified Live Mode locked state, local policy
+  truthfulness, no live money, no Telegram, and no new integrations.
+
+Verification:
+- `cd frontend && npm run build` passed.
+- `./scripts/test.sh` passed with 68 backend tests and a successful frontend build.
+- `./scripts/check-nemo.sh` passed with `nemoguardrails` 0.21.0 and `guardrails/scalex` loaded.
+- Post-implementation `git diff --check` passed.
+- Unsafe/generated path scan returned no matches.
+- Staged added-lines secret scan returned no matches.
+- Browser animation smoke passed at `http://127.0.0.1:5174/`: initial labels, running labels,
+  blocked-risk climax, progressive proof labels, and complete state were verified through Chrome
+  DevTools.
+
+Suggested commit message:
+Animate ScaleX governed execution story
+
+Next:
+- Goal 9 - final repo/video/submission polish.
+
+---
+
 ## 2026-06-28 - Goal 8J: Demo drama and Stripe mode clarity
 
 Completed:
