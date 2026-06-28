@@ -45,19 +45,19 @@ export function NodeInspector({
   const evidenceTime = node?.timestamp ? formatDateTime(node.timestamp) : "Awaiting run evidence";
 
   return (
-    <aside className="flex min-h-[44rem] flex-col overflow-hidden bg-white text-zinc-950 shadow-sm ring-1 ring-zinc-200">
-      <div className="border-b border-zinc-200 bg-white p-4">
+    <aside className="flex min-h-[44rem] flex-col overflow-hidden rounded-md bg-white text-zinc-950 shadow-xl shadow-zinc-950/10 ring-1 ring-zinc-200/80">
+      <div className="scalex-grid-surface border-b border-white/10 bg-zinc-950 p-5 text-white">
         <div className="flex items-start justify-between gap-3">
           <div className="flex min-w-0 items-start gap-3">
-            <span className="flex h-10 w-10 flex-none items-center justify-center rounded-md bg-zinc-950 text-white">
+            <span className="flex h-10 w-10 flex-none items-center justify-center rounded-md border border-emerald-300/30 bg-emerald-300/10 text-emerald-100">
               <Icon className="h-5 w-5" aria-hidden="true" />
             </span>
             <div className="min-w-0">
-              <p className="text-xs font-semibold uppercase text-zinc-500">Evidence Drawer</p>
-              <h2 className="mt-1 break-words text-lg font-semibold text-zinc-950">
+              <p className="text-xs font-semibold uppercase text-emerald-300">Evidence Drawer</p>
+              <h2 className="mt-1 break-words text-xl font-semibold text-white">
                 {node?.title ?? "Run Summary"}
               </h2>
-              <p className="mt-1 text-sm leading-5 text-zinc-600">
+              <p className="mt-1 text-sm leading-5 text-zinc-300">
                 {node ? `${inspectorStatusLabel(node.status)} - ${evidenceTime}` : runStatus}
               </p>
             </div>
@@ -65,7 +65,7 @@ export function NodeInspector({
           {selectedKey !== "summary" ? (
             <button
               aria-label="Return to run summary"
-              className="inline-flex h-9 w-9 flex-none items-center justify-center rounded-md border border-zinc-300 bg-white text-zinc-600 transition hover:bg-zinc-50 hover:text-zinc-950"
+              className="inline-flex h-9 w-9 flex-none items-center justify-center rounded-md border border-white/10 bg-white/10 text-zinc-200 transition hover:bg-white/20 hover:text-white"
               onClick={() => onSelect("summary")}
               type="button"
             >
@@ -75,7 +75,7 @@ export function NodeInspector({
         </div>
       </div>
 
-      <div className="flex-1 space-y-4 overflow-auto bg-zinc-50 p-4">
+      <div className="flex-1 space-y-4 overflow-auto bg-[#f7faf9] p-4">
         {selectedKey === "summary" ? (
           <RunSummaryInspector
             activeWorkflow={activeWorkflow}

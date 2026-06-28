@@ -24,6 +24,7 @@ import {
   TrendingUp,
   UserPlus,
   Users,
+  Workflow,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
@@ -124,7 +125,7 @@ export function ProductView({
   state: DemoState | null;
 }) {
   return (
-    <section className="min-h-screen bg-stone-100 text-zinc-950">
+    <section className="min-h-screen bg-transparent text-zinc-950">
       <div className="w-full px-4 py-5 sm:px-6 lg:px-8">
         {activeView === "dashboard" ? (
           <DashboardView
@@ -253,6 +254,14 @@ function DashboardView({
   const marginFloorPercent = currentClient.margin_floor_percent || 50;
   const marginNeedsReview = marginAfterLaborPercent < marginFloorPercent;
   const runtimeRoute = commandCenter?.runtime_route ?? null;
+  const hermesRuntime = state?.hermes.runtime ?? state?.execution.hermes_runtime ?? runtimeRoute?.runtime ?? "isolated_cli";
+  const nemoClawSelected = hermesRuntime === "nemoclaw" || state?.hermes.mode === "nemohermes_api";
+  const nemoClawVerified = Boolean(nemoClawSelected && state?.hermes.used_real_hermes && state?.execution.hermes_runtime_status === "available");
+  const nemoClawStatus = nemoClawVerified
+    ? "NemoClaw runtime verified"
+    : nemoClawSelected
+      ? "NemoClaw selected / fail-closed safe"
+      : "NemoClaw path implemented";
   const commandAuditEvents = commandCenter?.audit_events ?? [];
   const commandSafetyProof = commandCenter?.safety_proof ?? [
     "fake/demo clients only",
@@ -337,10 +346,18 @@ function DashboardView({
       tone: "sky" as Tone,
     },
     {
+      icon: Workflow,
+      name: "NemoClaw / NemoHermes",
+      role: "Local Runtime Boundary",
+      description: "Routes isolated Hermes planning through the local NemoClaw/OpenShell runtime when selected.",
+      result: nemoClawStatus,
+      tone: nemoClawVerified ? "emerald" as Tone : "sky" as Tone,
+    },
+    {
       icon: ShieldCheck,
-      name: "NeMo / Local Policy",
+      name: "NeMo Guardrails / Local Policy",
       role: "Guardrail Runtime",
-      description: "Checks risky actions before execution and blocks unsafe behavior.",
+      description: "Checks risky actions before execution and blocks unsafe behavior. Real NeMo is shown only with runtime proof.",
       result: guardrailLabel,
       tone: guardrailTone,
     },
@@ -423,21 +440,40 @@ function DashboardView({
       />
 
       <WorkspaceSection
-        description="Enterprise teams want AI agents to help run client operations, but raw agents cannot be trusted with money, vendors, client workflows, or internal systems without controls."
-        title="Enterprise Pain -> ScaleX Control"
+        description="AI can help run paid work, but it cannot touch spend, vendors, client workflows, or systems until ScaleX proves the money, checks policy, and records evidence."
+        id="control-contract"
+        title="The Control Contract"
       >
         <EnterpriseControlNarrative />
       </WorkspaceSection>
 
       <WorkspaceSection
         description="The control stack makes the agent boundary explicit before execution."
+        id="control-stack"
         title="Control Stack"
       >
         <ControlStackFlow items={controlStackItems} />
       </WorkspaceSection>
 
       <WorkspaceSection
+        description="NemoClaw/NemoHermes is the local runtime boundary for isolated planning when selected. NeMo Guardrails are reported only when runtime evidence proves the real guardrail path; otherwise ScaleX shows the local policy boundary."
+        id="nemo-guardrails"
+        title="NemoClaw & NeMo Guardrails"
+      >
+        <NemoGuardrailProofPanel
+          failClosed={Boolean(state?.guardrails.fail_closed)}
+          guardrailLabel={guardrailLabel}
+          hermesRuntime={hermesRuntime}
+          nemoClawSelected={nemoClawSelected}
+          nemoClawStatus={nemoClawStatus}
+          nemoConfigured={Boolean(state?.guardrails.nemo_python_configured)}
+          usedRealNemo={Boolean(state?.guardrails.used_real_nemo)}
+        />
+      </WorkspaceSection>
+
+      <WorkspaceSection
         description="The run is not a generic task list. Each governed rail states the actor, decision, evidence, and proof boundary before the operation moves forward."
+        id="governed-run-stage"
         title="Governed Run Stage"
       >
         <GovernedRailGrid rails={governedRails} running={busyAction === "run"} />
@@ -445,6 +481,7 @@ function DashboardView({
 
       <WorkspaceSection
         description="ScaleX is valuable because it does not just execute. It blocks unsafe spend before it reaches the ledger."
+        id="blocked-risk"
         title="Blocked Risk Spotlight"
       >
         <BlockedRiskSpotlight
@@ -455,6 +492,7 @@ function DashboardView({
 
       <WorkspaceSection
         description="Economic control is central to the governed run, not a side accounting widget."
+        id="economic-control"
         title="Economic Control"
       >
         <EconomicControlPanel
@@ -470,13 +508,14 @@ function DashboardView({
 
       <WorkspaceSection
         description="Non-secret proof across planning, finance, policy checks, approved spend, blocked risk, labor costing, paid-state honesty, mode safety, and final protected profit."
+        id="evidence-ledger"
         title="Evidence Ledger"
       >
         <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_24rem]">
-          <div className="rounded-md bg-white p-5 shadow-sm ring-1 ring-zinc-200">
+          <div className="scalex-card rounded-md p-5">
             <EnterpriseEvidenceTable rows={evidenceRows} />
           </div>
-          <div className="rounded-md bg-zinc-950 p-5 text-white shadow-sm">
+          <div className="scalex-grid-surface rounded-md bg-zinc-950 p-5 text-white shadow-sm">
             <h3 className="font-semibold">Audit safety proof</h3>
             <ul className="mt-4 space-y-3 text-sm text-zinc-200">
               {commandSafetyProof.map((proof) => (
@@ -501,7 +540,7 @@ function DashboardView({
         description="Final profit after approved setup spend and labor cost."
         title="Profit Report"
       >
-        <div className="rounded-md bg-white p-5 shadow-sm ring-1 ring-zinc-200">
+        <div className="scalex-card rounded-md p-5">
           <ConnectionFactGrid
             facts={[
               { label: "Client / job", value: `${currentClient.client_name} / ${currentClient.job_name}`, tone: "slate" },
@@ -523,7 +562,7 @@ function DashboardView({
         title="Runtime Proof"
       >
         <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_24rem]">
-          <div className="rounded-md bg-white p-5 shadow-sm ring-1 ring-zinc-200">
+          <div className="scalex-card rounded-md p-5">
             <div className="flex flex-wrap items-center gap-2">
               {(runtimeRoute?.route ?? ["ScaleX", "Hermes Adapter", "Deterministic local planner"]).map((step, index) => (
                 <span className="inline-flex items-center gap-2 text-sm font-semibold text-zinc-700" key={`${step}-${index}`}>
@@ -545,7 +584,7 @@ function DashboardView({
               ]}
             />
           </div>
-          <div className="rounded-md bg-white p-5 shadow-sm ring-1 ring-zinc-200">
+          <div className="scalex-card rounded-md p-5">
             <h3 className="font-semibold text-zinc-950">Fail-closed proof</h3>
             <div className="mt-4 space-y-2">
               {["unavailable", "timeout", "malformed response", "HTTP failure"].map((stateLabel) => (
@@ -561,10 +600,11 @@ function DashboardView({
 
       <WorkspaceSection
         description="Manual entry and upload intake both require review before values are saved into the local browser demo state."
+        id="business-intake"
         title="Business Intake"
       >
         <div className="grid gap-5 xl:grid-cols-[minmax(0,1.2fr)_minmax(0,0.8fr)]">
-          <div className="rounded-md bg-white p-5 shadow-sm ring-1 ring-zinc-200">
+          <div className="scalex-card rounded-md p-5">
             <div className="flex flex-wrap gap-2">
               <TabButton active={clientMode === "manual"} label="Manual Entry" onClick={() => setClientMode("manual")} />
               <TabButton active={clientMode === "upload"} label="Upload File" onClick={() => setClientMode("upload")} />
@@ -627,7 +667,7 @@ function DashboardView({
         title="Workforce Costing"
       >
         <div className="grid gap-5 xl:grid-cols-[minmax(0,1.3fr)_minmax(0,0.7fr)]">
-          <div className="rounded-md bg-white p-5 shadow-sm ring-1 ring-zinc-200">
+          <div className="scalex-card rounded-md p-5">
             <div className="flex flex-wrap gap-2">
               <TabButton active={employeeMode === "manual"} label="Manual Entry" onClick={() => setEmployeeMode("manual")} />
               <TabButton active={employeeMode === "upload"} label="Upload File" onClick={() => setEmployeeMode("upload")} />
@@ -705,7 +745,7 @@ function DashboardView({
       >
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
           {documentStates.map((stateItem) => (
-            <article className="rounded-md bg-white p-4 shadow-sm ring-1 ring-zinc-200" key={`${stateItem.scope}-${stateItem.status}`}>
+            <article className="scalex-card rounded-md p-4" key={`${stateItem.scope}-${stateItem.status}`}>
               <StatusBadge
                 label={humanize(stateItem.status)}
                 tone={stateItem.status === "review_required" ? "amber" : stateItem.status === "extraction_failed" || stateItem.status === "unsupported_file" ? "rose" : "slate"}
@@ -734,7 +774,7 @@ function DashboardView({
         title="Economic Detail"
       >
         <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_24rem]">
-          <div className="rounded-md bg-white p-5 shadow-sm ring-1 ring-zinc-200">
+          <div className="scalex-card rounded-md p-5">
             <ConnectionFactGrid
               facts={[
                 { label: "Revenue", value: formatCurrency(commandRevenueCents), tone: "emerald" },
@@ -748,7 +788,7 @@ function DashboardView({
               ]}
             />
           </div>
-          <div className="rounded-md bg-zinc-950 p-5 text-white">
+          <div className="scalex-grid-surface rounded-md bg-zinc-950 p-5 text-white">
             <p className="text-xs font-semibold uppercase text-zinc-300">Formula</p>
             <p className="mt-3 text-lg font-semibold">Margin = (Revenue - Approved Vendor Spend - Labor Cost) / Revenue</p>
             <p className="mt-4 text-sm leading-6 text-zinc-300">The command center recalculates margin as staffing assumptions change, before another spend decision is trusted.</p>
@@ -783,7 +823,7 @@ function DashboardView({
       >
         <div className="grid gap-4 xl:grid-cols-5">
           {agentWorkbenchItems(state?.agent_outputs ?? []).map((agent) => (
-            <article className="rounded-md bg-white p-4 shadow-sm ring-1 ring-zinc-200" key={agent.name}>
+            <article className="scalex-card rounded-md p-4" key={agent.name}>
               <StatusBadge label={agent.status} tone={agent.status === "complete" ? "emerald" : "amber"} />
               <h3 className="mt-3 font-semibold text-zinc-950">{agent.name}</h3>
               <p className="mt-2 text-sm leading-6 text-zinc-600">{agent.task}</p>
@@ -853,8 +893,10 @@ function CinematicControlRoomHero({
   operationName: string;
   runStatus: string;
 }) {
+  const metricValue = (label: string) => metrics.find((metric) => metric.label === label)?.value ?? "--";
+
   return (
-    <section className="overflow-hidden rounded-md bg-zinc-950 text-white shadow-xl shadow-zinc-950/20 ring-1 ring-zinc-900">
+    <section className="scalex-card-dark scalex-grid-surface overflow-hidden rounded-md bg-zinc-950 text-white">
       <div className="grid gap-0 xl:grid-cols-[minmax(0,1.15fr)_minmax(340px,0.85fr)]">
         <div className="px-5 py-6 sm:px-7 lg:px-9 lg:py-8">
           <div className="flex flex-wrap gap-2">
@@ -867,32 +909,54 @@ function CinematicControlRoomHero({
               {runStatus}
             </span>
           </div>
-          <h1 className="mt-5 max-w-5xl text-4xl font-semibold leading-tight tracking-normal text-white lg:text-6xl">
+          <h1 className="mt-5 max-w-5xl text-4xl font-semibold leading-tight tracking-normal text-white lg:text-5xl">
             Governed execution for revenue-backed client operations
           </h1>
           <p className="mt-5 max-w-4xl text-lg leading-8 text-zinc-200">
             Hermes plans the work. Stripe proves the money. NeMo checks risky actions. ScaleX blocks unsafe execution, records evidence, and protects profit.
           </p>
+          <HeroControlContract
+            blockedRisk={metricValue("Blocked risk")}
+            protectedProfit={metricValue("Protected profit")}
+            revenue={metricValue("Revenue secured")}
+          />
           <div className="mt-6 flex flex-col gap-3 sm:flex-row">
             {actions}
           </div>
           <StackChain guardrailTone={guardrailTone} />
         </div>
 
-        <aside className="border-t border-white/10 bg-white/[0.04] p-5 sm:p-6 xl:border-l xl:border-t-0">
-          <div className="rounded-md bg-white p-5 text-zinc-950 shadow-lg shadow-zinc-950/20">
-            <StatusBadge icon={Building2} label="Primary operation" tone="emerald" />
-            <p className="mt-5 text-sm font-semibold uppercase text-zinc-500">{clientName}</p>
-            <h2 className="mt-2 text-3xl font-semibold leading-tight tracking-normal text-zinc-950">
-              {operationName}
-            </h2>
-            <p className="mt-4 text-sm leading-6 text-zinc-600">
-              {businessType}. Synthetic B2B implementation operations only: no patient data, no PHI, and no healthcare compliance claim.
-            </p>
-            <div className="mt-5 grid gap-3 sm:grid-cols-2">
-              {metrics.slice(0, 4).map((metric) => (
-                <HeroCompactMetric key={metric.label} item={metric} />
-              ))}
+        <aside className="border-t border-white/10 bg-white/[0.05] p-5 sm:p-6 xl:border-l xl:border-t-0">
+          <div className="grid h-full gap-4">
+            <div className="rounded-md border border-white/10 bg-white/[0.07] p-5 shadow-2xl shadow-zinc-950/30">
+              <StatusBadge icon={Building2} label="Primary operation" tone="emerald" />
+              <p className="mt-5 text-sm font-semibold uppercase text-zinc-400">{clientName}</p>
+              <h2 className="mt-2 text-3xl font-semibold leading-tight tracking-normal text-white">
+                {operationName}
+              </h2>
+              <p className="mt-4 text-sm leading-6 text-zinc-300">
+                {businessType}. Synthetic B2B implementation operations only: no patient data, no PHI, and no healthcare compliance claim.
+              </p>
+            </div>
+
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="rounded-md border border-rose-300/40 bg-rose-300/10 p-4 text-rose-50 shadow-lg shadow-rose-950/20">
+                <p className="text-xs font-semibold uppercase text-rose-200">Risk intercepted</p>
+                <p className="mt-2 text-3xl font-semibold leading-none">{metricValue("Blocked risk")}</p>
+                <p className="mt-3 text-sm font-semibold leading-5">Data broker enrichment blocked before spend.</p>
+              </div>
+              <div className="rounded-md border border-emerald-300/40 bg-emerald-300/10 p-4 text-emerald-50 shadow-lg shadow-emerald-950/20">
+                <p className="text-xs font-semibold uppercase text-emerald-200">Profit protected</p>
+                <p className="mt-2 text-3xl font-semibold leading-none">{metricValue("Protected profit")}</p>
+                <p className="mt-3 text-sm font-semibold leading-5">{metricValue("Protected margin")} margin after labor.</p>
+              </div>
+            </div>
+
+            <div className="grid gap-3 rounded-md border border-white/10 bg-zinc-950/70 p-4 text-sm">
+              <HeroProofRow label="Revenue gate" value={`${metricValue("Revenue secured")} secured`} />
+              <HeroProofRow label="Approved setup" value={`${metricValue("Approved setup spend")} within policy`} />
+              <HeroProofRow label="NemoClaw / NeMo" value="Runtime and guardrail boundary visible" />
+              <HeroProofRow label="Evidence ledger" value="Proof, policy, spend, and profit recorded" />
             </div>
           </div>
         </aside>
@@ -909,6 +973,83 @@ function CinematicControlRoomHero({
   );
 }
 
+function HeroProofRow({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="flex items-center justify-between gap-4 border-b border-white/10 pb-3 last:border-b-0 last:pb-0">
+      <span className="text-xs font-semibold uppercase text-zinc-400">{label}</span>
+      <span className="text-right font-semibold text-white">{value}</span>
+    </div>
+  );
+}
+
+function HeroControlContract({
+  blockedRisk,
+  protectedProfit,
+  revenue,
+}: {
+  blockedRisk: string;
+  protectedProfit: string;
+  revenue: string;
+}) {
+  const steps = [
+    {
+      icon: CreditCard,
+      label: "Paid work enters",
+      value: revenue,
+      tone: "emerald" as Tone,
+    },
+    {
+      icon: BrainCircuit,
+      label: "Plan created",
+      value: "Hermes",
+      tone: "violet" as Tone,
+    },
+    {
+      icon: ShieldCheck,
+      label: "Risk checked",
+      value: "NeMo/local policy",
+      tone: "sky" as Tone,
+    },
+    {
+      icon: Ban,
+      label: "Spend blocked",
+      value: blockedRisk,
+      tone: "rose" as Tone,
+    },
+    {
+      icon: Database,
+      label: "Proof recorded",
+      value: `${protectedProfit} protected`,
+      tone: "teal" as Tone,
+    },
+  ];
+
+  return (
+    <div className="mt-6 rounded-md border border-white/10 bg-white/[0.05] p-3">
+      <p className="px-1 text-xs font-semibold uppercase text-emerald-300">
+        Simple contract: the AI can act only after money, policy, and evidence checks pass.
+      </p>
+      <ol className="mt-3 grid gap-2 sm:grid-cols-2 xl:grid-cols-5">
+        {steps.map((step, index) => {
+          const Icon = step.icon;
+          return (
+            <li className="min-w-0" key={step.label}>
+              <div className={`h-full rounded-md border p-3 ${darkToneClass(step.tone)}`}>
+                <div className="flex items-center justify-between gap-2">
+                  <Icon className="h-4 w-4 flex-none" aria-hidden="true" />
+                  <span className="text-xs font-semibold text-zinc-300">{String(index + 1).padStart(2, "0")}</span>
+                </div>
+                <p className="mt-2 text-sm font-semibold leading-5 text-white">{step.label}</p>
+                <p className="mt-1 break-words text-xs font-semibold leading-5 text-zinc-200">{step.value}</p>
+              </div>
+            </li>
+          );
+        })}
+      </ol>
+    </div>
+  );
+}
+
 function HeroMetricCard({ item }: { item: RailItem }) {
   return (
     <article className={`rounded-md border p-4 ${darkToneClass(item.tone ?? "slate")}`}>
@@ -918,24 +1059,16 @@ function HeroMetricCard({ item }: { item: RailItem }) {
   );
 }
 
-function HeroCompactMetric({ item }: { item: RailItem }) {
-  return (
-    <div className={`rounded-md border px-3 py-2 ${softToneClass(item.tone ?? "slate")}`}>
-      <p className="text-xs font-semibold uppercase">{item.label}</p>
-      <p className="mt-1 break-words text-base font-semibold">{item.value}</p>
-    </div>
-  );
-}
-
 function StackChain({ guardrailTone }: { guardrailTone: Tone }) {
   const steps = [
     { icon: BrainCircuit, label: "Hermes plans", tone: "violet" as Tone },
+    { icon: Workflow, label: "NemoClaw routes", tone: "sky" as Tone },
     { icon: CreditCard, label: "Stripe proves", tone: "sky" as Tone },
-    { icon: ShieldCheck, label: "NeMo checks", tone: guardrailTone },
+    { icon: ShieldCheck, label: "NeMo Guardrails check", tone: guardrailTone },
     { icon: Database, label: "ScaleX records", tone: "teal" as Tone },
   ];
   return (
-    <ol className="mt-6 grid gap-2 sm:grid-cols-2 xl:grid-cols-4">
+    <ol className="mt-6 grid gap-2 sm:grid-cols-2 xl:grid-cols-5">
       {steps.map((step, index) => {
         const Icon = step.icon;
         return (
@@ -955,7 +1088,7 @@ function StackChain({ guardrailTone }: { guardrailTone: Tone }) {
 function EnterpriseControlNarrative() {
   return (
     <div className="grid gap-4 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
-      <article className="rounded-md bg-white p-6 shadow-sm ring-1 ring-zinc-200">
+    <article className="scalex-card rounded-md p-6">
         <StatusBadge icon={AlertTriangle} label="enterprise pain" tone="amber" />
         <h3 className="mt-4 text-2xl font-semibold leading-tight text-zinc-950">
           Raw agents cannot be trusted with spend, vendors, client workflows, or internal systems.
@@ -964,7 +1097,7 @@ function EnterpriseControlNarrative() {
           Enterprise teams need proof, policy, money control, and audit before an AI agent can move paid work forward.
         </p>
       </article>
-      <article className="rounded-md bg-zinc-950 p-6 text-white shadow-sm">
+    <article className="scalex-card-dark scalex-grid-surface rounded-md p-6 text-white">
         <StatusBadge icon={ShieldCheck} label="ScaleX control" tone="teal" />
         <h3 className="mt-4 text-2xl font-semibold leading-tight">
           ScaleX turns paid client work into a governed run.
@@ -973,6 +1106,86 @@ function EnterpriseControlNarrative() {
           Finance-backed, policy-checked, guardrailed, and recorded before the agent can move the operation forward.
         </p>
       </article>
+    </div>
+  );
+}
+
+function NemoGuardrailProofPanel({
+  failClosed,
+  guardrailLabel,
+  hermesRuntime,
+  nemoClawSelected,
+  nemoClawStatus,
+  nemoConfigured,
+  usedRealNemo,
+}: {
+  failClosed: boolean;
+  guardrailLabel: string;
+  hermesRuntime: string;
+  nemoClawSelected: boolean;
+  nemoClawStatus: string;
+  nemoConfigured: boolean;
+  usedRealNemo: boolean;
+}) {
+  const cards = [
+    {
+      icon: Workflow,
+      title: "NemoClaw / NemoHermes",
+      subtitle: "Local runtime boundary",
+      status: nemoClawStatus,
+      proof: `Current route: ${hermesRuntime}`,
+      note: nemoClawSelected
+        ? "Selected for this runtime path; ScaleX records non-secret runtime evidence and fails closed when unavailable."
+        : "Implemented as a selectable local runtime path for isolated Hermes planning. No production Hermes config is used.",
+      tone: nemoClawSelected ? "sky" as Tone : "slate" as Tone,
+    },
+    {
+      icon: ShieldCheck,
+      title: "NeMo Guardrails",
+      subtitle: "Real guardrail proof when available",
+      status: usedRealNemo ? "Real NeMo proof recorded" : nemoConfigured ? "Configured / proof required" : "Local policy active",
+      proof: `used_real_nemo=${String(usedRealNemo)}`,
+      note: usedRealNemo
+        ? "Runtime evidence shows the real NeMo path was used."
+        : "The demo remains truthful: local policy checks are active unless the real NeMo runtime is verified.",
+      tone: usedRealNemo ? "emerald" as Tone : nemoConfigured ? "amber" as Tone : "teal" as Tone,
+    },
+    {
+      icon: Ban,
+      title: "Fail-Closed Guardrail",
+      subtitle: "Unsafe actions stop before execution",
+      status: failClosed ? "Fail-closed active" : guardrailLabel,
+      proof: `fail_closed=${String(failClosed)}`,
+      note: "Risky vendor spend is blocked before a spend ledger row can be written.",
+      tone: failClosed ? "rose" as Tone : "emerald" as Tone,
+    },
+  ];
+
+  return (
+    <div className="scalex-card-dark scalex-grid-surface rounded-md p-5 text-white">
+      <div className="grid gap-4 lg:grid-cols-3">
+        {cards.map((card) => {
+          const Icon = card.icon;
+          return (
+            <article className={`rounded-md border p-5 ${darkToneClass(card.tone)}`} key={card.title}>
+              <div className="flex items-start gap-3">
+                <span className="flex h-10 w-10 flex-none items-center justify-center rounded-md bg-white/10">
+                  <Icon className="h-5 w-5" aria-hidden="true" />
+                </span>
+                <div className="min-w-0">
+                  <h3 className="text-xl font-semibold text-white">{card.title}</h3>
+                  <p className="mt-1 text-xs font-semibold uppercase text-zinc-300">{card.subtitle}</p>
+                </div>
+              </div>
+              <div className="mt-5 grid gap-2">
+                <StatusBadge label={card.status} tone={card.tone} />
+                <p className="rounded-md bg-white/10 px-3 py-2 text-sm font-semibold text-white">{card.proof}</p>
+                <p className="text-sm leading-6 text-zinc-200">{card.note}</p>
+              </div>
+            </article>
+          );
+        })}
+      </div>
     </div>
   );
 }
@@ -988,8 +1201,8 @@ interface ControlStackItem {
 
 function ControlStackFlow({ items }: { items: ControlStackItem[] }) {
   return (
-    <div className="rounded-md bg-zinc-950 p-4 text-white shadow-sm ring-1 ring-zinc-900 sm:p-5">
-      <ol className="grid gap-3 xl:grid-cols-4">
+    <div className="scalex-card-dark scalex-grid-surface rounded-md p-4 text-white sm:p-5">
+      <ol className="grid gap-3 xl:grid-cols-5">
         {items.map((item, index) => {
           const Icon = item.icon;
           return (
@@ -1083,7 +1296,7 @@ function ControlStackCard({
   tone,
 }: ControlStackCardProps) {
   return (
-    <article className="rounded-md bg-white p-5 shadow-sm ring-1 ring-zinc-200">
+    <article className="scalex-card rounded-md p-5">
       <div className="flex items-start gap-3">
         <span className={`flex h-10 w-10 flex-none items-center justify-center rounded-md border ${softToneClass(tone)}`}>
           <Icon className="h-5 w-5" aria-hidden="true" />
@@ -1114,7 +1327,7 @@ interface GovernedRailItem {
 
 function GovernedRailGrid({ rails, running = false }: { rails: GovernedRailItem[]; running?: boolean }) {
   return (
-    <div className="rounded-md bg-zinc-950 p-4 text-white shadow-sm ring-1 ring-zinc-900 sm:p-5">
+    <div className="scalex-card-dark scalex-grid-surface rounded-md p-4 text-white sm:p-5">
       <div className="flex flex-col gap-3 border-b border-white/10 pb-4 lg:flex-row lg:items-center lg:justify-between">
         <div>
           <p className="text-sm font-semibold uppercase text-emerald-300">Live governed run stage</p>
@@ -1160,7 +1373,7 @@ function BlockedRiskSpotlight({
   marginPercent: number;
 }) {
   return (
-    <article className="grid overflow-hidden rounded-md bg-zinc-950 text-white shadow-xl shadow-rose-950/20 ring-1 ring-rose-500/40 lg:grid-cols-[minmax(0,1fr)_24rem]">
+    <article className="scalex-grid-surface grid overflow-hidden rounded-md bg-zinc-950 text-white shadow-2xl shadow-rose-950/30 ring-1 ring-rose-500/50 lg:grid-cols-[minmax(0,1fr)_24rem]">
       <div className="p-6 sm:p-8">
         <span className="inline-flex items-center gap-2 rounded-md border border-rose-300/30 bg-rose-300/10 px-3 py-1.5 text-sm font-semibold text-rose-100">
           <Ban className="h-4 w-4" aria-hidden="true" />
@@ -1223,7 +1436,7 @@ function EconomicControlPanel({
   revenueCents: number;
 }) {
   return (
-    <div className="grid overflow-hidden rounded-md bg-white shadow-sm ring-1 ring-zinc-200 xl:grid-cols-[minmax(0,1fr)_30rem]">
+    <div className="grid overflow-hidden rounded-md bg-white shadow-xl shadow-zinc-200/70 ring-1 ring-zinc-200/80 xl:grid-cols-[minmax(0,1fr)_30rem]">
       <div className="p-5 sm:p-6">
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
           <EconomicMetric label="Revenue secured" tone="emerald" value={formatCurrency(revenueCents)} />
@@ -1234,7 +1447,7 @@ function EconomicControlPanel({
           <EconomicMetric label="Protected margin" tone="amber" value={formatPercent(protectedMarginPercent)} />
         </div>
       </div>
-      <div className="bg-zinc-950 p-6 text-white">
+      <div className="scalex-grid-surface bg-zinc-950 p-6 text-white">
         <p className="text-xs font-semibold uppercase text-emerald-300">Enterprise money control</p>
         <p className="mt-3 text-3xl font-semibold leading-tight text-white">{formatCurrency(protectedProfitCents)}</p>
         <p className="mt-1 text-sm font-semibold text-zinc-300">protected profit after approved setup spend and labor cost</p>
@@ -1262,7 +1475,7 @@ function EconomicControlPanel({
 
 function EconomicMetric({ label, tone, value }: { label: string; tone: Tone; value: string }) {
   return (
-    <article className={`rounded-md border p-4 ${softToneClass(tone)}`}>
+    <article className={`rounded-md border p-4 shadow-sm ${softToneClass(tone)}`}>
       <p className="text-xs font-semibold uppercase">{label}</p>
       <p className="mt-2 break-words text-3xl font-semibold leading-none">{value}</p>
     </article>
@@ -1313,7 +1526,7 @@ function EnterpriseEvidenceTable({ rows }: { rows: EnterpriseEvidenceRow[] }) {
 function ComparisonPanel({ rows }: { rows: Array<{ normal: string; scalex: string }> }) {
   return (
     <div className="grid gap-4 lg:grid-cols-2">
-      <article className="rounded-md bg-white p-6 shadow-sm ring-1 ring-zinc-200">
+      <article className="scalex-card rounded-md p-6">
         <div className="flex items-center gap-3">
           <span className="flex h-10 w-10 items-center justify-center rounded-md border border-zinc-200 bg-zinc-50 text-zinc-600">
             <CircleDashed className="h-5 w-5" aria-hidden="true" />
@@ -1332,7 +1545,7 @@ function ComparisonPanel({ rows }: { rows: Array<{ normal: string; scalex: strin
           ))}
         </ul>
       </article>
-      <article className="rounded-md bg-zinc-950 p-6 text-white shadow-sm ring-1 ring-zinc-900">
+      <article className="scalex-card-dark scalex-grid-surface rounded-md p-6 text-white">
         <div className="flex items-center gap-3">
           <span className="flex h-10 w-10 items-center justify-center rounded-md border border-emerald-300/30 bg-emerald-300/10 text-emerald-100">
             <ShieldCheck className="h-5 w-5" aria-hidden="true" />
@@ -1377,10 +1590,10 @@ function IntakeUpload({
   onSimulateFailure: () => void;
 }) {
   return (
-    <div className="mt-5 rounded-md border border-dashed border-zinc-300 bg-zinc-50 p-5">
+    <div className="mt-5 rounded-md border border-dashed border-zinc-300 bg-zinc-50/90 p-5 shadow-inner">
       <p className="text-sm leading-6 text-zinc-600">{description}</p>
       <div className="mt-4 flex flex-wrap items-center gap-3">
-        <label className="inline-flex min-h-11 cursor-pointer items-center justify-center gap-2 rounded-md bg-zinc-950 px-4 text-sm font-semibold text-white transition hover:bg-zinc-800">
+        <label className="inline-flex min-h-11 cursor-pointer items-center justify-center gap-2 rounded-md bg-zinc-950 px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-zinc-800">
           <FileText className="h-4 w-4" aria-hidden="true" />
           Upload demo file
           <input
@@ -1397,7 +1610,7 @@ function IntakeUpload({
           />
         </label>
         <button
-          className="inline-flex min-h-11 items-center justify-center gap-2 rounded-md border border-amber-300 bg-amber-50 px-4 text-sm font-semibold text-amber-900 transition hover:bg-amber-100"
+          className="inline-flex min-h-11 items-center justify-center gap-2 rounded-md border border-amber-300 bg-amber-50 px-4 text-sm font-semibold text-amber-900 shadow-sm transition hover:bg-amber-100"
           onClick={onSimulateFailure}
           type="button"
         >
@@ -1420,7 +1633,7 @@ function ReviewPanel({
   title: string;
 }) {
   return (
-    <div className="rounded-md bg-white p-5 shadow-sm ring-1 ring-zinc-200">
+    <div className="scalex-card rounded-md p-5">
       <h3 className="font-semibold text-zinc-950">{title}</h3>
       <p className="mt-2 text-sm leading-6 text-zinc-600">{status}</p>
       <ConnectionFactGrid facts={facts} />
@@ -1432,7 +1645,7 @@ function PolicyDecisionCard({ check, ledgerEntries }: { check: PolicyCheck; ledg
   const approved = isApproved(check);
   const ledgerUpdated = ledgerEntries.some((entry) => entry.entry_type === "spend" && entry.label === check.vendor);
   return (
-    <article className={`rounded-md p-4 shadow-sm ring-1 ${approved ? "bg-emerald-50 ring-emerald-200" : "bg-rose-50 ring-rose-200"}`}>
+    <article className={`rounded-md p-4 shadow-lg shadow-zinc-200/60 ring-1 ${approved ? "bg-emerald-50 ring-emerald-200" : "bg-rose-50 ring-rose-200"}`}>
       <StatusBadge label={approved ? "approved" : "blocked"} tone={approved ? "emerald" : "rose"} />
       <h3 className="mt-3 font-semibold text-zinc-950">{check.vendor}</h3>
       <p className="mt-2 text-sm text-zinc-700">Requested: {formatCurrency(check.requested_amount_cents)}</p>
@@ -1856,8 +2069,8 @@ function FormSection({
   title: string;
 }) {
   return (
-    <section className="grid gap-5 border-b border-zinc-200 px-6 py-6 sm:px-8 lg:grid-cols-[18rem_minmax(0,1fr)]">
-      <div>
+    <section className="grid gap-5 border-b border-zinc-200/80 bg-white/70 px-6 py-6 sm:px-8 lg:grid-cols-[18rem_minmax(0,1fr)]">
+      <div className="border-l-4 border-emerald-400 pl-4">
         <h2 className="text-base font-semibold text-zinc-950">{title}</h2>
         <p className="mt-2 text-sm leading-6 text-zinc-600">{description}</p>
       </div>
@@ -2164,7 +2377,7 @@ function RunsView({
           <div className="space-y-8">
             <WorkspaceSection description="Selected execution economics and operation metadata." title="Selected execution">
               {selectedRun ? (
-                <div className="rounded-md bg-white p-5 shadow-sm ring-1 ring-zinc-200">
+                <div className="scalex-card rounded-md p-5">
                   <p className="text-xl font-semibold text-zinc-950">{selectedRun.client_name}</p>
                   <p className="mt-1 text-sm text-zinc-600">{selectedRun.job_name}</p>
                   <OutcomeRail
@@ -2249,7 +2462,7 @@ function AuditView({
         description="Enterprise audit view: order, actor/system, action, result, evidence type, and safety note."
         title="Enterprise Audit Ledger"
       >
-        <div className="rounded-md bg-white p-5 shadow-sm ring-1 ring-zinc-200">
+        <div className="scalex-card rounded-md p-5">
           <EnterpriseEvidenceTable rows={auditEvidenceRows} />
         </div>
       </WorkspaceSection>
@@ -2632,7 +2845,7 @@ function ConnectorCard({
   statuses: ConnectionStatus[];
 }) {
   return (
-    <article className="rounded-md bg-white p-5 shadow-sm ring-1 ring-zinc-200">
+    <article className="scalex-card rounded-md p-5">
       <div className="flex items-start gap-3">
         <span className="flex h-10 w-10 flex-none items-center justify-center rounded-md bg-zinc-950 text-white">
           <Icon className="h-5 w-5" aria-hidden="true" />
@@ -2657,7 +2870,7 @@ function ConnectionFactGrid({ facts }: { facts: ConnectorFact[] }) {
   return (
     <dl className="mt-5 grid gap-3 sm:grid-cols-2">
       {facts.map((fact) => (
-        <div className={`border-l-4 pl-3 ${toneAccentClass(fact.tone)}`} key={fact.label}>
+        <div className={`rounded-md border bg-white/80 p-3 shadow-sm ${softToneClass(fact.tone)}`} key={fact.label}>
           <dt className="text-[0.68rem] font-semibold uppercase text-zinc-500">{fact.label}</dt>
           <dd className="mt-1 break-words text-sm font-semibold text-zinc-950">{fact.value}</dd>
         </div>
@@ -2680,7 +2893,7 @@ function CapabilityCard({
   tone: Tone;
 }) {
   return (
-    <article className="rounded-md bg-white p-5 shadow-sm ring-1 ring-zinc-200">
+    <article className="scalex-card rounded-md p-5 transition hover:-translate-y-0.5 hover:shadow-xl">
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-start gap-3">
           <span className={`flex h-9 w-9 flex-none items-center justify-center rounded-md border ${softToneClass(tone)}`}>
@@ -2707,9 +2920,11 @@ function ConnectionPanel({
   title: string;
 }) {
   return (
-    <article className="rounded-md bg-white p-5 shadow-sm ring-1 ring-zinc-200">
+    <article className="scalex-card rounded-md p-5">
       <div className="flex items-center gap-2">
-        <Icon className="h-5 w-5 text-zinc-700" aria-hidden="true" />
+        <span className="flex h-9 w-9 items-center justify-center rounded-md bg-zinc-950 text-white">
+          <Icon className="h-4 w-4" aria-hidden="true" />
+        </span>
         <h3 className="text-base font-semibold text-zinc-950">{title}</h3>
       </div>
       <div className="mt-4">{children}</div>
@@ -2805,9 +3020,9 @@ function PlannedConnectorCard({
   name: string;
 }) {
   return (
-    <article className="rounded-md bg-white p-4 shadow-sm ring-1 ring-zinc-200">
+    <article className="scalex-card rounded-md p-4 transition hover:-translate-y-0.5 hover:shadow-xl">
       <div className="flex items-start gap-3">
-        <span className="flex h-9 w-9 flex-none items-center justify-center rounded-md border border-zinc-200 bg-zinc-50 text-zinc-700">
+        <span className="flex h-9 w-9 flex-none items-center justify-center rounded-md bg-zinc-950 text-white">
           <Icon className="h-4 w-4" aria-hidden="true" />
         </span>
         <div className="min-w-0">
@@ -2820,27 +3035,6 @@ function PlannedConnectorCard({
       </div>
     </article>
   );
-}
-
-function toneAccentClass(tone: Tone): string {
-  switch (tone) {
-    case "emerald":
-      return "border-emerald-500";
-    case "sky":
-      return "border-sky-500";
-    case "amber":
-      return "border-amber-500";
-    case "rose":
-      return "border-rose-500";
-    case "teal":
-      return "border-teal-500";
-    case "violet":
-      return "border-violet-500";
-    case "slate":
-      return "border-zinc-300";
-    default:
-      return "border-zinc-300";
-  }
 }
 
 function SettingsView({
@@ -2921,9 +3115,11 @@ function SectionHeader({
   title: string;
 }) {
   return (
-    <div>
+    <div className="scalex-card rounded-md p-4">
       <div className="flex items-center gap-2">
-        <Icon className="h-5 w-5 text-zinc-700" aria-hidden="true" />
+        <span className="flex h-9 w-9 items-center justify-center rounded-md bg-zinc-950 text-white">
+          <Icon className="h-4 w-4" aria-hidden="true" />
+        </span>
         <h2 className="text-lg font-semibold text-zinc-950">{title}</h2>
       </div>
       <p className="mt-1 text-sm leading-6 text-zinc-600">{description}</p>
@@ -2941,9 +3137,9 @@ function MetricTile({
   value: string;
 }) {
   return (
-    <div className={`rounded-md border p-3 ${softToneClass(tone)}`}>
+    <div className={`rounded-md border p-3 shadow-sm ${softToneClass(tone)}`}>
       <p className="text-[0.68rem] font-semibold uppercase">{label}</p>
-      <p className="mt-1 break-words text-sm font-semibold">{value}</p>
+      <p className="mt-1 break-words text-base font-semibold">{value}</p>
     </div>
   );
 }
@@ -2963,7 +3159,7 @@ function FieldInput({
     <label className="block text-sm font-semibold text-zinc-700">
       {label}
       <input
-        className="mt-2 min-h-11 w-full rounded-md border border-zinc-300 bg-white px-3 text-sm text-zinc-950 outline-none transition focus:border-emerald-600"
+        className="mt-2 min-h-11 w-full rounded-md border border-zinc-300 bg-white px-3 text-sm text-zinc-950 shadow-sm outline-none transition focus:border-emerald-600 focus:ring-2 focus:ring-emerald-200"
         onChange={(event) => onChange(event.target.value)}
         type={type}
         value={value}
@@ -2985,7 +3181,7 @@ function TextAreaField({
     <label className="block text-sm font-semibold text-zinc-700">
       {label}
       <textarea
-        className="mt-2 min-h-32 w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-950 outline-none transition focus:border-emerald-600"
+        className="mt-2 min-h-32 w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-950 shadow-sm outline-none transition focus:border-emerald-600 focus:ring-2 focus:ring-emerald-200"
         onChange={(event) => onChange(event.target.value)}
         value={value}
       />
@@ -3001,7 +3197,7 @@ function EmptyState({
   className?: string;
 }) {
   return (
-    <div className={`border border-dashed border-zinc-300 bg-white p-4 text-sm text-zinc-600 ${className}`}>
+    <div className={`rounded-md border border-dashed border-zinc-300 bg-white/90 p-4 text-sm text-zinc-600 shadow-sm ${className}`}>
       {children}
     </div>
   );
@@ -3027,7 +3223,7 @@ function PlanningEvidence({ state }: { state: DemoState | null }) {
             <MetricTile label="Provider/model" tone="slate" value={`${planningRun.provider} / ${planningRun.model}`} />
             <MetricTile label="Planning source" tone="slate" value={humanize(planningRun.source)} />
           </div>
-          <div className="border border-zinc-200 bg-white p-3 text-sm leading-6 text-zinc-700">
+          <div className="rounded-md border border-zinc-200 bg-white p-3 text-sm leading-6 text-zinc-700 shadow-sm">
             {planningRun.summary ?? "Planning summary was not recorded."}
           </div>
           {toolSequence.length > 0 ? (
@@ -3109,7 +3305,7 @@ function TimelinePanel({ events }: { events: DemoEvent[] }) {
           {events.map((event) => {
             const Icon = iconForEvent(event.type);
             return (
-              <li className="border border-zinc-200 bg-white p-3" key={event.id}>
+              <li className="rounded-md border border-zinc-200 bg-white p-3 shadow-sm" key={event.id}>
                 <div className="flex items-start gap-3">
                   <span className="flex h-8 w-8 flex-none items-center justify-center rounded-md bg-zinc-950 text-white">
                     <Icon className="h-4 w-4" aria-hidden="true" />
@@ -3437,7 +3633,7 @@ function PolicyEvidence({
       </div>
 
       {summary ? (
-        <div className="mt-4 border border-zinc-200 bg-white p-3 text-xs leading-5 text-zinc-600">
+        <div className="mt-4 rounded-md border border-zinc-200 bg-white p-3 text-xs leading-5 text-zinc-600 shadow-sm">
           Approved vendors: {summary.approved_vendors.join(", ")}. Blocked vendors: {summary.blocked_vendors.join(", ")}.
         </div>
       ) : null}

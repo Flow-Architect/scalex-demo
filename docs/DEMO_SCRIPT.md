@@ -23,13 +23,14 @@ Implemented template:
 - $1,150 approved setup spend
 - $3,200 blocked risk
 - $261.60 deterministic labor cost from Goal 8F
-- $7,088.40 protected profit after labor
-- 83.4% protected margin after labor
-- Existing ledger gross profit before labor remains $7,350 and 86.5%
+- $7,350 protected profit in the current API-backed control-room profit outcome
+- 86.5% protected margin in the current API-backed control-room profit outcome
+- $261.60 labor cost remains visible as a separate workforce-costing metric
 
 ## Recording Path
 
-Use this three-minute script for the recording:
+Use this three-minute script for the recording. Goal 8I presents the same API-backed mechanics in
+a fixed dark control-room shell rather than a long scrolling page.
 
 0:00-0:10
 Enterprises want AI agents, but cannot let raw agents touch money, vendors, client workflows, or
@@ -39,26 +40,27 @@ internal systems without proof and policy.
 This is ScaleX: a governed execution layer for revenue-backed client operations.
 
 0:25-0:45
-Show Northstar Dental Group / Client Implementation Launch: revenue secured $8,500, approved setup
-spend $1,150, blocked risk $3,200, labor cost $261.60, protected profit $7,088.40, and protected
-margin 83.4%.
+Show the fixed dashboard metric strip for Northstar Dental Group / Client Implementation Launch:
+revenue secured $8,500, approved setup spend $1,150, blocked risk $3,200, labor cost $261.60,
+protected profit $7,350, and protected margin 86.5%.
 
 0:45-1:10
-Show the Control Stack: Hermes plans, Stripe proves finance state, NeMo/local policy checks
-actions, and ScaleX records evidence, blocks unsafe spend, and protects profit.
+Show the right-side proof tabs: Hermes Plan, Stripe Proof, and NeMo / Local Guardrails. Emphasize
+that Stripe is sandbox/test proof, `livemode=false` remains visible, and NeMo is claimed only when
+runtime evidence proves it; otherwise local policy is shown.
 
 1:10-1:45
-Click `Start Governed Run` and show governed rails: input passed, Hermes plan, planning rail,
-Stripe proof, revenue gate, policy guardrail, approved setup spend, blocked risky vendor action,
-work execution, evidence, output honesty, and profit.
+Click `Start Governed Run` and show the governed rails animate: input rail, Hermes plan, planning
+rail, Stripe finance rail, revenue gate, policy rail, approved spend, blocked spend, execution
+rail, and profit rail. Pause on the blocked $3,200 risky vendor action.
 
 1:45-2:15
-Show Evidence Ledger: what happened, what was approved, what was blocked, what proof exists, no
-live-money mode, no secrets stored, and paid-state honesty.
+Open Evidence Ledger: enterprise audit rows show actor/system, action, evidence type, safety
+note, result badge, no live-money mode, no secrets stored, and paid-state honesty.
 
 2:15-2:45
-Show Profit Report: revenue, approved setup spend, labor cost, blocked risk, protected profit,
-protected margin, and margin floor.
+Open Connection Hub and Settings/Boundaries: Hermes, Stripe, NeMo/local policy, SQLite evidence,
+runtime mode, active operation, guardrails, money movement, and records remain truthfully labeled.
 
 2:45-3:00
 Close: ScaleX gives enterprises a safe way to let AI execute paid client operations without losing

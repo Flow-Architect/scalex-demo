@@ -10,6 +10,39 @@ Use:
 
 ---
 
+## 2026-06-28 - Goal 8I: Control-room frontend skin rewrite
+
+Completed:
+- Redesign the existing API-backed ScaleX frontend into a premium dark enterprise control-room
+  UI using the uploaded control-room prompt as visual guidance only.
+- Added a fixed full-viewport dark shell with a 200px sidebar, compact topbar, Active Operation
+  card, and persistent Start Governed Run action.
+- Added a modular `ControlRoomApp` feature instead of creating a hardcoded single-file static
+  prototype.
+- Rebuilt Dashboard around five API-backed metrics, governed execution rails, Hermes Plan /
+  Stripe Proof / NeMo Guardrails tabs, and blocked-risk visual emphasis.
+- Added Governed Run Studio, Enterprise Audit Ledger, Connection Hub, and Settings / Boundaries
+  views in the tabbed SPA shell.
+- Kept Business Intake, Document Review, and Workforce Costing as supporting modules behind the
+  main demo story.
+- Preserved backend mechanics, API calls, auth behavior, deterministic Judge Demo Mode, evidence
+  boundaries, Stripe safety, isolated Hermes, optional NemoHermes, NeMo/local policy truthfulness,
+  and fail-closed behavior.
+
+Verification:
+- `cd frontend && npm run build` passed.
+- `./scripts/test.sh` passed with 68 backend tests and a successful frontend build.
+- `./scripts/check-nemo.sh` passed with `nemoguardrails` 0.21.0 and `guardrails/scalex` loaded.
+- Local browser smoke at `http://127.0.0.1:5174/` rendered the control-room UI with demo-safe
+  overrides and no live Stripe key exported.
+- DevTools smoke verified Dashboard, Governed Run, Evidence Ledger, Connection Hub, and Settings
+  render without runtime errors.
+
+Suggested commit message:
+Restyle ScaleX enterprise control room UI
+
+---
+
 ## 2026-06-28 - Goal 8H: Cinematic enterprise demo UI redesign
 
 Completed:

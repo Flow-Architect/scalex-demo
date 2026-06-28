@@ -23,6 +23,7 @@ import {
   deleteWorkflow,
   selectWorkflow,
 } from "./api";
+import { ControlRoomApp } from "./features/control-room/ControlRoomApp";
 import {
   ProductView as OperationsProductView,
   type OnboardingDraft,
@@ -395,88 +396,49 @@ export default function App() {
   return (
     <AppShell
       activeView={activeView}
-      auth={auth}
       busy={isBusy}
-      onLogout={handleLogout}
+      displayCustomer={displayCustomer}
+      displayJob={displayJob}
       onNavigate={setActiveView}
-      topBar={
-        <TopCommandBar
-          activeWorkflow={activeWorkflow}
-          authEnabled={Boolean(auth?.auth_enabled)}
-          busyAction={busyAction}
-          displayCustomer={displayCustomer}
-          displayJob={displayJob}
-          isBusy={isBusy}
-          onLogout={handleLogout}
-          onRefresh={refreshState}
-          onReset={handleResetDemo}
-          onRun={handleRunDemo}
-          runStatus={runStatus}
-        />
-      }
+      onRun={handleRunDemo}
+      profitLabel={formatCurrencyText(money.grossProfitCents)}
+      revenueLabel={formatCurrencyText(money.revenueCents)}
     >
-      {activeView === "workflow" ? (
-        <WorkflowPage
-          activeWorkflow={activeWorkflow}
-          auditRows={auditRows}
-          busyAction={busyAction}
-          displayCustomer={displayCustomer}
-          displayJob={displayJob}
-          error={error}
-          health={health}
-          isBusy={isBusy}
-          money={money}
-          notice={notice}
-          onOpenCustomers={() => setActiveView("customers")}
-          onRefresh={refreshState}
-          onReset={handleResetDemo}
-          onRun={handleRunDemo}
-          onOpenAudit={() => setActiveView("audit")}
-          onSelectNode={setSelectedNodeKey}
-          playbackIndex={playbackIndex}
-          runCompletedMoment={runCompletedMoment}
-          runStatus={runStatus}
-          selectedNodeKey={selectedNodeKey}
-          state={state}
-        />
-      ) : (
-        <OperationsProductView
-          activeView={activeView}
-          auditRows={auditRows}
-          auth={auth}
-          health={health}
-          money={money}
-          onNavigate={setActiveView}
-          onDeleteWorkflow={handleDeleteWorkflow}
-          onDraftChange={setOnboardingDraft}
-          onInspectRun={handleInspectRun}
-          onRun={handleRunDemo}
-          onSaveWorkflow={handleSaveOnboarding}
-          onSelectWorkflow={handleSelectWorkflow}
-          onUseNorthstarSample={handleUseNorthstarSample}
-          onboardingBusy={busyAction === "reset"}
-          onboardingDraft={onboardingDraft}
-          onboardingError={onboardingError}
-          busyAction={busyAction}
-          runStatus={runStatus}
-          state={state}
-        />
-      )}
+      <ControlRoomApp
+        activeView={activeView}
+        auditRows={auditRows}
+        auth={auth}
+        busyAction={busyAction}
+        displayCustomer={displayCustomer}
+        displayJob={displayJob}
+        error={error}
+        health={health}
+        money={money}
+        notice={notice}
+        onNavigate={setActiveView}
+        onRefresh={refreshState}
+        onReset={handleResetDemo}
+        onLogout={handleLogout}
+        onRun={handleRunDemo}
+        runCompletedMoment={runCompletedMoment}
+        runStatus={runStatus}
+        state={state}
+      />
     </AppShell>
   );
 }
 
 function LoadingScreen() {
   return (
-    <main className="flex min-h-screen items-center justify-center bg-stone-100 px-4 text-zinc-950">
-      <div className="w-full max-w-md rounded-md bg-white p-6 shadow-sm ring-1 ring-zinc-200">
+    <main className="scalex-grid-surface flex min-h-screen items-center justify-center bg-zinc-950 px-4 text-white">
+      <div className="w-full max-w-md rounded-md border border-white/10 bg-white/[0.04] p-6 shadow-xl shadow-zinc-950/30">
         <div className="flex items-center gap-3">
-          <span className="flex h-11 w-11 items-center justify-center rounded-md bg-zinc-950 text-white">
+          <span className="flex h-11 w-11 items-center justify-center rounded-md border border-emerald-300/30 bg-emerald-300/10 text-emerald-100">
             <Workflow className="h-5 w-5 animate-pulse" aria-hidden="true" />
           </span>
           <div>
             <p className="text-lg font-semibold">ScaleX Governed ClientOps</p>
-            <p className="text-sm text-zinc-600">Loading local operation workspace</p>
+            <p className="text-sm text-zinc-300">Loading governed execution workspace</p>
           </div>
         </div>
       </div>
@@ -498,42 +460,42 @@ function LoginScreen({
   onSubmit: (event: FormEvent<HTMLFormElement>) => void;
 }) {
   return (
-    <main className="min-h-screen bg-stone-100 text-zinc-950">
+    <main className="min-h-screen bg-zinc-950 text-white">
       <div className="grid min-h-screen lg:grid-cols-[minmax(0,0.95fr)_minmax(420px,0.7fr)]">
-        <section className="flex min-h-[22rem] flex-col justify-between border-b border-zinc-200 bg-white p-6 lg:border-b-0 lg:border-r lg:p-10">
+        <section className="scalex-grid-surface flex min-h-[22rem] flex-col justify-between border-b border-white/10 bg-zinc-950 p-6 lg:border-b-0 lg:border-r lg:p-10">
           <div className="flex items-center gap-3">
-            <span className="flex h-11 w-11 items-center justify-center rounded-md bg-zinc-950 text-white">
+            <span className="flex h-11 w-11 items-center justify-center rounded-md border border-emerald-300/30 bg-emerald-300/10 text-emerald-100">
               <ShieldCheck className="h-5 w-5" aria-hidden="true" />
             </span>
             <div>
               <p className="text-xl font-semibold">ScaleX Governed ClientOps</p>
-              <p className="text-sm text-zinc-600">Enterprise Function Accelerator</p>
+              <p className="text-sm text-emerald-300">Enterprise Function Accelerator</p>
             </div>
           </div>
 
           <div className="max-w-3xl">
-            <p className="text-sm font-semibold uppercase text-emerald-700">
+            <p className="text-sm font-semibold uppercase text-emerald-300">
               Governed execution workspace
             </p>
-            <h1 className="mt-3 text-4xl font-semibold leading-tight lg:text-6xl">
+            <h1 className="mt-3 text-4xl font-semibold leading-tight text-white lg:text-6xl">
               Governed execution for revenue-backed client operations.
             </h1>
-            <p className="mt-5 max-w-2xl text-base leading-7 text-zinc-600">
+            <p className="mt-5 max-w-2xl text-base leading-7 text-zinc-300">
               Local prototype auth gates the demo API and product shell with a signed
               session cookie. It is not production enterprise identity.
             </p>
           </div>
 
-          <div className="grid gap-3 text-sm text-zinc-700 sm:grid-cols-3">
+          <div className="grid gap-3 text-sm text-zinc-200 sm:grid-cols-3">
             <LoginProof icon={LockKeyhole} label="Local session" />
             <LoginProof icon={BrainCircuit} label="Hermes proof preserved" />
             <LoginProof icon={CreditCard} label="Stripe test only" />
           </div>
         </section>
 
-        <section className="flex items-center justify-center p-6 lg:p-10">
+        <section className="flex items-center justify-center bg-[#eef2f1] p-6 text-zinc-950 lg:p-10">
           <form
-            className="w-full max-w-md rounded-md bg-white p-5 shadow-sm ring-1 ring-zinc-200"
+            className="w-full max-w-md rounded-md bg-white p-6 shadow-xl shadow-zinc-950/10 ring-1 ring-zinc-200"
             onSubmit={onSubmit}
           >
             <div className="flex items-center gap-3">
@@ -550,7 +512,7 @@ function LoginScreen({
               Username
               <input
                 autoComplete="username"
-                className="mt-2 min-h-11 w-full rounded-md border border-zinc-300 bg-white px-3 text-zinc-950 outline-none transition focus:border-emerald-600"
+                className="mt-2 min-h-11 w-full rounded-md border border-zinc-300 bg-white px-3 text-zinc-950 shadow-sm outline-none transition focus:border-emerald-600 focus:ring-2 focus:ring-emerald-200"
                 onChange={(event) => onChange({ ...form, username: event.target.value })}
                 type="text"
                 value={form.username}
@@ -560,7 +522,7 @@ function LoginScreen({
               Password
               <input
                 autoComplete="current-password"
-                className="mt-2 min-h-11 w-full rounded-md border border-zinc-300 bg-white px-3 text-zinc-950 outline-none transition focus:border-emerald-600"
+                className="mt-2 min-h-11 w-full rounded-md border border-zinc-300 bg-white px-3 text-zinc-950 shadow-sm outline-none transition focus:border-emerald-600 focus:ring-2 focus:ring-emerald-200"
                 onChange={(event) => onChange({ ...form, password: event.target.value })}
                 type="password"
                 value={form.password}
@@ -594,8 +556,8 @@ function LoginScreen({
 
 function LoginProof({ icon: Icon, label }: { icon: LucideIcon; label: string }) {
   return (
-    <div className="flex items-center gap-2 rounded-md border border-zinc-200 bg-zinc-50 p-3">
-      <Icon className="h-4 w-4 text-emerald-700" aria-hidden="true" />
+    <div className="flex items-center gap-2 rounded-md border border-white/10 bg-white/[0.04] p-3">
+      <Icon className="h-4 w-4 text-emerald-300" aria-hidden="true" />
       <span>{label}</span>
     </div>
   );

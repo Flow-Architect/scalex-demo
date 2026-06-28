@@ -4,6 +4,20 @@
 
 Goal 9 - final repo/video/submission polish.
 
+Goal 8I is complete. Next work should stay narrow and focus on final delivery readiness:
+
+- Rehearse the three-minute recording against `docs/DEMO_SCRIPT.md`.
+- Confirm the local demo opens at `http://127.0.0.1:5174/` with the dark control-room UI.
+- Capture final screenshots or video assets only if needed for submission.
+- Do a final submission copy check against `docs/SUBMISSION_WRITEUP.md`.
+- Run final build/tests/safety scans and keep the repo clean.
+
+Do not add Telegram, live Stripe, production Hermes, Full Proof runs, Docker/NemoClaw commands,
+new backend features, new external services, production payroll/HR behavior, MCP, real `.env`
+changes, database files, uploaded real files, or secrets.
+
+## Recently Completed
+
 Goal 8F is complete. ScaleX now has a docs-first command-center UI, deterministic client and
 employee intake proof, demo-safe document review states, labor costing, economic controls, policy
 proof, agent workbench, judge proof, and final profit after labor.
@@ -28,10 +42,16 @@ surface that immediately shows:
 Goal 8H did not add Telegram, new external services, live Stripe, production Hermes, Full Proof
 runs, production payroll/HR behavior, live document extraction, or backend state-machine scope.
 
-Next recommended goal: Goal 9 - final repo/video/submission polish. Required outputs should be
-local browser smoke outside the sandbox, recording rehearsal against `docs/DEMO_SCRIPT.md`, final
-submission copy check, repo cleanliness, and final safety scan. Do not start Telegram, live Stripe,
-MCP, production payroll/HR, or new integration work before submission.
+Goal 8I is complete. It was a frontend skin rewrite, not a new integration or static prototype.
+The authenticated app is now a fixed dark enterprise control room with left sidebar, compact
+topbar, Active Operation card, API-backed metric strip, governed rails, proof tabs, Governed Run
+Studio, Enterprise Audit Ledger, Connection Hub, and Settings / Boundaries.
+
+Goal 8I preserved API-backed mechanics, auth behavior, deterministic Judge Demo Mode, evidence
+boundaries, Stripe safety, isolated Hermes, optional NemoHermes, NeMo/local policy truthfulness,
+and fail-closed behavior. The local smoke state rendered the current API outcome as $8,500
+revenue, $1,150 approved spend, $3,200 blocked risk, $261.60 labor cost, $7,350 protected profit,
+and 86.5% protected margin.
 
 Goal 8E is complete. ScaleX has an optional backend runtime adapter for the already validated
 local NemoHermes OpenAI-compatible API. It is selected with `HERMES_RUNTIME=nemoclaw`, records
@@ -40,6 +60,39 @@ non-secret runtime evidence, and fails closed if selected but unavailable.
 Goal 7.13B is complete. The repo now has a product-facing Connection Hub view for allowed systems,
 connector modes, guardrails, evidence duties, missing config, blocked policy actions, and planned
 boundaries while preserving Judge Demo Mode and Full Proof compatibility.
+
+## Goal 8I Gate Result
+
+Goal 8I - Frontend Skin Rewrite Using Control-Room Visual Spec is complete.
+
+Completed:
+
+- Replaced the authenticated app with a fixed full-viewport dark enterprise shell, 200px sidebar,
+  compact topbar, Active Operation card, and persistent Start Governed Run action.
+- Added a modular `frontend/src/features/control-room/ControlRoomApp.tsx` surface instead of
+  replacing the app with a hardcoded single-file prototype.
+- Rebuilt Dashboard around five API-backed metrics, governed execution rails, and proof tabs for
+  Hermes Plan, Stripe Proof, and NeMo Guardrails.
+- Added Governed Run Studio, Enterprise Audit Ledger, Connection Hub, and Settings / Boundaries
+  views inside the same SPA shell.
+- Kept Business Intake, Document Review, and Workforce Costing visible as supporting modules
+  behind the main recording story.
+- Preserved existing backend/API/auth mechanics and restored logout when prototype auth is
+  enabled.
+
+Validation:
+
+- `cd frontend && npm run build` passed.
+- `./scripts/test.sh` passed with 68 backend tests and a successful frontend build.
+- `./scripts/check-nemo.sh` passed with `nemoguardrails` 0.21.0 and `guardrails/scalex` loaded.
+- Local demo server smoke passed at `http://127.0.0.1:5174/` with demo-safe overrides and no live
+  Stripe key exported.
+- Browser DevTools smoke verified Dashboard, Governed Run, Evidence Ledger, Connection Hub, and
+  Settings render without runtime errors.
+
+Suggested commit message:
+
+`Restyle ScaleX enterprise control room UI`
 
 ## Goal 8H Gate Result
 

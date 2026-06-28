@@ -7,13 +7,19 @@ Last updated: 2026-06-28
 - Project folder exists at `/home/ascabrya/dev/scalex-demo`.
 - Latest committed baseline before Goal 8E: `615a9bd Document NemoClaw correction and next
   integration plan`.
-- Last completed goal: Goal 8H - Cinematic Enterprise Demo UI Redesign.
-- Last completed implementation/QA goal: Goal 8H - frontend-first cinematic enterprise demo UI
-  redesign.
-- Last completed documentation/tracking update: Goal 8H visual storytelling closeout.
+- Last completed goal: Goal 8I - frontend visual skin rewrite into a premium dark enterprise
+  control-room UI.
+- Last completed implementation/QA goal: Goal 8I - API-backed control-room shell, metric strip,
+  governed rails, proof tabs, Evidence Ledger, Connection Hub, and Boundaries view.
+- Last completed documentation/tracking update: Goal 8I control-room closeout.
 - Last completed checkout cleanup: Open Source Checkout Cleanup for judge readiness.
-- Current priority: Goal 9 - final repo/video/submission polish, including local browser smoke
-  before recording.
+- Current priority: Goal 9 - final repo/video/submission polish, recording rehearsal, submission
+  copy check, and final safety scan.
+- Goal 8I used the uploaded six-phase control-room visual prompt as a design specification only.
+  It did not become a hardcoded single-file prototype, did not remove API calls, and preserved
+  deterministic Judge Demo Mode, auth behavior, backend state, evidence boundaries, Stripe
+  safety, isolated Hermes, optional NemoHermes, local policy truthfulness, and fail-closed
+  behavior.
 - Goal 7.11B replaced the legacy Harbor sample with Northstar Dental Group / Client Implementation Launch.
 - Goal 7.11C-followup replaced the remaining generated dashboard/card shell with a ClientOps
   operation-file workspace across Dashboard, Function Studio, Onboarding, Client Operations,
@@ -68,6 +74,11 @@ Last updated: 2026-06-28
   actions, and ScaleX approves safe actions while blocking unsafe ones.
   Act 3 - the evidence ledger records approvals, blocks, proof, safety notes, and the final
   protected-profit outcome.
+- Goal 8I replaced the scrolling/section-heavy demo skin with a fixed full-viewport dark
+  enterprise control-room shell. The app now opens with a 200px left sidebar, compact topbar,
+  Active Operation card, API-backed metric strip, governed execution rails, proof tabs for Hermes
+  Plan / Stripe Proof / NeMo Guardrails, Governed Run Studio, Enterprise Audit Ledger,
+  Connection Hub, Settings / Boundaries, and supporting modules behind the main story.
 - Goal 9 remains final polish and submission assets.
 - Goal 7B remains future Verified Live Mode hardening.
 
@@ -170,6 +181,9 @@ Dental Group account.
 - Deterministic Goal 8F labor cost: $261.60
 - Existing ledger gross profit before labor: $7,350 and 86.5% gross margin
 - Goal 8G protected profit after labor: $7,088.40 and 83.4% protected margin
+- Goal 8I control-room dashboard shows the API current protected profit outcome. In the verified
+  local smoke state this rendered as $7,350 protected profit and 86.5% protected margin, with
+  $261.60 labor cost visible as a separate metric.
 - Formula: protected profit = revenue - approved setup spend - labor cost; protected margin =
   protected profit / revenue
 - Synthetic account only; no patient data, no PHI, no healthcare compliance claim, and no HIPAA
@@ -305,6 +319,55 @@ Verification completed:
 Suggested commit message:
 
 `Polish ScaleX cinematic enterprise demo`
+
+## Verified For Goal 8I
+
+Goal 8I completed the frontend skin rewrite into a premium dark enterprise control-room UI while
+preserving the existing API-backed mechanics.
+
+Recorded updates:
+
+- Replaced the authenticated app shell with a fixed full-viewport dark control room, 200px left
+  sidebar, compact topbar, Active Operation card, and persistent Start Governed Run CTA.
+- Added a modular `ControlRoomApp` feature instead of a hardcoded single-file prototype.
+- Reworked the Dashboard into a metric strip plus Governed Run rails and a proof panel with
+  Hermes Plan, Stripe Proof, and NeMo Guardrails tabs.
+- Added a dedicated Governed Run Studio with operation details, compact rail map, expandable proof
+  snippets, evidence drawer, and rail activity chips.
+- Reworked Evidence Ledger into an enterprise audit table with stat pills, evidence type, safety
+  notes, result badges, and blocked-risk row emphasis.
+- Reworked Connection Hub into product-facing cards for Hermes Planning, Stripe Finance Proof,
+  NeMo / Local Policy, and SQLite Evidence Ledger, including truthfulness boundaries.
+- Replaced Settings with a Boundaries & Runtime table plus supporting Business Intake, Document
+  Review, and Workforce Costing cards behind the main demo story.
+- Restored the logout affordance when prototype auth is enabled.
+
+Deterministic/demo-safe behavior preserved:
+
+- Existing backend APIs, `VITE_API_BASE_URL`, auth flow, Judge Demo Mode, Stripe safety,
+  deterministic Hermes path, optional NemoHermes path, local policy, NeMo truthfulness fields,
+  evidence boundaries, and fail-closed behavior remain intact.
+
+Intentionally not touched:
+
+- No Telegram, new backend feature, new external service, live Stripe, production Hermes, Full
+  Proof run, Docker/NemoClaw command, MCP, production payroll/HR behavior, real `.env`, real
+  database file, uploaded real file, or secret setup was added.
+
+Verification completed:
+
+- `cd frontend && npm run build` passed.
+- `./scripts/test.sh` passed with 68 backend tests and a successful frontend build.
+- `./scripts/check-nemo.sh` passed with `nemoguardrails` 0.21.0 and `guardrails/scalex` loaded.
+- Local dev-server smoke passed at `http://127.0.0.1:5174/` with demo-safe overrides
+  (live Stripe secret key unset, `HERMES_TEST_MODE=true`, `HERMES_REQUIRE_REAL=false`,
+  `STRIPE_TEST_DOUBLE_MODE=true`, `SCALEX_AUTH_ENABLED=false`).
+- Live browser smoke verified Dashboard, Governed Run, Evidence Ledger, Connection Hub, and
+  Settings render without runtime errors.
+
+Suggested commit message:
+
+`Restyle ScaleX enterprise control room UI`
 
 ## Verified For Goal 8G
 

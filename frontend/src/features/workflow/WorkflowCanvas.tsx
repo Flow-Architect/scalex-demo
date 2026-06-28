@@ -127,50 +127,50 @@ export function WorkflowCanvas({
   };
 
   return (
-    <section className="flex h-full min-h-[44rem] flex-col overflow-hidden bg-white text-zinc-950 shadow-sm ring-1 ring-zinc-200">
-      <div className="border-b border-zinc-200 bg-white p-4">
+    <section className="flex h-full min-h-[44rem] flex-col overflow-hidden rounded-md bg-white text-zinc-950 shadow-xl shadow-zinc-950/10 ring-1 ring-zinc-200/80">
+      <div className="scalex-grid-surface border-b border-white/10 bg-zinc-950 p-5 text-white">
         <div className="flex flex-col gap-3 2xl:flex-row 2xl:items-center 2xl:justify-between">
           <div>
-            <p className="text-xs font-semibold uppercase text-zinc-500">Governed Rail Map</p>
-            <h2 className="mt-1 text-xl font-semibold text-zinc-950">Client implementation run</h2>
-            <p className="mt-1 text-sm text-zinc-600">
+            <p className="text-xs font-semibold uppercase text-emerald-300">Governed Rail Map</p>
+            <h2 className="mt-1 text-2xl font-semibold text-white">Client implementation run</h2>
+            <p className="mt-1 text-sm leading-6 text-zinc-300">
               Revenue, finance proof, guardrail review, evidence, and profit outcome in one governed route.
             </p>
           </div>
           <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center 2xl:justify-end">
             <CanvasLegend />
-            <span className="w-fit rounded-md border border-zinc-200 bg-zinc-50 px-3 py-2 text-xs font-semibold text-zinc-700">
+            <span className="w-fit rounded-md border border-white/10 bg-white/10 px-3 py-2 text-xs font-semibold text-zinc-100">
               {model.activeCount}/{model.nodes.length} rails available
             </span>
           </div>
         </div>
       </div>
 
-      <div ref={viewportRef} className="flex-1 bg-zinc-50 p-4">
+      <div ref={viewportRef} className="flex-1 bg-[#f7faf9] p-4">
         <ol className="grid gap-3">
           {nodes.map((node, index) => (
             <li key={node.key}>
               <button
-                className={`grid w-full gap-4 rounded-md border bg-white p-4 text-left shadow-sm transition hover:border-zinc-500 hover:shadow-md sm:grid-cols-[3rem_minmax(0,1fr)] ${
+                className={`grid w-full gap-4 rounded-md border bg-white p-4 text-left shadow-md shadow-zinc-200/70 transition hover:-translate-y-0.5 hover:border-zinc-500 hover:shadow-xl sm:grid-cols-[3rem_minmax(0,1fr)] ${
                   selectedKey === node.key ? "border-emerald-600 ring-2 ring-emerald-600 ring-offset-2 ring-offset-zinc-50" : stepBorderClass(node.tone)
                 }`}
                 onClick={() => handleNodeSelect(node.key)}
                 type="button"
               >
-                <span className="flex h-10 w-10 items-center justify-center rounded-md bg-zinc-950 text-sm font-semibold text-white">
+                <span className="flex h-10 w-10 items-center justify-center rounded-md bg-zinc-950 text-sm font-semibold text-white shadow-sm">
                   {String(index + 1).padStart(2, "0")}
                 </span>
                 <span className="min-w-0">
                   <span className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
                     <span className="min-w-0">
                       <span className="text-xs font-semibold uppercase text-zinc-500">{node.eyebrow}</span>
-                      <span className="mt-1 block text-lg font-semibold text-zinc-950">{node.title}</span>
+                      <span className="mt-1 block text-xl font-semibold text-zinc-950">{node.title}</span>
                     </span>
                     <span className={`inline-flex w-fit items-center justify-center rounded-md px-2 py-1 text-xs font-semibold ${stepStatusClass(node.status)}`}>
                       {node.badge}
                     </span>
                   </span>
-                  <span className="mt-1 block text-sm leading-6 text-zinc-600">{node.proof}</span>
+                  <span className="mt-2 block text-sm leading-6 text-zinc-600">{node.proof}</span>
                 </span>
               </button>
             </li>
@@ -295,7 +295,7 @@ function ConnectorLayer({
 
 function CanvasLegend() {
   return (
-    <div className="flex w-fit flex-wrap gap-2 border border-zinc-200 bg-zinc-50 p-2 text-[0.68rem] font-semibold text-zinc-700">
+    <div className="flex w-fit flex-wrap gap-2 rounded-md border border-white/10 bg-white/10 p-2 text-[0.68rem] font-semibold text-zinc-100">
       <LegendDot className="bg-emerald-300" label="Approved" />
       <LegendDot className="bg-rose-300" label="Blocked" />
       <LegendDot className="bg-amber-300" label="Awaiting run" />

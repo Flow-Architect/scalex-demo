@@ -42,13 +42,13 @@ export function WorkspacePage({
 }) {
   return (
     <div className="mx-auto max-w-[94rem] space-y-7 text-zinc-950">
-      <header className="grid gap-5 border-b border-zinc-200 pb-6 xl:grid-cols-[minmax(0,1fr)_auto] xl:items-end">
+      <header className="scalex-grid-surface grid gap-5 overflow-hidden rounded-md bg-zinc-950 p-6 text-white shadow-xl shadow-zinc-950/20 ring-1 ring-zinc-900 xl:grid-cols-[minmax(0,1fr)_auto] xl:items-end">
         <div className="min-w-0">
-          <p className="text-sm font-semibold uppercase text-emerald-700">{eyebrow}</p>
-          <h1 className="mt-2 max-w-5xl text-4xl font-semibold leading-tight tracking-normal text-zinc-950 lg:text-5xl">
+          <p className="text-sm font-semibold uppercase text-emerald-300">{eyebrow}</p>
+          <h1 className="mt-2 max-w-5xl text-4xl font-semibold leading-tight tracking-normal text-white lg:text-5xl">
             {title}
           </h1>
-          <p className="mt-3 max-w-4xl text-base leading-7 text-zinc-600">{description}</p>
+          <p className="mt-3 max-w-4xl text-base leading-7 text-zinc-300">{description}</p>
           {meta ? <div className="mt-4">{meta}</div> : null}
         </div>
         {actions ? <div className="flex flex-col gap-2 sm:flex-row xl:justify-end">{actions}</div> : null}
@@ -74,7 +74,7 @@ export function OperationHero({
   title: string;
 }) {
   return (
-    <section className="grid overflow-hidden rounded-md bg-white shadow-sm ring-1 ring-zinc-200 xl:grid-cols-[minmax(0,1fr)_24rem]">
+    <section className="grid overflow-hidden rounded-md bg-white shadow-xl shadow-zinc-200/60 ring-1 ring-zinc-200/80 xl:grid-cols-[minmax(0,1fr)_24rem]">
       <div className="px-6 py-8 sm:px-8 lg:px-10">
         <p className="text-sm font-semibold uppercase text-zinc-500">{client}</p>
         <h2 className="mt-3 max-w-4xl text-4xl font-semibold leading-tight text-zinc-950 lg:text-5xl">
@@ -109,7 +109,7 @@ export function OperationHero({
 
 export function OutcomeRail({ items }: { items: RailItem[] }) {
   return (
-    <section className="overflow-hidden rounded-md bg-white shadow-sm ring-1 ring-zinc-200" aria-label="Outcome ledger">
+    <section className="overflow-hidden rounded-md bg-white shadow-lg shadow-zinc-200/70 ring-1 ring-zinc-200/80" aria-label="Outcome ledger">
       <div className="grid divide-y divide-zinc-200 sm:grid-cols-2 sm:divide-x sm:divide-y-0 xl:grid-cols-6">
         {items.map((item) => (
           <div className="px-5 py-5 sm:px-6" key={item.label}>
@@ -126,7 +126,7 @@ export function OutcomeRail({ items }: { items: RailItem[] }) {
 
 export function OperationTimeline({ steps }: { steps: TimelineStep[] }) {
   return (
-    <ol className="grid gap-0 overflow-hidden rounded-md bg-white shadow-sm ring-1 ring-zinc-200 lg:grid-cols-4">
+    <ol className="grid gap-0 overflow-hidden rounded-md bg-white shadow-lg shadow-zinc-200/70 ring-1 ring-zinc-200/80 lg:grid-cols-4">
       {steps.map((step, index) => {
         const Icon = step.icon;
         return (
@@ -159,18 +159,20 @@ export function WorkspaceSection({
   actions,
   children,
   description,
+  id,
   title,
 }: {
   actions?: ReactNode;
   children: ReactNode;
   description?: string;
+  id?: string;
   title: string;
 }) {
   return (
-    <section className="border-t border-zinc-200 pt-6">
+    <section className="scroll-mt-28 border-t border-zinc-300/70 pt-8" id={id}>
       <div className="grid gap-3 xl:grid-cols-[minmax(0,1fr)_auto] xl:items-start">
-        <div>
-          <h2 className="text-2xl font-semibold text-zinc-950">{title}</h2>
+        <div className="border-l-4 border-emerald-400 pl-4">
+          <h2 className="text-3xl font-semibold leading-tight text-zinc-950">{title}</h2>
           {description ? <p className="mt-2 max-w-4xl text-sm leading-6 text-zinc-600">{description}</p> : null}
         </div>
         {actions ? <div className="flex flex-col gap-2 sm:flex-row xl:justify-end">{actions}</div> : null}
@@ -188,7 +190,7 @@ export function TemplateShelf({
   planned: string[];
 }) {
   return (
-    <div className="grid gap-5 rounded-md bg-white p-6 shadow-sm ring-1 ring-zinc-200 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)]">
+    <div className="grid gap-5 rounded-md bg-white p-6 shadow-lg shadow-zinc-200/70 ring-1 ring-zinc-200/80 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)]">
       <div>
         <p className="text-xs font-semibold uppercase text-emerald-700">Implemented</p>
         <p className="mt-2 text-xl font-semibold text-zinc-950">{implemented}</p>
@@ -236,7 +238,7 @@ export function ProofRoute({
 
 export function EmptyWorkspaceState({ children }: { children: ReactNode }) {
   return (
-    <div className="border border-dashed border-zinc-300 bg-white px-5 py-8 text-sm leading-6 text-zinc-600">
+    <div className="rounded-md border border-dashed border-zinc-300 bg-white/90 px-5 py-8 text-sm leading-6 text-zinc-600 shadow-sm">
       {children}
     </div>
   );
@@ -250,16 +252,16 @@ export function PlainTable({
   headers: string[];
 }) {
   return (
-    <div className="overflow-hidden rounded-md bg-white shadow-sm ring-1 ring-zinc-200">
+    <div className="overflow-hidden rounded-md bg-white shadow-lg shadow-zinc-200/70 ring-1 ring-zinc-200/80">
       <table className="min-w-full divide-y divide-zinc-200 text-sm">
-        <thead className="bg-zinc-50 text-left text-xs uppercase text-zinc-500">
+        <thead className="bg-zinc-950 text-left text-xs uppercase text-zinc-200">
           <tr>
             {headers.map((header) => (
               <th className="px-4 py-3 font-semibold" key={header}>{header}</th>
             ))}
           </tr>
         </thead>
-        <tbody className="divide-y divide-zinc-200">{children}</tbody>
+        <tbody className="divide-y divide-zinc-200 bg-white">{children}</tbody>
       </table>
     </div>
   );

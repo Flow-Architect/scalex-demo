@@ -18,7 +18,7 @@ export function InspectorSection({
   title: string;
 }) {
   return (
-    <section className="border border-zinc-200 bg-white p-4">
+    <section className="rounded-md border border-zinc-200 bg-white p-4 shadow-md shadow-zinc-200/70">
       <div className="flex items-start gap-3">
         {Icon ? (
           <span className="flex h-9 w-9 flex-none items-center justify-center rounded-md bg-zinc-950 text-white">
@@ -43,7 +43,7 @@ export function FactGrid({ children }: { children: ReactNode }) {
 
 export function Fact({ label, value }: { label: string; value: ReactNode }) {
   return (
-    <div className="min-w-0 rounded-md border border-zinc-200 bg-zinc-50 p-3">
+    <div className="min-w-0 rounded-md border border-zinc-200 bg-zinc-50 p-3 shadow-sm">
       <p className="text-[0.68rem] font-semibold uppercase text-zinc-500">{label}</p>
       <div className="mt-1 break-words text-sm font-semibold text-zinc-950">{value}</div>
     </div>
@@ -60,7 +60,7 @@ export function Metric({
   value: string;
 }) {
   return (
-    <div className={`rounded-md border p-3 ${softToneClass(tone)}`}>
+    <div className={`rounded-md border p-3 shadow-sm ${softToneClass(tone)}`}>
       <p className="truncate text-[0.68rem] font-semibold uppercase">{label}</p>
       <p className="mt-1 truncate text-lg font-semibold">{value}</p>
     </div>
@@ -86,7 +86,7 @@ export function StatusPill({
 
 export function EmptyState({ children }: { children: ReactNode }) {
   return (
-    <div className="border border-dashed border-zinc-300 bg-white p-4 text-sm leading-6 text-zinc-600">
+    <div className="rounded-md border border-dashed border-zinc-300 bg-white p-4 text-sm leading-6 text-zinc-600 shadow-sm">
       {children}
     </div>
   );
@@ -125,7 +125,7 @@ export function MarkdownDetails({
 
   return (
     <details
-      className="border border-zinc-200 bg-white p-3 text-sm text-zinc-700"
+      className="rounded-md border border-zinc-200 bg-white p-3 text-sm text-zinc-700 shadow-sm"
       open={open}
     >
       <summary className="cursor-pointer text-sm font-semibold text-zinc-950">{title}</summary>

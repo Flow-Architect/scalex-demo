@@ -3,12 +3,14 @@
 @tailwind utilities;
 
 html {
-  background: #f8fafc;
+  background: #0a0b0e;
 }
 
 body {
   margin: 0;
   min-width: 320px;
+  background: #0a0b0e;
+  overflow-x: hidden;
   font-family:
     Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
     sans-serif;
@@ -19,4 +21,278 @@ body {
 
 button {
   font: inherit;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+.scalex-grid-surface {
+  background-image:
+    linear-gradient(rgba(16, 185, 129, 0.08) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(14, 165, 233, 0.06) 1px, transparent 1px);
+  background-size: 36px 36px;
+}
+
+.scalex-grid-surface > * {
+  position: relative;
+}
+
+.scalex-workspace-bg {
+  background:
+    linear-gradient(180deg, rgba(9, 9, 11, 0.04) 0%, rgba(241, 245, 244, 0.98) 24rem),
+    radial-gradient(circle at 12% 0%, rgba(16, 185, 129, 0.12), transparent 28rem),
+    #edf2f0;
+}
+
+.scalex-card {
+  border: 1px solid rgba(212, 217, 216, 0.88);
+  background: rgba(255, 255, 255, 0.94);
+  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.08);
+}
+
+.scalex-card-dark {
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(9, 9, 11, 0.94);
+  box-shadow: 0 24px 60px rgba(9, 9, 11, 0.22);
+}
+
+.control-btn,
+.control-btn-primary,
+.control-link {
+  display: inline-flex;
+  min-height: 2.25rem;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  border-radius: 0.375rem;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  line-height: 1;
+  transition:
+    border-color 160ms ease,
+    background-color 160ms ease,
+    color 160ms ease,
+    transform 160ms ease,
+    box-shadow 160ms ease;
+}
+
+.control-btn {
+  border: 1px solid #1e2128;
+  background: #111318;
+  color: #8a8f9e;
+}
+
+.control-btn:hover {
+  border-color: #2a2f3a;
+  background: #151821;
+  color: #f0f0f0;
+}
+
+.control-btn-primary {
+  border: 1px solid rgba(0, 208, 132, 0.45);
+  background: #00d084;
+  color: #07110d;
+  box-shadow: 0 0 0 1px rgba(0, 208, 132, 0.1), 0 16px 32px rgba(0, 208, 132, 0.13);
+}
+
+.control-btn-primary:hover {
+  background: #28e39b;
+  transform: translateY(-1px);
+}
+
+.control-btn-primary:disabled,
+.control-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.58;
+  transform: none;
+}
+
+.control-link {
+  min-height: 2rem;
+  border: 1px solid rgba(0, 208, 132, 0.26);
+  background: rgba(0, 208, 132, 0.08);
+  color: #00d084;
+}
+
+.control-link:hover {
+  border-color: rgba(0, 208, 132, 0.5);
+  background: rgba(0, 208, 132, 0.12);
+}
+
+.metric-card {
+  min-height: 6.6rem;
+  overflow: hidden;
+  border-radius: 0.5rem;
+  border: 1px solid #1e2128;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.035), transparent 42%),
+    #111318;
+  padding: 1rem;
+  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.22);
+  transition:
+    border-color 180ms ease,
+    background-color 180ms ease,
+    transform 180ms ease,
+    box-shadow 180ms ease;
+}
+
+.metric-card:hover {
+  border-color: #2a2f3a;
+  transform: translateY(-1px);
+}
+
+.metric-hero {
+  border-color: rgba(0, 208, 132, 0.38);
+  background:
+    linear-gradient(135deg, rgba(0, 208, 132, 0.16), transparent 48%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.045), transparent 45%),
+    #111318;
+  box-shadow: 0 28px 56px rgba(0, 208, 132, 0.1);
+}
+
+.rail-row,
+.rail-card {
+  border-radius: 0.5rem;
+  border: 1px solid #1e2128;
+  background: #0d0e12;
+  transition:
+    border-color 180ms ease,
+    background-color 180ms ease,
+    transform 180ms ease,
+    box-shadow 180ms ease,
+    opacity 180ms ease;
+}
+
+.rail-row {
+  display: flex;
+  min-height: 2.9rem;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem 0.65rem;
+}
+
+.rail-row:hover,
+.rail-card:hover {
+  border-color: #2a2f3a;
+  background: #111318;
+}
+
+.rail-card {
+  width: 100%;
+  padding: 0.55rem 0.65rem;
+}
+
+.rail-index {
+  display: inline-flex;
+  height: 1.55rem;
+  min-width: 1.9rem;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.375rem;
+  border: 1px solid #1e2128;
+  background: #0a0b0e;
+  color: #8a8f9e;
+  font-family:
+    ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0;
+}
+
+.status-dot {
+  height: 0.55rem;
+  width: 0.55rem;
+  flex: none;
+  border-radius: 999px;
+  background: #4a4f5e;
+  box-shadow: 0 0 0 4px rgba(74, 79, 94, 0.12);
+}
+
+.rail-blocked,
+.rail-card-blocked {
+  min-height: 3.15rem;
+  border-color: rgba(239, 68, 68, 0.54);
+  background:
+    linear-gradient(90deg, rgba(239, 68, 68, 0.14), transparent 45%),
+    #111318;
+  box-shadow: inset 3px 0 0 #ef4444;
+}
+
+.rail-blocked .rail-index,
+.rail-card-blocked .rail-index {
+  border-color: rgba(239, 68, 68, 0.45);
+  color: #f87171;
+}
+
+.rail-blocked .status-dot {
+  background: #ef4444;
+  box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.15), 0 0 22px rgba(239, 68, 68, 0.4);
+}
+
+.proof-terminal {
+  max-height: calc(100vh - 304px);
+  overflow: auto;
+  border-radius: 0.5rem;
+  border: 1px solid #1e2128;
+  background:
+    linear-gradient(180deg, rgba(0, 208, 132, 0.06), transparent 35%),
+    #050607;
+  padding: 1rem;
+  color: #c8ffe6;
+  font-family:
+    ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+  font-size: 0.78rem;
+  line-height: 1.65;
+}
+
+.rail-enter {
+  animation: rail-enter 360ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+.metric-flash-red {
+  animation: metric-flash-red 900ms ease-out;
+}
+
+.danger-pulse-on-visible .status-dot {
+  animation: danger-pulse 1.25s ease-out infinite;
+}
+
+@keyframes rail-enter {
+  from {
+    opacity: 0;
+    transform: translateX(-10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes metric-flash-red {
+  0% {
+    border-color: rgba(239, 68, 68, 0.9);
+    box-shadow: 0 0 0 1px rgba(239, 68, 68, 0.65), 0 0 34px rgba(239, 68, 68, 0.32);
+  }
+
+  100% {
+    border-color: #1e2128;
+    box-shadow: 0 24px 48px rgba(0, 0, 0, 0.22);
+  }
+}
+
+@keyframes danger-pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.56), 0 0 24px rgba(239, 68, 68, 0.42);
+  }
+
+  70% {
+    box-shadow: 0 0 0 12px rgba(239, 68, 68, 0), 0 0 28px rgba(239, 68, 68, 0.28);
+  }
+
+  100% {
+    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0), 0 0 24px rgba(239, 68, 68, 0.22);
+  }
 }

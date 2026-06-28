@@ -26,6 +26,9 @@ operations without losing control of money, margin, compliance boundaries, or au
 Goal 8H completed the frontend-first cinematic visual redesign for the recording. It does not add
 a new integration or backend feature; it turns the existing deterministic Northstar story into
 three visible acts: the paid client operation, governed AI execution, and enterprise proof.
+Goal 8I completed the final control-room skin rewrite without replacing the app with a static
+prototype: the dashboard, governed run, evidence ledger, connection hub, and settings boundaries
+views remain API-backed while presenting a fixed dark enterprise shell for the recording.
 
 ScaleX Connection Hub is an implemented internal product layer that shows which
 systems the ClientOps Autopilot is allowed to use, what execution mode each connector is in, what
@@ -45,9 +48,8 @@ Current implementation note:
 - It uses no patient data and no PHI, and ScaleX does not claim healthcare compliance or HIPAA
   support.
 - It proves $8,500 revenue, $1,150 approved setup spend, $3,200 blocked risk, $261.60
-  deterministic labor cost, $7,088.40 protected profit after labor, and 83.4% protected margin
-  after labor.
-- The existing ledger gross profit before labor remains $7,350 and 86.5%.
+  deterministic labor cost, $7,350 protected profit, and 86.5% protected margin in the current
+  API-backed control-room profit outcome.
 - Harbor Fleet Services is historical only and is no longer the current implemented sample.
 
 Demo-readiness note:
