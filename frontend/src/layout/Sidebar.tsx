@@ -1,9 +1,8 @@
 import {
   Play,
-  ShieldCheck,
 } from "lucide-react";
-import { useState } from "react";
 
+import { BrandLogo } from "../components/BrandLogo";
 import { NAV_ITEMS } from "./navigation";
 import type { AppView } from "./navigation";
 
@@ -26,37 +25,14 @@ export function Sidebar({
   profitLabel: string;
   revenueLabel: string;
 }) {
-  const [logoFailed, setLogoFailed] = useState(false);
-
   return (
     <aside className="fixed inset-y-0 left-0 z-40 flex w-[200px] flex-col border-r border-[#232834] bg-[#050505] p-3 text-white">
       <div className="border-b border-[#232834] bg-transparent pb-4">
-        {logoFailed ? (
-          <div className="flex items-center gap-2">
-            <span className="flex h-9 w-9 items-center justify-center rounded-md border border-[#fcba03]/40 bg-[#fcba03]/10 text-[#fcba03]">
-              <ShieldCheck className="h-4 w-4" aria-hidden="true" />
-            </span>
-            <div>
-              <p className="text-lg font-semibold leading-5">ScaleX</p>
-              <p className="text-[0.62rem] font-semibold uppercase tracking-wide text-[#fcba03]">
-                Governed ClientOps
-              </p>
-            </div>
-          </div>
-        ) : (
-          <div className="bg-transparent px-1 pt-1">
-            <img
-              alt="ScaleX"
-              className="block h-auto max-h-[52px] w-[142px] object-contain object-left"
-              onError={() => setLogoFailed(true)}
-              src="/brand/scalex-logo.png"
-            />
-            <div className="mt-3 h-px w-full bg-[#fcba03]/70" aria-hidden="true" />
-            <p className="mt-2 text-[0.62rem] font-semibold uppercase tracking-wide text-[#A1A1AA]">
-              Governed ClientOps
-            </p>
-          </div>
-        )}
+        <BrandLogo variant="sidebar" />
+        <div className="mt-3 h-px w-full bg-[#fcba03]/70" aria-hidden="true" />
+        <p className="mt-2 text-[0.62rem] font-semibold uppercase tracking-wide text-[#A1A1AA]">
+          Governed ClientOps
+        </p>
       </div>
 
       <nav className="mt-4 grid gap-1.5">

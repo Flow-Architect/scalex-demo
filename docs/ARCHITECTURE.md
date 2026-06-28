@@ -39,7 +39,8 @@ ScaleX UI
   the NeMo Guardrails adapter.
 - SQLite records evidence for planning, orchestration, finance proof, policy checks, ledger rows,
   agent outputs, and final reports.
-- Profit Outcome reports protected profit after approved spend and labor cost, plus blocked risk.
+- Profit Outcome reports protected gross profit after approved spend, separate labor-cost proof,
+  and blocked risk.
 
 ## Goal 8G Enterprise Demo Architecture
 
@@ -81,16 +82,17 @@ Goal 8G exact Northstar economics:
 - Revenue secured: $8,500.
 - Approved setup spend: $1,150.
 - Blocked risky spend: $3,200.
-- Deterministic labor cost: $261.60.
-- Protected profit after labor: $7,088.40.
-- Protected margin after labor: 83.4%.
-- Existing ledger gross profit before labor: $7,350 and 86.5%.
+- Deterministic labor cost: $261.60, visible as a separate workforce-costing metric.
+- Current implemented protected gross profit: $7,350.
+- Current implemented protected margin: 86.5%.
+- Historical after-labor planning target: $7,088.40 and 83.4%.
 
 Profit formulas:
 
 ```text
-protected_profit = revenue - approved_setup_spend - labor_cost
-protected_margin = protected_profit / revenue
+protected_gross_profit = revenue - approved_setup_spend
+protected_margin = protected_gross_profit / revenue
+labor_cost = separate workforce-costing proof metric
 ```
 
 Evidence Ledger should present enterprise audit fields: timestamp/order, actor/system, action,
@@ -420,8 +422,9 @@ configured external `SCALEX_NEMO_PYTHON` subprocess and loads `SCALEX_NEMO_CONFI
 if selected but unavailable, broken, or misconfigured, ScaleX fails closed. `nemo_compatible` is a
 labeled fallback only and must keep `used_real_nemo=false`.
 
-Goal 8C deepened pre-action rail execution around protected actions. ScaleX does not claim real
-NemoClaw.
+Goal 8C deepened pre-action rail execution around protected actions. ScaleX claims NemoHermes
+planning only when `HERMES_RUNTIME=nemoclaw` is selected, the local API call succeeds, and
+non-secret runtime evidence is recorded.
 
 ## Telegram Approval Gate Target
 
@@ -449,5 +452,6 @@ audit records before any live-money action.
 
 Goal 7 work must not use live Stripe mode, production Hermes, Windows Hermes config, production
 Prometheus, homelab/OpenClaw, Recall memory, actual NemoClaw production paths, or real client
-data. No docs should claim NemoClaw, Telegram approval, MCP server, live-money support, real client
-email, PHI handling, or production auth until those paths are implemented and verified.
+data. No docs should claim Telegram approval, MCP server, live-money support, real client email,
+PHI handling, production auth, or NemoHermes use for a specific run until those paths are selected,
+implemented, and verified with evidence.

@@ -2,14 +2,17 @@
 
 ## Current Priority
 
-Goal 9 - final repo/video/submission polish.
+Goal 9 - final repo/video/submission polish and open-source audit closeout.
 
-Goal 8O is complete. Return to final recording and submission readiness:
+Documentation/open-source audit alignment is complete after Goal 8O. Return to final recording and
+submission readiness:
 
 - Rehearse the three-minute recording against `docs/DEMO_SCRIPT.md`.
 - Confirm the local demo opens at `http://127.0.0.1:5174/` with the dark control-room UI.
 - Capture final screenshots or video assets only if needed for submission.
 - Do a final submission copy check against `docs/SUBMISSION_WRITEUP.md`.
+- Review `docs/OPEN_SOURCE_AUDIT.md`, `SECURITY.md`, and `CONTRIBUTING.md` before public release.
+- Choose a license before calling the repo open source.
 - Run final build/tests/safety scans and keep the repo clean.
 
 Do not add Telegram, live Stripe, production Hermes, Full Proof runs, Docker/NemoClaw commands,
@@ -18,13 +21,13 @@ changes, database files, uploaded real files, or secrets.
 
 ## Recently Completed
 
-Goal 8O is complete. It was a tiny frontend-only logo/sidebar polish pass:
+Goal 8O is complete. It was a tiny frontend-only logo/sidebar polish pass, later superseded by
+the new full ScaleX logo asset now wired through `BrandLogo`:
 
-- Confirmed `frontend/public/brand/scalex-logo.png` is a transparent RGBA PNG, not a baked-in
-  checkerboard/white-background asset.
-- Kept the current logo path and added an explicitly transparent, compact sidebar wrapper.
-- Constrained the logo with `object-contain`, `object-left`, and a restrained max height so it
-  blends into the dark sidebar without a white tile/card.
+- At Goal 8O time, confirmed the then-current logo was a transparent RGBA PNG and kept it inside
+  an explicitly transparent, compact sidebar wrapper.
+- Current post-audit state uses the new 1027x348 RGBA ScaleX logo asset with its own dark brand
+  treatment in the sidebar, loading screen, login screen, and shared header.
 - Preserved the black/white/#fcba03 brand treatment and did not change backend mechanics,
   product layout, integrations, Telegram, live mode, Stripe, Hermes, or NemoClaw behavior.
 
@@ -34,6 +37,23 @@ Goal 8O validation:
 - Browser smoke at `http://127.0.0.1:5174/` verified logo render bounds, transparent wrapper
   background, dark sidebar background, dashboard render, no document overflow, and no runtime
   exceptions.
+
+Documentation/open-source audit alignment after Goal 8O:
+
+- Added `docs/OPEN_SOURCE_AUDIT.md`, `SECURITY.md`, and `CONTRIBUTING.md`.
+- Tightened `.gitignore` for local env variants, SQLite files outside `data/`, video/recording
+  files, coverage output, and generated artifacts.
+- Aligned README, START_HERE, ROADMAP, STATUS, product spec, architecture, demo script, and
+  submission writeup to the current API-backed control-room setup.
+- Current implemented economics are $8,500 revenue, $1,150 approved setup spend, $3,200 blocked
+  risk, $261.60 labor cost shown separately, $7,350 protected gross profit, and 86.5% protected
+  margin.
+- Optional NemoHermes is documented as selected/verified only; MCP, Telegram, live money,
+  production auth, production payroll/HR, real client data, PHI, and production Hermes remain out
+  of scope.
+- Validation passed: `git diff --check`, tracked generated/unsafe file scan, `./scripts/test.sh`,
+  and `./scripts/check-nemo.sh`. Diff secret-pattern scan found only documentation safety-boundary
+  text, not credentials.
 
 Goal 8N is complete. It kept the API-backed control-room shell and completed the brand/overflow
 polish pass:
@@ -103,8 +123,8 @@ not a new integration. The above-the-fold view now presents a premium control-ro
 surface that immediately shows:
 
 - Act 1 - Northstar Dental Group / Client Implementation Launch with $8,500 revenue, $1,150
-  approved setup spend, $261.60 labor cost, $3,200 blocked risk, $7,088.40 protected profit, and
-  83.4% protected margin.
+  approved setup spend, $261.60 labor cost shown separately, $3,200 blocked risk, $7,350
+  protected gross profit, and 86.5% protected margin.
 - Act 2 - governed AI execution: Hermes plans, Stripe proves finance state, NeMo/local policy
   checks risky actions, and ScaleX approves safe actions while blocking unsafe execution.
 - Act 3 - enterprise proof: the evidence ledger records what happened, what was approved, what
@@ -348,10 +368,10 @@ Exact demo story:
 - Revenue secured: $8,500.
 - Approved setup spend: $1,150.
 - Blocked risky spend: $3,200.
-- Deterministic Goal 8F labor cost: $261.60.
-- Protected profit after labor: $7,088.40.
-- Protected margin after labor: 83.4%.
-- Existing ledger gross profit before labor remains $7,350 and 86.5%.
+- Deterministic Goal 8F labor cost: $261.60, visible as a separate workforce-costing metric.
+- Current implemented protected gross profit: $7,350.
+- Current implemented protected margin: 86.5%.
+- Historical Goal 8G after-labor planning target: $7,088.40 and 83.4%.
 
 Visible run sequence:
 
@@ -498,7 +518,8 @@ the sample implementation pass.
 
 ## Next Recommended Goal
 
-Run Codex `/goal` 9 - final repo/video/submission polish after Goal 8G lands.
+Run Goal 9 - final repo/video/submission polish and source-audit closeout from the current Goal
+8O-plus-doc-audit baseline.
 
 Goal 9 should record and package the judge-facing path around ScaleX as a governed execution layer
 for revenue-backed client operations. Telegram approval should remain deferred unless the user
@@ -529,8 +550,8 @@ Goal 9 required output:
 
 Recommended sequence:
 
-1. Goal 8G - Enterprise Demo Narrative UI Lock.
-2. Goal 9 - final repo/video/submission polish.
+1. Goal 9 - final repo/video/submission polish and open-source audit closeout.
+2. License selection before calling the repo open source.
 3. Goal 7.13C - MCP Server Prototype only after NemoClaw, guardrail, and approval boundaries are
    safe.
 4. Goal 7B / Production Hardening - Verified Live Mode for future live-money payments.
@@ -875,8 +896,8 @@ OpenShell / `nemohermes` is a separate target and must be handled before MCP.
 
 - Lock the first screen around governed execution for revenue-backed client operations.
 - Show Northstar Dental Group / Client Implementation Launch with $8,500 revenue, $1,150 approved
-  setup spend, $3,200 blocked risk, $261.60 labor cost, $7,088.40 protected profit, and 83.4%
-  protected margin.
+  setup spend, $3,200 blocked risk, $261.60 labor cost shown separately, $7,350 protected gross
+  profit, and 86.5% protected margin.
 - Make Hermes, Stripe, NeMo/local policy, and ScaleX roles obvious.
 - Reframe the run timeline as governed rails, make blocked risk visually important, centralize
   money control, and make Evidence Ledger read as enterprise audit.

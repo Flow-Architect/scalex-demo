@@ -67,15 +67,16 @@ Client operation intake
 -> Stripe test invoice/payment-state proof
 -> ScaleX business-rule enforcement
 -> local policy guardrails now / NeMo Guardrails adapter verified when configured
--> actual NVIDIA NemoClaw / OpenShell / nemohermes targeted next, not wired yet
+-> optional NVIDIA NemoClaw / OpenShell / nemohermes API runtime when selected and verified
 -> SQLite evidence ledger
 -> agent work
 -> Profit Outcome
 ```
 
-Goal 7.15A is complete as a docs-only alignment pass. It corrected NeMo Guardrails vs actual
-NemoClaw, added the Telegram approval-gate plan, added the Product Depth + Demo-Winning UI plan,
-and paused MCP until NemoClaw, approval, product, and guardrail boundaries are safe.
+Goal 8O is complete. The current app is an API-backed dark enterprise control-room demo with
+Northstar Dental Group preloaded, a fixed left sidebar, current ScaleX logo asset, governed run
+rails, Evidence Ledger, Connection Hub, Settings, Judge Demo Mode, optional Full Proof Mode,
+optional NeMo Guardrails adapter proof, and optional fail-closed NemoHermes planning.
 
 ## Current Sample State
 
@@ -86,6 +87,7 @@ Implemented today:
 - synthetic B2B implementation operations account only; no patient data and no PHI
 - $8,500 revenue, $1,150 approved setup spend, $3,200 blocked risk, $7,350 protected gross
   profit, and 86.5% protected margin.
+- $261.60 labor cost is visible as a separate workforce-costing metric.
 
 Harbor Fleet Services is historical only and is no longer the current implemented sample.
 
@@ -107,7 +109,9 @@ Harbor Fleet Services is historical only and is no longer the current implemente
   connector dashboard or marketplace.
 - The NeMo Guardrails adapter path is implemented through `nemoguardrails` and runtime verified
   only when configured. This is not the same as NemoClaw.
-- Actual NVIDIA NemoClaw / OpenShell / `nemohermes` is not installed or wired yet.
+- Actual NVIDIA NemoClaw / OpenShell / `nemohermes` is available only through the optional local
+  `HERMES_RUNTIME=nemoclaw` / `HERMES_MODE=nemohermes_api` path when selected and verified; it is
+  not active by default.
 - Do not claim Telegram approval is implemented.
 - Do not implement MCP before NemoClaw preflight, approval-gate planning/implementation or
   explicit deferral, product-story review, and guardrail/tool-boundary review.
@@ -122,14 +126,11 @@ Harbor Fleet Services is historical only and is no longer the current implemente
 
 ## Current Next Goals
 
-1. Goal 8D - Actual NemoClaw / NemoHermes Preflight.
-2. Goal 8E - Wire ScaleX to NemoClaw Hermes Runtime if safe.
-3. Goal 8F - Telegram Human Approval Gate.
-4. Goal 7.15B - Product Depth + Demo-Winning UI Pass.
-5. Goal 7.13C - MCP Server Prototype only after NemoClaw, guardrail, and approval boundaries are
+1. Goal 9 - final repo/video/submission polish, including final open-source audit checks.
+2. License selection before calling the repo open source.
+3. Goal 7.13C - MCP Server Prototype only after guardrail, approval, and product boundaries are
    safe.
-6. Goal 9 - final repo/video/submission polish.
-7. Goal 7B / Production Hardening - Verified Live Mode for future live-money payments.
+4. Goal 7B / Production Hardening - Verified Live Mode for future live-money payments.
 
 Connection Hub is implemented as the layer where ScaleX declares which systems Hermes and future
 agents can use, what mode each connector is in, what guardrails apply, which actions are blocked,
@@ -141,10 +142,10 @@ tools/resources/prompts must not expose secrets, bypass local policy, bypass NeM
 adapter checks, bypass future NemoClaw runtime boundaries, bypass Telegram approvals, touch live
 money, use real client data, or use PHI.
 
-Goal 8A, Goal 8B, and Goal 8C are complete. Local policy remains active by default; the NeMo
-Guardrails adapter is available only through optional `nemo_guardrails` mode after runtime
-verification and must not be claimed active unless `used_real_nemo=true`. Actual NemoClaw /
-OpenShell / `nemohermes` is not installed or wired.
+Goals 8A through 8O are complete. Local policy remains active by default; the NeMo Guardrails
+adapter is available only through optional `nemo_guardrails` mode after runtime verification and
+must not be claimed active unless `used_real_nemo=true`. Optional NemoHermes planning is available
+only when selected, the local API call succeeds, and non-secret runtime evidence is recorded.
 
 ## Session Closeout Requirement
 

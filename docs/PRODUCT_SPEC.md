@@ -79,11 +79,12 @@ Primary operation:
 - Approved setup spend: $1,150.
 - Blocked risky spend: $3,200.
 - Deterministic labor cost from Goal 8F: $261.60.
-- Protected profit after labor: $7,088.40.
-- Protected margin after labor: 83.4%.
-- Existing ledger gross profit before labor remains $7,350 and 86.5%.
-- Formula: protected profit = revenue - approved setup spend - labor cost; protected margin =
-  protected profit / revenue.
+- Labor cost: $261.60, visible as a separate workforce-costing metric.
+- Current implemented protected gross profit: $7,350.
+- Current implemented protected margin: 86.5%.
+- Historical Goal 8G after-labor planning target: $7,088.40 and 83.4%.
+- Current formula: protected gross profit = revenue - approved setup spend; protected margin =
+  protected gross profit / revenue.
 
 Visible run sequence:
 
@@ -314,9 +315,9 @@ Implemented today:
   client operation, confirms revenue, creates finance proof, checks business rules, blocks risky
   spend, coordinates work units, records evidence, and reports protected profit and launch status.
 - Numbers: $8,500 revenue, $1,150 approved setup spend, $3,200 blocked risk, $261.60
-  deterministic labor cost, $7,088.40 protected profit after labor, 83.4% protected margin after
-  labor, $7,350 ledger gross profit before labor, 86.5% ledger gross margin before labor, and a
-  50% margin floor.
+  deterministic labor cost shown separately, $7,350 current implemented protected gross profit,
+  86.5% current implemented protected margin, historical $7,088.40 after-labor planning target,
+  historical 83.4% after-labor planning target, and a 50% margin floor.
 - Harbor Fleet Services is historical only and is no longer the current implemented sample.
 
 Future templates, not implemented:
@@ -394,12 +395,12 @@ Active connector concepts:
 - Hermes Planning
 - Stripe Finance Proof
 - Local Policy / NeMo Guardrails adapter
+- NemoClaw / OpenShell Sandbox through optional NemoHermes API runtime
 - SQLite Evidence Ledger
 - Prototype Auth
 
 Planned connector concepts:
 
-- NemoClaw / OpenShell Sandbox target
 - Telegram Approval Gate
 - Slack / Email notifications or future approvals
 - CRM client context
@@ -434,8 +435,9 @@ Required future improvements:
    auth is enabled locally with demo credentials, show prototype local auth clearly and do not
    claim production auth. Avoid scary missing-config warnings in normal Judge Demo Mode.
 2. Command Center hero: immediately show Northstar Dental Group, Client Implementation Launch,
-   revenue secured $8,500, approved setup spend $1,150, blocked risk $3,200, labor cost $261.60,
-   protected profit $7,088.40, protected margin 83.4%, and `Start Governed Run`.
+   revenue secured $8,500, approved setup spend $1,150, blocked risk $3,200, labor cost $261.60
+   as a separate workforce-costing metric, protected gross profit $7,350, protected margin 86.5%,
+   and `Start Governed Run`.
 3. Operation Catalog: show ScaleX is repeatable across Client Implementation Launch active demo,
    Invoice-to-Cash Follow-Up planned, Vendor Spend Review planned, Client Onboarding Checklist
    planned, and Renewal Risk Review planned.
@@ -451,8 +453,8 @@ Required future improvements:
    policy-blocked data broker enrichment, no ledger spend row for blocked action, `paid=false`
    honesty, and Profit Outcome recorded.
 7. Guardrail proof: `local_policy` default, NeMo Guardrails optional/runtime verified when state
-   says so, NemoClaw target not active yet, `used_real_nemo`, `fail_closed`, rail decisions, and
-   blocked-spend no-ledger-row proof.
+   says so, optional NemoHermes planning only when selected and verified, `used_real_nemo`,
+   `fail_closed`, rail decisions, and blocked-spend no-ledger-row proof.
 8. Stripe proof honesty: test-double in Judge Demo Mode, real Stripe test mode only when
    `used_real_stripe=true`, invoice ID/hosted invoice URL only when available, `paid=false`
    remains unpaid, and no live money.
@@ -481,7 +483,8 @@ Target Full Proof Mode:
 - no real client email;
 - no patient data and no PHI;
 - no NeMo Guardrails adapter claim unless runtime verified;
-- no NemoClaw claim until actual NemoClaw is installed, onboarded, connected, and verified.
+- no NemoHermes claim unless `HERMES_RUNTIME=nemoclaw` is selected and the local API call
+  succeeds.
 
 Expected proof:
 

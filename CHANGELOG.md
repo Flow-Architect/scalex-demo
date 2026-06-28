@@ -10,6 +10,44 @@ Use:
 
 ---
 
+## 2026-06-28 - Documentation and open-source audit alignment
+
+Completed:
+- Audited README, START_HERE, ROADMAP, STATUS, TASKS, product spec, architecture, demo script,
+  submission writeup, agent notes, ignore rules, and source-audit posture against the current
+  Goal 8O app.
+- Added `docs/OPEN_SOURCE_AUDIT.md`, `SECURITY.md`, and `CONTRIBUTING.md`.
+- Tightened `.gitignore` for local env variants, SQLite files outside `data/`, recordings/video
+  files, coverage output, and generated artifacts.
+- Aligned current demo economics to the implemented API-backed control-room outcome: $8,500
+  revenue, $1,150 approved setup spend, $3,200 blocked risk, $261.60 labor cost shown separately,
+  $7,350 protected gross profit, and 86.5% protected margin.
+- Updated docs to reflect optional NemoHermes planning as selected/verified only, while keeping
+  MCP, Telegram, live money, production auth, production payroll/HR, real client data, PHI, and
+  production Hermes out of scope.
+- Recorded that the repo still needs an explicit license decision before it should be called open
+  source.
+
+Verification:
+- `git diff --check` passed.
+- Tracked generated/unsafe file scan returned no matches.
+- Diff secret-pattern scan returned only documentation safety-boundary text such as
+  "without secrets" and "non-secret runtime evidence"; no credentials were present.
+- Narrow credential-shape scan found only the existing Stripe test-key redaction regex in
+  `backend/app/services/hermes_adapter.py`, not an actual key.
+- Repo-local ignore check confirmed `.env`, SQLite DBs, build output, `node_modules`, venvs, and
+  pytest caches are ignored.
+- `./scripts/test.sh` passed with 68 backend tests and a successful frontend build.
+- `./scripts/check-nemo.sh` passed with `nemoguardrails` 0.21.0 and `guardrails/scalex` loaded.
+
+Suggested commit message:
+Align ScaleX docs for source audit readiness
+
+Next:
+- Goal 9 - final repo/video/submission polish and open-source audit closeout.
+
+---
+
 ## 2026-06-28 - Goal 8O: Logo transparency treatment
 
 Completed:

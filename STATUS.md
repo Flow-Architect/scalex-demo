@@ -7,10 +7,11 @@ Last updated: 2026-06-28
 - Project folder exists at `/home/ascabrya/dev/scalex-demo`.
 - Latest committed baseline before Goal 8E: `615a9bd Document NemoClaw correction and next
   integration plan`.
-- Last completed goal: Goal 8O - logo transparency and sidebar brand treatment.
-- Last completed implementation/QA goal: Goal 8O - transparent sidebar logo wrapper, compact
-  object-contained logo rendering, and browser smoke validation.
-- Last completed documentation/tracking update: Goal 8O logo treatment closeout.
+- Last completed goal: documentation and open-source audit alignment after Goal 8O.
+- Last completed implementation/QA goal: new ScaleX logo implementation across sidebar,
+  loading/login screens, and shared header, with frontend build and browser smoke validation.
+- Last completed documentation/tracking update: source-audit readiness, current demo economics,
+  optional NemoHermes truthfulness, and final Goal 9 handoff.
 - Last completed checkout cleanup: Open Source Checkout Cleanup for judge readiness.
 - Current priority: Goal 9 - final repo/video/submission polish.
 - Goal 8I used the uploaded six-phase control-room visual prompt as a design specification only.
@@ -121,15 +122,28 @@ Last updated: 2026-06-28
 - Goal 8N validation passed `./scripts/test.sh`, `./scripts/check-nemo.sh`, browser smoke for all
   main views, strict browser overflow measurement with no page or uncontrolled element horizontal
   overflow at 1440x900, logo render bounds, blocked-risk animation, and no runtime exceptions.
-- Goal 8O completed the tiny frontend-only logo polish pass. Inspection confirmed
-  `frontend/public/brand/scalex-logo.png` is a transparent RGBA asset, so the change was limited
-  to the sidebar brand wrapper: explicit transparent background, compact object-contained logo
-  sizing, restrained spacing, and no white/checkerboard tile or card behind the logo. Backend
-  mechanics, product layout, integrations, and brand colors were not changed.
+- Goal 8O completed the tiny frontend-only logo polish pass for the prior transparent asset. That
+  historical treatment was superseded by the current new logo implementation using the 1027x348
+  RGBA ScaleX logo asset and reusable `BrandLogo` component. Backend mechanics, product layout,
+  integrations, and brand colors were not changed.
 - Goal 8O validation passed `cd frontend && npm run build` and local browser smoke at
   `http://127.0.0.1:5174/`, confirming the logo renders at 142px by about 50px with
   `object-fit: contain`, transparent wrapper background, dark sidebar background, dashboard
   loaded, no document overflow, and no runtime exceptions.
+- The current logo asset at `frontend/public/brand/scalex-logo.png` is now a 1027x348 RGBA PNG
+  with its own dark brand treatment. The app uses a reusable `BrandLogo` component with a
+  cache-busted source in the fixed sidebar, loading screen, login screen, and shared header.
+- Documentation/open-source audit alignment added `docs/OPEN_SOURCE_AUDIT.md`, `SECURITY.md`,
+  and `CONTRIBUTING.md`; tightened `.gitignore` for env variants, SQLite files, videos, coverage,
+  and generated artifacts; and aligned README/roadmap/spec/architecture/demo/submission docs to
+  the current optional NemoHermes status and current protected gross profit display.
+- Documentation/open-source audit validation passed `git diff --check`, tracked generated/unsafe
+  file scan, `./scripts/test.sh`, and `./scripts/check-nemo.sh`. The diff secret-pattern scan
+  returned only documentation safety-boundary text such as "without secrets" and "non-secret
+  runtime evidence"; no credentials were present.
+- Narrow credential-shape scan found only the existing Stripe test-key redaction regex in
+  `backend/app/services/hermes_adapter.py`, not an actual key. Repo-local ignore check confirmed
+  `.env`, SQLite DBs, build output, `node_modules`, venvs, and pytest caches are ignored.
 - Goal 9 remains final polish and submission assets.
 - Goal 7B remains future Verified Live Mode hardening.
 
@@ -229,14 +243,12 @@ Dental Group account.
 - Margin floor: 50%
 - Approved setup spend: $350 Secure Workspace Pack, $500 Data Migration Sandbox, and $300 Launch Asset Kit
 - Blocked risk: $3,200 Unapproved Data Broker Enrichment
-- Deterministic Goal 8F labor cost: $261.60
-- Existing ledger gross profit before labor: $7,350 and 86.5% gross margin
-- Goal 8G protected profit after labor: $7,088.40 and 83.4% protected margin
-- Goal 8I control-room dashboard shows the API current protected profit outcome. In the verified
-  local smoke state this rendered as $7,350 protected profit and 86.5% protected margin, with
-  $261.60 labor cost visible as a separate metric.
-- Formula: protected profit = revenue - approved setup spend - labor cost; protected margin =
-  protected profit / revenue
+- Deterministic Goal 8F labor cost: $261.60, shown as a separate workforce-costing metric
+- Current implemented protected gross profit: $7,350
+- Current implemented protected margin: 86.5%
+- Historical Goal 8G after-labor planning target: $7,088.40 and 83.4%
+- Formula: protected gross profit = revenue - approved setup spend; protected margin =
+  protected gross profit / revenue
 - Synthetic account only; no patient data, no PHI, no healthcare compliance claim, and no HIPAA
   support claim
 
@@ -936,12 +948,12 @@ Research-to-Report, Ops Handoff, and Renewal Recommendation.
 
 ## Current Priority
 
-Goal 8G - Enterprise Demo Narrative UI Lock.
+Goal 9 - final repo/video/submission polish and open-source audit closeout.
 
 Recommended sequence:
 
-1. Goal 8G - Enterprise Demo Narrative UI Lock.
-2. Goal 9 - final repo/video/submission polish.
+1. Goal 9 - final repo/video/submission polish and open-source audit closeout.
+2. License selection before calling the repo open source.
 3. Goal 7.13C - MCP Server Prototype only after NemoClaw, guardrail, and approval boundaries are
    safe.
 

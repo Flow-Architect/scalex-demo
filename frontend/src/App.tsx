@@ -6,8 +6,6 @@ import {
   KeyRound,
   LockKeyhole,
   RefreshCw,
-  ShieldCheck,
-  Workflow,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
@@ -30,6 +28,7 @@ import {
 } from "./features/operations/ProductView";
 import { WorkflowPage } from "./features/workflow/WorkflowPage";
 import { WORKFLOW_NODE_ORDER, type WorkflowInspectorKey } from "./features/workflow/workflowModel";
+import { BrandLogo } from "./components/BrandLogo";
 import { AppShell } from "./layout/AppShell";
 import { TopCommandBar } from "./layout/TopCommandBar";
 import type { AppView } from "./layout/navigation";
@@ -432,10 +431,8 @@ function LoadingScreen() {
   return (
     <main className="scalex-grid-surface flex min-h-screen items-center justify-center bg-zinc-950 px-4 text-white">
       <div className="w-full max-w-md rounded-md border border-white/10 bg-white/[0.04] p-6 shadow-xl shadow-zinc-950/30">
-        <div className="flex items-center gap-3">
-          <span className="flex h-11 w-11 items-center justify-center rounded-md border border-emerald-300/30 bg-emerald-300/10 text-emerald-100">
-            <Workflow className="h-5 w-5 animate-pulse" aria-hidden="true" />
-          </span>
+        <div className="flex flex-wrap items-center gap-3">
+          <BrandLogo variant="compact" />
           <div>
             <p className="text-lg font-semibold">ScaleX Governed ClientOps</p>
             <p className="text-sm text-zinc-300">Loading governed execution workspace</p>
@@ -463,12 +460,10 @@ function LoginScreen({
     <main className="min-h-screen bg-zinc-950 text-white">
       <div className="grid min-h-screen lg:grid-cols-[minmax(0,0.95fr)_minmax(420px,0.7fr)]">
         <section className="scalex-grid-surface flex min-h-[22rem] flex-col justify-between border-b border-white/10 bg-zinc-950 p-6 lg:border-b-0 lg:border-r lg:p-10">
-          <div className="flex items-center gap-3">
-            <span className="flex h-11 w-11 items-center justify-center rounded-md border border-emerald-300/30 bg-emerald-300/10 text-emerald-100">
-              <ShieldCheck className="h-5 w-5" aria-hidden="true" />
-            </span>
+          <div className="flex flex-wrap items-center gap-3">
+            <BrandLogo variant="hero" />
             <div>
-              <p className="text-xl font-semibold">ScaleX Governed ClientOps</p>
+              <p className="text-xl font-semibold">Governed ClientOps</p>
               <p className="text-sm text-emerald-300">Enterprise Function Accelerator</p>
             </div>
           </div>

@@ -29,9 +29,9 @@ Implemented template:
 
 ## Recording Path
 
-Use this three-minute script for the recording. Goal 8J keeps the fixed API-backed control-room
-shell and adds the needed demo drama: mode clarity, proof artifacts, rail activity, and a more
-obvious blocked-risk moment.
+Use this three-minute script for the recording. The current Goal 8O control-room shell keeps the
+app API-backed, demo-safe, and focused on the Northstar operation, current ScaleX logo treatment,
+mode clarity, proof artifacts, governed rails, and the blocked-risk moment.
 
 0:00-0:10
 Enterprises want AI agents, but cannot let raw agents touch money, vendors, client workflows, or
@@ -226,8 +226,8 @@ described as a fallback and not real NeMo. Do not say actual NemoClaw is active.
 Goal 8G should make the browser path feel like a repeatable enterprise product:
 
 1. Command Center with Northstar Dental Group, Client Implementation Launch, $8,500 revenue,
-   $1,150 approved setup spend, $3,200 blocked risk, $261.60 labor cost, $7,088.40 protected
-   profit, 83.4% protected margin, and `Start Governed Run`.
+   $1,150 approved setup spend, $3,200 blocked risk, $261.60 labor cost shown separately,
+   $7,350 protected gross profit, 86.5% protected margin, and `Start Governed Run`.
 2. Start Governed Run.
 3. Governed Run Studio / run timeline showing input rail, Hermes plan, planning rail, Stripe
    finance proof, revenue gate, NeMo/local policy check, approved setup spend, blocked risky
@@ -256,8 +256,8 @@ ScaleX records evidence, blocks unsafe execution, and protects profit.
 
 0:25-0:45 - Show Northstar metrics:
 Northstar Dental Group / Client Implementation Launch, $8,500 revenue secured, $1,150 approved
-setup spend, $3,200 blocked risk, $261.60 labor cost, $7,088.40 protected profit, and 83.4%
-protected margin.
+setup spend, $3,200 blocked risk, $261.60 labor cost shown separately, $7,350 protected gross
+profit, and 86.5% protected margin.
 
 0:45-1:10 - Show the Control Stack:
 Hermes creates the plan, Stripe proves finance state, NeMo/local policy checks risk, and ScaleX

@@ -62,7 +62,8 @@ Client operation intake
 -> NeMo Guardrails adapter available through nemoguardrails runtime verification
 -> optional NVIDIA NemoClaw / OpenShell / nemohermes API runtime for sandboxed Hermes planning
 -> SQLite records evidence
--> Profit Outcome reports protected profit after approved spend and labor cost, plus blocked risk
+-> Profit Outcome reports protected gross profit after approved spend, separate labor-cost proof,
+   and blocked risk
 ```
 
 ScaleX code is the execution and policy authority. Hermes may plan and propose steps, but
@@ -245,10 +246,10 @@ Implemented current sample:
 - Margin floor: 50%
 - Approved setup spend: $350 Secure Workspace Pack, $500 Data Migration Sandbox, and $300 Launch Asset Kit
 - Blocked risk: $3,200 Unapproved Data Broker Enrichment
-- Deterministic labor cost: $261.60
-- Protected profit after labor: $7,088.40
-- Protected margin after labor: 83.4%
-- Existing ledger gross profit before labor: $7,350 and 86.5%
+- Deterministic labor cost: $261.60, visible as a separate workforce-costing metric
+- Current implemented protected gross profit: $7,350
+- Current implemented protected margin: 86.5%
+- Historical after-labor planning target: $7,088.40 and 83.4%
 - Synthetic account only; no patient data, no PHI, no healthcare compliance claim, and no HIPAA
   support claim
 
@@ -290,10 +291,10 @@ Implemented demo numbers:
   - Total approved spend: $1,150
 - Blocked risky spend:
   - Unapproved Data Broker Enrichment: $3,200
-- Deterministic labor cost: $261.60
-- Protected profit after labor: $7,088.40
-- Protected margin after labor: 83.4%
-- Existing ledger gross profit before labor: $7,350 and 86.5%
+- Deterministic labor cost: $261.60, visible as a separate workforce-costing metric
+- Current implemented protected gross profit: $7,350
+- Current implemented protected margin: 86.5%
+- Historical after-labor planning target: $7,088.40 and 83.4%
 - Margin floor: 50%
 
 Future template candidates, not implemented yet:
@@ -326,11 +327,20 @@ Completed baseline:
   Correction
 - Goal 8E - Wire ScaleX to the live NemoHermes API Runtime
 - Goal 8F - Docs-First Command Center UI, Document Intake, and Labor Costing
+- Goal 8G - Enterprise Demo Narrative UI Lock
+- Goal 8H - Cinematic Enterprise Demo UI Redesign
+- Goal 8I - Fixed Control-Room Shell
+- Goal 8J - Demo Drama and Stripe Mode Clarity
+- Goal 8K - Motion Storytelling and Label Clarity
+- Goal 8L - Choreography and Copy Cleanup
+- Goal 8M - Enterprise Tool Rails and Guardrail Visibility
+- Goal 8N - Brand System, Compact Rails, and Overflow Fix
+- Goal 8O - Logo Treatment
 
 Suggested next sequence:
 
-1. Goal 8G - Enterprise Demo Narrative UI Lock.
-2. Goal 9 - Final polish and submission assets.
+1. Goal 9 - final repo/video/submission polish and open-source audit checks.
+2. License selection before public open-source release.
 3. Goal 7.13C - MCP Server Prototype only after NemoClaw, guardrail, and approval boundaries are
    safe.
 4. Goal 7B / Production Hardening - Verified Live Mode for future live-money payments.
@@ -567,8 +577,9 @@ Required improvements:
    auth is enabled with local demo credentials, label it as prototype local auth and do not claim
    production auth. Avoid scary missing-config warnings during normal Judge Demo Mode.
 2. Command Center hero: first screen shows Northstar Dental Group, Client Implementation Launch,
-   revenue secured $8,500, approved setup spend $1,150, blocked risk $3,200, labor cost $261.60,
-   protected profit $7,088.40, protected margin 83.4%, and a clear `Start Governed Run` CTA.
+   revenue secured $8,500, approved setup spend $1,150, blocked risk $3,200, labor cost $261.60
+   as a separate workforce-costing metric, protected gross profit $7,350, protected margin
+   86.5%, and a clear `Start Governed Run` CTA.
 3. Operation Catalog: show multiple ClientOps functions while only one needs to run now: Client
    Implementation Launch active demo; Invoice-to-Cash Follow-Up, Vendor Spend Review, Client
    Onboarding Checklist, and Renewal Risk Review planned.
@@ -585,8 +596,8 @@ Required improvements:
    spend, policy-blocked data broker enrichment, no ledger spend row for blocked action, paid=false
    honesty, and Profit Outcome recorded.
 7. Guardrail proof: surface `local_policy` default, NeMo Guardrails optional/runtime verified when
-   state says so, NemoClaw target not active yet, `used_real_nemo`, `fail_closed`, rail decisions,
-   and blocked-spend no-ledger-row proof.
+   state says so, optional NemoHermes planning only when selected and verified, `used_real_nemo`,
+   `fail_closed`, rail decisions, and blocked-spend no-ledger-row proof.
 8. Stripe proof honesty: distinguish test-double in Judge Demo Mode from real Stripe test mode
    only when `used_real_stripe=true`; show invoice ID/hosted invoice URL only when available;
    preserve `paid=false`; no live money.
@@ -830,9 +841,9 @@ Demo story:
 - Revenue secured: $8,500.
 - Approved setup spend: $1,150.
 - Blocked risky spend: $3,200.
-- Labor cost: $261.60.
-- Protected profit after labor: $7,088.40.
-- Protected margin after labor: 83.4%.
+- Labor cost: $261.60, shown as a separate workforce-costing metric.
+- Current protected gross profit: $7,350.
+- Current protected margin: 86.5%.
 
 Visible run sequence:
 

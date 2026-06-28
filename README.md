@@ -68,11 +68,14 @@ Northstar Dental Group account.
 - Margin floor: 50%
 - Approved setup spend: $350 Secure Workspace Pack, $500 Data Migration Sandbox, and $300 Launch Asset Kit
 - Blocked risk: $3,200 Unapproved Data Broker Enrichment
-- Deterministic labor cost from Goal 8F: $261.60
-- Ledger gross profit before labor: $7,350 and 86.5% gross margin
-- Goal 8G protected profit after labor: $7,088.40 and 83.4% protected margin
-- Formula: protected profit = revenue - approved setup spend - labor cost; protected margin =
-  protected profit / revenue
+- Deterministic labor cost from Goal 8F: $261.60, shown as a separate workforce-costing metric
+- Current implemented protected gross profit: $7,350
+- Current implemented protected margin: 86.5%
+- Historical after-labor planning target: $7,088.40 and 83.4%; the current API-backed
+  control-room profit outcome reports the ledger protected gross profit and surfaces labor cost
+  separately
+- Current formula: protected gross profit = revenue - approved setup spend; protected margin =
+  protected gross profit / revenue
 - Data boundary: synthetic account only, no patient data, no PHI, no healthcare compliance claim,
   and no HIPAA support claim
 
@@ -156,6 +159,8 @@ must run in the appropriate environment.
 - Telegram approval is planned and not implemented yet.
 - Hermes planning uses the ScaleX-isolated laptop install, not production Hermes.
 - Stripe test invoices are labeled honestly as open/unpaid unless Stripe reports `paid=true`.
+- Open-source release still needs an explicit license decision before the repo should be called
+  open source.
 
 ## Current Prototype State
 
@@ -186,6 +191,22 @@ Implemented today:
 - Optional NeMo Guardrails adapter proof through `nemoguardrails` runtime verification.
 - Optional NemoHermes API runtime for sandboxed Hermes planning; it is not active by default and
   fails closed if selected but unavailable.
+
+## Open Source Audit Readiness
+
+This checkout has been prepared for source audit as a local prototype, not a production SaaS
+release. See `docs/OPEN_SOURCE_AUDIT.md`, `SECURITY.md`, and `CONTRIBUTING.md` before publishing
+or accepting external changes.
+
+Current audit posture:
+
+- `.env`, SQLite databases, logs, recordings, videos, caches, virtual environments,
+  `node_modules`, and build output are ignored.
+- Judge Demo Mode remains the default and works without secrets.
+- Full Proof Mode stays local-only through ignored `.env` values.
+- No license has been selected yet. Add a license before calling the repo open source.
+- Do not publish claims for live-money Stripe, production auth, production Hermes, Telegram, MCP,
+  real client data, PHI, or production payroll/HR behavior.
 
 ## Connection Hub And MCP Plan
 

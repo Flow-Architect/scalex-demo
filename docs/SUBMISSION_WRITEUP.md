@@ -29,10 +29,10 @@ three visible acts: the paid client operation, governed AI execution, and enterp
 Goal 8I completed the final control-room skin rewrite without replacing the app with a static
 prototype: the dashboard, governed run, evidence ledger, connection hub, and settings boundaries
 views remain API-backed while presenting a fixed dark enterprise shell for the recording.
-Goal 8J is the final visual storytelling polish pass on that shell. It restores stronger run
-animation, blocked-risk drama, rail activity, proof artifacts, evidence drawer clarity, and mode
-language for Judge Demo Mode, Stripe Sandbox Prototype, and future Verified Live Mode without
-adding new integrations or changing backend safety behavior.
+Goals 8J through 8O finished the final frontend/story polish on that shell: stronger run
+animation, blocked-risk drama, proof artifacts, evidence drawer clarity, mode language, compact
+rails, brand treatment, overflow fixes, and the current ScaleX logo implementation without adding
+new integrations or changing backend safety behavior.
 
 ScaleX Connection Hub is an implemented internal product layer that shows which
 systems the ClientOps Autopilot is allowed to use, what execution mode each connector is in, what
@@ -78,22 +78,23 @@ Demo-readiness note:
 - Goal 7.15A corrected the docs so NeMo Guardrails adapter proof is not confused with actual
   NemoClaw. It also added the future Telegram approval-gate plan and Product Depth + Demo-Winning
   UI plan.
-- Goal 8F targets a docs-first command-center UI, client/employee onboarding with manual and
+- Goal 8F completed a docs-first command-center UI, client/employee onboarding with manual and
   demo-safe document intake, and labor costing. It implements deterministic command-center state,
   local browser-only intake review/edit/save controls, upload-triggered deterministic extraction
   fixtures, fake/demo labor costing, and final profit after labor. It does not add live-money
   behavior, production payroll, HR compliance processing, tax processing, real client data, or real
   employee records.
-- Goal 8G targets a docs-first enterprise narrative UI lock. It does not add Telegram, MCP, new
+- Goal 8G completed a docs-first enterprise narrative UI lock. It does not add Telegram, MCP, new
   integrations, real Stripe runs, Full Proof runs, production payroll/HR behavior, Docker/NemoClaw
   commands, external extraction services, live money, real client data, or secrets.
 - Goal 8H completed a cinematic enterprise demo UI. It keeps the same deterministic demo-safe
   behavior and same integration truth while making the first screen, governed run stage, blocked
   risk, economic control, control stack, evidence ledger, and comparison panel visually strong
   enough for a three-minute judge recording.
-- Goal 8J keeps the app API-backed and frontend-first while making the blocked $3,200 stop
+- Goal 8O leaves the app API-backed and frontend-first while making the blocked $3,200 stop
   decision, proof path, Stripe sandbox/test-mode status, NemoClaw/NemoHermes optional runtime
-  boundary, and final protected-profit story easier to understand from the screen.
+  boundary, final protected-profit story, and ScaleX logo treatment easier to understand from the
+  screen.
 
 Demo story:
 
@@ -103,7 +104,8 @@ invoice proof, lets Hermes plan onboarding and delivery, checks spend and vendor
 local policy now and the optional NeMo Guardrails adapter when configured, targets actual
 NemoClaw/OpenShell sandboxing only when selected and verified, approves safe setup spend, blocks
 risky enrichment spend, coordinates work units, records evidence, adds demo labor-cost
-assumptions, and reports protected profit and launch status after approved vendor spend and labor.
+assumptions, and reports protected gross profit and launch status with labor cost shown as a
+separate workforce-costing proof metric.
 
 Visible run sequence:
 
