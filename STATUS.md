@@ -7,10 +7,10 @@ Last updated: 2026-06-29
 - Project folder exists at `/home/ascabrya/dev/scalex-demo`.
 - Latest committed baseline before Goal 8E: `615a9bd Document NemoClaw correction and next
   integration plan`.
-- Last completed goal: Goal 8R - protected profit enterprise cost-basis recalibration.
-- Last completed implementation/QA goal: Goal 8R - deterministic backend/frontend economics now
-  report protected profit after approved delivery costs.
-- Last completed documentation/tracking update: Goal 8R cost-basis closeout.
+- Last completed goal: Goal 8S - final run timing only.
+- Last completed implementation/QA goal: Goal 8S - frontend-only governed-run timing constants
+  for final recording readability.
+- Last completed documentation/tracking update: Goal 8S timing closeout.
 - Last completed checkout cleanup: Open Source Checkout Cleanup for judge readiness.
 - Current priority: Goal 9 - final repo/video/submission polish.
 - Goal 8I used the uploaded six-phase control-room visual prompt as a design specification only.
@@ -193,6 +193,28 @@ Last updated: 2026-06-29
   economics and 16.1% blocked-risk impact, Connection Hub and Settings summarize current
   economics truthfully, `Start Governed Run` clicks successfully, no old $7,088 / 83.4% / $262 /
   $7,350 refs appear in current UI text, and document width equals viewport width.
+- Goal 8S updated only the frontend governed-run timing constants for the final recording. The
+  default automatic run now takes about 29-30 seconds plus small rail gaps: Business Intake 2.2s,
+  Cost Basis 2.2s, Hermes 2.4s, each Stripe finance rail 3.2s, NemoClaw / NeMo policy 3.2s,
+  setup spend approval 2.4s, blocked risky vendor action 4.8s, Evidence Ledger 2.6s, and Profit
+  Outcome 3.2s.
+- Goal 8S shortened the detail transition to 550ms, the blocked-risk count-up to about 1.8s, and
+  the blocked flash to 1.2s while keeping the blocked climax, red rail emphasis, blocked-risk
+  metric count-up, synchronized Live Run Detail, and stable complete state. Goal 8R economics,
+  layout, colors, branding, Evidence Ledger content, Connection Hub, Settings, backend mechanics,
+  Stripe/Hermes/NemoClaw behavior, Judge Demo Mode, no live money, no Telegram, and no new
+  integrations were preserved.
+- Goal 8S validation passed `cd frontend && npm run build`, `./scripts/test.sh`,
+  `./scripts/check-nemo.sh`, `git diff --check`, unsafe/generated path scan, staged added-lines
+  secret scan, and browser smoke at 1440x900. Browser smoke sampled Business Intake at ~0.6s,
+  Cost Basis at ~3.1s, Hermes at ~5.1s, Stripe Invoice at ~7.7s, Stripe Payment Status at
+  ~11.2s, NemoClaw / NeMo Check at ~14.2s, approved setup spend at ~17.7s, blocked risky vendor
+  action at ~20.3s, Evidence Ledger at ~24.8s, Profit Outcome at ~27.8s, and stable complete
+  state at ~30.9s. A focused blocked smoke confirmed the blocked-risk metric counted through
+  `$400`, `$800`, `$1,200`, `$1,800`, `$2,200`, `$2,800`, and `$3,200` over about 1.7 seconds,
+  then held the blocked detail until Evidence Ledger. Browser smoke also confirmed the Goal 8R
+  metrics remained $8,500 / $3,935 / $3,200 / $4,565 / 53.7% and document width matched the
+  1440px viewport.
 - Goal 9 remains final polish and submission assets.
 - Goal 7B remains future Verified Live Mode hardening.
 

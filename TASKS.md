@@ -4,10 +4,13 @@
 
 Goal 9 - final repo/video/submission polish and open-source audit closeout.
 
-Goal 8R is complete. Return to final recording and submission readiness:
+Goal 8S is complete. Return to final recording and submission readiness:
 
 - Rehearse the three-minute recording against `docs/DEMO_SCRIPT.md`.
 - Confirm the local demo opens at `http://127.0.0.1:5174/` with the dark control-room UI.
+- Confirm `Start Governed Run` plays the final timing pass at roughly 29-30 seconds, with the
+  blocked-risk decision visible for about 4.8 seconds and the $0 -> $3,200 count-up taking about
+  1.8 seconds.
 - Confirm the metric strip reads $8,500 revenue, $3,935 approved costs, $3,200 risk contained,
   $4,565 protected profit, and 53.7% protected margin.
 - Confirm Cost Basis shows $950 loaded labor as job costing, not payroll, and the blocked-risk
@@ -23,6 +26,41 @@ new backend features, new external services, production payroll/HR behavior, MCP
 changes, database files, uploaded real files, or secrets.
 
 ## Recently Completed
+
+Goal 8S is complete. It was a frontend-only final run timing pass:
+
+- Updated only the governed-run timing constants: default rails 2.2s, Business Intake 2.2s, Cost
+  Basis 2.2s, Hermes 2.4s, Stripe finance rails 3.2s each, NemoClaw / NeMo policy 3.2s, approved
+  setup spend 2.4s, blocked risky vendor action 4.8s, Evidence Ledger 2.6s, and Profit Outcome
+  3.2s.
+- Set the detail transition to 550ms, blocked-risk count-up to about 1.8s, and blocked flash to
+  1.2s.
+- Kept the blocked flash/climax, red rail emphasis, blocked-risk metric count-up, synchronized
+  Live Run Detail, and stable screenshot-ready final complete state.
+- Preserved the Dashboard layout, logo, brand colors, compact active-run area, onboarding/cost
+  basis, labor costing, MCP-ready/tool action rail, Stripe finance card, NemoClaw/NeMo visibility,
+  Evidence Ledger, Connection Hub, Settings/Boundaries, Goal 8R economics, backend mechanics, no
+  live money, no Telegram, no new integrations, and no `.env` or database changes.
+
+Goal 8S validation:
+
+- `cd frontend && npm run build` passed.
+- `./scripts/test.sh` passed with 68 backend tests and a successful frontend build.
+- `./scripts/check-nemo.sh` passed with `nemoguardrails` 0.21.0 and `guardrails/scalex` loaded.
+- `git diff --check` passed.
+- Browser smoke at `http://127.0.0.1:5174/` with a temp `/tmp/scalex-goal8s-browser.db`
+  sampled the final run timing at 1440x900: Business Intake ~0.6s, Cost Basis ~3.1s, Hermes
+  ~5.1s, Stripe Invoice ~7.7s, Stripe Payment Status ~11.2s, NemoClaw / NeMo Check ~14.2s,
+  approved setup spend ~17.7s, blocked risky vendor action ~20.3s, Evidence Ledger ~24.8s,
+  Profit Outcome ~27.8s, and stable complete state ~30.9s.
+- Focused blocked smoke confirmed the blocked-risk metric counted through `$400`, `$800`,
+  `$1,200`, `$1,800`, `$2,200`, `$2,800`, and `$3,200` over about 1.7 seconds, while the blocked
+  detail stayed visible with Data Broker Enrichment, $3,200 requested, 16.1% margin if approved,
+  and no spend ledger row.
+- Browser smoke confirmed Goal 8R metrics stayed $8,500 / $3,935 / $3,200 / $4,565 / 53.7%,
+  Live Run Detail stayed synchronized, final state was stable, and document width matched the
+  1440px viewport.
+- Unsafe/generated path scan and staged added-lines secret scan returned no matches.
 
 Goal 8R is complete. It recalibrated protected profit around an enterprise approved delivery cost
 basis instead of setup-spend-only economics:

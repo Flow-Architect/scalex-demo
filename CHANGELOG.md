@@ -10,6 +10,49 @@ Use:
 
 ---
 
+## 2026-06-29 - Goal 8S: Final run timing only
+
+Completed:
+- Updated only the frontend governed-run presentation timing constants for the final recording.
+- Set the default rail holds to the Goal 8S schedule: Business Intake 2.2s, Cost Basis 2.2s,
+  Hermes 2.4s, Stripe finance rails 3.2s each, NemoClaw / NeMo policy 3.2s, approved setup spend
+  2.4s, blocked risky vendor action 4.8s, Evidence Ledger 2.6s, and Profit Outcome 3.2s.
+- Set detail transition to 550ms, blocked-risk count-up to about 1.8s, and blocked flash to 1.2s.
+- Preserved the blocked flash/climax, red rail emphasis, blocked-risk metric count-up,
+  synchronized Live Run Detail, and final complete state.
+- Preserved Dashboard layout, logo, brand colors, compact active-run area, onboarding/cost basis,
+  labor costing, MCP-ready/tool action rail, Stripe finance card, NemoClaw/NeMo visibility,
+  Evidence Ledger, Connection Hub, Settings/Boundaries, Goal 8R economics, backend mechanics, no
+  live money, no Telegram, no new integrations, and no `.env` or database changes.
+
+Verification:
+- `cd frontend && npm run build` passed.
+- `./scripts/test.sh` passed with 68 backend tests and a successful frontend build.
+- `./scripts/check-nemo.sh` passed with `nemoguardrails` 0.21.0 and `guardrails/scalex` loaded.
+- `git diff --check` passed.
+- Browser smoke at `http://127.0.0.1:5174/` with a temp `/tmp/scalex-goal8s-browser.db`
+  sampled the final run timing at 1440x900: Business Intake ~0.6s, Cost Basis ~3.1s, Hermes
+  ~5.1s, Stripe Invoice ~7.7s, Stripe Payment Status ~11.2s, NemoClaw / NeMo Check ~14.2s,
+  approved setup spend ~17.7s, blocked risky vendor action ~20.3s, Evidence Ledger ~24.8s,
+  Profit Outcome ~27.8s, and stable complete state ~30.9s.
+- Focused blocked smoke confirmed the blocked-risk metric counted through `$400`, `$800`,
+  `$1,200`, `$1,800`, `$2,200`, `$2,800`, and `$3,200` over about 1.7 seconds, while the blocked
+  detail stayed visible with Data Broker Enrichment, $3,200 requested, 16.1% margin if approved,
+  and no spend ledger row.
+- Browser smoke confirmed Goal 8R metrics stayed $8,500 / $3,935 / $3,200 / $4,565 / 53.7%,
+  Live Run Detail stayed synchronized, final state was stable, and document width matched the
+  1440px viewport.
+- Unsafe/generated path scan returned no matches.
+- Staged added-lines secret scan returned no matches.
+
+Suggested commit message:
+Slow ScaleX final run timing
+
+Next:
+- Goal 9 - final repo/video/submission polish and open-source audit closeout.
+
+---
+
 ## 2026-06-29 - Goal 8R: Enterprise cost-basis protected profit
 
 Completed:
