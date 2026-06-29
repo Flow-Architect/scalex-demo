@@ -158,16 +158,16 @@ Last updated: 2026-06-29
   sidebar, topbar, or complete-state layout; it did not change backend mechanics, Stripe, Hermes,
   NemoClaw, Telegram, MCP, live mode, `.env`, database files, or integrations.
 - Goal 8Q slowed the governed-run presentation again for final recording readability. The
-  default ten-rail automatic run now holds active decisions for roughly 43 seconds in browser
-  smoke: 3.0s intake, 3.0s cost basis, 3.3s Hermes plan, 4.5s for each Stripe finance rail, 4.5s
-  NemoClaw / NeMo policy, 3.3s setup spend approval, 6.5s blocked risky vendor action, 3.8s
-  evidence ledger, and 4.5s profit outcome.
+  default ten-rail automatic run now holds active decisions for roughly 48 seconds in browser
+  smoke: 3.3s intake, 3.3s cost basis, 3.6s Hermes plan, 5.0s for each Stripe finance rail, 5.0s
+  NemoClaw / NeMo policy, 3.6s setup spend approval, 7.2s blocked risky vendor action, 4.2s
+  evidence ledger, and 5.0s profit outcome.
 - Goal 8Q kept Live Run Detail synchronized with the active rail, stretched the blocked-risk
-  count-up to about 2.6 seconds, kept the blocked flash/climax to a single readable moment, and
+  count-up to about 3.0 seconds, kept the blocked flash/climax to a single readable moment, and
   preserved the final stable complete state.
 - Goal 8Q validation passed `cd frontend && npm run build`, `./scripts/test.sh`,
   `./scripts/check-nemo.sh`, `git diff --check`, and browser smoke at 1440x900. Browser smoke
-  sampled the rail sequence from Business Intake through stable complete state at about 42.8s,
+  sampled the rail sequence from Business Intake through stable complete state at about 47.7s,
   confirmed no horizontal overflow, confirmed Live Run Detail synchronization, and confirmed the
   blocked-risk metric counted through `$1,400` mid-climax before settling at `$3,200`.
 - Goal 8Q did not change backend mechanics, Stripe, Hermes, NemoClaw / NeMo backend behavior,
