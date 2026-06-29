@@ -1457,11 +1457,17 @@ function RailActivityTimeline({
 
 function ConnectorCard({ card }: { card: ConnectorCardModel }) {
   const Icon = card.icon;
+  const [logoFailed, setLogoFailed] = useState(false);
+  const showLogo = Boolean(card.logoSrc && !logoFailed);
   return (
     <article className="rounded-md border border-[#232834] bg-[#111318] p-4 transition hover:border-[#343A46]">
       <div className="flex items-start gap-3">
-        <span className="flex h-10 w-10 items-center justify-center rounded-md border border-[#232834] bg-[#0a0b0e] text-[#fcba03]">
-          <Icon className="h-5 w-5" />
+        <span className="connector-logo-frame">
+          {showLogo ? (
+            <img alt="" className="connector-logo-img" onError={() => setLogoFailed(true)} src={card.logoSrc} />
+          ) : (
+            <Icon className="h-5 w-5" />
+          )}
         </span>
         <div className="min-w-0">
           <h2 className="text-lg font-semibold text-white">{card.title}</h2>
@@ -1743,6 +1749,7 @@ interface ConnectorCardModel {
   description: string;
   facts: StatPill[];
   icon: LucideIcon;
+  logoSrc?: string;
   title: string;
 }
 
@@ -2168,6 +2175,7 @@ function buildConnectionCards(state: DemoState | null, auditRows: number, guardr
       description: "Creates the client implementation plan and proposes the controlled tool sequence.",
       facts: [{ label: "Current mode", value: hermesLabel, tone: "purple" }, { label: "Runtime", value: hermesRuntime, tone: "white" }, { label: "NemoClaw route", value: nemoClawSelected ? "selected" : "not selected", tone: nemoClawSelected ? "green" : "blue" }, { label: "Planning runs", value: String(state?.planning_runs?.length ?? 0), tone: "white" }],
       icon: BrainCircuit,
+      logoSrc: "/brand/connections/hermes_agent_nous_square_white.png",
       title: "Hermes Planning",
     },
     {
@@ -2176,6 +2184,7 @@ function buildConnectionCards(state: DemoState | null, auditRows: number, guardr
       description: "Provides finance state through sandbox/test-mode invoice records.",
       facts: [{ label: "Current mode", value: stripeLabel, tone: "blue" }, { label: "livemode", value: String(state?.stripe?.livemode ?? false), tone: "green" }, { label: "paid", value: String(state?.stripe?.paid ?? false), tone: "amber" }, { label: "invoice", value: state?.stripe?.invoice_id ? "Available" : "Demo state", tone: "white" }],
       icon: CreditCard,
+      logoSrc: "/brand/connections/stripe_square_s_mark.png",
       title: "Stripe Finance State",
     },
     {
@@ -2184,6 +2193,7 @@ function buildConnectionCards(state: DemoState | null, auditRows: number, guardr
       description: "Checks risky actions before execution and blocks unsafe behavior.",
       facts: [{ label: "Current mode", value: guardrailLabel, tone: "green" }, { label: "used_real_nemo", value: String(Boolean(guardrails?.used_real_nemo)), tone: guardrails?.used_real_nemo ? "green" : "amber" }, { label: "fail_closed", value: String(Boolean(guardrails?.fail_closed)), tone: guardrails?.fail_closed ? "red" : "green" }, { label: "adapter", value: guardrails?.adapter_status ?? "local policy", tone: "white" }],
       icon: ShieldCheck,
+      logoSrc: "/brand/connections/nvidia_square_mark.png",
       title: "NeMo Guardrails / Local Policy",
     },
     {
@@ -2192,6 +2202,7 @@ function buildConnectionCards(state: DemoState | null, auditRows: number, guardr
       description: "Persists run events, ledger rows, planning records, policy checks, guardrail evaluations, and reports.",
       facts: [{ label: "Ledger entries", value: String(state?.ledger?.entries?.length ?? 4), tone: "green" }, { label: "Evidence rows", value: String(auditRows || 64), tone: "white" }, { label: "Reports", value: String(state?.reports?.length ?? 1), tone: "green" }, { label: "Blocked spend rows", value: "0", tone: "green" }],
       icon: Database,
+      logoSrc: "/brand/connections/sqlite_square_icon.png",
       title: "SQLite Evidence Ledger",
     },
   ];

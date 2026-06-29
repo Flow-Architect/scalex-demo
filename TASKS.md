@@ -4,7 +4,7 @@
 
 Goal 9 - final repo/video/submission polish and open-source audit closeout.
 
-Goal 8T is complete. Return to final recording and submission readiness:
+Goal 8U is complete. Return to final recording and submission readiness:
 
 - Rehearse the three-minute recording against `docs/DEMO_SCRIPT.md`.
 - Confirm the local demo opens at `http://127.0.0.1:5174/` with the dark control-room UI.
@@ -15,6 +15,9 @@ Goal 8T is complete. Return to final recording and submission readiness:
   $4,565 protected profit, and 53.7% protected margin.
 - Confirm Cost Basis shows the polished approved delivery cost table, $950 loaded labor as job
   costing only, and the blocked-risk detail shows 16.1% margin if risky spend were approved.
+- Confirm Connection Hub cards show the copied system logos for Hermes Planning, Stripe Finance
+  State, NeMo Guardrails / Local Policy, and SQLite Evidence Ledger without changing the
+  truthfulness labels.
 - Capture final screenshots or video assets only if needed for submission.
 - Do a final submission copy check against `docs/SUBMISSION_WRITEUP.md`.
 - Review `docs/OPEN_SOURCE_AUDIT.md`, `SECURITY.md`, and `CONTRIBUTING.md` before public release.
@@ -26,6 +29,29 @@ new backend features, new external services, production payroll/HR behavior, MCP
 changes, database files, uploaded real files, or secrets.
 
 ## Recently Completed
+
+Goal 8U is complete. It was a frontend-only Connection Hub logo polish:
+
+- Copied the selected square logo assets from the uploaded `ui_square_logo_pngs.zip` bundle into
+  `frontend/public/brand/connections/`.
+- Used the copied assets from `/brand/connections/<filename>` for Hermes Planning, Stripe Finance
+  State, NeMo Guardrails / Local Policy, and SQLite Evidence Ledger.
+- Preserved the original generic Lucide icons as image-load fallbacks so a missing logo does not
+  leave an empty or broken placeholder.
+- Kept the Connection Hub layout, labels, truthfulness text, mode badges, card facts, backend
+  mechanics, economics, run timing, Dashboard, Governed Run, Evidence Ledger, Settings, sidebar
+  logo, no live money, no Telegram, no new integrations, no `.env` changes, and no database
+  artifacts.
+
+Goal 8U validation:
+
+- `cd frontend && npm run build` passed.
+- `./scripts/test.sh` passed with 68 backend tests and a successful frontend build.
+- `./scripts/check-nemo.sh` passed with `nemoguardrails` 0.21.0 and `guardrails/scalex` loaded.
+- Browser smoke at `http://127.0.0.1:5174/` verified Connection Hub loads, all four cards use the
+  copied `/brand/connections/` logo assets, logos complete at 1024x1024 natural size inside 32px
+  frames, no horizontal document overflow, truthfulness text unchanged, and the generic icon
+  fallback renders when a logo fails to load.
 
 Goal 8T is complete. It was a frontend-only Cost Basis / Delivery Cost Stack presentation polish:
 

@@ -10,6 +10,37 @@ Use:
 
 ---
 
+## 2026-06-29 - Goal 8U: Connection Hub system logos
+
+Completed:
+- Integrated selected square logo assets from the uploaded `ui_square_logo_pngs.zip` bundle into
+  `frontend/public/brand/connections/`.
+- Replaced generic Connection Hub card icons with system logos where available:
+  Hermes Planning, Stripe Finance State, NeMo Guardrails / Local Policy, and SQLite Evidence
+  Ledger.
+- Kept the original Lucide icons as image-load fallbacks so missing assets do not leave broken or
+  empty card marks.
+- Preserved card labels, truthfulness copy, mode badges, backend mechanics, economics, animation
+  timing, no live money, no Telegram, no new integrations, no `.env` changes, and no database
+  artifacts.
+
+Verification:
+- `cd frontend && npm run build` passed.
+- `./scripts/test.sh` passed with 68 backend tests and a successful frontend build.
+- `./scripts/check-nemo.sh` passed with `nemoguardrails` 0.21.0 and `guardrails/scalex` loaded.
+- Browser smoke at `http://127.0.0.1:5174/` verified Connection Hub loads, all four cards use the
+  copied `/brand/connections/` logo assets, each logo image completes at 1024x1024 natural size
+  inside a 32px frame, no horizontal document overflow, truthfulness text unchanged, and the
+  generic icon fallback renders when a logo fails to load.
+
+Suggested commit message:
+Use system logos in ScaleX connection hub
+
+Next:
+- Goal 9 - final repo/video/submission polish and open-source audit closeout.
+
+---
+
 ## 2026-06-29 - Goal 8T: Cost-basis display polish
 
 Completed:

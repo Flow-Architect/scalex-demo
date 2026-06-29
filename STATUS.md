@@ -7,10 +7,9 @@ Last updated: 2026-06-29
 - Project folder exists at `/home/ascabrya/dev/scalex-demo`.
 - Latest committed baseline before Goal 8E: `615a9bd Document NemoClaw correction and next
   integration plan`.
-- Last completed goal: Goal 8T - cost-basis display polish.
-- Last completed implementation/QA goal: Goal 8T - frontend-only Cost Basis / Delivery Cost
-  Stack table presentation polish.
-- Last completed documentation/tracking update: Goal 8T cost-basis display closeout.
+- Last completed goal: Goal 8U - Connection Hub system logos.
+- Last completed implementation/QA goal: Goal 8U - frontend-only Connection Hub logo polish.
+- Last completed documentation/tracking update: Goal 8U Connection Hub logo closeout.
 - Last completed checkout cleanup: Open Source Checkout Cleanup for judge readiness.
 - Current priority: Goal 9 - final repo/video/submission polish.
 - Goal 8I used the uploaded six-phase control-room visual prompt as a design specification only.
@@ -230,6 +229,22 @@ Last updated: 2026-06-29
   display for approved cost rows, total approved costs `$3,935`, protected profit `$4,565`,
   protected margin `53.7%`, labor cost `$950`, no horizontal document overflow, a real
   `Start Governed Run` click, and the role-based labor table rows.
+- Goal 8U completed the frontend-only Connection Hub system-logo polish. It copied the selected
+  square logo assets from the uploaded `ui_square_logo_pngs.zip` bundle into
+  `frontend/public/brand/connections/` and uses them for Hermes Planning, Stripe Finance State,
+  NeMo Guardrails / Local Policy, and SQLite Evidence Ledger. The Connection Hub card renderer
+  keeps the original generic Lucide icons as image-load fallbacks and does not depend on the ZIP
+  file or `/mnt/data` at runtime.
+- Goal 8U preserved the Connection Hub card labels, truthfulness copy, mode badges, backend
+  mechanics, economics, animation timing, Dashboard, Governed Run, Evidence Ledger, Settings,
+  sidebar logo, no live money, no Telegram, no new integrations, no `.env` changes, and no
+  database artifacts.
+- Goal 8U validation passed `cd frontend && npm run build`, `./scripts/test.sh` with 68 backend
+  tests and a successful frontend build, `./scripts/check-nemo.sh`, and browser smoke at
+  `http://127.0.0.1:5174/`. Browser smoke verified all four Connection Hub cards loaded their
+  copied logo assets at `/brand/connections/`, each image completed with 1024x1024 natural size
+  inside a 32px frame, no horizontal document overflow, truthfulness text unchanged, and the
+  image-load fallback path replacing a failed logo with the generic icon.
 - Goal 9 remains final polish and submission assets.
 - Goal 7B remains future Verified Live Mode hardening.
 
