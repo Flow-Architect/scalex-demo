@@ -1566,7 +1566,7 @@ function buildControlRoomModel(
   const stripeLabel = state?.execution?.finance_label ?? (state?.stripe?.used_real_stripe ? "Real Stripe test finance" : "Stripe sandbox finance");
   const guardrailLabel = state?.execution?.guardrail_label ?? (state?.guardrails?.used_real_nemo ? "NeMo Guardrails verified" : "Local policy active");
   const rails = buildRails({ approvedCostsCents, blockedSpendCents, guardrailLabel, hasReport, laborCostCents, marginIfBlockedApprovedPercent, marginFloorPercent, marginPercent, protectedProfitCents, revenueCents, setupSpendCents, stripeLabel });
-  const auditRowsData = buildAuditRows({ approvedCostsCents, blockedSpendCents, guardrailLabel, laborCostCents, marginIfBlockedApprovedPercent, protectedProfitCents, state });
+  const auditRowsData = buildAuditRows({ approvedCostsCents, blockedSpendCents, guardrailLabel, laborCostCents, marginIfBlockedApprovedPercent, protectedProfitCents, setupSpendCents, state });
   const modeCards = buildModeCards(state);
   const proofArtifacts = buildProofArtifacts({ approvedCostsCents, blockedSpendCents, guardrailLabel, laborCostCents, protectedProfitCents, state, stripeLabel });
   const primaryMode = modeCards.find((mode) => mode.primary) ?? modeCards[0];
@@ -2037,13 +2037,14 @@ function buildSupportingModules(state: DemoState | null, laborCostCents: number)
   ];
 }
 
-function buildAuditRows({ approvedCostsCents, blockedSpendCents, guardrailLabel, laborCostCents, marginIfBlockedApprovedPercent, protectedProfitCents, state }: {
+function buildAuditRows({ approvedCostsCents, blockedSpendCents, guardrailLabel, laborCostCents, marginIfBlockedApprovedPercent, protectedProfitCents, setupSpendCents, state }: {
   approvedCostsCents: number;
   blockedSpendCents: number;
   guardrailLabel: string;
   laborCostCents: number;
   marginIfBlockedApprovedPercent: number;
   protectedProfitCents: number;
+  setupSpendCents: number;
   state: DemoState | null;
 }): AuditRowModel[] {
   const stripeResult = state?.stripe?.used_real_stripe ? "real Stripe test" : "sandbox finance";
@@ -2051,13 +2052,16 @@ function buildAuditRows({ approvedCostsCents, blockedSpendCents, guardrailLabel,
     { order: "001", actor: "Hermes", action: "Implementation plan recorded", evidenceType: "planning_run", safetyNote: "Hermes plans only; ScaleX executes approved actions.", status: "Recorded", tone: "purple" },
     { order: "002", actor: "Stripe", action: "Finance state recorded", evidenceType: "stripe_event", safetyNote: `Finance state is ${stripeResult}; livemode is not live money.`, status: "Verified", tone: "blue" },
     { order: "003", actor: "NeMo / Local Policy", action: "Guardrail check recorded", evidenceType: "guardrail_evaluation", safetyNote: guardrailLabel, status: "Verified", tone: "green" },
-    { order: "004", actor: "ScaleX Economics", action: `Approved delivery costs ${formatCurrency(approvedCostsCents)}`, evidenceType: "cost_basis", safetyNote: "Protected profit is calculated after approved delivery costs, not just labor.", status: "Recorded", tone: "green" },
-    { order: "005", actor: "ScaleX Policy", action: `Blocked risky vendor spend ${formatCurrency(blockedSpendCents)}`, evidenceType: "policy_check", safetyNote: `Data broker enrichment would collapse margin to ${formatPercent(marginIfBlockedApprovedPercent)}; no spend ledger row created.`, status: "BLOCKED", tone: "red" },
-    { order: "006", actor: "Workforce Costing", action: `Labor cost recorded ${formatCurrency(laborCostCents)}`, evidenceType: "job_costing", safetyNote: "Demo job costing only; not payroll or HR compliance.", status: "Recorded", tone: "purple" },
-    { order: "007", actor: "Output Rail", action: "Paid-state honesty verified", evidenceType: "output_guardrail", safetyNote: "Open/unpaid Stripe state is not described as paid.", status: "Verified", tone: "amber" },
-    { order: "008", actor: "ScaleX Safety", action: "No live-money mode verified", evidenceType: "mode_boundary", safetyNote: "Verified Live Mode is future-only.", status: "Verified", tone: "green" },
-    { order: "009", actor: "ScaleX Safety", action: "No secrets stored verified", evidenceType: "secret_boundary", safetyNote: "No tokens, credential headers, or .env values are shown.", status: "Verified", tone: "green" },
-    { order: "010", actor: "ScaleX Ledger", action: "Final protected profit outcome recorded", evidenceType: "profit_report", safetyNote: `Protected profit ${formatCurrency(protectedProfitCents)} after approved delivery costs.`, status: "Recorded", tone: "green" },
+    { order: "004", actor: "ScaleX Economics", action: `Cost basis calculated ${formatCurrency(approvedCostsCents)}`, evidenceType: "cost_basis", safetyNote: "Protected profit is calculated after approved delivery costs, not just labor.", status: "Recorded", tone: "green" },
+    { order: "005", actor: "ScaleX Policy", action: `Approved setup spend recorded ${formatCurrency(setupSpendCents)}`, evidenceType: "policy_check", safetyNote: "Allowed vendors and setup spend cap were checked before spend.", status: "Approved", tone: "green" },
+    { order: "006", actor: "Workforce Costing", action: `Labor cost proof recorded ${formatCurrency(laborCostCents)}`, evidenceType: "job_costing", safetyNote: "Demo job costing only; not payroll or HR compliance.", status: "Recorded", tone: "purple" },
+    { order: "007", actor: "ScaleX Economics", action: "Campaign/media cost recorded $600", evidenceType: "cost_basis", safetyNote: "Delivery cost assumption is included before profit is reported.", status: "Recorded", tone: "green" },
+    { order: "008", actor: "ScaleX Economics", action: "Materials/delivery cost recorded $375", evidenceType: "cost_basis", safetyNote: "Delivery materials are included in the approved cost basis.", status: "Recorded", tone: "green" },
+    { order: "009", actor: "ScaleX Policy", action: `Blocked risky vendor spend ${formatCurrency(blockedSpendCents)}`, evidenceType: "policy_check", safetyNote: `Data broker enrichment would collapse margin to ${formatPercent(marginIfBlockedApprovedPercent)}; no spend ledger row created.`, status: "BLOCKED", tone: "red" },
+    { order: "010", actor: "Output Rail", action: "Paid-state honesty verified", evidenceType: "output_guardrail", safetyNote: "Open/unpaid Stripe state is not described as paid.", status: "Verified", tone: "amber" },
+    { order: "011", actor: "ScaleX Safety", action: "No live-money mode verified", evidenceType: "mode_boundary", safetyNote: "Verified Live Mode is future-only.", status: "Verified", tone: "green" },
+    { order: "012", actor: "ScaleX Safety", action: "No secrets stored verified", evidenceType: "secret_boundary", safetyNote: "No tokens, credential headers, or .env values are shown.", status: "Verified", tone: "green" },
+    { order: "013", actor: "ScaleX Ledger", action: "Final protected profit outcome recorded", evidenceType: "profit_report", safetyNote: `Protected profit ${formatCurrency(protectedProfitCents)} after approved delivery costs.`, status: "Recorded", tone: "green" },
   ];
 }
 
