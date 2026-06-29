@@ -7,9 +7,10 @@ Last updated: 2026-06-29
 - Project folder exists at `/home/ascabrya/dev/scalex-demo`.
 - Latest committed baseline before Goal 8E: `615a9bd Document NemoClaw correction and next
   integration plan`.
-- Last completed goal: Goal 8V - Live Run Detail branded system cards.
-- Last completed implementation/QA goal: Goal 8V - frontend-only Live Run Detail card polish.
-- Last completed documentation/tracking update: Goal 8V Live Run Detail card closeout.
+- Last completed goal: Goal 8W - pre-run Live Run Detail decision stage.
+- Last completed implementation/QA goal: Goal 8W - frontend-only idle-state Live Run Detail
+  composition polish.
+- Last completed documentation/tracking update: Goal 8W pre-run Live Run Detail closeout.
 - Last completed checkout cleanup: Open Source Checkout Cleanup for judge readiness.
 - Current priority: Goal 9 - final repo/video/submission polish.
 - Goal 8I used the uploaded six-phase control-room visual prompt as a design specification only.
@@ -261,6 +262,23 @@ Last updated: 2026-06-29
   `Start Governed Run` click, active highlight progression through Hermes, Stripe, policy, and
   ScaleX, final complete readability, image-load fallback behavior, and Connection Hub / Settings
   truthfulness.
+- Goal 8W completed the frontend-only pre-run Live Run Detail composition polish. It fills only
+  the idle/pre-run empty middle space with a compact "Ready to govern Northstar operation"
+  decision stage, a governance flow, readiness chips, and an operation summary for Northstar
+  Dental Group, Client Implementation Launch, $8,500 revenue, $3,935 approved costs, $3,200 risk
+  to contain, and 50.0% margin floor.
+- Goal 8W intentionally preserved the running rail detail states, blocked-risk detail, Evidence
+  Ledger result state, complete Profit Outcome/result card, Dashboard layout, governed-run
+  timing, backend mechanics, economics, run/reset behavior, Connection Hub, Settings /
+  Boundaries, truthfulness text, no live money, no Telegram, no new integrations, no `.env`
+  changes, and no database artifacts.
+- Goal 8W validation passed `cd frontend && npm run build`, `./scripts/test.sh` with 68 backend
+  tests and a successful frontend build, `./scripts/check-nemo.sh`, and browser smoke at
+  `http://127.0.0.1:5174/`. Browser smoke verified Dashboard pre-run render, the Ready to Govern
+  decision stage, visible Start Governed Run button, branded system cards, no old economics
+  values, a real `Start Governed Run` click, running states without the pre-run stage, final
+  `$4,565` Profit Outcome still readable, no horizontal document overflow, and Connection Hub /
+  Settings truthfulness.
 - Goal 9 remains final polish and submission assets.
 - Goal 7B remains future Verified Live Mode hardening.
 

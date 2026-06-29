@@ -10,6 +10,40 @@ Use:
 
 ---
 
+## 2026-06-29 - Goal 8W: Pre-run Live Run Detail decision stage
+
+Completed:
+- Filled only the idle/pre-run Live Run Detail empty middle space with a compact "Ready to govern
+  Northstar operation" decision stage.
+- Added a pre-run governance flow, readiness chips, and a compact operation summary for Northstar
+  Dental Group, Client Implementation Launch, $8,500 revenue, $3,935 approved costs, $3,200 risk
+  to contain, and 50.0% margin floor.
+- Preserved the branded system cards below the stage and kept the Start Governed Run button
+  visible in the pre-run panel.
+- Intentionally preserved running rail detail states, blocked-risk detail, Evidence Ledger result
+  state, final Profit Outcome/result card, Dashboard layout, governed-run timing, backend
+  mechanics, economics, run/reset behavior, Connection Hub, Settings / Boundaries, truthfulness
+  text, no live money, no Telegram, no new integrations, no `.env` changes, and no database
+  artifacts.
+
+Verification:
+- `cd frontend && npm run build` passed.
+- `./scripts/test.sh` passed with 68 backend tests and a successful frontend build.
+- `./scripts/check-nemo.sh` passed with `nemoguardrails` 0.21.0 and `guardrails/scalex` loaded.
+- Browser smoke at `http://127.0.0.1:5174/` verified Dashboard pre-run render, the Ready to
+  Govern decision stage, visible Start Governed Run button, branded system cards, no old
+  economics values, a real `Start Governed Run` click, running states without the pre-run stage,
+  final `$4,565` Profit Outcome readability, no horizontal document overflow, and Connection Hub
+  / Settings truthfulness.
+
+Suggested commit message:
+Polish ScaleX pre-run live detail state
+
+Next:
+- Goal 9 - final repo/video/submission polish and open-source audit closeout.
+
+---
+
 ## 2026-06-29 - Goal 8V: Live Run Detail branded system cards
 
 Completed:

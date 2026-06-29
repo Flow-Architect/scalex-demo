@@ -4,7 +4,7 @@
 
 Goal 9 - final repo/video/submission polish and open-source audit closeout.
 
-Goal 8V is complete. Return to final recording and submission readiness:
+Goal 8W is complete. Return to final recording and submission readiness:
 
 - Rehearse the three-minute recording against `docs/DEMO_SCRIPT.md`.
 - Confirm the local demo opens at `http://127.0.0.1:5174/` with the dark control-room UI.
@@ -21,6 +21,8 @@ Goal 8V is complete. Return to final recording and submission readiness:
 - Confirm Live Run Detail shows branded system cards for Hermes Planning, Stripe Finance,
   NemoClaw / NeMo Policy, and ScaleX Control Plane, with subtle active highlighting during the
   governed-run sequence.
+- Confirm pre-run Live Run Detail shows the Ready to Govern decision stage, operation summary,
+  readiness chips, branded system cards, and visible Start Governed Run button before recording.
 - Capture final screenshots or video assets only if needed for submission.
 - Do a final submission copy check against `docs/SUBMISSION_WRITEUP.md`.
 - Review `docs/OPEN_SOURCE_AUDIT.md`, `SECURITY.md`, and `CONTRIBUTING.md` before public release.
@@ -32,6 +34,35 @@ new backend features, new external services, production payroll/HR behavior, MCP
 changes, database files, uploaded real files, or secrets.
 
 ## Recently Completed
+
+Goal 8W is complete. It was a frontend-only pre-run Live Run Detail composition polish:
+
+- Filled only the idle/pre-run Live Run Detail empty middle space with a compact "Ready to govern
+  Northstar operation" decision stage.
+- Added the requested pre-run governance flow: Business intake -> Cost basis -> Hermes plan ->
+  Stripe finance -> NemoClaw policy -> Evidence ledger -> Protected profit.
+- Added compact readiness chips for Revenue-backed, Cost basis loaded, No live money, Local
+  policy active, and Evidence ledger ready.
+- Added a compact pre-run operation summary for Northstar Dental Group, Client Implementation
+  Launch, $8,500 revenue, $3,935 approved costs, $3,200 risk to contain, and 50.0% margin floor.
+- Preserved the branded system cards below the stage and kept the Start Governed Run button
+  visible without internal scrolling.
+- Intentionally preserved running rail detail states, blocked-risk detail, Evidence Ledger result
+  state, final Profit Outcome/result card, Dashboard layout, governed-run timing, backend
+  mechanics, economics, run/reset behavior, Connection Hub, Settings / Boundaries, truthfulness
+  text, no live money, no Telegram, no new integrations, no `.env` changes, and no database
+  artifacts.
+
+Goal 8W validation:
+
+- `cd frontend && npm run build` passed.
+- `./scripts/test.sh` passed with 68 backend tests and a successful frontend build.
+- `./scripts/check-nemo.sh` passed with `nemoguardrails` 0.21.0 and `guardrails/scalex` loaded.
+- Browser smoke at `http://127.0.0.1:5174/` verified Dashboard pre-run render, the Ready to
+  Govern decision stage, visible Start Governed Run button, branded system cards, no old
+  economics values, real `Start Governed Run` click behavior, running states without the pre-run
+  stage, final `$4,565` Profit Outcome readability, no horizontal document overflow, and
+  Connection Hub / Settings truthfulness.
 
 Goal 8V is complete. It was a frontend-only Live Run Detail card polish:
 

@@ -534,7 +534,6 @@ function LiveRunDetail({
   const invoiceId = model.state?.stripe?.invoice_id ?? "in_demo_northstar";
   const livemode = String(model.state?.stripe?.livemode ?? false);
   const paid = String(model.state?.stripe?.paid ?? false);
-  const nemoRuntimeVerified = Boolean(model.state?.guardrails?.used_real_nemo);
   const decisionSystemCards = <DecisionSystemCards focusId={focusId} runVisualState={runVisualState} />;
   const renderDetail = () => {
     if (focusId === "input" || focusId === "cost-basis") {
@@ -703,13 +702,7 @@ function LiveRunDetail({
 
     return (
       <section className={`live-detail-card live-detail-enter ${startCompact ? "live-detail-start-compact" : ""}`}>
-        <div className="flex items-start justify-between gap-3">
-          <div>
-            <p className="text-[0.68rem] font-semibold uppercase text-[#A1A1AA]">Ready to govern</p>
-            <h2 className="mt-1 text-xl font-semibold text-white">Start the Northstar operation</h2>
-          </div>
-          <StatusBadge label={nemoRuntimeVerified ? "NeMo verified" : "local policy active"} tone={nemoRuntimeVerified ? "green" : "cyan"} />
-        </div>
+        <PreRunDecisionStage model={model} />
         {decisionSystemCards}
         <button className="control-btn-primary mt-4 w-full" disabled={runActive} onClick={onRun} type="button">
           {runActive ? "Executing governed run..." : "Start Governed Run"}
@@ -725,6 +718,53 @@ function LiveRunDetail({
       <div className={startCompact ? "h-full" : "mt-3"} key={focusId}>
         {renderDetail()}
       </div>
+    </div>
+  );
+}
+
+function PreRunDecisionStage({ model }: { model: ControlRoomModel }) {
+  const summary = [
+    { label: "Client", value: model.clientName, tone: "white" as Tone },
+    { label: "Operation", value: model.operationName, tone: "white" as Tone },
+    { label: "Revenue", value: model.metrics.find((metric) => metric.label === "Revenue secured")?.value ?? "$8,500", tone: "green" as Tone },
+    { label: "Approved costs", value: model.approvedCostsLabel, tone: "green" as Tone },
+    { label: "Risk to contain", value: model.blockedRiskLabel, tone: "red" as Tone },
+    { label: "Margin floor", value: model.marginFloorLabel, tone: "amber" as Tone },
+  ];
+  const flow = ["Business intake", "Cost basis", "Hermes plan", "Stripe finance", "NemoClaw policy", "Evidence ledger", "Protected profit"];
+  const chips = ["Revenue-backed", "Cost basis loaded", "No live money", "Local policy active", "Evidence ledger ready"];
+
+  return (
+    <div className="pre-run-stage" aria-label="Ready to govern decision stage">
+      <div className="pre-run-stage-head">
+        <div className="min-w-0">
+          <p>Decision stage</p>
+          <h3>Ready to govern Northstar operation</h3>
+        </div>
+        <span className="pre-run-stage-pulse" aria-hidden="true" />
+      </div>
+      <p className="pre-run-stage-subtitle">
+        ScaleX will inspect the client operation through proof, policy, money control, and audit before execution.
+      </p>
+      <div className="pre-run-flow" aria-label="Pre-run governance flow">
+        {flow.map((item, index) => (
+          <span key={item}>
+            {item}
+            {index < flow.length - 1 ? <b aria-hidden="true">→</b> : null}
+          </span>
+        ))}
+      </div>
+      <div className="pre-run-chip-row" aria-label="Pre-run readiness checks">
+        {chips.map((chip) => <span key={chip}>{chip}</span>)}
+      </div>
+      <dl className="pre-run-summary-grid">
+        {summary.map((item) => (
+          <div className={`pre-run-summary-item pre-run-summary-item-${item.tone}`} key={item.label}>
+            <dt>{item.label}</dt>
+            <dd>{item.value}</dd>
+          </div>
+        ))}
+      </dl>
     </div>
   );
 }
