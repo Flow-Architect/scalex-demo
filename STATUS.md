@@ -7,10 +7,10 @@ Last updated: 2026-06-29
 - Project folder exists at `/home/ascabrya/dev/scalex-demo`.
 - Latest committed baseline before Goal 8E: `615a9bd Document NemoClaw correction and next
   integration plan`.
-- Last completed goal: Goal 8P - slow governed run pace and keep Dashboard Live Run Detail visible.
-- Last completed implementation/QA goal: Goal 8P - frontend-only presentation timing and
-  Dashboard active-run viewport-fit polish.
-- Last completed documentation/tracking update: Goal 8P timing/layout closeout.
+- Last completed goal: Goal 8Q - final presentation timing pass.
+- Last completed implementation/QA goal: Goal 8Q - frontend-only governed-run presentation
+  pacing for final recording readability.
+- Last completed documentation/tracking update: Goal 8Q timing closeout.
 - Last completed checkout cleanup: Open Source Checkout Cleanup for judge readiness.
 - Current priority: Goal 9 - final repo/video/submission polish.
 - Goal 8I used the uploaded six-phase control-room visual prompt as a design specification only.
@@ -157,6 +157,21 @@ Last updated: 2026-06-29
 - Goal 8P did not compact Governed Run, Evidence Ledger, Connection Hub, Settings / Boundaries,
   sidebar, topbar, or complete-state layout; it did not change backend mechanics, Stripe, Hermes,
   NemoClaw, Telegram, MCP, live mode, `.env`, database files, or integrations.
+- Goal 8Q slowed the governed-run presentation again for final recording readability. The
+  default ten-rail automatic run now holds active decisions for roughly 30 seconds total:
+  2.2s intake, 2.2s cost basis, 2.4s Hermes plan, 3.2s for each Stripe finance rail, 3.2s
+  NemoClaw / NeMo policy, 2.4s setup spend approval, 4.8s blocked risky vendor action, 2.6s
+  evidence ledger, and 3.2s profit outcome.
+- Goal 8Q kept Live Run Detail synchronized with the active rail, stretched the blocked-risk
+  count-up to about 1.8 seconds, kept the blocked flash/climax to a single readable moment, and
+  preserved the final stable complete state.
+- Goal 8Q validation passed `cd frontend && npm run build`, `./scripts/test.sh`,
+  `./scripts/check-nemo.sh`, `git diff --check`, and browser smoke at 1440x900. Browser smoke
+  sampled the rail sequence from Business Intake through stable complete state at about 32.1s,
+  confirmed no horizontal overflow, confirmed Live Run Detail synchronization, and confirmed the
+  blocked-risk metric counted through `$1,000` mid-climax before settling at `$3,200`.
+- Goal 8Q did not change backend mechanics, Stripe, Hermes, NemoClaw / NeMo backend behavior,
+  Telegram, live mode, MCP, `.env`, database files, secrets, branding, colors, or integrations.
 - Goal 9 remains final polish and submission assets.
 - Goal 7B remains future Verified Live Mode hardening.
 

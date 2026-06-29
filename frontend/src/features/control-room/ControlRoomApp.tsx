@@ -25,17 +25,19 @@ type RunVisualState = "idle" | "running" | "complete";
 
 const RUN_START_DELAY_MS = 260;
 const RAIL_GAP_MS = 90;
-const DEFAULT_RAIL_DELAY_MS = 1300;
-const HERMES_RAIL_HOLD_MS = 1400;
-const APPROVED_RAIL_HOLD_MS = 1400;
-const STRIPE_RAIL_HOLD_MS = 1700;
-const POLICY_RAIL_HOLD_MS = 1700;
-const BLOCKED_RAIL_HOLD_MS = 2600;
-const EVIDENCE_RAIL_HOLD_MS = 1600;
-const PROFIT_RAIL_HOLD_MS = 1700;
-const DETAIL_TRANSITION_MS = 400;
-const BLOCKED_COUNT_DURATION_MS = 1200;
-const BLOCKED_FLASH_DURATION_MS = 900;
+const DEFAULT_RAIL_DELAY_MS = 2200;
+const INTAKE_RAIL_HOLD_MS = 2200;
+const COST_BASIS_RAIL_HOLD_MS = 2200;
+const HERMES_RAIL_HOLD_MS = 2400;
+const STRIPE_RAIL_HOLD_MS = 3200;
+const POLICY_RAIL_HOLD_MS = 3200;
+const APPROVED_SPEND_RAIL_HOLD_MS = 2400;
+const BLOCKED_RAIL_HOLD_MS = 4800;
+const EVIDENCE_RAIL_HOLD_MS = 2600;
+const PROFIT_RAIL_HOLD_MS = 3200;
+const DETAIL_TRANSITION_MS = 550;
+const BLOCKED_COUNT_DURATION_MS = 1800;
+const BLOCKED_FLASH_DURATION_MS = 1200;
 const DETAIL_TRANSITION_STYLE = {
   "--detail-transition-ms": `${DETAIL_TRANSITION_MS}ms`,
 } as CSSProperties;
@@ -370,6 +372,7 @@ function DashboardView({
   runVisualState: RunVisualState;
 }) {
   const dashboardRunning = runVisualState === "running";
+  const dashboardDetailCompact = dashboardRunning || runVisualState === "idle";
 
   return (
     <section
@@ -404,11 +407,11 @@ function DashboardView({
             runningCompact={dashboardRunning}
           />
         </Panel>
-        <Panel compact={dashboardRunning} title="Live Run Detail" eyebrow="active decision context" action={<button className="control-link" onClick={() => onNavigate("audit")} type="button">Open Ledger</button>}>
+        <Panel compact={dashboardDetailCompact} title="Live Run Detail" eyebrow="active decision context" action={<button className="control-link" onClick={() => onNavigate("audit")} type="button">Open Ledger</button>}>
           <LiveRunDetail
             activeRailId={activeRailId}
             blockedFlash={blockedFlash}
-            compact={dashboardRunning}
+            compact={dashboardDetailCompact}
             completedRailIds={completedRailIds}
             model={model}
             onRun={onRun}
@@ -504,6 +507,7 @@ function LiveRunDetail({
   runVisualState: RunVisualState;
 }) {
   const focusId = activeRailId ?? (runVisualState === "complete" || completedRailIds.includes("profit") ? "profit" : "idle");
+  const startCompact = compact && focusId === "idle";
   const marginFloor = model.operationFacts.find((fact) => fact.label === "Floor")?.value ?? "50%";
   const invoiceId = model.state?.stripe?.invoice_id ?? "in_demo_northstar";
   const livemode = String(model.state?.stripe?.livemode ?? false);
@@ -667,7 +671,7 @@ function LiveRunDetail({
     }
 
     return (
-      <section className="live-detail-card live-detail-enter">
+      <section className={`live-detail-card live-detail-enter ${startCompact ? "live-detail-start-compact" : ""}`}>
         <div className="flex items-start justify-between gap-3">
           <div>
             <p className="text-[0.68rem] font-semibold uppercase text-[#A1A1AA]">Ready to govern</p>
@@ -675,13 +679,18 @@ function LiveRunDetail({
           </div>
           <StatusBadge label={nemoRuntimeVerified ? "NeMo verified" : "local policy active"} tone={nemoRuntimeVerified ? "green" : "cyan"} />
         </div>
-        <div className="mt-3 grid gap-2">
-          {[
+        <div className="start-proof-list mt-3 grid gap-2">
+          {(startCompact ? [
+            "Hermes creates the plan.",
+            "Stripe verifies livemode=false.",
+            "NeMo/local policy checks risk.",
+            "ScaleX records proof and margin.",
+          ] : [
             "Hermes will create the implementation plan.",
             "Stripe will verify finance state with livemode=false.",
             "NeMo Guardrails or local policy will check risky actions.",
             "ScaleX will record the audit trail and report protected margin.",
-          ].map((line) => (
+          ]).map((line) => (
             <p className="rounded-md border border-[#232834] bg-[#0a0b0e] px-3 py-2 text-sm text-[#FFFFFF]" key={line}>{line}</p>
           ))}
         </div>
@@ -693,10 +702,10 @@ function LiveRunDetail({
   };
 
   return (
-    <div className={`live-run-shell ${compact ? "live-run-shell-compact" : ""}`}>
-      <ControlStackChain activeRailId={activeRailId} completedRailIds={completedRailIds} model={model} />
-      <RunSignals completedRailIds={completedRailIds} runVisualState={runVisualState} />
-      <div className="mt-3" key={focusId}>
+    <div className={`live-run-shell ${compact ? "live-run-shell-compact" : ""} ${startCompact ? "live-run-shell-start-compact" : ""}`}>
+      {!startCompact ? <ControlStackChain activeRailId={activeRailId} completedRailIds={completedRailIds} model={model} /> : null}
+      {!startCompact ? <RunSignals completedRailIds={completedRailIds} runVisualState={runVisualState} /> : null}
+      <div className={startCompact ? "h-full" : "mt-3"} key={focusId}>
         {renderDetail()}
       </div>
     </div>
@@ -1467,6 +1476,12 @@ function railResult(rail: RailView, active: boolean, complete: boolean): { label
 }
 
 function railHoldMs(railId: string): number {
+  if (railId === "input") {
+    return INTAKE_RAIL_HOLD_MS;
+  }
+  if (railId === "cost-basis") {
+    return COST_BASIS_RAIL_HOLD_MS;
+  }
   if (railId === "stripe-invoice" || railId === "stripe-status") {
     return STRIPE_RAIL_HOLD_MS;
   }
@@ -1486,7 +1501,7 @@ function railHoldMs(railId: string): number {
     return HERMES_RAIL_HOLD_MS;
   }
   if (railId === "approved-spend") {
-    return APPROVED_RAIL_HOLD_MS;
+    return APPROVED_SPEND_RAIL_HOLD_MS;
   }
   return DEFAULT_RAIL_DELAY_MS;
 }

@@ -4,7 +4,7 @@
 
 Goal 9 - final repo/video/submission polish and open-source audit closeout.
 
-Goal 8P is complete. Return to final recording and submission readiness:
+Goal 8Q is complete. Return to final recording and submission readiness:
 
 - Rehearse the three-minute recording against `docs/DEMO_SCRIPT.md`.
 - Confirm the local demo opens at `http://127.0.0.1:5174/` with the dark control-room UI.
@@ -19,6 +19,33 @@ new backend features, new external services, production payroll/HR behavior, MCP
 changes, database files, uploaded real files, or secrets.
 
 ## Recently Completed
+
+Goal 8Q is complete. It was a frontend-only presentation timing pass for final recording
+readability:
+
+- Slowed the default ten-rail governed run to roughly 30 seconds so each active decision remains
+  readable.
+- Held Business Intake, Cost Basis, Hermes, Stripe finance, NemoClaw / NeMo policy, setup spend,
+  blocked risk, evidence ledger, and profit outcome details in sync with the active rail.
+- Kept the risky vendor action blocked moment visible for about 4.8 seconds, with a single
+  readable red flash and a slower $0 -> $3,200 blocked-risk count-up.
+- Preserved the final complete state: all rails complete, risky vendor action visibly blocked,
+  protected profit visible, and Live Run Detail on Profit Outcome.
+- Preserved API-backed state, run/reset behavior, evidence state, Stripe/Hermes/NeMo truthfulness,
+  Judge Demo Mode, Stripe Sandbox Prototype wording, Verified Live Mode locked, local policy,
+  onboarding/cost basis, labor costing, MCP-ready/tool action rail, Stripe finance flow,
+  NemoClaw/NeMo visibility, no live money, no Telegram, and no new integrations.
+
+Goal 8Q validation:
+
+- `cd frontend && npm run build` passed.
+- `./scripts/test.sh` passed with 68 backend tests and a successful frontend build.
+- `./scripts/check-nemo.sh` passed with `nemoguardrails` 0.21.0 and `guardrails/scalex` loaded.
+- `git diff --check` passed.
+- Browser smoke at `http://127.0.0.1:5174/` sampled the 1440x900 run from Business Intake
+  through stable complete state at about 32.1s, with no horizontal overflow, synchronized Live Run
+  Detail, readable blocked-risk hold, and blocked-risk metric settling at `$3,200`.
+- Unsafe/generated path scan and staged added-lines secret scan returned no matches.
 
 Goal 8P is complete. It was a tiny frontend-only timing and Dashboard viewport-fit polish pass:
 

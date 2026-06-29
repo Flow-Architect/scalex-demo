@@ -10,6 +10,47 @@ Use:
 
 ---
 
+## 2026-06-29 - Goal 8Q: Final presentation timing pass
+
+Completed:
+- Slowed the default governed-run presentation to roughly 30 seconds so the final recording has
+  enough time to read each active decision.
+- Set rail holds to the final presentation pacing: Business Intake 2.2s, Cost Basis 2.2s,
+  Hermes 2.4s, Stripe finance rails 3.2s each, NemoClaw / NeMo policy 3.2s, approved setup spend
+  2.4s, blocked risky vendor action 4.8s, evidence ledger 2.6s, and profit outcome 3.2s.
+- Kept Live Run Detail synchronized with the active rail and preserved the final stable complete
+  state.
+- Slowed the blocked-risk count-up to about 1.8 seconds and kept the blocked flash/climax as one
+  readable moment.
+- Preserved the Dashboard layout, compact active-run behavior, logo, brand system, evidence
+  views, Connection Hub, Settings / Boundaries, API-backed mechanics, Stripe/Hermes/NeMo
+  truthfulness, Judge Demo Mode, no live money, no Telegram, and no new integrations.
+
+Verification:
+- `cd frontend && npm run build` passed.
+- `./scripts/test.sh` passed with 68 backend tests and a successful frontend build.
+- `./scripts/check-nemo.sh` passed against `guardrails/scalex` with
+  `nemoguardrails_version=0.21.0`.
+- `git diff --check` passed.
+- Browser smoke at `http://127.0.0.1:5174/` passed at 1440x900. The sampled run showed Business
+  Intake at ~1.3s, Cost Basis at ~3.5s, Hermes at ~5.9s, Stripe Invoice at ~8.9s, Stripe Payment
+  Status at ~12.0s, NemoClaw / NeMo Check at ~15.3s, approved setup spend at ~18.4s, blocked
+  risky vendor action at ~20.6s and ~23.7s, Evidence Ledger at ~26.1s, Profit Outcome at ~29.1s,
+  and stable complete state at ~32.1s.
+- Browser smoke confirmed no horizontal overflow, Live Run Detail stayed synchronized with the
+  active rail, the blocked-risk metric counted through `$1,000` mid-climax and settled at
+  `$3,200`, and the final complete state kept Profit Outcome visible without an active rail.
+- Unsafe/generated path scan returned no staged matches.
+- Staged added-lines secret scan returned no matches.
+
+Suggested commit message:
+Slow ScaleX presentation timing
+
+Next:
+- Goal 9 - final repo/video/submission polish and open-source audit closeout.
+
+---
+
 ## 2026-06-29 - Goal 8P: Slow run pace and Dashboard live detail fit
 
 Completed:

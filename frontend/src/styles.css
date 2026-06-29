@@ -531,6 +531,10 @@ dd {
   overflow: hidden;
 }
 
+.live-run-shell-start-compact {
+  display: block;
+}
+
 .live-run-shell-compact .stack-node {
   padding: 0.38rem;
 }
@@ -588,6 +592,44 @@ dd {
 .live-run-shell-compact .live-detail-card p.mt-3,
 .live-run-shell-compact .live-detail-card p.mt-4 {
   margin-top: 0.6rem;
+}
+
+.live-detail-start-compact {
+  display: flex;
+  height: 100%;
+  min-height: 0;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 0.68rem;
+}
+
+.live-detail-start-compact h2 {
+  font-size: 1.06rem;
+  line-height: 1.22;
+}
+
+.live-detail-start-compact .status-badge {
+  max-width: 7.8rem;
+  white-space: normal;
+}
+
+.live-detail-start-compact .start-proof-list {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.45rem;
+  margin-top: 0.65rem;
+}
+
+.live-detail-start-compact .start-proof-list p {
+  min-height: 3rem;
+  padding: 0.45rem 0.55rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  line-height: 1.25;
+}
+
+.live-detail-start-compact .control-btn-primary {
+  min-height: 2.1rem;
+  margin-top: 0.65rem;
 }
 
 .run-signals-grid {
@@ -963,7 +1005,7 @@ dd {
 }
 
 .metric-flash-red {
-  animation: metric-flash-red 900ms ease-out;
+  animation: metric-flash-red 1200ms ease-out;
 }
 
 .metric-glow-green {
@@ -973,16 +1015,16 @@ dd {
 
 .rail-running.danger-pulse-on-visible .status-dot,
 .blocked-card-flash .status-dot {
-  animation: danger-pulse 900ms ease-out 1;
+  animation: danger-pulse 1200ms ease-out 1;
 }
 
 .blocked-card-flash {
-  animation: blocked-card-flash 900ms ease-out;
+  animation: blocked-card-flash 1200ms ease-out;
 }
 
 .blocked-scale {
   transform-origin: center;
-  animation: blocked-card-flash 900ms ease-out;
+  animation: blocked-card-flash 1200ms ease-out;
 }
 
 .panel-shell {
