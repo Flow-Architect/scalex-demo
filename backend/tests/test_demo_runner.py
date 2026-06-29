@@ -209,8 +209,9 @@ def test_selected_workflow_drives_run_and_custom_invoice_amount(tmp_path, monkey
     assert state["ledger"]["totals"]["approved_spend_cents"] == 115000
     assert state["ledger"]["totals"]["gross_profit_cents"] == 885000
     assert state["ledger"]["totals"]["actual_margin_percent"] == 88.5
-    assert state["report"]["gross_profit_cents"] == 885000
-    assert state["report"]["actual_margin_percent"] == 88.5
+    assert state["report"]["approved_spend_cents"] == 393500
+    assert state["report"]["gross_profit_cents"] == 606500
+    assert state["report"]["actual_margin_percent"] == 60.7
 
 
 def test_saved_workflow_can_be_selected_for_next_run(tmp_path, monkeypatch) -> None:
@@ -416,7 +417,7 @@ def test_state_endpoint_can_inspect_previous_run(tmp_path, monkeypatch) -> None:
     assert inspected["selected_run_id"] == first_run_id
     assert inspected["job"]["id"] == first_run_id
     assert len(inspected["jobs"]) == 2
-    assert inspected["report"]["gross_profit_cents"] == 735000
+    assert inspected["report"]["gross_profit_cents"] == 456500
 
 
 def test_protected_http_endpoints_require_auth_when_enabled(tmp_path, monkeypatch) -> None:
@@ -539,11 +540,15 @@ def test_command_center_demo_state_includes_intake_review_and_labor_costing(
         "James Carter",
         "Avery Smith",
     ]
-    assert employees[0]["fully_loaded_hourly_rate_cents"] == 2880
-    assert employees[0]["labor_cost_cents"] == 14400
-    assert command_center["labor_costing"]["total_labor_cost_cents"] == 26160
-    assert command_center["labor_costing"]["gross_profit_after_labor_cents"] == 708840
-    assert command_center["labor_costing"]["final_margin_after_labor_percent"] == 83.4
+    assert employees[0]["fully_loaded_hourly_rate_cents"] == 7000
+    assert employees[0]["labor_cost_cents"] == 42000
+    assert command_center["labor_costing"]["total_labor_cost_cents"] == 95000
+    assert command_center["labor_costing"]["gross_profit_after_labor_cents"] == 456500
+    assert command_center["labor_costing"]["final_margin_after_labor_percent"] == 53.7
+    assert command_center["cost_basis"]["total_approved_costs_cents"] == 393500
+    assert command_center["cost_basis"]["protected_profit_cents"] == 456500
+    assert command_center["cost_basis"]["protected_margin_percent"] == 53.7
+    assert command_center["cost_basis"]["margin_if_blocked_approved_percent"] == 16.1
     assert command_center["labor_costing"]["margin_warning"] is False
     assert command_center["final_profit_report"]["decision"] == "Safe / Profitable"
 
@@ -691,10 +696,10 @@ def _assert_complete_demo_state(state: dict) -> None:
     report = state["report"]
     assert report is not None
     assert report["revenue_cents"] == 850000
-    assert report["approved_spend_cents"] == 115000
+    assert report["approved_spend_cents"] == 393500
     assert report["blocked_spend_cents"] == 320000
-    assert report["gross_profit_cents"] == 735000
-    assert report["actual_margin_percent"] == 86.5
+    assert report["gross_profit_cents"] == 456500
+    assert report["actual_margin_percent"] == 53.7
     assert report["policy_violations"] == 0
     assert "Proceed with implementation launch" in report["recommendation"]
 

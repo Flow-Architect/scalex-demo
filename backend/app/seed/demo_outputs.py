@@ -10,12 +10,14 @@ DEMO_AGENT_OUTPUTS = [
         "output_markdown": """# Finance Agent
 
 - Implementation package revenue booked: $8,500.
-- Approved setup spend: $1,150 across Secure Workspace Pack, Data Migration Sandbox, and Launch Asset Kit.
+- Approved delivery cost basis: $3,935.
+- Setup/tool spend: $1,150 across Secure Workspace Pack, Data Migration Sandbox, and Launch Asset Kit.
 - Blocked risk: $3,200 Unapproved Data Broker Enrichment request.
-- Protected gross profit: $7,350.
-- Protected margin: 86.5%.
+- Margin if blocked risk were approved: 16.1%.
+- Protected profit: $4,565.
+- Protected margin: 53.7%.
 
-Spend control result: the client implementation launch stayed well above the 50% margin floor and inside the $1,150 setup spend cap.""",
+Spend control result: the client implementation launch stayed above the 50% margin floor after enterprise delivery costs and inside the $1,150 setup spend cap.""",
     },
     {
         "id": "agt_marketing_northstar_client_implementation",
@@ -57,6 +59,7 @@ Data boundary: this is a synthetic multi-location client account. Do not use pat
 Delivery checklist:
 - Confirm payment recorded in the local sandbox ledger.
 - Verify approved setup spend totals $1,150.
+- Verify total approved delivery costs remain $3,935.
 - Verify Unapproved Data Broker Enrichment remained blocked.
 - Package workspace setup, non-PHI sandbox, launch asset, and stakeholder handoff evidence.
 - Attach final protected-profit report.

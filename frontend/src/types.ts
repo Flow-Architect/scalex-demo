@@ -338,8 +338,11 @@ export interface ReportPlaceholder {
   status: string;
   expected_revenue_cents: number;
   expected_approved_spend_cents: number;
+  expected_setup_tool_spend_cents?: number;
   expected_gross_profit_cents: number;
   expected_margin_percent: number;
+  expected_total_approved_costs_cents?: number;
+  expected_blocked_spend_cents?: number;
   recommendation: string;
 }
 
@@ -393,6 +396,32 @@ export interface CommandCenterAuditEvent {
   detail: string;
 }
 
+export interface CommandCenterCostBasisLineItem {
+  id: string;
+  label: string;
+  amount_cents: number;
+  category: string;
+  evidence_type: string;
+}
+
+export interface CommandCenterCostBasis {
+  line_items: CommandCenterCostBasisLineItem[];
+  setup_tool_spend_cents: number;
+  labor_cost_cents: number;
+  total_approved_costs_cents: number;
+  protected_profit_cents: number;
+  protected_margin_percent: number;
+  margin_floor_percent: number;
+  blocked_spend_cents: number;
+  total_costs_if_blocked_approved_cents: number;
+  profit_if_blocked_approved_cents: number;
+  margin_if_blocked_approved_percent: number;
+  blocked_decision: string;
+  formula: string;
+  blocked_formula: string;
+  summary: string;
+}
+
 export interface CommandCenterState {
   mission_control: {
     active_client: string;
@@ -403,10 +432,15 @@ export interface CommandCenterState {
     spend_cap_cents: number;
     margin_floor_percent: number;
     approved_vendor_spend_cents: number;
+    total_approved_costs_cents: number;
     blocked_spend_cents: number;
     labor_cost_cents: number;
     projected_profit_cents: number;
+    protected_profit_cents: number;
     final_margin_after_labor_percent: number;
+    protected_margin_percent: number;
+    margin_if_blocked_approved_percent: number;
+    profit_if_blocked_approved_cents: number;
     runtime_mode: string;
     overall_status: string;
   };
@@ -453,16 +487,23 @@ export interface CommandCenterState {
     margin_warning: boolean;
     status: string;
   };
+  cost_basis: CommandCenterCostBasis;
   final_profit_report: {
     client_name: string;
     job_name: string;
     revenue_cents: number;
     approved_vendor_spend_cents: number;
+    total_approved_costs_cents: number;
     blocked_spend_cents: number;
     labor_cost_cents: number;
     gross_profit_after_labor_cents: number;
+    protected_profit_cents: number;
     final_margin_after_labor_percent: number;
+    protected_margin_percent: number;
     margin_floor_percent: number;
+    total_costs_if_blocked_approved_cents: number;
+    profit_if_blocked_approved_cents: number;
+    margin_if_blocked_approved_percent: number;
     policy_violations: number;
     decision: string;
     recommendation: string;

@@ -17,7 +17,7 @@ import { formatCurrency, formatPercent } from "../../format";
 import type { BusyAction, MoneySnapshot } from "../../lib/demoSelectors";
 import { isApproved } from "../../lib/demoSelectors";
 import type { AppView } from "../../layout/navigation";
-import type { AuthStatus, DemoState, HealthResponse, PolicyCheck } from "../../types";
+import type { AuthStatus, CommandCenterCostBasisLineItem, DemoState, HealthResponse, PolicyCheck } from "../../types";
 
 type Tone = "brand" | "green" | "red" | "amber" | "blue" | "purple" | "cyan" | "muted" | "white";
 type DrawerTab = "summary" | "operation" | "control";
@@ -512,7 +512,6 @@ function LiveRunDetail({
   const invoiceId = model.state?.stripe?.invoice_id ?? "in_demo_northstar";
   const livemode = String(model.state?.stripe?.livemode ?? false);
   const paid = String(model.state?.stripe?.paid ?? false);
-  const hermesRuntime = model.state?.execution?.hermes_runtime ?? "isolated_cli";
   const nemoRuntimeVerified = Boolean(model.state?.guardrails?.used_real_nemo);
   const renderDetail = () => {
     if (focusId === "input" || focusId === "cost-basis") {
@@ -527,12 +526,12 @@ function LiveRunDetail({
           </div>
           <dl className="mt-3 grid grid-cols-2 gap-2">
             <FactRow label="Client" value={model.clientName} tone="white" />
-            <FactRow label="Document review" value="review before save" tone="green" />
-            <FactRow label="Workers" value={`${model.laborWorkers.length} workers`} tone="white" />
+            <FactRow label="Total costs" value={model.approvedCostsLabel} tone="green" />
             <FactRow label="Labor cost" value={model.laborCostLabel} tone="green" />
+            <FactRow label="Margin floor" value={model.marginFloorLabel} tone="amber" />
           </dl>
           <p className="mt-3 rounded-md border border-[#232834] bg-[#0a0b0e] p-3 text-xs leading-5 text-[#A1A1AA]">
-            Intake and workforce costing establish the business context and cost basis before Hermes proposes tool actions.
+            Approved delivery costs include setup/tool spend, labor, campaign/media, materials, fees, QA/compliance overhead, and reserve before Hermes proposes tool actions.
           </p>
         </section>
       );
@@ -592,8 +591,8 @@ function LiveRunDetail({
           <dl className="mt-3 grid grid-cols-2 gap-2">
             <FactRow label="Guardrail mode" value={model.guardrailLabel} tone="cyan" />
             <FactRow label="Vendor gate" value="allowlist enforced" tone="green" />
+            <FactRow label="Setup spend" value={model.setupSpendLabel} tone="green" />
             <FactRow label="Margin floor" value={marginFloor} tone="amber" />
-            <FactRow label="NemoClaw route" value={hermesRuntime} tone="white" />
           </dl>
           <p className="mt-3 rounded-md border border-[#232834] bg-[#0a0b0e] p-3 text-xs leading-5 text-[#A1A1AA]">
             Real NeMo Guardrails is shown only when runtime verification is present. Local policy remains active otherwise; NemoClaw/NemoHermes routing is explicit and fail-closed.
@@ -615,11 +614,13 @@ function LiveRunDetail({
           <dl className="mt-4 grid grid-cols-2 gap-2">
             <FactRow label="Requested" value={model.blockedRiskLabel} tone="red" />
             <FactRow label="Decision" value="Blocked by policy" tone="red" />
+            <FactRow label="Current margin" value={model.marginLabel} tone="green" />
+            <FactRow label="If approved" value={model.marginIfBlockedApprovedLabel} tone="red" />
+            <FactRow label="Margin floor" value={model.marginFloorLabel} tone="amber" />
             <FactRow label="Spend row" value="not created" tone="green" />
-            <FactRow label="Audit" value="record created" tone="green" />
           </dl>
           <p className="mt-4 rounded-md border border-[#ef4444]/35 bg-[#ef4444]/10 p-3 text-sm font-semibold leading-6 text-[#f87171]">
-            {model.blockedRiskLabel} risk contained · unsafe vendor action blocked · margin protected.
+            ScaleX did not just block a vendor. It protected the operation from margin collapse and recorded proof.
           </p>
         </section>
       );
@@ -664,7 +665,7 @@ function LiveRunDetail({
             ))}
           </dl>
           <p className="mt-3 rounded-md border border-[#10B981]/30 bg-[#10B981]/10 p-3 text-sm font-semibold text-[#10B981]">
-            Protected margin: {model.marginLabel}. Formula: revenue - approved spend - labor cost.
+            Protected margin: {model.marginLabel}. Formula: Revenue - Total Approved Costs.
           </p>
         </section>
       );
@@ -730,19 +731,34 @@ function BusinessCostBasisCard({ model }: { model: ControlRoomModel }) {
     <article className="enterprise-card">
       <div className="enterprise-card-head">
         <div>
-          <p className="enterprise-eyebrow">Business Intake & Cost Basis</p>
-          <h2>{model.clientName}</h2>
+          <p className="enterprise-eyebrow">Cost Basis / Delivery Cost Stack</p>
+          <h2>Approved delivery costs</h2>
         </div>
         <StatusBadge label="reviewed" tone="green" />
       </div>
       <dl className="enterprise-fact-grid">
-        <FactRow label="Source" value={clientSource.includes("manual") ? "manual + document" : clientSource} tone="white" />
-        <FactRow label="Editable" value={reviewEditable ? "yes" : "locked"} tone={reviewEditable ? "green" : "amber"} />
-        <FactRow label="Workers" value={`${model.laborWorkers.length} workers`} tone="white" />
-        <FactRow label="Labor cost" value={model.laborCostLabel} tone="green" />
+        <FactRow label="Total approved costs" value={model.approvedCostsLabel} tone="green" />
+        <FactRow label="Protected profit" value={model.protectedProfitLabel} tone="green" />
+        <FactRow label="Protected margin" value={model.marginLabel} tone="green" />
+        <FactRow label="Margin floor" value={model.marginFloorLabel} tone="amber" />
       </dl>
-      <details className="enterprise-details" open>
-        <summary>View cost basis</summary>
+      <div className="enterprise-cost-stack" aria-label="Approved delivery cost basis">
+        {model.costBasisLineItems.map((item) => (
+          <div className="enterprise-cost-row" key={item.id}>
+            <span>{item.label}</span>
+            <strong>{formatCurrency(item.amount_cents)}</strong>
+          </div>
+        ))}
+      </div>
+      <p className="enterprise-note">Protected profit is calculated after approved delivery costs, not just labor.</p>
+      <details className="enterprise-details">
+        <summary>View labor job costing</summary>
+        <dl className="enterprise-fact-grid">
+          <FactRow label="Source" value={clientSource.includes("manual") ? "manual + document" : clientSource} tone="white" />
+          <FactRow label="Editable" value={reviewEditable ? "yes" : "locked"} tone={reviewEditable ? "green" : "amber"} />
+          <FactRow label="Workers" value={`${model.laborWorkers.length} workers`} tone="white" />
+        <FactRow label="Labor cost" value={model.laborCostLabel} tone="green" />
+        </dl>
         <table className="cost-basis-table">
           <thead>
             <tr>
@@ -762,7 +778,6 @@ function BusinessCostBasisCard({ model }: { model: ControlRoomModel }) {
           </tbody>
         </table>
       </details>
-      <p className="enterprise-note">{model.marginImpactLabel}; document review remains review-before-save.</p>
     </article>
   );
 }
@@ -1189,7 +1204,7 @@ function MetricStrip({
   return (
     <div className={`metric-strip-grid ${compact ? "metric-strip-grid-compact" : ""}`}>
       {metrics.map((metric) => {
-        const isApprovedMetric = metric.label === "Approved spend";
+        const isApprovedMetric = metric.label === "Approved costs";
         const isRiskMetric = metric.label === "Risk contained";
         const isProfitMetric = metric.label === "Protected profit";
         const displayLabel = isRiskMetric && runActive && !blockedActive ? "Risk pending" : metric.label;
@@ -1203,9 +1218,9 @@ function MetricStrip({
               {isRiskMetric && runActive ? blockedRiskDisplayValue : metric.value}
             </p>
             {metric.label === "Revenue secured" ? <p className="mt-2 text-xs font-semibold text-[#A1A1AA]">client revenue context loaded</p> : null}
-            {isApprovedMetric ? <p className="mt-2 text-xs font-semibold text-[#10B981]">allowed setup spend</p> : null}
+            {isApprovedMetric ? <p className="mt-2 text-xs font-semibold text-[#10B981]">approved delivery cost basis</p> : null}
             {isRiskMetric ? <p className="mt-2 text-xs font-semibold text-[#f87171]">unsafe vendor exposure contained</p> : null}
-            {metric.label === "Labor cost" ? <p className="mt-2 text-xs font-semibold text-[#A1A1AA]">delivery cost included</p> : null}
+            {metric.label === "Protected margin" ? <p className="mt-2 text-xs font-semibold text-[#10B981]">margin floor preserved</p> : null}
             {isProfitMetric ? <p className="mt-2 text-xs font-semibold text-[#10B981]">revenue minus approved spend and labor</p> : null}
           </article>
         );
@@ -1514,13 +1529,27 @@ function buildControlRoomModel(
   displayJob: string,
 ): ControlRoomModel {
   const mission = state?.command_center?.mission_control ?? null;
+  const costBasis = state?.command_center?.cost_basis ?? null;
   const revenueCents = money.revenueCents ?? mission?.invoice_amount_cents ?? 850_000;
-  const approvedSpendCents = money.approvedSpendCents ?? mission?.approved_vendor_spend_cents ?? 115_000;
+  const setupSpendCents = costBasis?.setup_tool_spend_cents ?? mission?.approved_vendor_spend_cents ?? 115_000;
+  const approvedCostsCents = costBasis?.total_approved_costs_cents ?? mission?.total_approved_costs_cents ?? money.approvedSpendCents ?? 393_500;
   const blockedSpendCents = money.blockedSpendCents ?? mission?.blocked_spend_cents ?? 320_000;
-  const laborCostCents = state?.command_center?.labor_costing?.total_labor_cost_cents ?? mission?.labor_cost_cents ?? 26_160;
-  const protectedProfitCents = money.grossProfitCents ?? mission?.projected_profit_cents ?? revenueCents - approvedSpendCents - laborCostCents;
-  const marginPercent = money.marginPercent ?? mission?.final_margin_after_labor_percent ?? (revenueCents > 0 ? protectedProfitCents / revenueCents * 100 : 0);
+  const laborCostCents = costBasis?.labor_cost_cents ?? state?.command_center?.labor_costing?.total_labor_cost_cents ?? mission?.labor_cost_cents ?? 95_000;
+  const protectedProfitCents = costBasis?.protected_profit_cents ?? money.grossProfitCents ?? mission?.protected_profit_cents ?? mission?.projected_profit_cents ?? revenueCents - approvedCostsCents;
+  const marginPercent = costBasis?.protected_margin_percent ?? money.marginPercent ?? mission?.protected_margin_percent ?? mission?.final_margin_after_labor_percent ?? (revenueCents > 0 ? protectedProfitCents / revenueCents * 100 : 0);
   const marginFloorPercent = money.marginFloorPercent ?? mission?.margin_floor_percent ?? 50;
+  const marginIfBlockedApprovedPercent = costBasis?.margin_if_blocked_approved_percent ?? mission?.margin_if_blocked_approved_percent ?? 16.1;
+  const profitIfBlockedApprovedCents = costBasis?.profit_if_blocked_approved_cents ?? mission?.profit_if_blocked_approved_cents ?? 136_500;
+  const totalCostsIfBlockedApprovedCents = costBasis?.total_costs_if_blocked_approved_cents ?? 713_500;
+  const costBasisLineItems = costBasis?.line_items ?? [
+    { id: "setup_tool_spend", label: "Setup/tool spend", amount_cents: setupSpendCents, category: "vendor_setup", evidence_type: "policy_approved_setup_spend" },
+    { id: "labor_cost", label: "Labor cost", amount_cents: laborCostCents, category: "job_costing", evidence_type: "loaded_labor_cost" },
+    { id: "campaign_media_cost", label: "Campaign/media cost", amount_cents: 60_000, category: "delivery", evidence_type: "delivery_cost_assumption" },
+    { id: "materials_delivery_cost", label: "Materials/delivery cost", amount_cents: 37_500, category: "delivery", evidence_type: "delivery_cost_assumption" },
+    { id: "platform_processing_fees", label: "Platform/processing fees", amount_cents: 28_500, category: "platform", evidence_type: "fee_cost_assumption" },
+    { id: "qa_compliance_overhead", label: "QA/compliance overhead", amount_cents: 35_000, category: "governance", evidence_type: "qa_cost_assumption" },
+    { id: "contingency_reserve", label: "Contingency reserve", amount_cents: 22_500, category: "reserve", evidence_type: "reserve_cost_assumption" },
+  ];
   const hasReport = Boolean(state?.report || state?.command_center?.final_profit_report);
   const policyChecks = state?.policy_checks ?? [];
   const guardrailEvaluations = state?.guardrail_evaluations ?? [];
@@ -1528,15 +1557,15 @@ function buildControlRoomModel(
   const hermesLabel = state?.execution?.planning_label ?? (state?.hermes?.used_real_hermes ? "Runtime Hermes plan" : "Deterministic Hermes plan");
   const stripeLabel = state?.execution?.finance_label ?? (state?.stripe?.used_real_stripe ? "Real Stripe test finance" : "Stripe sandbox finance");
   const guardrailLabel = state?.execution?.guardrail_label ?? (state?.guardrails?.used_real_nemo ? "NeMo Guardrails verified" : "Local policy active");
-  const rails = buildRails({ approvedSpendCents, blockedSpendCents, guardrailLabel, hasReport, laborCostCents, marginPercent, protectedProfitCents, revenueCents, stripeLabel });
-  const auditRowsData = buildAuditRows({ approvedSpendCents, blockedSpendCents, guardrailLabel, laborCostCents, protectedProfitCents, state });
+  const rails = buildRails({ approvedCostsCents, blockedSpendCents, guardrailLabel, hasReport, laborCostCents, marginIfBlockedApprovedPercent, marginFloorPercent, marginPercent, protectedProfitCents, revenueCents, setupSpendCents, stripeLabel });
+  const auditRowsData = buildAuditRows({ approvedCostsCents, blockedSpendCents, guardrailLabel, laborCostCents, marginIfBlockedApprovedPercent, protectedProfitCents, state });
   const modeCards = buildModeCards(state);
-  const proofArtifacts = buildProofArtifacts({ approvedSpendCents, blockedSpendCents, guardrailLabel, laborCostCents, protectedProfitCents, state, stripeLabel });
+  const proofArtifacts = buildProofArtifacts({ approvedCostsCents, blockedSpendCents, guardrailLabel, laborCostCents, protectedProfitCents, state, stripeLabel });
   const primaryMode = modeCards.find((mode) => mode.primary) ?? modeCards[0];
   const laborWorkers = buildLaborWorkers(state);
 
   return {
-    activityChips: buildActivityChips({ approvedSpendCents, blockedSpendCents, protectedProfitCents }),
+    activityChips: buildActivityChips({ blockedSpendCents, protectedProfitCents, setupSpendCents }),
     auditPills: [
       { label: "Timeline", value: String(events.length || 14), tone: "muted" },
       { label: "Finance", value: String(state?.stripe_events?.length || 4), tone: "blue" },
@@ -1559,20 +1588,28 @@ function buildControlRoomModel(
     laborCostLabel: formatCurrency(laborCostCents),
     laborWorkers,
     marginLabel: formatPercent(marginPercent),
-    marginImpactLabel: `${formatCurrency(laborCostCents)} included in protected profit`,
+    marginImpactLabel: `${formatCurrency(approvedCostsCents)} approved delivery cost basis included in protected profit`,
+    approvedCostsLabel: formatCurrency(approvedCostsCents),
+    approvedCostsCents,
+  costBasisLineItems,
+    marginFloorLabel: formatPercent(marginFloorPercent),
+    marginIfBlockedApprovedLabel: formatPercent(marginIfBlockedApprovedPercent),
+    profitIfBlockedApprovedLabel: formatCurrency(profitIfBlockedApprovedCents),
+    setupSpendLabel: formatCurrency(setupSpendCents),
+    totalCostsIfBlockedApprovedLabel: formatCurrency(totalCostsIfBlockedApprovedCents),
     metrics: [
       { label: "Revenue secured", value: formatCurrency(revenueCents), tone: "white" },
-      { label: "Approved spend", value: formatCurrency(approvedSpendCents), tone: "green" },
+      { label: "Approved costs", value: formatCurrency(approvedCostsCents), tone: "green" },
       { label: "Risk contained", value: formatCurrency(blockedSpendCents), tone: "red" },
-      { label: "Labor cost", value: formatCurrency(laborCostCents), tone: "white" },
       { label: "Protected profit", value: formatCurrency(protectedProfitCents), tone: "green" },
+      { label: "Protected margin", value: formatPercent(marginPercent), tone: "green" },
     ],
     modeCards,
     operationFacts: [
       { label: "Client", value: displayCustomer },
       { label: "Operation", value: displayJob },
       { label: "Revenue", value: formatCurrency(revenueCents), tone: "white" },
-      { label: "Spend", value: formatCurrency(approvedSpendCents), tone: "green" },
+      { label: "Approved costs", value: formatCurrency(approvedCostsCents), tone: "green" },
       { label: "Risk", value: formatCurrency(blockedSpendCents), tone: "red" },
       { label: "Profit", value: formatCurrency(protectedProfitCents), tone: "green" },
       { label: "Margin", value: formatPercent(marginPercent), tone: "green" },
@@ -1594,6 +1631,8 @@ function buildControlRoomModel(
 
 interface ControlRoomModel {
   activityChips: ActivityChipModel[];
+  approvedCostsCents: number;
+  approvedCostsLabel: string;
   auditPills: StatPill[];
   auditRows: number;
   auditRowsData: AuditRowModel[];
@@ -1601,6 +1640,7 @@ interface ControlRoomModel {
   blockedSpendCents: number;
   clientName: string;
   connectionCards: ConnectorCardModel[];
+  costBasisLineItems: CommandCenterCostBasisLineItem[];
   guardrailChecks: Array<{ label: string; status: "Allow" | "Warn" | "Block" }>;
   guardrailLabel: string;
   hasReport: boolean;
@@ -1610,19 +1650,24 @@ interface ControlRoomModel {
   laborWorkers: LaborWorkerView[];
   marginLabel: string;
   marginImpactLabel: string;
+  marginFloorLabel: string;
+  marginIfBlockedApprovedLabel: string;
   metrics: StatPill[];
   modeCards: ModeCardModel[];
   operationFacts: StatPill[];
   operationName: string;
   primaryModeTone: Tone;
+  profitIfBlockedApprovedLabel: string;
   proofArtifacts: ProofArtifactModel[];
   protectedProfitLabel: string;
   rails: RailView[];
   safetyProof: string[];
+  setupSpendLabel: string;
   state: DemoState | null;
   stripeLabel: string;
   stripeFlowSteps: FlowStepView[];
   supportingModules: Array<{ description: string; status: string; title: string; tone: Tone; value: string }>;
+  totalCostsIfBlockedApprovedLabel: string;
   toolActionGroups: ToolActionGroupView[];
 }
 
@@ -1738,6 +1783,7 @@ function buildToolActionGroups(state: DemoState | null): ToolActionGroupView[] {
         { name: "intake.parse_client_document", status: "Allowed", tone: "green" },
         { name: "intake.review_client_record", status: "Executed in demo", tone: "green" },
         { name: "workforce.calculate_labor_cost", status: "Executed in demo", tone: "green" },
+        { name: "cost_basis.calculate_delivery_costs", status: "Executed in demo", tone: "green" },
       ],
     },
     {
@@ -1793,7 +1839,7 @@ function buildStripeFlowSteps(state: DemoState | null): FlowStepView[] {
 }
 
 function buildProofArtifacts({
-  approvedSpendCents,
+  approvedCostsCents,
   blockedSpendCents,
   guardrailLabel,
   laborCostCents,
@@ -1801,7 +1847,7 @@ function buildProofArtifacts({
   state,
   stripeLabel,
 }: {
-  approvedSpendCents: number;
+  approvedCostsCents: number;
   blockedSpendCents: number;
   guardrailLabel: string;
   laborCostCents: number;
@@ -1847,17 +1893,17 @@ function buildProofArtifacts({
       tone: "cyan",
     },
     {
-      detail: `${formatCurrency(laborCostCents)} labor cost included before protected margin is reported.`,
+      detail: `${formatCurrency(approvedCostsCents)} approved delivery cost basis includes ${formatCurrency(laborCostCents)} labor before protected margin is reported.`,
       icon: Activity,
       meta: "job_costing:demo_labor_cost",
       railId: "evidence",
       status: "Recorded",
       system: "Workforce Costing",
-      title: "Labor Costing",
+      title: "Delivery Cost Basis",
       tone: "green",
     },
     {
-      detail: `${formatCurrency(protectedProfitCents)} protected profit report recorded after approved spend and labor.`,
+      detail: `${formatCurrency(protectedProfitCents)} protected profit report recorded after the full approved delivery cost basis.`,
       icon: FileText,
       meta: "profit_report:protected_margin",
       railId: "profit",
@@ -1870,37 +1916,43 @@ function buildProofArtifacts({
 }
 
 function buildRails({
-  approvedSpendCents,
+  approvedCostsCents,
   blockedSpendCents,
   guardrailLabel,
   hasReport,
   laborCostCents,
+  marginFloorPercent,
+  marginIfBlockedApprovedPercent,
   marginPercent,
   protectedProfitCents,
   revenueCents,
+  setupSpendCents,
   stripeLabel,
 }: {
-  approvedSpendCents: number;
+  approvedCostsCents: number;
   blockedSpendCents: number;
   guardrailLabel: string;
   hasReport: boolean;
   laborCostCents: number;
+  marginFloorPercent: number;
+  marginIfBlockedApprovedPercent: number;
   marginPercent: number;
   protectedProfitCents: number;
   revenueCents: number;
+  setupSpendCents: number;
   stripeLabel: string;
 }): RailView[] {
   return [
     { actor: "SCALEX", badge: "01", detail: "Client onboarding and reviewed document intake load the synthetic Northstar operation before any agent action.", evidence: "Business intake loaded", id: "input", name: "Business Intake Loaded", proofTag: "intake", riskTag: "data safe", status: "Loaded", subline: "Client record reviewed · document intake supported", tone: "green" },
-    { actor: "SCALEX", badge: "02", detail: `${formatCurrency(laborCostCents)} labor cost is loaded into the margin model before execution begins.`, evidence: "Cost basis loaded", id: "cost-basis", name: "Cost Basis Loaded", proofTag: "labor model", riskTag: "margin basis", status: "Loaded", subline: "Worker cost basis included in margin", tone: "green" },
+    { actor: "SCALEX", badge: "02", detail: `${formatCurrency(approvedCostsCents)} approved delivery cost basis is loaded, including ${formatCurrency(laborCostCents)} labor before execution begins.`, evidence: "Cost basis loaded", id: "cost-basis", name: "Cost Basis Loaded", proofTag: "delivery costs", riskTag: "margin basis", status: "Loaded", subline: "Full cost basis included in margin", tone: "green" },
     { actor: "HERMES", badge: "03", detail: "Hermes creates the implementation launch plan and proposes next tool actions. ScaleX governs what can execute.", evidence: "Hermes operation plan recorded", id: "hermes", name: "Hermes Operation Plan", proofTag: "operator plan", riskTag: "bounded plan", status: "Created", subline: "Implementation plan created · ScaleX governs", tone: "blue" },
     { actor: "STRIPE", badge: "04", detail: "Stripe customer, invoice, and payment-link actions are prepared as controlled tool calls, not raw agent autonomy.", evidence: "Stripe invoice tool prepared", id: "stripe-invoice", name: "Stripe Invoice Tool", proofTag: "tool call", riskTag: "sandbox", status: "Prepared", subline: "Invoice/payment-link action prepared", tone: "purple" },
     { actor: "STRIPE", badge: "05", detail: `Finance state checked for ${formatCurrency(revenueCents)}. ${stripeLabel}.`, evidence: "Stripe payment status retrieved", id: "stripe-status", name: "Stripe Payment Status", proofTag: "livemode=false", riskTag: "money state", status: "Verified", subline: "Invoice state retrieved · paid-state honest", tone: "purple" },
     { actor: "NEMOCLAW / NEMO", badge: "06", detail: "NemoClaw boundary is visible while NeMo Guardrails/local policy checks vendor, margin, live-money, data, and tool-action rules.", evidence: guardrailLabel, id: "policy", name: "NemoClaw / NeMo Check", proofTag: "risk decision", riskTag: "guardrail", status: "Checked", subline: "Policy checked before execution", tone: "cyan" },
-    { actor: "SCALEX", badge: "07", detail: `${formatCurrency(approvedSpendCents)} setup spend stays inside approved vendor and margin rules.`, evidence: "Approved setup spend recorded", id: "approved-spend", name: "Setup Spend Approved", proofTag: "policy pass", riskTag: "approved", status: "Approved", subline: "Allowed setup spend inside policy", tone: "green" },
-    { actor: "SCALEX", badge: "08", detail: `Unapproved vendor · ${formatCurrency(blockedSpendCents)} requested · no spend ledger row created.`, evidence: "Policy blocked data broker enrichment", id: "blocked-spend", name: "Risky Vendor Action Blocked", proofTag: "no spend row", riskTag: "blocked", status: "BLOCKED", subline: "Data broker enrichment blocked", tone: "red" },
+    { actor: "SCALEX", badge: "07", detail: `${formatCurrency(setupSpendCents)} setup spend stays inside approved vendor and margin rules.`, evidence: "Approved setup spend recorded", id: "approved-spend", name: "Setup Spend Approved", proofTag: "policy pass", riskTag: "approved", status: "Approved", subline: "Allowed setup spend inside policy", tone: "green" },
+    { actor: "SCALEX", badge: "08", detail: `Data Broker Enrichment requested ${formatCurrency(blockedSpendCents)}. If approved, margin would fall to ${formatPercent(marginIfBlockedApprovedPercent)} below the ${formatPercent(marginFloorPercent)} floor; no spend row created.`, evidence: "Policy blocked data broker enrichment", id: "blocked-spend", name: "Risky Vendor Action Blocked", proofTag: "no spend row", riskTag: "blocked", status: "BLOCKED", subline: "Blocked margin collapse", tone: "red" },
     { actor: "SCALEX", badge: "09", detail: "Audit records are stored without secrets, live-money credentials, or production customer data.", evidence: hasReport ? "Evidence ledger recorded audit trail" : "Evidence ledger ready", id: "evidence", name: "Evidence Ledger Recorded", proofTag: "audit trail", riskTag: "recorded", status: "Recorded", subline: "Audit trail recorded", tone: "green" },
-    { actor: "SCALEX", badge: "10", detail: `Protected profit ${formatCurrency(protectedProfitCents)} after approved spend and ${formatCurrency(laborCostCents)} labor; margin ${formatPercent(marginPercent)}.`, evidence: "Protected profit outcome recorded", id: "profit", name: "Profit Outcome Reported", proofTag: "margin report", riskTag: "protected", status: "Protected", subline: "Protected profit and margin reported", tone: "green" },
+    { actor: "SCALEX", badge: "10", detail: `Protected profit ${formatCurrency(protectedProfitCents)} after ${formatCurrency(approvedCostsCents)} approved delivery costs; margin ${formatPercent(marginPercent)}.`, evidence: "Protected profit outcome recorded", id: "profit", name: "Profit Outcome Reported", proofTag: "margin report", riskTag: "protected", status: "Protected", subline: "Protected profit and margin reported", tone: "green" },
   ];
 }
 
@@ -1977,11 +2029,12 @@ function buildSupportingModules(state: DemoState | null, laborCostCents: number)
   ];
 }
 
-function buildAuditRows({ approvedSpendCents, blockedSpendCents, guardrailLabel, laborCostCents, protectedProfitCents, state }: {
-  approvedSpendCents: number;
+function buildAuditRows({ approvedCostsCents, blockedSpendCents, guardrailLabel, laborCostCents, marginIfBlockedApprovedPercent, protectedProfitCents, state }: {
+  approvedCostsCents: number;
   blockedSpendCents: number;
   guardrailLabel: string;
   laborCostCents: number;
+  marginIfBlockedApprovedPercent: number;
   protectedProfitCents: number;
   state: DemoState | null;
 }): AuditRowModel[] {
@@ -1990,13 +2043,13 @@ function buildAuditRows({ approvedSpendCents, blockedSpendCents, guardrailLabel,
     { order: "001", actor: "Hermes", action: "Implementation plan recorded", evidenceType: "planning_run", safetyNote: "Hermes plans only; ScaleX executes approved actions.", status: "Recorded", tone: "purple" },
     { order: "002", actor: "Stripe", action: "Finance state recorded", evidenceType: "stripe_event", safetyNote: `Finance state is ${stripeResult}; livemode is not live money.`, status: "Verified", tone: "blue" },
     { order: "003", actor: "NeMo / Local Policy", action: "Guardrail check recorded", evidenceType: "guardrail_evaluation", safetyNote: guardrailLabel, status: "Verified", tone: "green" },
-    { order: "004", actor: "ScaleX Policy", action: `Approved setup spend ${formatCurrency(approvedSpendCents)}`, evidenceType: "policy_check", safetyNote: "Allowed vendors and margin floor were checked before spend.", status: "Approved", tone: "green" },
-    { order: "005", actor: "ScaleX Policy", action: `Blocked risky vendor spend ${formatCurrency(blockedSpendCents)}`, evidenceType: "policy_check", safetyNote: "Data broker enrichment created no spend ledger row.", status: "BLOCKED", tone: "red" },
+    { order: "004", actor: "ScaleX Economics", action: `Approved delivery costs ${formatCurrency(approvedCostsCents)}`, evidenceType: "cost_basis", safetyNote: "Protected profit is calculated after approved delivery costs, not just labor.", status: "Recorded", tone: "green" },
+    { order: "005", actor: "ScaleX Policy", action: `Blocked risky vendor spend ${formatCurrency(blockedSpendCents)}`, evidenceType: "policy_check", safetyNote: `Data broker enrichment would collapse margin to ${formatPercent(marginIfBlockedApprovedPercent)}; no spend ledger row created.`, status: "BLOCKED", tone: "red" },
     { order: "006", actor: "Workforce Costing", action: `Labor cost recorded ${formatCurrency(laborCostCents)}`, evidenceType: "job_costing", safetyNote: "Demo job costing only; not payroll or HR compliance.", status: "Recorded", tone: "purple" },
     { order: "007", actor: "Output Rail", action: "Paid-state honesty verified", evidenceType: "output_guardrail", safetyNote: "Open/unpaid Stripe state is not described as paid.", status: "Verified", tone: "amber" },
     { order: "008", actor: "ScaleX Safety", action: "No live-money mode verified", evidenceType: "mode_boundary", safetyNote: "Verified Live Mode is future-only.", status: "Verified", tone: "green" },
     { order: "009", actor: "ScaleX Safety", action: "No secrets stored verified", evidenceType: "secret_boundary", safetyNote: "No tokens, credential headers, or .env values are shown.", status: "Verified", tone: "green" },
-    { order: "010", actor: "ScaleX Ledger", action: "Final protected profit outcome recorded", evidenceType: "profit_report", safetyNote: `Protected profit ${formatCurrency(protectedProfitCents)} after approved spend and labor.`, status: "Recorded", tone: "green" },
+    { order: "010", actor: "ScaleX Ledger", action: "Final protected profit outcome recorded", evidenceType: "profit_report", safetyNote: `Protected profit ${formatCurrency(protectedProfitCents)} after approved delivery costs.`, status: "Recorded", tone: "green" },
   ];
 }
 
@@ -2041,13 +2094,13 @@ function buildConnectionCards(state: DemoState | null, auditRows: number, guardr
 }
 
 function buildActivityChips({
-  approvedSpendCents,
   blockedSpendCents,
   protectedProfitCents,
+  setupSpendCents,
 }: {
-  approvedSpendCents: number;
   blockedSpendCents: number;
   protectedProfitCents: number;
+  setupSpendCents: number;
 }): ActivityChipModel[] {
   return [
     { label: "Business intake loaded", railId: "input", time: "T+01", tone: "green" },
@@ -2056,7 +2109,7 @@ function buildActivityChips({
     { label: "Stripe invoice action prepared", railId: "stripe-invoice", time: "T+04", tone: "purple" },
     { label: "Payment status retrieved", railId: "stripe-status", time: "T+05", tone: "purple" },
     { label: "NemoClaw/NeMo check completed", railId: "policy", time: "T+06", tone: "cyan" },
-    { label: "Setup spend approved", railId: "approved-spend", time: formatCurrency(approvedSpendCents), tone: "green" },
+    { label: "Setup spend approved", railId: "approved-spend", time: formatCurrency(setupSpendCents), tone: "green" },
     { label: `Risk contained: Data Broker ${formatCurrency(blockedSpendCents)}`, railId: "blocked-spend", time: "T+08", tone: "red" },
     { label: "Evidence ledger recorded audit trail", railId: "evidence", time: "T+09", tone: "green" },
     { label: `Profit report protected ${formatCurrency(protectedProfitCents)}`, railId: "profit", time: "T+10", tone: "green" },

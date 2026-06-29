@@ -5,6 +5,7 @@ from urllib.parse import urlparse
 
 from .. import repository
 from ..config import Settings, get_settings, normalized_execution_mode
+from .economics_service import demo_employee_records, demo_enterprise_cost_basis
 from .guardrails_service import guardrail_summary
 from .ledger_service import ledger_totals, usd_to_cents
 from .policy_service import policy_config_for_seed, policy_summary
@@ -57,6 +58,15 @@ def build_demo_state(connection: sqlite3.Connection, run_id: str | None = None) 
         for event in (repository.list_stripe_events(connection, job_id) if job_id else [])
     ]
     stripe_summary = _stripe_summary(stripe_events, events)
+    placeholder_revenue_cents = usd_to_cents(seed_config["invoiceAmountUsd"])
+    placeholder_setup_spend_cents = _approved_spend_cents(seed_config)
+    placeholder_blocked_spend_cents = _blocked_spend_cents(seed_config)
+    placeholder_cost_basis = demo_enterprise_cost_basis(
+        revenue_cents=placeholder_revenue_cents,
+        setup_tool_spend_cents=placeholder_setup_spend_cents,
+        blocked_spend_cents=placeholder_blocked_spend_cents,
+        margin_floor_percent=float(seed_config["marginFloorPercent"]),
+    )
 
     return {
         "mode": "local_sqlite",
@@ -115,13 +125,14 @@ def build_demo_state(connection: sqlite3.Connection, run_id: str | None = None) 
         "report": latest_report,
         "report_placeholder": {
             "status": "pending",
-            "expected_revenue_cents": usd_to_cents(seed_config["invoiceAmountUsd"]),
-            "expected_approved_spend_cents": _approved_spend_cents(seed_config),
-            "expected_gross_profit_cents": (
-                usd_to_cents(seed_config["invoiceAmountUsd"]) - _approved_spend_cents(seed_config)
-            ),
-            "expected_margin_percent": _expected_margin_percent(seed_config),
-            "recommendation": "Proceed with implementation launch while preserving setup spend guardrails.",
+            "expected_revenue_cents": placeholder_revenue_cents,
+            "expected_approved_spend_cents": placeholder_cost_basis["total_approved_costs_cents"],
+            "expected_setup_tool_spend_cents": placeholder_setup_spend_cents,
+            "expected_gross_profit_cents": placeholder_cost_basis["protected_profit_cents"],
+            "expected_margin_percent": placeholder_cost_basis["protected_margin_percent"],
+            "expected_total_approved_costs_cents": placeholder_cost_basis["total_approved_costs_cents"],
+            "expected_blocked_spend_cents": placeholder_blocked_spend_cents,
+            "recommendation": "Proceed with implementation launch while preserving enterprise cost-basis guardrails.",
         },
     }
 
@@ -234,11 +245,18 @@ def _command_center_summary(
     approved_vendor_spend_cents = int(totals.get("approved_spend_cents") or 0) or _approved_spend_cents(seed_config)
     blocked_spend_cents = int(totals.get("blocked_spend_cents") or 0) or _blocked_spend_cents(seed_config)
     margin_floor_percent = float(seed_config["marginFloorPercent"])
-    employees = _demo_employee_records()
+    employees = demo_employee_records()
     total_labor_cost_cents = sum(employee["labor_cost_cents"] for employee in employees)
-    gross_profit_after_labor_cents = revenue_cents - approved_vendor_spend_cents - total_labor_cost_cents
-    final_margin_after_labor_percent = _percent(gross_profit_after_labor_cents, revenue_cents)
-    margin_warning = final_margin_after_labor_percent < margin_floor_percent
+    cost_basis = demo_enterprise_cost_basis(
+        revenue_cents=revenue_cents,
+        setup_tool_spend_cents=approved_vendor_spend_cents,
+        blocked_spend_cents=blocked_spend_cents,
+        margin_floor_percent=margin_floor_percent,
+    )
+    total_approved_costs_cents = int(cost_basis["total_approved_costs_cents"])
+    protected_profit_cents = int(cost_basis["protected_profit_cents"])
+    protected_margin_percent = float(cost_basis["protected_margin_percent"])
+    margin_warning = protected_margin_percent < margin_floor_percent
     job_name = job["job_name"] if job else seed_config["jobName"]
     client_name = job["client_name"] if job else seed_config["clientName"]
     business_type = job["business_type"] if job else seed_config["businessType"]
@@ -258,6 +276,7 @@ def _command_center_summary(
         ledger_entries=ledger_entries,
         agent_outputs=agent_outputs,
         labor_cost_cents=total_labor_cost_cents,
+        cost_basis=cost_basis,
         margin_warning=margin_warning,
         reports=reports,
     )
@@ -272,10 +291,15 @@ def _command_center_summary(
             "spend_cap_cents": usd_to_cents(seed_config["spendCapUsd"]),
             "margin_floor_percent": margin_floor_percent,
             "approved_vendor_spend_cents": approved_vendor_spend_cents,
+            "total_approved_costs_cents": total_approved_costs_cents,
             "blocked_spend_cents": blocked_spend_cents,
             "labor_cost_cents": total_labor_cost_cents,
-            "projected_profit_cents": gross_profit_after_labor_cents,
-            "final_margin_after_labor_percent": final_margin_after_labor_percent,
+            "projected_profit_cents": protected_profit_cents,
+            "protected_profit_cents": protected_profit_cents,
+            "final_margin_after_labor_percent": protected_margin_percent,
+            "protected_margin_percent": protected_margin_percent,
+            "margin_if_blocked_approved_percent": cost_basis["margin_if_blocked_approved_percent"],
+            "profit_if_blocked_approved_cents": cost_basis["profit_if_blocked_approved_cents"],
             "runtime_mode": runtime_mode,
             "overall_status": "needs_review" if margin_warning else "safe_profitable",
         },
@@ -373,31 +397,41 @@ def _command_center_summary(
             ],
         },
         "labor_costing": {
-            "formula": "Margin = (Revenue - Approved Vendor Spend - Labor Cost) / Revenue",
+            "formula": "Loaded labor cost is one component of the approved delivery cost basis; it is job costing only, not payroll.",
             "employees": employees,
             "total_labor_cost_cents": total_labor_cost_cents,
-            "gross_profit_after_labor_cents": gross_profit_after_labor_cents,
-            "final_margin_after_labor_percent": final_margin_after_labor_percent,
+            "gross_profit_after_labor_cents": protected_profit_cents,
+            "final_margin_after_labor_percent": protected_margin_percent,
             "margin_floor_percent": margin_floor_percent,
             "margin_warning": margin_warning,
             "status": "needs_review" if margin_warning else "safe_profitable",
+        },
+        "cost_basis": {
+            **cost_basis,
+            "summary": "Protected profit is calculated after approved delivery costs, not just labor.",
         },
         "final_profit_report": {
             "client_name": client_name,
             "job_name": job_name,
             "revenue_cents": revenue_cents,
             "approved_vendor_spend_cents": approved_vendor_spend_cents,
+            "total_approved_costs_cents": total_approved_costs_cents,
             "blocked_spend_cents": blocked_spend_cents,
             "labor_cost_cents": total_labor_cost_cents,
-            "gross_profit_after_labor_cents": gross_profit_after_labor_cents,
-            "final_margin_after_labor_percent": final_margin_after_labor_percent,
+            "gross_profit_after_labor_cents": protected_profit_cents,
+            "protected_profit_cents": protected_profit_cents,
+            "final_margin_after_labor_percent": protected_margin_percent,
+            "protected_margin_percent": protected_margin_percent,
             "margin_floor_percent": margin_floor_percent,
+            "total_costs_if_blocked_approved_cents": cost_basis["total_costs_if_blocked_approved_cents"],
+            "profit_if_blocked_approved_cents": cost_basis["profit_if_blocked_approved_cents"],
+            "margin_if_blocked_approved_percent": cost_basis["margin_if_blocked_approved_percent"],
             "policy_violations": len([check for check in policy_checks if not bool(check.get("approved"))]),
             "decision": "Needs review" if margin_warning else "Safe / Profitable",
             "recommendation": (
                 "Review scope or staffing before approving more spend."
                 if margin_warning
-                else "Proceed with implementation launch while preserving labor and vendor-spend guardrails."
+                else "Proceed with implementation launch while preserving enterprise cost-basis and vendor-spend guardrails."
             ),
         },
         "audit_events": audit_events,
@@ -413,60 +447,6 @@ def _command_center_summary(
         ],
     }
 
-
-def _demo_employee_records() -> list[dict[str, Any]]:
-    base_records = [
-        {
-            "employee_name": "Maria Lopez",
-            "role_title": "Technician",
-            "base_hourly_rate_cents": 2400,
-            "labor_burden_percent": 20.0,
-            "assigned_hours": 5.0,
-            "skill_category": "Technical service",
-            "active": True,
-            "notes": "Demo employee only; no HR record.",
-            "source": "manual_entry",
-        },
-        {
-            "employee_name": "James Carter",
-            "role_title": "Service Assistant",
-            "base_hourly_rate_cents": 1800,
-            "labor_burden_percent": 20.0,
-            "assigned_hours": 3.0,
-            "skill_category": "Operations support",
-            "active": True,
-            "notes": "Demo employee only; no payroll record.",
-            "source": "file_extraction_fixture",
-        },
-        {
-            "employee_name": "Avery Smith",
-            "role_title": "Campaign/Ops Assistant",
-            "base_hourly_rate_cents": 2200,
-            "labor_burden_percent": 20.0,
-            "assigned_hours": 2.0,
-            "skill_category": "Campaign operations",
-            "active": True,
-            "notes": "Demo employee only; job-costing assumption.",
-            "source": "file_extraction_fixture",
-        },
-    ]
-    employees = []
-    for record in base_records:
-        loaded_rate_cents = round(
-            record["base_hourly_rate_cents"] * (1 + record["labor_burden_percent"] / 100)
-        )
-        labor_cost_cents = round(loaded_rate_cents * record["assigned_hours"])
-        employees.append(
-            {
-                **record,
-                "fully_loaded_hourly_rate_cents": loaded_rate_cents,
-                "labor_cost_cents": labor_cost_cents,
-                "status": "active" if record["active"] else "inactive",
-            }
-        )
-    return employees
-
-
 def _command_center_audit_events(
     *,
     events: list[dict[str, Any]],
@@ -474,6 +454,7 @@ def _command_center_audit_events(
     ledger_entries: list[dict[str, Any]],
     agent_outputs: list[dict[str, Any]],
     labor_cost_cents: int,
+    cost_basis: dict[str, Any],
     margin_warning: bool,
     reports: list[dict[str, Any]],
 ) -> list[dict[str, Any]]:
@@ -513,6 +494,30 @@ def _command_center_audit_events(
             "title": "Labor cost calculated",
             "status": "complete",
             "detail": f"Demo labor cost is ${labor_cost_cents / 100:,.2f}.",
+        },
+        {
+            "type": "cost_basis_calculated",
+            "title": "Approved delivery cost basis calculated",
+            "status": "complete",
+            "detail": f"Total approved costs are ${cost_basis['total_approved_costs_cents'] / 100:,.2f}.",
+        },
+        {
+            "type": "campaign_media_cost_recorded",
+            "title": "Campaign/media cost recorded",
+            "status": "recorded",
+            "detail": "Campaign/media cost is $600.00.",
+        },
+        {
+            "type": "materials_delivery_cost_recorded",
+            "title": "Materials/delivery cost recorded",
+            "status": "recorded",
+            "detail": "Materials/delivery cost is $375.00.",
+        },
+        {
+            "type": "blocked_margin_impact_calculated",
+            "title": "Blocked risk margin impact calculated",
+            "status": "blocked",
+            "detail": f"Risky spend would reduce margin to {cost_basis['margin_if_blocked_approved_percent']}%.",
         },
     ]
     if margin_warning:

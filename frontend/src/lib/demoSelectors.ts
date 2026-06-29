@@ -29,6 +29,7 @@ export function moneySnapshot(state: DemoState | null): MoneySnapshot {
   const totals = state?.ledger.totals ?? null;
   const placeholder = state?.report_placeholder ?? null;
   const commandReport = state?.command_center?.final_profit_report ?? null;
+  const costBasis = state?.command_center?.cost_basis ?? null;
   const job = state?.job ?? null;
   const workflow = state?.workflow ?? null;
   const hasLedgerRevenue = Boolean(totals && totals.revenue_cents > 0);
@@ -40,16 +41,22 @@ export function moneySnapshot(state: DemoState | null): MoneySnapshot {
       report?.revenue_cents ??
       (hasLedgerRevenue ? totals?.revenue_cents ?? null : placeholder?.expected_revenue_cents ?? null),
     approvedSpendCents:
+      commandReport?.total_approved_costs_cents ??
+      costBasis?.total_approved_costs_cents ??
       report?.approved_spend_cents ??
       (hasPolicyChecks ? totals?.approved_spend_cents ?? null : placeholder?.expected_approved_spend_cents ?? null),
     blockedSpendCents:
       report?.blocked_spend_cents ??
       (hasPolicyChecks ? totals?.blocked_spend_cents ?? null : placeholder ? LOCKED_DEMO_BLOCKED_SPEND_CENTS : null),
     grossProfitCents:
+      commandReport?.protected_profit_cents ??
+      costBasis?.protected_profit_cents ??
       commandReport?.gross_profit_after_labor_cents ??
       report?.gross_profit_cents ??
       (hasLedgerRevenue ? totals?.gross_profit_cents ?? null : placeholder?.expected_gross_profit_cents ?? null),
     marginPercent:
+      commandReport?.protected_margin_percent ??
+      costBasis?.protected_margin_percent ??
       commandReport?.final_margin_after_labor_percent ??
       report?.actual_margin_percent ??
       report?.margin_percent ??

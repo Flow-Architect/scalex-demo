@@ -5,6 +5,7 @@ from typing import Any
 
 from .. import repository
 from ..seed.demo_outputs import DEMO_AGENT_OUTPUTS
+from .economics_service import enterprise_report_totals
 from .ledger_service import ledger_totals
 
 
@@ -60,11 +61,19 @@ def create_demo_agent_outputs(connection: sqlite3.Connection, job: dict[str, Any
 
 
 def _render_agent_output(job: dict[str, Any], output: dict[str, Any], totals: dict[str, Any]) -> dict[str, str]:
-    revenue = _currency(totals["revenue_cents"])
-    approved_spend = _currency(totals["approved_spend_cents"])
-    blocked_spend = _currency(totals["blocked_spend_cents"])
-    gross_profit = _currency(totals["gross_profit_cents"])
-    margin = f"{totals['actual_margin_percent']}%"
+    enterprise_totals = enterprise_report_totals(
+        revenue_cents=int(totals["revenue_cents"]),
+        setup_tool_spend_cents=int(totals["approved_spend_cents"]),
+        blocked_spend_cents=int(totals["blocked_spend_cents"]),
+        margin_floor_percent=float(job["margin_floor_percent"]),
+    )
+    revenue = _currency(enterprise_totals["revenue_cents"])
+    setup_spend = _currency(enterprise_totals["setup_tool_spend_cents"])
+    approved_costs = _currency(enterprise_totals["approved_spend_cents"])
+    blocked_spend = _currency(enterprise_totals["blocked_spend_cents"])
+    gross_profit = _currency(enterprise_totals["gross_profit_cents"])
+    margin = f"{enterprise_totals['actual_margin_percent']}%"
+    blocked_margin = f"{enterprise_totals['margin_if_blocked_approved_percent']}%"
     spend_cap = _currency(job["spend_cap_cents"])
     margin_floor = f"{job['margin_floor_percent']}%"
     client_name = str(job["client_name"])
@@ -76,12 +85,14 @@ def _render_agent_output(job: dict[str, Any], output: dict[str, Any], totals: di
             "output_markdown": f"""# Finance Agent
 
 - Implementation package revenue: {revenue}.
-- Approved setup spend: {approved_spend}.
+- Approved delivery cost basis: {approved_costs}.
+- Setup/tool spend: {setup_spend}.
 - Blocked risk: {blocked_spend}.
-- Protected gross profit: {gross_profit}.
+- Margin if blocked risk were approved: {blocked_margin}.
+- Protected profit: {gross_profit}.
 - Protected margin: {margin}.
 
-Spend control result: {job_name} stayed above the {margin_floor} margin floor and inside the {spend_cap} setup spend cap.""",
+Spend control result: {job_name} stayed above the {margin_floor} margin floor after enterprise delivery costs and inside the {spend_cap} setup spend cap.""",
         }
 
     if output["agent_name"] == "Marketing":
@@ -121,7 +132,8 @@ Data boundary: this is a synthetic multi-location client account. Do not use pat
 
 Implementation checklist:
 - Confirm revenue recorded in the local sandbox ledger.
-- Verify approved setup spend totals {approved_spend}.
+- Verify approved setup spend totals {setup_spend}.
+- Verify total approved delivery costs remain {approved_costs}.
 - Verify blocked risk totals {blocked_spend}.
 - Confirm workspace setup, data migration sandbox, launch asset kit, and stakeholder handoff evidence.
 - Attach final protected-profit report.

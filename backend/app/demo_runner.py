@@ -16,6 +16,7 @@ from . import repository
 from .config import Settings, get_settings
 from .db import database_path, get_connection, initialize_database
 from .services.agent_service import create_demo_agent_output, record_demo_agent_work_complete
+from .services.economics_service import enterprise_report_totals
 from .services.guardrails_service import (
     GuardrailIntegrationError,
     evaluate_and_record_guardrail_stage,
@@ -291,10 +292,13 @@ def run_demo() -> dict[str, Any]:
                 stage="output",
                 payload={
                     "report": _report,
-                    "totals": ledger_totals(
+                    "totals": _enterprise_report_totals(
                         job,
-                        repository.list_ledger_entries(connection, job["id"]),
-                        repository.list_policy_checks(connection, job["id"]),
+                        ledger_totals(
+                            job,
+                            repository.list_ledger_entries(connection, job["id"]),
+                            repository.list_policy_checks(connection, job["id"]),
+                        ),
                     ),
                     "stripe_summary": _stripe_summary_for_guardrail(payment_status),
                 },
@@ -675,18 +679,19 @@ def _create_final_report(connection, job: dict[str, Any]) -> dict[str, Any]:
     ledger_entries = repository.list_ledger_entries(connection, job["id"])
     policy_checks = repository.list_policy_checks(connection, job["id"])
     totals = ledger_totals(job, ledger_entries, policy_checks)
+    report_totals = _enterprise_report_totals(job, totals)
 
     report = repository.create_report(
         connection,
         job_id=job["id"],
-        revenue_cents=int(totals["revenue_cents"]),
-        approved_spend_cents=int(totals["approved_spend_cents"]),
-        blocked_spend_cents=int(totals["blocked_spend_cents"]),
-        gross_profit_cents=int(totals["gross_profit_cents"]),
-        margin_percent=float(totals["actual_margin_percent"]),
+        revenue_cents=int(report_totals["revenue_cents"]),
+        approved_spend_cents=int(report_totals["approved_spend_cents"]),
+        blocked_spend_cents=int(report_totals["blocked_spend_cents"]),
+        gross_profit_cents=int(report_totals["gross_profit_cents"]),
+        margin_percent=float(report_totals["actual_margin_percent"]),
         policy_violations=0,
         recommendation=FINAL_RECOMMENDATION,
-        report_markdown=_final_report_markdown(job, totals),
+        report_markdown=_final_report_markdown(job, report_totals),
     )
     repository.create_event(
         connection,
@@ -694,11 +699,11 @@ def _create_final_report(connection, job: dict[str, Any]) -> dict[str, Any]:
         type="profit_report",
         title="Final profit report created",
         detail=(
-            f"${totals['revenue_cents'] / 100:,.0f} revenue, "
-            f"${totals['approved_spend_cents'] / 100:,.0f} approved setup spend, "
-            f"${totals['blocked_spend_cents'] / 100:,.0f} blocked risk, "
-            f"${totals['gross_profit_cents'] / 100:,.0f} protected gross profit, and "
-            f"{totals['actual_margin_percent']}% final margin."
+            f"${report_totals['revenue_cents'] / 100:,.0f} revenue, "
+            f"${report_totals['approved_spend_cents'] / 100:,.0f} approved delivery costs, "
+            f"${report_totals['blocked_spend_cents'] / 100:,.0f} blocked risk, "
+            f"${report_totals['gross_profit_cents'] / 100:,.0f} protected profit, and "
+            f"{report_totals['actual_margin_percent']}% final margin."
         ),
         status="complete",
     )
@@ -711,17 +716,35 @@ def _final_report_markdown(job: dict[str, Any], totals: dict[str, Any]) -> str:
 
 Implementation package revenue: ${totals['revenue_cents'] / 100:,.0f}
 
-Approved setup spend: ${totals['approved_spend_cents'] / 100:,.0f}
+Approved delivery cost basis: ${totals['approved_spend_cents'] / 100:,.0f}
+
+Setup/tool spend: ${totals['setup_tool_spend_cents'] / 100:,.0f}
+
+Labor cost: ${totals['labor_cost_cents'] / 100:,.0f}
 
 Blocked risk: ${totals['blocked_spend_cents'] / 100:,.0f}
 
-Protected gross profit: ${totals['gross_profit_cents'] / 100:,.0f}
+Margin if risky spend approved: {totals['margin_if_blocked_approved_percent']}%
+
+Protected profit: ${totals['gross_profit_cents'] / 100:,.0f}
 
 Protected margin: {totals['actual_margin_percent']}%
 
 Policy violations: 0
 
 Recommendation: {FINAL_RECOMMENDATION}."""
+
+
+def _enterprise_report_totals(job: dict[str, Any], ledger_based_totals: dict[str, Any]) -> dict[str, Any]:
+    revenue_cents = int(ledger_based_totals["revenue_cents"])
+    setup_tool_spend_cents = int(ledger_based_totals["approved_spend_cents"])
+    blocked_spend_cents = int(ledger_based_totals["blocked_spend_cents"])
+    return enterprise_report_totals(
+        revenue_cents=revenue_cents,
+        setup_tool_spend_cents=setup_tool_spend_cents,
+        blocked_spend_cents=blocked_spend_cents,
+        margin_floor_percent=float(job["margin_floor_percent"]),
+    )
 
 
 def _execute_tool(
