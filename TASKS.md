@@ -4,7 +4,7 @@
 
 Goal 9 - final repo/video/submission polish and open-source audit closeout.
 
-Goal 8U is complete. Return to final recording and submission readiness:
+Goal 8V is complete. Return to final recording and submission readiness:
 
 - Rehearse the three-minute recording against `docs/DEMO_SCRIPT.md`.
 - Confirm the local demo opens at `http://127.0.0.1:5174/` with the dark control-room UI.
@@ -18,6 +18,9 @@ Goal 8U is complete. Return to final recording and submission readiness:
 - Confirm Connection Hub cards show the copied system logos for Hermes Planning, Stripe Finance
   State, NeMo Guardrails / Local Policy, and SQLite Evidence Ledger without changing the
   truthfulness labels.
+- Confirm Live Run Detail shows branded system cards for Hermes Planning, Stripe Finance,
+  NemoClaw / NeMo Policy, and ScaleX Control Plane, with subtle active highlighting during the
+  governed-run sequence.
 - Capture final screenshots or video assets only if needed for submission.
 - Do a final submission copy check against `docs/SUBMISSION_WRITEUP.md`.
 - Review `docs/OPEN_SOURCE_AUDIT.md`, `SECURITY.md`, and `CONTRIBUTING.md` before public release.
@@ -29,6 +32,32 @@ new backend features, new external services, production payroll/HR behavior, MCP
 changes, database files, uploaded real files, or secrets.
 
 ## Recently Completed
+
+Goal 8V is complete. It was a frontend-only Live Run Detail card polish:
+
+- Replaced the idle-state plain text boxes in Live Run Detail with a 2x2 branded decision-card
+  grid for Hermes Planning, Stripe Finance, NemoClaw / NeMo Policy, and ScaleX Control Plane.
+- Reused the Connection Hub logo assets for Hermes, Stripe, and NVIDIA / NeMo, and used a compact
+  `SX` text mark for ScaleX instead of a wide sidebar logo tile.
+- Added image-load fallback behavior so missing card logos render the original Lucide fallback
+  icon instead of leaving a broken placeholder.
+- Added subtle active-state highlighting tied to the current rail family: Hermes, Stripe, policy,
+  and ScaleX evidence/profit.
+- Preserved Dashboard layout, compact active-run behavior, animation timing, blocked-risk moment,
+  cost-basis values, backend mechanics, economics, run/reset behavior, Connection Hub,
+  Settings / Boundaries, truthfulness text, no live money, no Telegram, no new integrations, no
+  `.env` changes, and no database artifacts.
+
+Goal 8V validation:
+
+- `cd frontend && npm run build` passed.
+- `./scripts/test.sh` passed with 68 backend tests and a successful frontend build.
+- `./scripts/check-nemo.sh` passed with `nemoguardrails` 0.21.0 and `guardrails/scalex` loaded.
+- Browser smoke at `http://127.0.0.1:5174/` verified Dashboard idle cards, clean logo render on
+  the dark background, no old plain-box text, no horizontal document overflow, real
+  `Start Governed Run` click behavior, active highlight progression through Hermes, Stripe,
+  policy, and ScaleX, final complete readability, image-load fallback behavior, and
+  Connection Hub / Settings truthfulness.
 
 Goal 8U is complete. It was a frontend-only Connection Hub logo polish:
 

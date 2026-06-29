@@ -100,6 +100,19 @@ interface CostBasisRowView {
   tone: Tone;
 }
 
+type DecisionSystemId = "hermes" | "stripe" | "policy" | "scalex";
+
+interface DecisionSystemCardView {
+  detail: string;
+  fallbackIcon: LucideIcon;
+  id: DecisionSystemId;
+  logoSrc?: string;
+  mark?: string;
+  subtitle: string;
+  title: string;
+  tone: Tone;
+}
+
 interface ToolActionView {
   name: string;
   status: string;
@@ -522,6 +535,7 @@ function LiveRunDetail({
   const livemode = String(model.state?.stripe?.livemode ?? false);
   const paid = String(model.state?.stripe?.paid ?? false);
   const nemoRuntimeVerified = Boolean(model.state?.guardrails?.used_real_nemo);
+  const decisionSystemCards = <DecisionSystemCards focusId={focusId} runVisualState={runVisualState} />;
   const renderDetail = () => {
     if (focusId === "input" || focusId === "cost-basis") {
       return (
@@ -533,6 +547,7 @@ function LiveRunDetail({
             </div>
             <StatusBadge label={focusId === "input" ? "reviewed" : "costed"} tone="green" />
           </div>
+          {decisionSystemCards}
           <dl className="mt-3 grid grid-cols-2 gap-2">
             <FactRow label="Client" value={model.clientName} tone="white" />
             <FactRow label="Total costs" value={model.approvedCostsLabel} tone="green" />
@@ -556,6 +571,7 @@ function LiveRunDetail({
             </div>
             <StatusBadge label="created" tone="blue" />
           </div>
+          {decisionSystemCards}
           <pre className="proof-terminal mt-3">
 {model.hermesTasks.slice(0, 5).map((task, index) => `$ ${index + 1}. ${task}`).join("\n")}
 {"\n"}$ boundary: Hermes proposes. ScaleX governs.
@@ -574,6 +590,7 @@ function LiveRunDetail({
             </div>
             <StatusBadge label="livemode=false" tone="green" />
           </div>
+          {decisionSystemCards}
           <dl className="mt-3 grid grid-cols-2 gap-2">
             <FactRow label="Mode" value={model.stripeLabel} tone="purple" />
             <FactRow label="Invoice" value={invoiceId} tone="white" />
@@ -597,6 +614,7 @@ function LiveRunDetail({
             </div>
             <StatusBadge label={focusId === "approved-spend" ? "approved" : "checked"} tone={focusId === "approved-spend" ? "green" : "cyan"} />
           </div>
+          {decisionSystemCards}
           <dl className="mt-3 grid grid-cols-2 gap-2">
             <FactRow label="Guardrail mode" value={model.guardrailLabel} tone="cyan" />
             <FactRow label="Vendor gate" value="allowlist enforced" tone="green" />
@@ -631,6 +649,7 @@ function LiveRunDetail({
           <p className="mt-4 rounded-md border border-[#ef4444]/35 bg-[#ef4444]/10 p-3 text-sm font-semibold leading-6 text-[#f87171]">
             ScaleX did not just block a vendor. It protected the operation from margin collapse and recorded proof.
           </p>
+          {decisionSystemCards}
         </section>
       );
     }
@@ -645,6 +664,7 @@ function LiveRunDetail({
             </div>
             <StatusBadge label="recorded" tone="green" />
           </div>
+          {decisionSystemCards}
           <div className="mt-3 grid gap-2">
             {[
               "Hermes plan, finance state, and guardrail decision are linked.",
@@ -668,6 +688,7 @@ function LiveRunDetail({
             </div>
             <StatusBadge label="protected" tone="green" />
           </div>
+          {decisionSystemCards}
           <dl className="live-profit-facts mt-3 grid gap-2">
             {model.metrics.map((metric) => (
               <FactRow key={metric.label} label={metric.label} value={metric.value} tone={metric.tone} />
@@ -689,21 +710,7 @@ function LiveRunDetail({
           </div>
           <StatusBadge label={nemoRuntimeVerified ? "NeMo verified" : "local policy active"} tone={nemoRuntimeVerified ? "green" : "cyan"} />
         </div>
-        <div className="start-proof-list mt-3 grid gap-2">
-          {(startCompact ? [
-            "Hermes creates the plan.",
-            "Stripe verifies livemode=false.",
-            "NeMo/local policy checks risk.",
-            "ScaleX records proof and margin.",
-          ] : [
-            "Hermes will create the implementation plan.",
-            "Stripe will verify finance state with livemode=false.",
-            "NeMo Guardrails or local policy will check risky actions.",
-            "ScaleX will record the audit trail and report protected margin.",
-          ]).map((line) => (
-            <p className="rounded-md border border-[#232834] bg-[#0a0b0e] px-3 py-2 text-sm text-[#FFFFFF]" key={line}>{line}</p>
-          ))}
-        </div>
+        {decisionSystemCards}
         <button className="control-btn-primary mt-4 w-full" disabled={runActive} onClick={onRun} type="button">
           {runActive ? "Executing governed run..." : "Start Governed Run"}
         </button>
@@ -720,6 +727,112 @@ function LiveRunDetail({
       </div>
     </div>
   );
+}
+
+function DecisionSystemCards({ focusId, runVisualState }: { focusId: string; runVisualState: RunVisualState }) {
+  const activeSystemId = decisionSystemForFocus(focusId, runVisualState);
+  const complete = runVisualState === "complete";
+
+  return (
+    <div className="decision-system-grid" aria-label="Governed execution systems">
+      {decisionSystemCardData.map((card) => (
+        <DecisionSystemCard
+          active={activeSystemId === card.id}
+          card={card}
+          complete={complete}
+          key={card.id}
+        />
+      ))}
+    </div>
+  );
+}
+
+function DecisionSystemCard({ active, card, complete }: { active: boolean; card: DecisionSystemCardView; complete: boolean }) {
+  const [logoFailed, setLogoFailed] = useState(false);
+  const Icon = card.fallbackIcon;
+  const showLogo = Boolean(card.logoSrc && !logoFailed);
+
+  return (
+    <article className={`decision-system-card decision-system-card-${card.tone} ${active ? "decision-system-card-active" : ""} ${complete ? "decision-system-card-complete" : ""}`}>
+      <div className="decision-system-topline">
+        <span className="decision-system-logo-frame">
+          {showLogo ? (
+            <img alt="" className="decision-system-logo-img" onError={() => setLogoFailed(true)} src={card.logoSrc} />
+          ) : card.mark ? (
+            <span className="decision-system-mark">{card.mark}</span>
+          ) : (
+            <Icon className="h-4 w-4" />
+          )}
+        </span>
+        <div className="min-w-0">
+          <h3>{card.title}</h3>
+          <p>{card.subtitle}</p>
+        </div>
+      </div>
+      <div className="decision-system-detail">
+        <span className="decision-system-dot" />
+        <span>{card.detail}</span>
+      </div>
+    </article>
+  );
+}
+
+const decisionSystemCardData: DecisionSystemCardView[] = [
+  {
+    detail: "Hermes proposes. ScaleX governs.",
+    fallbackIcon: BrainCircuit,
+    id: "hermes",
+    logoSrc: "/brand/connections/hermes_agent_nous_square_white.png",
+    subtitle: "Creates the implementation plan.",
+    title: "Hermes Planning",
+    tone: "blue",
+  },
+  {
+    detail: "livemode=false · no live money",
+    fallbackIcon: CreditCard,
+    id: "stripe",
+    logoSrc: "/brand/connections/stripe_square_s_mark.png",
+    subtitle: "Verifies sandbox finance state.",
+    title: "Stripe Finance",
+    tone: "purple",
+  },
+  {
+    detail: "Local policy active",
+    fallbackIcon: ShieldCheck,
+    id: "policy",
+    logoSrc: "/brand/connections/nvidia_square_mark.png",
+    subtitle: "Checks vendor, margin, and tool risk.",
+    title: "NemoClaw / NeMo Policy",
+    tone: "cyan",
+  },
+  {
+    detail: "Evidence ledger active",
+    fallbackIcon: Database,
+    id: "scalex",
+    mark: "SX",
+    subtitle: "Records audit evidence and protected margin.",
+    title: "ScaleX Control Plane",
+    tone: "brand",
+  },
+];
+
+function decisionSystemForFocus(focusId: string, runVisualState: RunVisualState): DecisionSystemId | null {
+  if (runVisualState === "complete") {
+    return "scalex";
+  }
+  if (focusId === "hermes") {
+    return "hermes";
+  }
+  if (focusId === "stripe-invoice" || focusId === "stripe-status") {
+    return "stripe";
+  }
+  if (focusId === "policy" || focusId === "approved-spend" || focusId === "blocked-spend") {
+    return "policy";
+  }
+  if (focusId === "evidence" || focusId === "profit") {
+    return "scalex";
+  }
+  return null;
 }
 
 function EnterpriseControlPanel({ model }: { model: ControlRoomModel }) {

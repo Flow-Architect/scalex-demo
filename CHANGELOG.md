@@ -10,6 +10,41 @@ Use:
 
 ---
 
+## 2026-06-29 - Goal 8V: Live Run Detail branded system cards
+
+Completed:
+- Replaced the Live Run Detail idle-state plain text boxes with a compact 2x2 branded decision
+  card grid.
+- Added cards for Hermes Planning, Stripe Finance, NemoClaw / NeMo Policy, and ScaleX Control
+  Plane.
+- Reused the Connection Hub logo assets for Hermes, Stripe, and NVIDIA / NeMo, and used a compact
+  `SX` mark for ScaleX so the card does not become a wide logo tile.
+- Kept the original Lucide icons as image-load fallbacks for missing logo assets.
+- Added subtle active-state highlighting tied to the current rail family: Hermes, Stripe, policy,
+  and ScaleX evidence/profit.
+- Preserved Dashboard layout, compact active-run behavior, animation timing, blocked-risk moment,
+  cost-basis values, backend mechanics, economics, run/reset behavior, Connection Hub,
+  Settings / Boundaries, truthfulness text, no live money, no Telegram, no new integrations, no
+  `.env` changes, and no database artifacts.
+
+Verification:
+- `cd frontend && npm run build` passed.
+- `./scripts/test.sh` passed with 68 backend tests and a successful frontend build.
+- `./scripts/check-nemo.sh` passed with `nemoguardrails` 0.21.0 and `guardrails/scalex` loaded.
+- Browser smoke at `http://127.0.0.1:5174/` verified Dashboard idle cards, clean logo render on
+  the dark background, no old plain-box text, no horizontal document overflow, a real
+  `Start Governed Run` click, active highlight progression through Hermes, Stripe, policy, and
+  ScaleX, final complete readability, image-load fallback behavior, and Connection Hub /
+  Settings truthfulness.
+
+Suggested commit message:
+Add branded system cards to ScaleX live detail
+
+Next:
+- Goal 9 - final repo/video/submission polish and open-source audit closeout.
+
+---
+
 ## 2026-06-29 - Goal 8U: Connection Hub system logos
 
 Completed:

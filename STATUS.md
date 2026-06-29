@@ -7,9 +7,9 @@ Last updated: 2026-06-29
 - Project folder exists at `/home/ascabrya/dev/scalex-demo`.
 - Latest committed baseline before Goal 8E: `615a9bd Document NemoClaw correction and next
   integration plan`.
-- Last completed goal: Goal 8U - Connection Hub system logos.
-- Last completed implementation/QA goal: Goal 8U - frontend-only Connection Hub logo polish.
-- Last completed documentation/tracking update: Goal 8U Connection Hub logo closeout.
+- Last completed goal: Goal 8V - Live Run Detail branded system cards.
+- Last completed implementation/QA goal: Goal 8V - frontend-only Live Run Detail card polish.
+- Last completed documentation/tracking update: Goal 8V Live Run Detail card closeout.
 - Last completed checkout cleanup: Open Source Checkout Cleanup for judge readiness.
 - Current priority: Goal 9 - final repo/video/submission polish.
 - Goal 8I used the uploaded six-phase control-room visual prompt as a design specification only.
@@ -245,6 +245,22 @@ Last updated: 2026-06-29
   copied logo assets at `/brand/connections/`, each image completed with 1024x1024 natural size
   inside a 32px frame, no horizontal document overflow, truthfulness text unchanged, and the
   image-load fallback path replacing a failed logo with the generic icon.
+- Goal 8V completed the frontend-only Live Run Detail branded system-card polish. It replaced the
+  idle-state plain text boxes with four compact branded cards for Hermes Planning, Stripe
+  Finance, NemoClaw / NeMo Policy, and ScaleX Control Plane; reused Connection Hub logo assets
+  where available; used a compact ScaleX `SX` mark instead of a wide logo tile; and added subtle
+  active-state highlighting tied to the current Hermes, Stripe, policy, evidence, or profit rail.
+- Goal 8V preserved Dashboard layout, compact active-run behavior, governed-run timing,
+  blocked-risk moment, cost-basis values, backend mechanics, economics, run/reset behavior,
+  Connection Hub, Settings / Boundaries, truthfulness text, no live money, no Telegram, no new
+  integrations, no `.env` changes, and no database artifacts.
+- Goal 8V validation passed `cd frontend && npm run build`, `./scripts/test.sh` with 68 backend
+  tests and a successful frontend build, `./scripts/check-nemo.sh`, and browser smoke at
+  `http://127.0.0.1:5174/`. Browser smoke verified Dashboard idle cards, clean logo render on the
+  dark background, no old plain-box text, no horizontal document overflow, a real
+  `Start Governed Run` click, active highlight progression through Hermes, Stripe, policy, and
+  ScaleX, final complete readability, image-load fallback behavior, and Connection Hub / Settings
+  truthfulness.
 - Goal 9 remains final polish and submission assets.
 - Goal 7B remains future Verified Live Mode hardening.
 

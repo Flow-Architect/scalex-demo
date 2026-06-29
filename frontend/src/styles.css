@@ -613,18 +613,39 @@ dd {
   white-space: normal;
 }
 
-.live-detail-start-compact .start-proof-list {
+.live-detail-start-compact .decision-system-grid {
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 0.45rem;
   margin-top: 0.65rem;
 }
 
-.live-detail-start-compact .start-proof-list p {
-  min-height: 3rem;
-  padding: 0.45rem 0.55rem;
-  font-size: 0.72rem;
-  font-weight: 700;
-  line-height: 1.25;
+.live-run-shell-compact .decision-system-grid {
+  gap: 0.42rem;
+  margin-top: 0.6rem;
+}
+
+.live-run-shell-compact .decision-system-card {
+  min-height: 4.45rem;
+  padding: 0.48rem 0.52rem;
+}
+
+.live-run-shell-compact .decision-system-logo-frame {
+  width: 1.72rem;
+  height: 1.72rem;
+}
+
+.live-run-shell-compact .decision-system-logo-img {
+  width: 1.16rem;
+  height: 1.16rem;
+}
+
+.live-run-shell-compact .decision-system-card h3 {
+  font-size: 0.69rem;
+}
+
+.live-run-shell-compact .decision-system-card p,
+.live-run-shell-compact .decision-system-detail {
+  font-size: 0.58rem;
 }
 
 .live-detail-start-compact .control-btn-primary {
@@ -752,6 +773,162 @@ dd {
 
 .live-detail-enter {
   animation: live-detail-enter var(--detail-transition-ms, 400ms) ease-out both;
+}
+
+.decision-system-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.55rem;
+  margin-top: 0.8rem;
+}
+
+.decision-system-card {
+  min-width: 0;
+  min-height: 4.45rem;
+  overflow: hidden;
+  border-radius: 0.5rem;
+  border: 1px solid #232834;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.028), transparent 70%),
+    #0a0b0e;
+  padding: 0.58rem 0.62rem;
+  transition:
+    border-color 180ms ease,
+    background-color 180ms ease,
+    box-shadow 180ms ease;
+}
+
+.decision-system-topline {
+  display: flex;
+  min-width: 0;
+  align-items: flex-start;
+  gap: 0.55rem;
+}
+
+.decision-system-logo-frame {
+  display: flex;
+  flex: 0 0 auto;
+  width: 1.95rem;
+  height: 1.95rem;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border: 1px solid #232834;
+  border-radius: 0.42rem;
+  background: #111318;
+  color: #fcba03;
+}
+
+.decision-system-logo-img {
+  display: block;
+  width: 1.34rem;
+  height: 1.34rem;
+  object-fit: contain;
+}
+
+.decision-system-mark {
+  color: #fcba03;
+  font-size: 0.64rem;
+  font-weight: 900;
+  letter-spacing: 0;
+}
+
+.decision-system-card h3 {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  color: #FFFFFF;
+  font-size: 0.77rem;
+  font-weight: 850;
+  line-height: 1.12;
+}
+
+.decision-system-card p {
+  margin-top: 0.18rem;
+  color: #A1A1AA;
+  font-size: 0.64rem;
+  font-weight: 650;
+  line-height: 1.25;
+}
+
+.decision-system-detail {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 0.35rem;
+  margin-top: 0.48rem;
+  color: #E4E4E7;
+  font-size: 0.63rem;
+  font-weight: 800;
+  line-height: 1.25;
+}
+
+.decision-system-detail span:last-child {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.decision-system-dot {
+  width: 0.42rem;
+  height: 0.42rem;
+  flex: 0 0 auto;
+  border-radius: 999px;
+  background: #52525B;
+}
+
+.decision-system-card-active {
+  border-color: rgba(252, 186, 3, 0.42);
+  box-shadow: inset 3px 0 0 #fcba03, 0 12px 28px rgba(252, 186, 3, 0.08);
+}
+
+.decision-system-card-active.decision-system-card-blue {
+  border-color: rgba(59, 130, 246, 0.45);
+  box-shadow: inset 3px 0 0 #3b82f6, 0 12px 28px rgba(59, 130, 246, 0.08);
+}
+
+.decision-system-card-active.decision-system-card-purple {
+  border-color: rgba(139, 92, 246, 0.48);
+  box-shadow: inset 3px 0 0 #8b5cf6, 0 12px 28px rgba(139, 92, 246, 0.08);
+}
+
+.decision-system-card-active.decision-system-card-cyan {
+  border-color: rgba(6, 182, 212, 0.48);
+  box-shadow: inset 3px 0 0 #06B6D4, 0 12px 28px rgba(6, 182, 212, 0.08);
+}
+
+.decision-system-card-active.decision-system-card-green,
+.decision-system-card-complete.decision-system-card-brand {
+  border-color: rgba(16, 185, 129, 0.4);
+  box-shadow: inset 3px 0 0 #10B981, 0 12px 28px rgba(16, 185, 129, 0.08);
+}
+
+.decision-system-card-active .decision-system-dot {
+  background: #fcba03;
+  box-shadow: 0 0 0 4px rgba(252, 186, 3, 0.1);
+}
+
+.decision-system-card-active.decision-system-card-blue .decision-system-dot {
+  background: #3b82f6;
+  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+}
+
+.decision-system-card-active.decision-system-card-purple .decision-system-dot {
+  background: #8b5cf6;
+  box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.1);
+}
+
+.decision-system-card-active.decision-system-card-cyan .decision-system-dot {
+  background: #06B6D4;
+  box-shadow: 0 0 0 4px rgba(6, 182, 212, 0.1);
+}
+
+.decision-system-card-complete .decision-system-dot {
+  background: #10B981;
+  box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.1);
 }
 
 .enterprise-control-stack {
