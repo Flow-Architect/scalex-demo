@@ -91,6 +91,15 @@ interface LaborWorkerView {
   worker: string;
 }
 
+interface CostBasisRowView {
+  amountLabel: string;
+  id: string;
+  itemLabel: string;
+  percentLabel: string;
+  status: string;
+  tone: Tone;
+}
+
 interface ToolActionView {
   name: string;
   status: string;
@@ -742,27 +751,52 @@ function BusinessCostBasisCard({ model }: { model: ControlRoomModel }) {
         <FactRow label="Protected margin" value={model.marginLabel} tone="green" />
         <FactRow label="Margin floor" value={model.marginFloorLabel} tone="amber" />
       </dl>
-      <div className="enterprise-cost-stack" aria-label="Approved delivery cost basis">
-        {model.costBasisLineItems.map((item) => (
-          <div className="enterprise-cost-row" key={item.id}>
-            <span>{item.label}</span>
-            <strong>{formatCurrency(item.amount_cents)}</strong>
-          </div>
-        ))}
-      </div>
+      <table className="cost-basis-table cost-basis-table-enterprise" aria-label="Approved delivery cost basis">
+        <colgroup>
+          <col className="cost-basis-col-item" />
+          <col className="cost-basis-col-amount" />
+          <col className="cost-basis-col-percent" />
+          <col className="cost-basis-col-status" />
+        </colgroup>
+        <thead>
+          <tr>
+            <th scope="col">Cost item</th>
+            <th className="numeric-cell" scope="col">Amount</th>
+            <th className="numeric-cell" scope="col">% revenue</th>
+            <th scope="col">Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          {model.costBasisRows.map((item) => (
+            <tr key={item.id}>
+              <td className="cost-item-cell">{item.itemLabel}</td>
+              <td className="numeric-cell">{item.amountLabel}</td>
+              <td className="numeric-cell">{item.percentLabel}</td>
+              <td><span className={`cost-status cost-status-${item.tone}`}>{item.status}</span></td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
       <p className="enterprise-note">Protected profit is calculated after approved delivery costs, not just labor.</p>
       <details className="enterprise-details">
-        <summary>View labor job costing</summary>
+        <summary>
+          <span>View Labor Job Costing</span>
+          <span>Job costing only · not payroll</span>
+        </summary>
         <dl className="enterprise-fact-grid">
           <FactRow label="Source" value={clientSource.includes("manual") ? "manual + document" : clientSource} tone="white" />
           <FactRow label="Editable" value={reviewEditable ? "yes" : "locked"} tone={reviewEditable ? "green" : "amber"} />
           <FactRow label="Workers" value={`${model.laborWorkers.length} workers`} tone="white" />
-        <FactRow label="Labor cost" value={model.laborCostLabel} tone="green" />
+          <FactRow label="Labor cost" value={model.laborCostLabel} tone="green" />
         </dl>
-        <table className="cost-basis-table">
+        <table className="cost-basis-table labor-cost-table" aria-label="Labor job costing">
           <thead>
             <tr>
-              {["Worker", "Role", "Rate", "Hours", "Cost"].map((heading) => <th key={heading}>{heading}</th>)}
+              <th scope="col">Worker</th>
+              <th scope="col">Role</th>
+              <th className="numeric-cell" scope="col">Loaded rate</th>
+              <th className="numeric-cell" scope="col">Hours</th>
+              <th className="numeric-cell" scope="col">Cost</th>
             </tr>
           </thead>
           <tbody>
@@ -770,12 +804,18 @@ function BusinessCostBasisCard({ model }: { model: ControlRoomModel }) {
               <tr key={worker.worker}>
                 <td>{worker.worker}</td>
                 <td>{worker.role}</td>
-                <td>{worker.rate}</td>
-                <td>{worker.hours}</td>
-                <td>{worker.cost}</td>
+                <td className="numeric-cell">{worker.rate}</td>
+                <td className="numeric-cell">{worker.hours}</td>
+                <td className="numeric-cell">{worker.cost}</td>
               </tr>
             ))}
           </tbody>
+          <tfoot>
+            <tr>
+              <th colSpan={4} scope="row">Loaded labor total{" "}</th>
+              <td className="numeric-cell">{model.laborCostLabel}</td>
+            </tr>
+          </tfoot>
         </table>
       </details>
     </article>
@@ -1570,6 +1610,7 @@ function buildControlRoomModel(
   const modeCards = buildModeCards(state);
   const proofArtifacts = buildProofArtifacts({ approvedCostsCents, blockedSpendCents, guardrailLabel, laborCostCents, protectedProfitCents, state, stripeLabel });
   const primaryMode = modeCards.find((mode) => mode.primary) ?? modeCards[0];
+  const costBasisRows = buildCostBasisRows(costBasisLineItems, revenueCents);
   const laborWorkers = buildLaborWorkers(state);
 
   return {
@@ -1588,6 +1629,7 @@ function buildControlRoomModel(
     blockedSpendCents,
     clientName: displayCustomer,
     connectionCards: buildConnectionCards(state, auditRows, guardrailLabel, hermesLabel, stripeLabel),
+    costBasisRows,
     guardrailChecks: buildGuardrailChecks(policyChecks, guardrailEvaluations),
     guardrailLabel,
     hasReport,
@@ -1599,7 +1641,6 @@ function buildControlRoomModel(
     marginImpactLabel: `${formatCurrency(approvedCostsCents)} approved delivery cost basis included in protected profit`,
     approvedCostsLabel: formatCurrency(approvedCostsCents),
     approvedCostsCents,
-  costBasisLineItems,
     marginFloorLabel: formatPercent(marginFloorPercent),
     marginIfBlockedApprovedLabel: formatPercent(marginIfBlockedApprovedPercent),
     profitIfBlockedApprovedLabel: formatCurrency(profitIfBlockedApprovedCents),
@@ -1648,7 +1689,7 @@ interface ControlRoomModel {
   blockedSpendCents: number;
   clientName: string;
   connectionCards: ConnectorCardModel[];
-  costBasisLineItems: CommandCenterCostBasisLineItem[];
+  costBasisRows: CostBasisRowView[];
   guardrailChecks: Array<{ label: string; status: "Allow" | "Warn" | "Block" }>;
   guardrailLabel: string;
   hasReport: boolean;
@@ -1767,13 +1808,64 @@ function buildLaborWorkers(state: DemoState | null): LaborWorkerView[] {
       { employee_name: "Avery Smith", role_title: "QA / Handoff Support", fully_loaded_hourly_rate_cents: 5000, assigned_hours: 4, labor_cost_cents: 20000 },
     ];
 
-  return employees.slice(0, 3).map((employee) => ({
-    cost: formatCurrency(employee.labor_cost_cents),
-    hours: `${employee.assigned_hours}`,
-    rate: `${formatCurrency(employee.fully_loaded_hourly_rate_cents)}/hr`,
-    role: employee.role_title,
-    worker: employee.employee_name,
-  }));
+  return employees.slice(0, 3).map((employee) => {
+    const skillCategory = "skill_category" in employee && typeof employee.skill_category === "string" ? employee.skill_category : "";
+    return {
+      cost: formatCurrency(employee.labor_cost_cents),
+      hours: `${employee.assigned_hours}h`,
+      rate: `${formatCurrency(employee.fully_loaded_hourly_rate_cents)}/hr`,
+      role: laborRoleLabel(employee.role_title, skillCategory),
+      worker: employee.role_title,
+    };
+  });
+}
+
+function buildCostBasisRows(items: CommandCenterCostBasisLineItem[], revenueCents: number): CostBasisRowView[] {
+  return items.map((item) => {
+    const metadata = costBasisMetadata(item);
+    return {
+      amountLabel: formatCurrency(item.amount_cents),
+      id: item.id,
+      itemLabel: metadata.label,
+      percentLabel: formatPercent(revenueCents > 0 ? item.amount_cents / revenueCents * 100 : 0),
+      status: metadata.status,
+      tone: metadata.tone,
+    };
+  });
+}
+
+function costBasisMetadata(item: CommandCenterCostBasisLineItem): { label: string; status: string; tone: Tone } {
+  switch (item.id) {
+    case "setup_tool_spend":
+      return { label: "Setup / tool spend", status: "Approved", tone: "green" };
+    case "labor_cost":
+      return { label: "Loaded labor", status: "Included", tone: "blue" };
+    case "campaign_media_cost":
+      return { label: "Campaign / media", status: "Approved", tone: "green" };
+    case "materials_delivery_cost":
+      return { label: "Materials / delivery", status: "Approved", tone: "green" };
+    case "platform_processing_fees":
+      return { label: "Platform / processing fees", status: "Recorded", tone: "brand" };
+    case "qa_compliance_overhead":
+      return { label: "QA / compliance overhead", status: "Included", tone: "blue" };
+    case "contingency_reserve":
+      return { label: "Contingency reserve", status: "Reserved", tone: "amber" };
+    default:
+      return { label: item.label, status: item.category === "reserve" ? "Reserved" : "Recorded", tone: item.category === "reserve" ? "amber" : "muted" };
+  }
+}
+
+function laborRoleLabel(roleTitle: string, skillCategory: string): string {
+  if (/lead/i.test(roleTitle)) {
+    return "Lead";
+  }
+  if (/specialist/i.test(roleTitle)) {
+    return "Specialist";
+  }
+  if (/qa|handoff/i.test(roleTitle)) {
+    return "QA";
+  }
+  return skillCategory || "Delivery";
 }
 
 function buildToolActionGroups(state: DemoState | null): ToolActionGroupView[] {

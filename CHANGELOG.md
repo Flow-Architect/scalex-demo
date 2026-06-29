@@ -10,6 +10,40 @@ Use:
 
 ---
 
+## 2026-06-29 - Goal 8T: Cost-basis display polish
+
+Completed:
+- Replaced the Cost Basis / Delivery Cost Stack raw approved-cost lines with a compact
+  enterprise table for Cost item, Amount, % revenue, and Status.
+- Added polished status treatment for approved, included, recorded, and reserved cost rows while
+  keeping the existing dark enterprise visual system.
+- Kept the summary cards for $3,935 total approved costs, $4,565 protected profit, 53.7%
+  protected margin, and 50.0% margin floor.
+- Kept the explanatory line: protected profit is calculated after approved delivery costs, not
+  just labor.
+- Reworked `View Labor Job Costing` into a restrained disclosure row and displayed role-based
+  labor job costing in a compact aligned table with a $950 loaded labor total.
+- Preserved the current economics, backend mechanics, animation timing, run/reset behavior,
+  Stripe Sandbox Prototype wording, Verified Live Mode locked, local policy truthfulness, no live
+  money, no Telegram, no new integrations, no `.env` changes, and no database artifacts.
+
+Verification:
+- `cd frontend && npm run build` passed.
+- `./scripts/test.sh` passed with 68 backend tests and a successful frontend build.
+- `./scripts/check-nemo.sh` passed with `nemoguardrails` 0.21.0 and `guardrails/scalex` loaded.
+- Browser smoke at `http://127.0.0.1:5174/` verified the approved-cost table rows, no
+  `Label$Amount` display for approved cost rows, $3,935 total approved costs, $4,565 protected
+  profit, 53.7% protected margin, $950 labor cost, no horizontal document overflow, a real
+  `Start Governed Run` click, and the role-based labor table rows.
+
+Suggested commit message:
+Polish ScaleX cost basis display
+
+Next:
+- Goal 9 - final repo/video/submission polish and open-source audit closeout.
+
+---
+
 ## 2026-06-29 - Goal 8S: Final run timing only
 
 Completed:

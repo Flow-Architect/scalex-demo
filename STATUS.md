@@ -7,10 +7,10 @@ Last updated: 2026-06-29
 - Project folder exists at `/home/ascabrya/dev/scalex-demo`.
 - Latest committed baseline before Goal 8E: `615a9bd Document NemoClaw correction and next
   integration plan`.
-- Last completed goal: Goal 8S - final run timing only.
-- Last completed implementation/QA goal: Goal 8S - frontend-only governed-run timing constants
-  for final recording readability.
-- Last completed documentation/tracking update: Goal 8S timing closeout.
+- Last completed goal: Goal 8T - cost-basis display polish.
+- Last completed implementation/QA goal: Goal 8T - frontend-only Cost Basis / Delivery Cost
+  Stack table presentation polish.
+- Last completed documentation/tracking update: Goal 8T cost-basis display closeout.
 - Last completed checkout cleanup: Open Source Checkout Cleanup for judge readiness.
 - Current priority: Goal 9 - final repo/video/submission polish.
 - Goal 8I used the uploaded six-phase control-room visual prompt as a design specification only.
@@ -215,6 +215,21 @@ Last updated: 2026-06-29
   then held the blocked detail until Evidence Ledger. Browser smoke also confirmed the Goal 8R
   metrics remained $8,500 / $3,935 / $3,200 / $4,565 / 53.7% and document width matched the
   1440px viewport.
+- Goal 8T completed the frontend-only Cost Basis / Delivery Cost Stack display polish. It
+  replaced raw approved-cost lines with a compact enterprise table showing cost item, amount,
+  percent of revenue, and status; changed the labor disclosure into a restrained "View Labor Job
+  Costing" action; and rendered role-based labor job costing as a compact aligned table.
+- Goal 8T preserved the $8,500 revenue, $3,935 total approved costs, $3,200 risk contained,
+  $4,565 protected profit, 53.7% protected margin, 50.0% margin floor, $950 loaded labor cost,
+  backend mechanics, run/reset behavior, Stripe Sandbox Prototype wording, Verified Live Mode
+  locked, local policy truthfulness, no live money, no Telegram, no new integrations, no `.env`
+  changes, and no database artifacts.
+- Goal 8T validation passed `cd frontend && npm run build`, `./scripts/test.sh` with 68 backend
+  tests and a successful frontend build, `./scripts/check-nemo.sh`, and browser smoke at
+  `http://127.0.0.1:5174/`. Browser smoke verified the cost table rows, no `Label$Amount`
+  display for approved cost rows, total approved costs `$3,935`, protected profit `$4,565`,
+  protected margin `53.7%`, labor cost `$950`, no horizontal document overflow, a real
+  `Start Governed Run` click, and the role-based labor table rows.
 - Goal 9 remains final polish and submission assets.
 - Goal 7B remains future Verified Live Mode hardening.
 

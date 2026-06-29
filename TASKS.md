@@ -4,7 +4,7 @@
 
 Goal 9 - final repo/video/submission polish and open-source audit closeout.
 
-Goal 8S is complete. Return to final recording and submission readiness:
+Goal 8T is complete. Return to final recording and submission readiness:
 
 - Rehearse the three-minute recording against `docs/DEMO_SCRIPT.md`.
 - Confirm the local demo opens at `http://127.0.0.1:5174/` with the dark control-room UI.
@@ -13,8 +13,8 @@ Goal 8S is complete. Return to final recording and submission readiness:
   1.8 seconds.
 - Confirm the metric strip reads $8,500 revenue, $3,935 approved costs, $3,200 risk contained,
   $4,565 protected profit, and 53.7% protected margin.
-- Confirm Cost Basis shows $950 loaded labor as job costing, not payroll, and the blocked-risk
-  detail shows 16.1% margin if risky spend were approved.
+- Confirm Cost Basis shows the polished approved delivery cost table, $950 loaded labor as job
+  costing only, and the blocked-risk detail shows 16.1% margin if risky spend were approved.
 - Capture final screenshots or video assets only if needed for submission.
 - Do a final submission copy check against `docs/SUBMISSION_WRITEUP.md`.
 - Review `docs/OPEN_SOURCE_AUDIT.md`, `SECURITY.md`, and `CONTRIBUTING.md` before public release.
@@ -26,6 +26,35 @@ new backend features, new external services, production payroll/HR behavior, MCP
 changes, database files, uploaded real files, or secrets.
 
 ## Recently Completed
+
+Goal 8T is complete. It was a frontend-only Cost Basis / Delivery Cost Stack presentation polish:
+
+- Replaced the raw approved-cost lines with a compact enterprise table: Cost item, Amount,
+  % revenue, and Status.
+- Preserved the current economics: $8,500 revenue, $3,935 total approved costs, $3,200 risk
+  contained, $4,565 protected profit, 53.7% protected margin, 50.0% margin floor, and $950 loaded
+  labor cost.
+- Kept the summary cards readable and compact, and retained the note that protected profit is
+  calculated after approved delivery costs, not just labor.
+- Reworked `View Labor Job Costing` as a restrained disclosure action and displayed role-based
+  labor costing as an aligned table: ClientOps Lead / Lead / $70/hr / 6h / $420,
+  Implementation Specialist / Specialist / $55/hr / 6h / $330, and QA / Handoff Support / QA /
+  $50/hr / 4h / $200.
+- Preserved the surrounding dashboard, governed rails, Live Run Detail, Tool Action Rail, Stripe
+  Finance Flow, NemoClaw / NeMo Guardrail Layer, Evidence Ledger, Connection Hub,
+  Settings / Boundaries, sidebar, topbar, logo, backend mechanics, timing, run/reset behavior,
+  Stripe/Hermes/NemoClaw behavior, no live money, no Telegram, no new integrations, no `.env`
+  changes, and no database artifacts.
+
+Goal 8T validation:
+
+- `cd frontend && npm run build` passed.
+- `./scripts/test.sh` passed with 68 backend tests and a successful frontend build.
+- `./scripts/check-nemo.sh` passed with `nemoguardrails` 0.21.0 and `guardrails/scalex` loaded.
+- Browser smoke at `http://127.0.0.1:5174/` verified the approved-cost rows, no
+  `Label$Amount` display for approved cost rows, $3,935 total approved costs, $4,565 protected
+  profit, 53.7% protected margin, $950 labor cost, no horizontal document overflow, real
+  `Start Governed Run` click behavior, and the role-based labor table rows.
 
 Goal 8S is complete. It was a frontend-only final run timing pass:
 

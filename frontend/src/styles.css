@@ -828,42 +828,205 @@ dd {
 }
 
 .enterprise-details summary {
+  display: flex;
+  min-width: 0;
   cursor: pointer;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.65rem;
+  border-top: 1px solid #232834;
+  padding-top: 0.6rem;
   color: #fcba03;
-  font-size: 0.68rem;
+  font-size: 0.66rem;
   font-weight: 800;
+  letter-spacing: 0.02em;
+  list-style: none;
   text-transform: uppercase;
+}
+
+.enterprise-details summary::-webkit-details-marker {
+  display: none;
+}
+
+.enterprise-details summary span {
+  min-width: 0;
+}
+
+.enterprise-details summary span:first-child {
+  flex: 0 0 auto;
+}
+
+.enterprise-details summary span:last-child {
+  overflow: hidden;
+  color: #A1A1AA;
+  font-size: 0.58rem;
+  font-weight: 750;
+  text-align: right;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.enterprise-details[open] summary {
+  border-bottom: 1px solid #232834;
+  padding-bottom: 0.5rem;
 }
 
 .cost-basis-table {
   table-layout: fixed;
   width: 100%;
-  margin-top: 0.5rem;
+  margin-top: 0.6rem;
   border-collapse: collapse;
-  font-size: 0.62rem;
+  border: 1px solid #232834;
+  background: #08090c;
+  color: #FFFFFF;
+  font-size: 0.58rem;
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum";
+}
+
+.cost-basis-col-item {
+  width: 34%;
+}
+
+.cost-basis-col-amount {
+  width: 24%;
+}
+
+.cost-basis-col-percent {
+  width: 17%;
+}
+
+.cost-basis-col-status {
+  width: 25%;
 }
 
 .cost-basis-table th,
 .cost-basis-table td {
-  border-bottom: 1px solid #232834;
+  border-bottom: 1px solid #1e2128;
   max-width: 0;
   overflow: hidden;
-  padding: 0.34rem 0.25rem;
+  padding: 0.36rem 0.3rem;
   text-align: left;
   text-overflow: ellipsis;
-  vertical-align: top;
+  vertical-align: middle;
   white-space: nowrap;
 }
 
 .cost-basis-table th {
-  color: #52525B;
-  font-weight: 800;
+  color: #71717A;
+  font-size: 0.54rem;
+  font-weight: 850;
+  letter-spacing: 0.02em;
   text-transform: uppercase;
 }
 
 .cost-basis-table td {
+  color: #F4F4F5;
+  font-weight: 720;
+}
+
+.cost-basis-table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.cost-basis-table td.numeric-cell {
+  max-width: none;
+  overflow: visible;
+  text-align: right;
+  text-overflow: clip;
+}
+
+.cost-basis-table th.numeric-cell {
+  text-align: right;
+}
+
+.cost-item-cell {
   color: #FFFFFF;
-  font-weight: 700;
+  font-weight: 800;
+}
+
+.cost-status {
+  display: inline-flex;
+  max-width: 100%;
+  min-width: 0;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #232834;
+  border-radius: 0.28rem;
+  padding: 0.18rem 0.28rem;
+  font-size: 0.49rem;
+  font-weight: 850;
+  line-height: 1;
+  text-transform: uppercase;
+  vertical-align: middle;
+}
+
+.cost-status-brand {
+  border-color: rgba(252, 186, 3, 0.35);
+  background: rgba(252, 186, 3, 0.09);
+  color: #fcba03;
+}
+
+.cost-status-green {
+  border-color: rgba(16, 185, 129, 0.34);
+  background: rgba(16, 185, 129, 0.09);
+  color: #34d399;
+}
+
+.cost-status-blue {
+  border-color: rgba(59, 130, 246, 0.32);
+  background: rgba(59, 130, 246, 0.08);
+  color: #93c5fd;
+}
+
+.cost-status-amber {
+  border-color: rgba(245, 158, 11, 0.34);
+  background: rgba(245, 158, 11, 0.09);
+  color: #fbbf24;
+}
+
+.cost-status-muted {
+  border-color: #232834;
+  background: #0a0b0e;
+  color: #A1A1AA;
+}
+
+.labor-cost-table {
+  margin-top: 0.55rem;
+  font-size: 0.58rem;
+}
+
+.labor-cost-table th:nth-child(1) {
+  width: 30%;
+}
+
+.labor-cost-table th:nth-child(2) {
+  width: 19%;
+}
+
+.labor-cost-table th:nth-child(3) {
+  width: 19%;
+}
+
+.labor-cost-table th:nth-child(4) {
+  width: 12%;
+}
+
+.labor-cost-table th:nth-child(5) {
+  width: 20%;
+}
+
+.labor-cost-table tfoot th,
+.labor-cost-table tfoot td {
+  border-top: 1px solid #303540;
+  border-bottom: 0;
+  color: #fcba03;
+  font-weight: 850;
+}
+
+.labor-cost-table tfoot th {
+  text-align: right;
+  text-transform: uppercase;
 }
 
 .enterprise-note {
