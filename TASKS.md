@@ -23,11 +23,11 @@ changes, database files, uploaded real files, or secrets.
 Goal 8Q is complete. It was a frontend-only presentation timing pass for final recording
 readability:
 
-- Slowed the default ten-rail governed run to roughly 39 seconds so each active decision remains
+- Slowed the default ten-rail governed run to roughly 43 seconds so each active decision remains
   readable.
 - Held Business Intake, Cost Basis, Hermes, Stripe finance, NemoClaw / NeMo policy, setup spend,
   blocked risk, evidence ledger, and profit outcome details in sync with the active rail.
-- Kept the risky vendor action blocked moment visible for about 5.6 seconds, with a single
+- Kept the risky vendor action blocked moment visible for about 6.5 seconds, with a single
   readable red flash and a slower $0 -> $3,200 blocked-risk count-up.
 - Preserved the final complete state: all rails complete, risky vendor action visibly blocked,
   protected profit visible, and Live Run Detail on Profit Outcome.
@@ -43,7 +43,7 @@ Goal 8Q validation:
 - `./scripts/check-nemo.sh` passed with `nemoguardrails` 0.21.0 and `guardrails/scalex` loaded.
 - `git diff --check` passed.
 - Browser smoke at `http://127.0.0.1:5174/` sampled the 1440x900 run from Business Intake
-  through stable complete state at about 38.7s, with no horizontal overflow, synchronized Live Run
+  through stable complete state at about 42.8s, with no horizontal overflow, synchronized Live Run
   Detail, readable blocked-risk hold, and blocked-risk metric settling at `$3,200`.
 - Unsafe/generated path scan and staged added-lines secret scan returned no matches.
 

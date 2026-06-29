@@ -1005,7 +1005,7 @@ dd {
 }
 
 .metric-flash-red {
-  animation: metric-flash-red 1400ms ease-out;
+  animation: metric-flash-red 1600ms ease-out;
 }
 
 .metric-glow-green {
@@ -1015,16 +1015,16 @@ dd {
 
 .rail-running.danger-pulse-on-visible .status-dot,
 .blocked-card-flash .status-dot {
-  animation: danger-pulse 1400ms ease-out 1;
+  animation: danger-pulse 1600ms ease-out 1;
 }
 
 .blocked-card-flash {
-  animation: blocked-card-flash 1400ms ease-out;
+  animation: blocked-card-flash 1600ms ease-out;
 }
 
 .blocked-scale {
   transform-origin: center;
-  animation: blocked-card-flash 1400ms ease-out;
+  animation: blocked-card-flash 1600ms ease-out;
 }
 
 .panel-shell {

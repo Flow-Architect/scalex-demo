@@ -13,14 +13,14 @@ Use:
 ## 2026-06-29 - Goal 8Q: Final presentation timing pass
 
 Completed:
-- Slowed the default governed-run presentation to roughly 39 seconds so the final recording has
+- Slowed the default governed-run presentation to roughly 43 seconds so the final recording has
   enough time to read each active decision.
-- Set rail holds to the final presentation pacing: Business Intake 2.6s, Cost Basis 2.6s,
-  Hermes 2.8s, Stripe finance rails 3.8s each, NemoClaw / NeMo policy 3.8s, approved setup spend
-  2.8s, blocked risky vendor action 5.6s, evidence ledger 3.2s, and profit outcome 3.8s.
+- Set rail holds to the final presentation pacing: Business Intake 3.0s, Cost Basis 3.0s,
+  Hermes 3.3s, Stripe finance rails 4.5s each, NemoClaw / NeMo policy 4.5s, approved setup spend
+  3.3s, blocked risky vendor action 6.5s, evidence ledger 3.8s, and profit outcome 4.5s.
 - Kept Live Run Detail synchronized with the active rail and preserved the final stable complete
   state.
-- Slowed the blocked-risk count-up to about 2.2 seconds and kept the blocked flash/climax as one
+- Slowed the blocked-risk count-up to about 2.6 seconds and kept the blocked flash/climax as one
   readable moment.
 - Preserved the Dashboard layout, compact active-run behavior, logo, brand system, evidence
   views, Connection Hub, Settings / Boundaries, API-backed mechanics, Stripe/Hermes/NeMo
@@ -33,10 +33,10 @@ Verification:
   `nemoguardrails_version=0.21.0`.
 - `git diff --check` passed.
 - Browser smoke at `http://127.0.0.1:5174/` passed at 1440x900. The sampled run showed Business
-  Intake at ~1.4s, Cost Basis at ~4.3s, Hermes at ~7.2s, Stripe Invoice at ~10.1s, Stripe Payment
-  Status at ~14.6s, NemoClaw / NeMo Check at ~18.4s, approved setup spend at ~21.8s, blocked
-  risky vendor action at ~24.4s and ~27.5s, Evidence Ledger at ~30.7s, Profit Outcome at ~34.5s,
-  and stable complete state at ~38.7s.
+  Intake at ~1.6s, Cost Basis at ~4.6s, Hermes at ~7.7s, Stripe Invoice at ~11.2s, Stripe Payment
+  Status at ~16.4s, NemoClaw / NeMo Check at ~20.7s, approved setup spend at ~24.9s, blocked
+  risky vendor action at ~28.5s and ~31.7s, Evidence Ledger at ~35.3s, Profit Outcome at ~39.3s,
+  and stable complete state at ~42.8s.
 - Browser smoke confirmed no horizontal overflow, Live Run Detail stayed synchronized with the
   active rail, the blocked-risk metric counted through `$1,400` mid-climax and settled at
   `$3,200`, and the final complete state kept Profit Outcome visible without an active rail.
