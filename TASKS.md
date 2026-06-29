@@ -4,8 +4,7 @@
 
 Goal 9 - final repo/video/submission polish and open-source audit closeout.
 
-Documentation/open-source audit alignment is complete after Goal 8O. Return to final recording and
-submission readiness:
+Goal 8P is complete. Return to final recording and submission readiness:
 
 - Rehearse the three-minute recording against `docs/DEMO_SCRIPT.md`.
 - Confirm the local demo opens at `http://127.0.0.1:5174/` with the dark control-room UI.
@@ -20,6 +19,34 @@ new backend features, new external services, production payroll/HR behavior, MCP
 changes, database files, uploaded real files, or secrets.
 
 ## Recently Completed
+
+Goal 8P is complete. It was a tiny frontend-only timing and Dashboard viewport-fit polish pass:
+
+- Slowed global governed-run presentation timing so the frontend stays in running state for the
+  readable rail sequence instead of rushing through the active decision.
+- Kept the blocked-risk flash/climax, blocked-risk count-up, red blocked rail emphasis, and
+  blocked Live Run Detail card.
+- Added Dashboard-only running compact mode for the active run area. While running, Dashboard
+  keeps the metric strip, governed rails, active rail state, Live Run Detail, blocked-risk moment,
+  and profit outcome visible above the fold.
+- Moved Dashboard Enterprise Rails/supporting modules lower only during the active run. Governed
+  Run, Evidence Ledger, Connection Hub, Settings / Boundaries, sidebar, topbar, and final complete
+  state were not compacted.
+- Preserved API-backed state, run/reset behavior, evidence state, Stripe/Hermes/NeMo truthfulness,
+  Judge Demo Mode, Stripe Sandbox Prototype wording, Verified Live Mode locked, local policy,
+  onboarding/cost basis, labor costing, MCP-ready/tool action rail, Stripe finance flow,
+  NemoClaw/NeMo visibility, and no live money.
+
+Goal 8P browser smoke:
+
+- Dashboard loaded at `http://127.0.0.1:5174/`.
+- No horizontal overflow at 1440x900 (`documentScrollWidth === innerWidth === 1440`).
+- During running state, Dashboard active rails and Live Run Detail both rendered from `top=268`
+  to `bottom=892`, inside the 900px viewport.
+- Policy, blocked-risk, and profit detail panels had no internal scroll for the main detail body.
+- Blocked-risk flash was observed with `blockedFlash=true` and `blocked-card-flash` on the
+  blocked rail and detail card.
+- Complete state returned to the existing non-compact Dashboard layout and stayed screenshot-ready.
 
 Goal 8O is complete. It was a tiny frontend-only logo/sidebar polish pass, later superseded by
 the new full ScaleX logo asset now wired through `BrandLogo`:

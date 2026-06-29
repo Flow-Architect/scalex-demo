@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import type { ReactNode } from "react";
+import type { CSSProperties, ReactNode } from "react";
 import {
   Activity,
   BrainCircuit,
@@ -23,15 +23,22 @@ type Tone = "brand" | "green" | "red" | "amber" | "blue" | "purple" | "cyan" | "
 type DrawerTab = "summary" | "operation" | "control";
 type RunVisualState = "idle" | "running" | "complete";
 
-const DEMO_RAIL_DELAY_MS = 160;
-const DEMO_RAIL_GAP_MS = 150;
-const DEMO_DEFAULT_RAIL_HOLD_MS = 1050;
-const DEMO_STRIPE_HOLD_MS = 1320;
-const DEMO_NEMO_HOLD_MS = 1340;
-const DEMO_BLOCKED_HOLD_MS = 2050;
-const DEMO_PROFIT_HOLD_MS = 1220;
-const DEMO_BLOCKED_FLASH_MS = 1250;
-const DEMO_BLOCKED_COUNT_MS = 980;
+const RUN_START_DELAY_MS = 260;
+const RAIL_GAP_MS = 90;
+const DEFAULT_RAIL_DELAY_MS = 1300;
+const HERMES_RAIL_HOLD_MS = 1400;
+const APPROVED_RAIL_HOLD_MS = 1400;
+const STRIPE_RAIL_HOLD_MS = 1700;
+const POLICY_RAIL_HOLD_MS = 1700;
+const BLOCKED_RAIL_HOLD_MS = 2600;
+const EVIDENCE_RAIL_HOLD_MS = 1600;
+const PROFIT_RAIL_HOLD_MS = 1700;
+const DETAIL_TRANSITION_MS = 400;
+const BLOCKED_COUNT_DURATION_MS = 1200;
+const BLOCKED_FLASH_DURATION_MS = 900;
+const DETAIL_TRANSITION_STYLE = {
+  "--detail-transition-ms": `${DETAIL_TRANSITION_MS}ms`,
+} as CSSProperties;
 
 interface ControlRoomAppProps {
   activeView: AppView;
@@ -150,7 +157,7 @@ export function ControlRoomApp({
     setDisplayedBlockedRiskCents(0);
     const blockedTarget = model.blockedSpendCents;
     const timers: number[] = [];
-    let cursorMs = DEMO_RAIL_DELAY_MS;
+    let cursorMs = RUN_START_DELAY_MS;
     model.rails.forEach((_, index) => {
       const rail = model.rails[index];
       const durationMs = railHoldMs(rail.id);
@@ -161,9 +168,9 @@ export function ControlRoomApp({
           Array.from({ length: 16 }).forEach((__, stepIndex) => {
             timers.push(window.setTimeout(() => {
               setDisplayedBlockedRiskCents(Math.round(blockedTarget * ((stepIndex + 1) / 16)));
-            }, stepIndex * (DEMO_BLOCKED_COUNT_MS / 16)));
+            }, stepIndex * (BLOCKED_COUNT_DURATION_MS / 16)));
           });
-          timers.push(window.setTimeout(() => setBlockedFlash(false), DEMO_BLOCKED_FLASH_MS));
+          timers.push(window.setTimeout(() => setBlockedFlash(false), BLOCKED_FLASH_DURATION_MS));
         }
       }, cursorMs));
 
@@ -177,7 +184,7 @@ export function ControlRoomApp({
           setActiveRailId(null);
         }
       }, cursorMs + durationMs));
-      cursorMs += durationMs + DEMO_RAIL_GAP_MS;
+      cursorMs += durationMs + RAIL_GAP_MS;
     });
 
     return () => timers.forEach((timer) => window.clearTimeout(timer));
@@ -362,26 +369,46 @@ function DashboardView({
   runActive: boolean;
   runVisualState: RunVisualState;
 }) {
+  const dashboardRunning = runVisualState === "running";
+
   return (
-    <section className="grid h-full min-h-0 grid-rows-[auto_auto_minmax(0,1fr)] gap-4">
-      <OperationIdentityBar model={model} />
+    <section
+      className={`dashboard-view ${dashboardRunning ? "dashboard-view-running" : ""}`}
+      style={DETAIL_TRANSITION_STYLE}
+    >
+      <OperationIdentityBar compact={dashboardRunning} model={model} />
       <MetricStrip
         activeRailId={activeRailId}
         blockedFlash={blockedFlash}
         blockedRiskDisplayValue={formatCurrency(displayedBlockedRiskCents)}
+        compact={dashboardRunning}
         completedRailIds={completedRailIds}
         metrics={model.metrics}
         runActive={runActive}
         runVisualState={runVisualState}
       />
-      <div className="grid min-h-0 grid-cols-[minmax(320px,0.92fr)_minmax(320px,0.86fr)_minmax(260px,0.58fr)] gap-3 overflow-hidden">
-        <Panel title="Governed Run" eyebrow="execution rails" action={<StatusBadge label={runVisualState === "running" ? "running" : runVisualState === "complete" ? "complete" : "ready"} tone={runVisualState === "running" ? "blue" : runVisualState === "complete" ? "green" : "brand"} />}>
-          <RailList activeRailId={activeRailId} blockedFlash={blockedFlash} compact completedRailIds={completedRailIds} model={model} />
+      <div className={`dashboard-active-grid ${dashboardRunning ? "dashboard-active-grid-running" : ""}`}>
+        <Panel
+          compact={dashboardRunning}
+          title="Governed Run"
+          eyebrow="execution rails"
+          action={<StatusBadge label={runVisualState === "running" ? "running" : runVisualState === "complete" ? "complete" : "ready"} tone={runVisualState === "running" ? "blue" : runVisualState === "complete" ? "green" : "brand"} />}
+        >
+          <RailList
+            activeRailId={activeRailId}
+            blockedFlash={blockedFlash}
+            compact
+            completedRailIds={completedRailIds}
+            hideSecondary={dashboardRunning}
+            model={model}
+            runningCompact={dashboardRunning}
+          />
         </Panel>
-        <Panel title="Live Run Detail" eyebrow="active decision context" action={<button className="control-link" onClick={() => onNavigate("audit")} type="button">Open Ledger</button>}>
+        <Panel compact={dashboardRunning} title="Live Run Detail" eyebrow="active decision context" action={<button className="control-link" onClick={() => onNavigate("audit")} type="button">Open Ledger</button>}>
           <LiveRunDetail
             activeRailId={activeRailId}
             blockedFlash={blockedFlash}
+            compact={dashboardRunning}
             completedRailIds={completedRailIds}
             model={model}
             onRun={onRun}
@@ -389,17 +416,26 @@ function DashboardView({
             runVisualState={runVisualState}
           />
         </Panel>
-        <Panel title="Enterprise Rails" eyebrow="intake · tools · guardrails" action={<StatusBadge label="MCP-ready" tone="blue" />}>
-          <EnterpriseControlPanel model={model} />
-        </Panel>
+        {!dashboardRunning ? (
+          <Panel title="Enterprise Rails" eyebrow="intake · tools · guardrails" action={<StatusBadge label="MCP-ready" tone="blue" />}>
+            <EnterpriseControlPanel model={model} />
+          </Panel>
+        ) : null}
       </div>
+      {dashboardRunning ? (
+        <div className="dashboard-support-lower">
+          <Panel title="Enterprise Rails" eyebrow="supporting modules below active run" action={<StatusBadge label="MCP-ready" tone="blue" />}>
+            <EnterpriseControlPanel model={model} />
+          </Panel>
+        </div>
+      ) : null}
     </section>
   );
 }
 
-function OperationIdentityBar({ model }: { model: ControlRoomModel }) {
+function OperationIdentityBar({ compact = false, model }: { compact?: boolean; model: ControlRoomModel }) {
   return (
-    <div className="operation-identity-bar">
+    <div className={`operation-identity-bar ${compact ? "operation-identity-bar-compact" : ""}`}>
       <div className="min-w-0">
         <p className="text-[0.68rem] font-semibold uppercase tracking-wide text-[#fcba03]">Active operation</p>
         <div className="mt-1 flex min-w-0 flex-wrap items-end gap-x-3 gap-y-1">
@@ -451,6 +487,7 @@ function RunSignals({ completedRailIds, runVisualState }: { completedRailIds: st
 function LiveRunDetail({
   activeRailId,
   blockedFlash,
+  compact = false,
   completedRailIds,
   model,
   onRun,
@@ -459,6 +496,7 @@ function LiveRunDetail({
 }: {
   activeRailId: string | null;
   blockedFlash: boolean;
+  compact?: boolean;
   completedRailIds: string[];
   model: ControlRoomModel;
   onRun: () => void;
@@ -655,7 +693,7 @@ function LiveRunDetail({
   };
 
   return (
-    <div className="live-run-shell">
+    <div className={`live-run-shell ${compact ? "live-run-shell-compact" : ""}`}>
       <ControlStackChain activeRailId={activeRailId} completedRailIds={completedRailIds} model={model} />
       <RunSignals completedRailIds={completedRailIds} runVisualState={runVisualState} />
       <div className="mt-3" key={focusId}>
@@ -1120,6 +1158,7 @@ function MetricStrip({
   activeRailId,
   blockedFlash,
   blockedRiskDisplayValue,
+  compact = false,
   completedRailIds,
   metrics,
   runActive,
@@ -1128,6 +1167,7 @@ function MetricStrip({
   activeRailId: string | null;
   blockedFlash: boolean;
   blockedRiskDisplayValue: string;
+  compact?: boolean;
   completedRailIds: string[];
   metrics: StatPill[];
   runActive: boolean;
@@ -1138,7 +1178,7 @@ function MetricStrip({
   const profitActive = activeRailId === "profit" || completedRailIds.includes("profit") || runVisualState === "complete";
 
   return (
-    <div className="grid grid-cols-5 gap-3">
+    <div className={`metric-strip-grid ${compact ? "metric-strip-grid-compact" : ""}`}>
       {metrics.map((metric) => {
         const isApprovedMetric = metric.label === "Approved spend";
         const isRiskMetric = metric.label === "Risk contained";
@@ -1170,16 +1210,20 @@ function RailList({
   blockedFlash = false,
   compact,
   completedRailIds,
+  hideSecondary = false,
   model,
+  runningCompact = false,
 }: {
   activeRailId: string | null;
   blockedFlash?: boolean;
   compact?: boolean;
   completedRailIds: string[];
+  hideSecondary?: boolean;
   model: ControlRoomModel;
+  runningCompact?: boolean;
 }) {
   return (
-    <ol className={`grid ${compact ? "rail-list-compact gap-1" : "gap-2"}`}>
+    <ol className={`grid ${compact ? "rail-list-compact gap-1" : "gap-2"} ${runningCompact ? "rail-list-dashboard-running" : ""}`}>
       {model.rails.map((rail, index) => {
         const active = activeRailId === rail.id;
         const complete = completedRailIds.includes(rail.id);
@@ -1195,7 +1239,7 @@ function RailList({
             <span className="status-dot" />
             <div className="min-w-0 flex-1">
               <p className="truncate text-sm font-semibold text-[#FFFFFF]">{rail.name}</p>
-              {!compact ? <p className="truncate text-xs text-[#A1A1AA]">{rail.evidence}</p> : <p className="truncate text-[0.68rem] text-[#A1A1AA]">{rail.subline}</p>}
+              {hideSecondary ? null : !compact ? <p className="truncate text-xs text-[#A1A1AA]">{rail.evidence}</p> : <p className="truncate text-[0.68rem] text-[#A1A1AA]">{rail.subline}</p>}
             </div>
             {!compact ? <span className="hidden rounded border border-[#232834] px-2 py-1 text-[0.64rem] font-semibold uppercase text-[#A1A1AA] xl:inline">{rail.proofTag}</span> : null}
             <StatusBadge label={result.label} tone={result.tone} />
@@ -1363,17 +1407,17 @@ function ConnectorCard({ card }: { card: ConnectorCardModel }) {
   );
 }
 
-function Panel({ action, children, eyebrow, title }: { action?: ReactNode; children: ReactNode; eyebrow: string; title: string }) {
+function Panel({ action, children, compact = false, eyebrow, title }: { action?: ReactNode; children: ReactNode; compact?: boolean; eyebrow: string; title: string }) {
   return (
-    <section className="min-h-0 max-w-full overflow-hidden rounded-lg border border-[#232834] bg-[#111318] shadow-xl shadow-black/20">
-      <div className="flex h-14 items-center justify-between gap-3 border-b border-[#232834] px-4">
+    <section className={`panel-shell ${compact ? "panel-shell-compact" : ""}`}>
+      <div className="panel-head">
         <div className="min-w-0">
           <p className="truncate text-[0.64rem] font-semibold uppercase tracking-wide text-[#fcba03]">{eyebrow}</p>
           <h1 className="text-lg font-semibold text-white">{title}</h1>
         </div>
         {action}
       </div>
-      <div className="h-[calc(100%-3.5rem)] overflow-y-auto overflow-x-hidden p-4">{children}</div>
+      <div className="panel-body">{children}</div>
     </section>
   );
 }
@@ -1424,18 +1468,27 @@ function railResult(rail: RailView, active: boolean, complete: boolean): { label
 
 function railHoldMs(railId: string): number {
   if (railId === "stripe-invoice" || railId === "stripe-status") {
-    return DEMO_STRIPE_HOLD_MS;
+    return STRIPE_RAIL_HOLD_MS;
   }
   if (railId === "policy") {
-    return DEMO_NEMO_HOLD_MS;
+    return POLICY_RAIL_HOLD_MS;
   }
   if (railId === "blocked-spend") {
-    return DEMO_BLOCKED_HOLD_MS;
+    return BLOCKED_RAIL_HOLD_MS;
+  }
+  if (railId === "evidence") {
+    return EVIDENCE_RAIL_HOLD_MS;
   }
   if (railId === "profit") {
-    return DEMO_PROFIT_HOLD_MS;
+    return PROFIT_RAIL_HOLD_MS;
   }
-  return DEMO_DEFAULT_RAIL_HOLD_MS;
+  if (railId === "hermes") {
+    return HERMES_RAIL_HOLD_MS;
+  }
+  if (railId === "approved-spend") {
+    return APPROVED_RAIL_HOLD_MS;
+  }
+  return DEFAULT_RAIL_DELAY_MS;
 }
 
 function buildControlRoomModel(

@@ -1,17 +1,16 @@
 # STATUS - ScaleX ClientOps Autopilot
 
-Last updated: 2026-06-28
+Last updated: 2026-06-29
 
 ## Verified Current State
 
 - Project folder exists at `/home/ascabrya/dev/scalex-demo`.
 - Latest committed baseline before Goal 8E: `615a9bd Document NemoClaw correction and next
   integration plan`.
-- Last completed goal: documentation and open-source audit alignment after Goal 8O.
-- Last completed implementation/QA goal: new ScaleX logo implementation across sidebar,
-  loading/login screens, and shared header, with frontend build and browser smoke validation.
-- Last completed documentation/tracking update: source-audit readiness, current demo economics,
-  optional NemoHermes truthfulness, and final Goal 9 handoff.
+- Last completed goal: Goal 8P - slow governed run pace and keep Dashboard Live Run Detail visible.
+- Last completed implementation/QA goal: Goal 8P - frontend-only presentation timing and
+  Dashboard active-run viewport-fit polish.
+- Last completed documentation/tracking update: Goal 8P timing/layout closeout.
 - Last completed checkout cleanup: Open Source Checkout Cleanup for judge readiness.
 - Current priority: Goal 9 - final repo/video/submission polish.
 - Goal 8I used the uploaded six-phase control-room visual prompt as a design specification only.
@@ -144,6 +143,20 @@ Last updated: 2026-06-28
 - Narrow credential-shape scan found only the existing Stripe test-key redaction regex in
   `backend/app/services/hermes_adapter.py`, not an actual key. Repo-local ignore check confirmed
   `.env`, SQLite DBs, build output, `node_modules`, venvs, and pytest caches are ignored.
+- Goal 8P slowed the governed run presentation so the frontend remains in running state for the
+  readable 16-22 second rail sequence. Stripe finance, NemoClaw/NeMo policy, blocked risk, and
+  profit outcome rails now hold long enough for the recording.
+- Goal 8P kept the blocked-risk flash/climax, red rail emphasis, blocked-risk count-up, and
+  blocked Live Run Detail card. Browser smoke caught the blocked rail at `blockedFlash=true` with
+  `blocked-card-flash` on both the rail and detail card.
+- Goal 8P added a Dashboard-only running compact mode for the active run area. While
+  `runVisualState === "running"`, the Dashboard active area becomes a two-column rails/detail
+  stage, hides only secondary Dashboard-running helper text, moves Enterprise Rails lower on the
+  Dashboard, and keeps the metric strip, governed rails, active rail state, Live Run Detail,
+  blocked-risk detail, and profit outcome visible without scrolling at 1440x900.
+- Goal 8P did not compact Governed Run, Evidence Ledger, Connection Hub, Settings / Boundaries,
+  sidebar, topbar, or complete-state layout; it did not change backend mechanics, Stripe, Hermes,
+  NemoClaw, Telegram, MCP, live mode, `.env`, database files, or integrations.
 - Goal 9 remains final polish and submission assets.
 - Goal 7B remains future Verified Live Mode hardening.
 

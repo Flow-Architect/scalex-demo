@@ -10,6 +10,52 @@ Use:
 
 ---
 
+## 2026-06-29 - Goal 8P: Slow run pace and Dashboard live detail fit
+
+Completed:
+- Slowed the global governed-run presentation timing so the run remains readable for the final
+  recording instead of collapsing into a fast 5-8 second sequence.
+- Kept the blocked-risk flash/climax, blocked-risk count-up, red blocked rail emphasis, and
+  blocked Live Run Detail card.
+- Added Dashboard-only running compact mode for the active run area. While running, Dashboard
+  prioritizes the metric strip, governed rails, active rail state, Live Run Detail, blocked-risk
+  moment, and profit outcome above the fold.
+- Moved Dashboard Enterprise Rails/supporting modules lower only during active run playback.
+- Preserved the non-compact complete state and did not compact Governed Run, Evidence Ledger,
+  Connection Hub, Settings / Boundaries, sidebar, or topbar.
+- Preserved backend mechanics, API-backed state, run/reset behavior, evidence state,
+  Stripe/Hermes/NeMo truthfulness, Judge Demo Mode, Stripe Sandbox Prototype wording, Verified
+  Live Mode locked, local policy, onboarding/cost basis, labor costing, MCP-ready/tool action rail,
+  Stripe finance flow, NemoClaw/NeMo visibility, no live money, no Telegram, and no new
+  integrations.
+
+Browser smoke:
+- Dashboard loaded at `http://127.0.0.1:5174/`.
+- No horizontal overflow at 1440x900 (`documentScrollWidth === innerWidth === 1440`).
+- During running state, Dashboard active rails and Live Run Detail both rendered from `top=268`
+  to `bottom=892`, inside the 900px viewport.
+- Policy, blocked-risk, and profit detail panels had no internal scroll for the main detail body.
+- Blocked-risk flash was observed with `blockedFlash=true` and `blocked-card-flash` on the
+  blocked rail and detail card.
+- Complete state returned to the existing non-compact Dashboard layout and stayed screenshot-ready.
+
+Verification:
+- `cd frontend && npm run build` passed.
+- `./scripts/test.sh` passed with 68 backend tests and a successful frontend build.
+- `./scripts/check-nemo.sh` passed against `guardrails/scalex` with
+  `nemoguardrails_version=0.21.0`.
+- `git diff --check` passed.
+- Unsafe/generated path scan returned no staged matches.
+- Staged added-lines secret scan returned no matches.
+
+Suggested commit message:
+Slow ScaleX run and keep dashboard live detail visible
+
+Next:
+- Goal 9 - final repo/video/submission polish and open-source audit closeout.
+
+---
+
 ## 2026-06-28 - Documentation and open-source audit alignment
 
 Completed:

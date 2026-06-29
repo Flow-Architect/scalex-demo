@@ -59,7 +59,7 @@ const NORTHSTAR_ONBOARDING_DRAFT: OnboardingDraft = {
   approvedVendors: "Secure Workspace Pack, Data Migration Sandbox, Launch Asset Kit",
   blockedVendors: "Unapproved Data Broker Enrichment",
 };
-const RUN_STEP_MS = 620;
+const RUN_STEP_MS = 1750;
 
 export default function App() {
   const [auth, setAuth] = useState<AuthStatus | null>(null);
