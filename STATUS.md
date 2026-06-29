@@ -158,18 +158,18 @@ Last updated: 2026-06-29
   sidebar, topbar, or complete-state layout; it did not change backend mechanics, Stripe, Hermes,
   NemoClaw, Telegram, MCP, live mode, `.env`, database files, or integrations.
 - Goal 8Q slowed the governed-run presentation again for final recording readability. The
-  default ten-rail automatic run now holds active decisions for roughly 30 seconds total:
-  2.2s intake, 2.2s cost basis, 2.4s Hermes plan, 3.2s for each Stripe finance rail, 3.2s
-  NemoClaw / NeMo policy, 2.4s setup spend approval, 4.8s blocked risky vendor action, 2.6s
-  evidence ledger, and 3.2s profit outcome.
+  default ten-rail automatic run now holds active decisions for roughly 39 seconds in browser
+  smoke: 2.6s intake, 2.6s cost basis, 2.8s Hermes plan, 3.8s for each Stripe finance rail, 3.8s
+  NemoClaw / NeMo policy, 2.8s setup spend approval, 5.6s blocked risky vendor action, 3.2s
+  evidence ledger, and 3.8s profit outcome.
 - Goal 8Q kept Live Run Detail synchronized with the active rail, stretched the blocked-risk
-  count-up to about 1.8 seconds, kept the blocked flash/climax to a single readable moment, and
+  count-up to about 2.2 seconds, kept the blocked flash/climax to a single readable moment, and
   preserved the final stable complete state.
 - Goal 8Q validation passed `cd frontend && npm run build`, `./scripts/test.sh`,
   `./scripts/check-nemo.sh`, `git diff --check`, and browser smoke at 1440x900. Browser smoke
-  sampled the rail sequence from Business Intake through stable complete state at about 32.1s,
+  sampled the rail sequence from Business Intake through stable complete state at about 38.7s,
   confirmed no horizontal overflow, confirmed Live Run Detail synchronization, and confirmed the
-  blocked-risk metric counted through `$1,000` mid-climax before settling at `$3,200`.
+  blocked-risk metric counted through `$1,400` mid-climax before settling at `$3,200`.
 - Goal 8Q did not change backend mechanics, Stripe, Hermes, NemoClaw / NeMo backend behavior,
   Telegram, live mode, MCP, `.env`, database files, secrets, branding, colors, or integrations.
 - Goal 9 remains final polish and submission assets.
