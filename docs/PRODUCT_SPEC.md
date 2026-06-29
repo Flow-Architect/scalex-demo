@@ -76,15 +76,17 @@ Primary operation:
 - Client: Northstar Dental Group.
 - Operation: Client Implementation Launch.
 - Revenue secured: $8,500.
-- Approved setup spend: $1,150.
+- Approved setup/tool spend: $1,150.
 - Blocked risky spend: $3,200.
-- Deterministic labor cost from Goal 8F: $261.60.
-- Labor cost: $261.60, visible as a separate workforce-costing metric.
-- Current implemented protected gross profit: $7,350.
-- Current implemented protected margin: 86.5%.
-- Historical Goal 8G after-labor planning target: $7,088.40 and 83.4%.
-- Current formula: protected gross profit = revenue - approved setup spend; protected margin =
-  protected gross profit / revenue.
+- Approved delivery cost basis: $3,935 total approved costs.
+- Cost basis line items: $1,150 setup/tool spend, $950 loaded labor cost, $600 campaign/media
+  cost, $375 materials/delivery cost, $285 platform/processing fees, $350 QA/compliance
+  overhead, and $225 contingency reserve.
+- Current implemented protected profit: $4,565.
+- Current implemented protected margin: 53.7%.
+- Blocked-risk impact if allowed: $7,135 total costs, $1,365 profit, and 16.1% margin.
+- Current formula: protected profit = revenue - total approved costs; protected margin =
+  protected profit / revenue.
 
 Visible run sequence:
 
@@ -314,10 +316,10 @@ Implemented today:
 - Story: a multi-location client purchased an implementation package. ScaleX launches the
   client operation, confirms revenue, creates finance proof, checks business rules, blocks risky
   spend, coordinates work units, records evidence, and reports protected profit and launch status.
-- Numbers: $8,500 revenue, $1,150 approved setup spend, $3,200 blocked risk, $261.60
-  deterministic labor cost shown separately, $7,350 current implemented protected gross profit,
-  86.5% current implemented protected margin, historical $7,088.40 after-labor planning target,
-  historical 83.4% after-labor planning target, and a 50% margin floor.
+- Numbers: $8,500 revenue, $3,935 approved delivery cost basis, $3,200 blocked risk, $950
+  deterministic loaded labor cost inside the cost basis, $4,565 current implemented protected
+  profit, 53.7% current implemented protected margin, 16.1% margin if the risky spend were
+  approved, and a 50% margin floor.
 - Harbor Fleet Services is historical only and is no longer the current implemented sample.
 
 Future templates, not implemented:
@@ -435,9 +437,9 @@ Required future improvements:
    auth is enabled locally with demo credentials, show prototype local auth clearly and do not
    claim production auth. Avoid scary missing-config warnings in normal Judge Demo Mode.
 2. Command Center hero: immediately show Northstar Dental Group, Client Implementation Launch,
-   revenue secured $8,500, approved setup spend $1,150, blocked risk $3,200, labor cost $261.60
-   as a separate workforce-costing metric, protected gross profit $7,350, protected margin 86.5%,
-   and `Start Governed Run`.
+   revenue secured $8,500, approved costs $3,935, blocked risk $3,200, protected profit $4,565,
+   protected margin 53.7%, and `Start Governed Run`; show the $950 loaded labor cost inside the
+   Cost Basis / Delivery Cost Stack panel, not as a hero metric.
 3. Operation Catalog: show ScaleX is repeatable across Client Implementation Launch active demo,
    Invoice-to-Cash Follow-Up planned, Vendor Spend Review planned, Client Onboarding Checklist
    planned, and Renewal Risk Review planned.
@@ -492,8 +494,9 @@ Expected proof:
   planning source as real/isolated Hermes.
 - Stripe proof shows `used_real_stripe=true`, `stripe_mode=stripe_test`, `livemode=false`, invoice
   ID, hosted invoice URL when provided, and no paid claim unless `paid=true`.
-- Policy proof shows local policy active, $1,150 approved setup spend, $3,200 Unapproved Data
-  Broker Enrichment blocked risk, 50% margin floor, and 86.5% protected margin.
+- Policy proof shows local policy active, $3,935 approved delivery costs, $3,200 Unapproved Data
+  Broker Enrichment blocked risk, 50% margin floor, 53.7% protected margin, and 16.1% margin if
+  the risky spend were allowed.
 - Evidence proof shows timeline, orchestration/tool call records, Stripe finance proof, policy
   checks, ledger entries, and final profit outcome.
 

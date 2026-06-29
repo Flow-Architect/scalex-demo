@@ -64,18 +64,20 @@ Northstar Dental Group account.
 - Template: Client Implementation Launch
 - Industry label: Multi-location healthcare services group
 - Implementation package revenue: $8,500
-- Setup spend cap: $1,150
+- Setup/tool spend: $1,150
 - Margin floor: 50%
 - Approved setup spend: $350 Secure Workspace Pack, $500 Data Migration Sandbox, and $300 Launch Asset Kit
 - Blocked risk: $3,200 Unapproved Data Broker Enrichment
-- Deterministic labor cost from Goal 8F: $261.60, shown as a separate workforce-costing metric
-- Current implemented protected gross profit: $7,350
-- Current implemented protected margin: 86.5%
-- Historical after-labor planning target: $7,088.40 and 83.4%; the current API-backed
-  control-room profit outcome reports the ledger protected gross profit and surfaces labor cost
-  separately
-- Current formula: protected gross profit = revenue - approved setup spend; protected margin =
-  protected gross profit / revenue
+- Approved delivery cost basis: $3,935 total approved costs
+- Cost basis line items: $1,150 setup/tool spend, $950 loaded labor cost, $600 campaign/media
+  cost, $375 materials/delivery cost, $285 platform/processing fees, $350 QA/compliance
+  overhead, and $225 contingency reserve
+- Current implemented protected profit: $4,565
+- Current implemented protected margin: 53.7%
+- Blocked-risk impact if allowed: $7,135 total costs, $1,365 profit, and 16.1% margin, blocked
+  because it would violate the 50% margin floor and vendor/risk policy
+- Current formula: protected profit = revenue - total approved costs; protected margin =
+  protected profit / revenue
 - Data boundary: synthetic account only, no patient data, no PHI, no healthcare compliance claim,
   and no HIPAA support claim
 
@@ -97,8 +99,8 @@ Onboarding, Research-to-Report, Ops Handoff, and Renewal Recommendation.
 ## Enterprise Demo Surface
 
 Goal 8F added command-center depth. Goal 8G makes those modules support a clearer enterprise
-story: ScaleX knows the client context, secured revenue, approved setup spend, blocked spend risk,
-labor cost, margin floor, guardrail results, and evidence duties before allowing agent execution.
+story: ScaleX knows the client context, secured revenue, approved delivery cost basis, blocked
+spend risk, margin floor, guardrail results, and evidence duties before allowing agent execution.
 
 The first screen should show the Northstar Dental Group / Client Implementation Launch operation,
 the money controls, the Control Stack, the blocked-risk decision, and the Evidence Ledger preview
@@ -114,11 +116,10 @@ states are shown clearly. Intake uses deterministic fixtures or basic local pars
 external extraction services, credentials, real uploaded files, or raw file contents are committed
 or logged.
 
-Labor costing is job costing only, not payroll. Fully loaded hourly rate is base hourly rate times
-`1 + labor burden percentage`; labor cost is fully loaded rate times assigned hours; job profit is
-revenue minus approved vendor spend minus labor cost; final margin is job profit divided by
-revenue. Labor cost should feed Mission Control, Workforce, Economic Control, Final Profit Report,
-and margin warnings.
+Labor costing is job costing only, not payroll. The current deterministic labor model is $950:
+ClientOps Lead at $70/hr for 6h ($420), Implementation Specialist at $55/hr for 6h ($330), and
+QA / Handoff Support at $50/hr for 4h ($200). Labor is one component of the approved delivery
+cost basis; protected profit is revenue minus total approved costs.
 
 Safety boundaries: fake/demo clients and employees only; no SSNs, tax IDs, bank information,
 addresses, birth dates, real HR records, sensitive payroll records, production payroll, HR
@@ -136,7 +137,7 @@ Client operation intake
 -> NeMo Guardrails adapter available when runtime verified
 -> optional NVIDIA NemoClaw / OpenShell / nemohermes API runtime when selected and verified
 -> SQLite records evidence
--> Profit Outcome reports protected profit and blocked risk
+-> Profit Outcome reports protected profit after approved delivery costs and blocked risk impact
 ```
 
 ## Safety Boundary

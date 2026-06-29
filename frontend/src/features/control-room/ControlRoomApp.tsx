@@ -1081,6 +1081,12 @@ function ConnectionHubView({ model }: { model: ControlRoomModel }) {
               </article>
             ))}
           </div>
+          <dl className="mt-4 grid grid-cols-2 gap-2">
+            <FactRow label="Approved costs" value={model.approvedCostsLabel} tone="green" />
+            <FactRow label="Protected profit" value={model.protectedProfitLabel} tone="green" />
+            <FactRow label="Protected margin" value={model.marginLabel} tone="green" />
+            <FactRow label="Blocked risk" value={model.blockedRiskLabel} tone="red" />
+          </dl>
           <div className="mt-4 rounded-md border border-[#232834] bg-[#0a0b0e] p-3">
             <p className="text-xs font-semibold uppercase text-[#06B6D4]">NemoClaw / NeMo Guardrails</p>
             <p className="mt-2 text-xs leading-5 text-[#A1A1AA]">
@@ -1122,6 +1128,8 @@ function SettingsView({
     ["MCP-ready tool path", "ScaleX tool action rail / skill path", "No real MCP server execution is claimed in the current app."],
     ["Runtime", `${health?.mode ?? state?.mode ?? "local"} / ${state?.execution?.hermes_runtime ?? "isolated_cli"}`, "Local API and SQLite-backed product workspace."],
     ["Active operation", `${model.clientName} / ${model.operationName}`, "Synthetic Northstar B2B implementation operation only."],
+    ["Protected economics", `${model.approvedCostsLabel} approved costs / ${model.protectedProfitLabel} profit / ${model.marginLabel} margin`, "Protected profit is revenue minus approved delivery costs."],
+    ["Blocked risk impact", `${model.blockedRiskLabel} blocked / ${model.marginIfBlockedApprovedLabel} margin if approved`, "Risky vendor spend remains blocked before execution."],
     ["Data", "Synthetic sample", "No patient data, no PHI, no healthcare compliance or HIPAA claim."],
     ["Stripe test mode only", model.stripeLabel, "Judge Demo uses deterministic/test-double finance; real Stripe test objects only when safely configured."],
     ["Money movement", `livemode=${String(Boolean(state?.stripe?.livemode))}`, "No live-money support; future live execution requires Verified Live Mode."],
@@ -1221,7 +1229,7 @@ function MetricStrip({
             {isApprovedMetric ? <p className="mt-2 text-xs font-semibold text-[#10B981]">approved delivery cost basis</p> : null}
             {isRiskMetric ? <p className="mt-2 text-xs font-semibold text-[#f87171]">unsafe vendor exposure contained</p> : null}
             {metric.label === "Protected margin" ? <p className="mt-2 text-xs font-semibold text-[#10B981]">margin floor preserved</p> : null}
-            {isProfitMetric ? <p className="mt-2 text-xs font-semibold text-[#10B981]">revenue minus approved spend and labor</p> : null}
+            {isProfitMetric ? <p className="mt-2 text-xs font-semibold text-[#10B981]">revenue minus approved delivery costs</p> : null}
           </article>
         );
       })}
@@ -1754,9 +1762,9 @@ function buildLaborWorkers(state: DemoState | null): LaborWorkerView[] {
   const employees = state?.command_center?.labor_costing?.employees
     ?? state?.command_center?.employee_onboarding?.saved_records
     ?? [
-      { employee_name: "Maria Lopez", role_title: "Technician", fully_loaded_hourly_rate_cents: 2880, assigned_hours: 5, labor_cost_cents: 14400 },
-      { employee_name: "James Carter", role_title: "Service Assistant", fully_loaded_hourly_rate_cents: 2160, assigned_hours: 3, labor_cost_cents: 6480 },
-      { employee_name: "Avery Smith", role_title: "Campaign/Ops Assistant", fully_loaded_hourly_rate_cents: 2640, assigned_hours: 2, labor_cost_cents: 5280 },
+      { employee_name: "Maria Lopez", role_title: "ClientOps Lead", fully_loaded_hourly_rate_cents: 7000, assigned_hours: 6, labor_cost_cents: 42000 },
+      { employee_name: "James Carter", role_title: "Implementation Specialist", fully_loaded_hourly_rate_cents: 5500, assigned_hours: 6, labor_cost_cents: 33000 },
+      { employee_name: "Avery Smith", role_title: "QA / Handoff Support", fully_loaded_hourly_rate_cents: 5000, assigned_hours: 4, labor_cost_cents: 20000 },
     ];
 
   return employees.slice(0, 3).map((employee) => ({

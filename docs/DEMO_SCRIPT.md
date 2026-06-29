@@ -20,12 +20,13 @@ Implemented template:
 - Synthetic multi-location client account
 - No patient data, no PHI, no healthcare compliance claim, and no HIPAA support claim
 - $8,500 implementation package revenue
-- $1,150 approved setup spend
+- $3,935 approved delivery cost basis
+- $1,150 approved setup/tool spend inside that cost basis
+- $950 loaded labor cost inside that cost basis
 - $3,200 blocked risk
-- $261.60 deterministic labor cost from Goal 8F
-- $7,350 protected profit in the current API-backed control-room profit outcome
-- 86.5% protected margin in the current API-backed control-room profit outcome
-- $261.60 labor cost remains visible as a separate workforce-costing metric
+- $4,565 protected profit in the current API-backed control-room profit outcome
+- 53.7% protected margin in the current API-backed control-room profit outcome
+- 16.1% margin if the risky vendor spend were approved, blocked below the 50.0% margin floor
 
 ## Recording Path
 
@@ -42,8 +43,9 @@ This is ScaleX: a governed execution layer for revenue-backed client operations.
 
 0:25-0:45
 Show the fixed dashboard metric strip for Northstar Dental Group / Client Implementation Launch:
-revenue secured $8,500, approved setup spend $1,150, blocked risk $3,200, labor cost $261.60,
-protected profit $7,350, and protected margin 86.5%.
+revenue secured $8,500, approved costs $3,935, risk contained $3,200, protected profit $4,565,
+and protected margin 53.7%. Mention that the Cost Basis panel includes $950 loaded labor plus
+campaign/media, materials, fees, QA/compliance overhead, and contingency reserve.
 
 0:45-1:10
 Show the right-side proof tabs: Hermes Plan, Stripe Proof, and NeMo / Local Guardrails. Emphasize
@@ -56,7 +58,8 @@ optional and shown only as selected/verified runtime proof.
 Click `Start Governed Run` and show the governed rails animate: input rail, Hermes plan, planning
 rail, Stripe finance rail, revenue gate, policy rail, approved spend, blocked spend, execution
 rail, and profit rail. Pause on the blocked $3,200 risky vendor action as the blocked-risk metric,
-rail badge, and evidence drawer make the stop decision obvious.
+rail badge, and evidence drawer make the stop decision obvious. Call out that approving the risky
+vendor spend would drop margin to 16.1%, below the 50.0% floor.
 
 1:45-2:15
 Open Evidence Ledger: enterprise audit rows and proof artifacts show actor/system, action,
@@ -226,8 +229,8 @@ described as a fallback and not real NeMo. Do not say actual NemoClaw is active.
 Goal 8G should make the browser path feel like a repeatable enterprise product:
 
 1. Command Center with Northstar Dental Group, Client Implementation Launch, $8,500 revenue,
-   $1,150 approved setup spend, $3,200 blocked risk, $261.60 labor cost shown separately,
-   $7,350 protected gross profit, 86.5% protected margin, and `Start Governed Run`.
+   $3,935 approved delivery cost basis, $3,200 blocked risk, $950 loaded labor cost inside Cost
+   Basis, $4,565 protected profit, 53.7% protected margin, and `Start Governed Run`.
 2. Start Governed Run.
 3. Governed Run Studio / run timeline showing input rail, Hermes plan, planning rail, Stripe
    finance proof, revenue gate, NeMo/local policy check, approved setup spend, blocked risky
@@ -256,8 +259,8 @@ ScaleX records evidence, blocks unsafe execution, and protects profit.
 
 0:25-0:45 - Show Northstar metrics:
 Northstar Dental Group / Client Implementation Launch, $8,500 revenue secured, $1,150 approved
-setup spend, $3,200 blocked risk, $261.60 labor cost shown separately, $7,350 protected gross
-profit, and 86.5% protected margin.
+setup/tool spend inside $3,935 approved costs, $3,200 blocked risk, $950 loaded labor cost inside
+Cost Basis, $4,565 protected profit, and 53.7% protected margin.
 
 0:45-1:10 - Show the Control Stack:
 Hermes creates the plan, Stripe proves finance state, NeMo/local policy checks risk, and ScaleX

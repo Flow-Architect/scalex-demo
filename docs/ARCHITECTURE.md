@@ -39,8 +39,8 @@ ScaleX UI
   the NeMo Guardrails adapter.
 - SQLite records evidence for planning, orchestration, finance proof, policy checks, ledger rows,
   agent outputs, and final reports.
-- Profit Outcome reports protected gross profit after approved spend, separate labor-cost proof,
-  and blocked risk.
+- Profit Outcome reports protected profit after the approved delivery cost basis, with labor cost
+  as one job-costing component and blocked-risk margin impact recorded.
 
 ## Goal 8G Enterprise Demo Architecture
 
@@ -80,19 +80,21 @@ The first-screen Control Stack should make responsibilities explicit:
 Goal 8G exact Northstar economics:
 
 - Revenue secured: $8,500.
-- Approved setup spend: $1,150.
+- Approved setup/tool spend: $1,150.
 - Blocked risky spend: $3,200.
-- Deterministic labor cost: $261.60, visible as a separate workforce-costing metric.
-- Current implemented protected gross profit: $7,350.
-- Current implemented protected margin: 86.5%.
-- Historical after-labor planning target: $7,088.40 and 83.4%.
+- Approved delivery cost basis: $3,935 total approved costs.
+- Deterministic loaded labor cost: $950, visible inside the cost basis as job costing only.
+- Current implemented protected profit: $4,565.
+- Current implemented protected margin: 53.7%.
+- Blocked-risk impact if allowed: $7,135 total costs, $1,365 profit, and 16.1% margin.
 
 Profit formulas:
 
 ```text
-protected_gross_profit = revenue - approved_setup_spend
-protected_margin = protected_gross_profit / revenue
-labor_cost = separate workforce-costing proof metric
+protected_profit = revenue - total_approved_costs
+protected_margin = protected_profit / revenue
+margin_if_risky_spend_approved = (revenue - total_approved_costs - blocked_risky_spend) / revenue
+labor_cost = job-costing component inside total_approved_costs, not payroll
 ```
 
 Evidence Ledger should present enterprise audit fields: timestamp/order, actor/system, action,
@@ -340,8 +342,9 @@ Expected proof:
   source clearly identifying `real_hermes` or `nemohermes_api`.
 - Stripe: `used_real_stripe=true`, `stripe_mode=stripe_test`, `livemode=false`, invoice ID,
   hosted invoice URL when Stripe provides it, and no paid claim unless `paid=true`.
-- Policy: `local_policy_active=true`, $1,150 approved setup spend, $3,200 Unapproved Data Broker
-  Enrichment blocked risk, 50% margin floor, and 86.5% protected margin.
+- Policy: `local_policy_active=true`, $3,935 approved delivery costs, $3,200 Unapproved Data
+  Broker Enrichment blocked risk, 50% margin floor, 53.7% protected margin, and 16.1% margin if
+  the risky spend were allowed.
 - Evidence: timeline, orchestration/tool calls, Stripe finance proof, policy checks, ledger
   entries, and final profit outcome records.
 

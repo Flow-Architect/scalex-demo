@@ -51,9 +51,11 @@ Current implementation note:
 - Northstar is a synthetic multi-location client account for B2B implementation operations only.
 - It uses no patient data and no PHI, and ScaleX does not claim healthcare compliance or HIPAA
   support.
-- It proves $8,500 revenue, $1,150 approved setup spend, $3,200 blocked risk, $261.60
-  deterministic labor cost, $7,350 protected profit, and 86.5% protected margin in the current
-  API-backed control-room profit outcome.
+- It proves $8,500 revenue, $3,935 approved delivery costs, $3,200 blocked risk, $950
+  deterministic loaded labor cost inside the cost basis, $4,565 protected profit, and 53.7%
+  protected margin in the current API-backed control-room profit outcome.
+- It shows the blocked $3,200 Data Broker Enrichment action would drop margin to 16.1%, below the
+  50.0% margin floor, so ScaleX blocks the spend and records proof.
 - Harbor Fleet Services is historical only and is no longer the current implemented sample.
 
 Demo-readiness note:
@@ -103,9 +105,9 @@ ScaleX launches the Client Implementation Launch operation, confirms revenue thr
 invoice proof, lets Hermes plan onboarding and delivery, checks spend and vendor actions through
 local policy now and the optional NeMo Guardrails adapter when configured, targets actual
 NemoClaw/OpenShell sandboxing only when selected and verified, approves safe setup spend, blocks
-risky enrichment spend, coordinates work units, records evidence, adds demo labor-cost
-assumptions, and reports protected gross profit and launch status with labor cost shown as a
-separate workforce-costing proof metric.
+risky enrichment spend, coordinates work units, records evidence, adds approved delivery-cost
+assumptions, and reports protected profit and launch status with labor cost shown as job-costing
+proof, not payroll.
 
 Visible run sequence:
 

@@ -4,10 +4,14 @@
 
 Goal 9 - final repo/video/submission polish and open-source audit closeout.
 
-Goal 8Q is complete. Return to final recording and submission readiness:
+Goal 8R is complete. Return to final recording and submission readiness:
 
 - Rehearse the three-minute recording against `docs/DEMO_SCRIPT.md`.
 - Confirm the local demo opens at `http://127.0.0.1:5174/` with the dark control-room UI.
+- Confirm the metric strip reads $8,500 revenue, $3,935 approved costs, $3,200 risk contained,
+  $4,565 protected profit, and 53.7% protected margin.
+- Confirm Cost Basis shows $950 loaded labor as job costing, not payroll, and the blocked-risk
+  detail shows 16.1% margin if risky spend were approved.
 - Capture final screenshots or video assets only if needed for submission.
 - Do a final submission copy check against `docs/SUBMISSION_WRITEUP.md`.
 - Review `docs/OPEN_SOURCE_AUDIT.md`, `SECURITY.md`, and `CONTRIBUTING.md` before public release.
@@ -19,6 +23,38 @@ new backend features, new external services, production payroll/HR behavior, MCP
 changes, database files, uploaded real files, or secrets.
 
 ## Recently Completed
+
+Goal 8R is complete. It recalibrated protected profit around an enterprise approved delivery cost
+basis instead of setup-spend-only economics:
+
+- Centralized deterministic cost-basis helpers in the backend for Northstar economics.
+- Updated the command-center state, final report, agent output, frontend selectors, control-room
+  metrics, Cost Basis / Delivery Cost Stack, Evidence Ledger rows, rails, blocked-risk detail,
+  proof artifacts, and tests to use $3,935 approved costs, $4,565 protected profit, and 53.7%
+  protected margin.
+- Updated labor costing to $950 loaded job-costing labor: ClientOps Lead $70/hr x 6h = $420,
+  Implementation Specialist $55/hr x 6h = $330, and QA / Handoff Support $50/hr x 4h = $200.
+- Updated the blocked $3,200 Data Broker Enrichment decision to show that allowing it would drop
+  margin to 16.1%, below the 50.0% floor, with no spend ledger row created.
+- Preserved API-backed state, Judge Demo Mode, Stripe Sandbox Prototype wording, Verified Live
+  Mode locked, local policy, optional NemoClaw/NeMo truthfulness, no live money, no Telegram, no
+  Docker/NemoClaw commands, no production Hermes, no new integrations, no `.env` changes, and no
+  database artifacts.
+
+Goal 8R validation:
+
+- `cd frontend && npm run build` passed.
+- Focused backend tests for demo runner and guardrail service passed with 36 tests.
+- `./scripts/test.sh` passed with 68 backend tests and a successful frontend build.
+- `./scripts/check-nemo.sh` passed with `nemoguardrails` 0.21.0 and `guardrails/scalex` loaded.
+- `git diff --check` passed.
+- API deterministic run smoke verified $3,935 approved costs, $4,565 protected profit, 53.7%
+  protected margin, $950 labor cost, and 16.1% blocked-risk impact in backend state.
+- Browser smoke at `http://127.0.0.1:5174/` verified Dashboard, Evidence Ledger, Connection Hub,
+  and Settings route text at 1440x900, no horizontal overflow, no old current-UI profit/labor
+  refs, the updated Cost Basis / Delivery Cost Stack, route-level current economics summaries, and
+  a successful `Start Governed Run` click.
+- Unsafe/generated path scan and staged added-lines secret scan returned no matches.
 
 Goal 8Q is complete. It was a frontend-only presentation timing pass for final recording
 readability:
@@ -99,9 +135,9 @@ Documentation/open-source audit alignment after Goal 8O:
   files, coverage output, and generated artifacts.
 - Aligned README, START_HERE, ROADMAP, STATUS, product spec, architecture, demo script, and
   submission writeup to the current API-backed control-room setup.
-- Current implemented economics are $8,500 revenue, $1,150 approved setup spend, $3,200 blocked
-  risk, $261.60 labor cost shown separately, $7,350 protected gross profit, and 86.5% protected
-  margin.
+- Current implemented economics are now superseded by Goal 8R: $8,500 revenue, $3,935 approved
+  delivery costs, $3,200 blocked risk, $950 loaded labor cost inside the cost basis, $4,565
+  protected profit, and 53.7% protected margin.
 - Optional NemoHermes is documented as selected/verified only; MCP, Telegram, live money,
   production auth, production payroll/HR, real client data, PHI, and production Hermes remain out
   of scope.
@@ -176,9 +212,9 @@ Goal 8H is complete. It was a frontend-first visual storytelling redesign for th
 not a new integration. The above-the-fold view now presents a premium control-room product
 surface that immediately shows:
 
-- Act 1 - Northstar Dental Group / Client Implementation Launch with $8,500 revenue, $1,150
-  approved setup spend, $261.60 labor cost shown separately, $3,200 blocked risk, $7,350
-  protected gross profit, and 86.5% protected margin.
+- Act 1 - Northstar Dental Group / Client Implementation Launch with $8,500 revenue, $3,935
+  approved delivery costs, $3,200 blocked risk, $4,565 protected profit, and 53.7% protected
+  margin.
 - Act 2 - governed AI execution: Hermes plans, Stripe proves finance state, NeMo/local policy
   checks risky actions, and ScaleX approves safe actions while blocking unsafe execution.
 - Act 3 - enterprise proof: the evidence ledger records what happened, what was approved, what
@@ -194,9 +230,9 @@ Studio, Enterprise Audit Ledger, Connection Hub, and Settings / Boundaries.
 
 Goal 8I preserved API-backed mechanics, auth behavior, deterministic Judge Demo Mode, evidence
 boundaries, Stripe safety, isolated Hermes, optional NemoHermes, NeMo/local policy truthfulness,
-and fail-closed behavior. The local smoke state rendered the current API outcome as $8,500
-revenue, $1,150 approved spend, $3,200 blocked risk, $261.60 labor cost, $7,350 protected profit,
-and 86.5% protected margin.
+and fail-closed behavior. Goal 8R later superseded the then-current API economics with $8,500
+revenue, $3,935 approved costs, $3,200 blocked risk, $4,565 protected profit, and 53.7% protected
+margin.
 
 Goal 8J is complete. It kept the Goal 8I shell API-backed and added the final visual storytelling
 polish: stronger product sentence in the topbar, deliberate rail animation state, blocked-risk
@@ -420,12 +456,13 @@ Exact demo story:
 - Client: Northstar Dental Group.
 - Operation: Client Implementation Launch.
 - Revenue secured: $8,500.
-- Approved setup spend: $1,150.
+- Approved setup/tool spend: $1,150.
 - Blocked risky spend: $3,200.
-- Deterministic Goal 8F labor cost: $261.60, visible as a separate workforce-costing metric.
-- Current implemented protected gross profit: $7,350.
-- Current implemented protected margin: 86.5%.
-- Historical Goal 8G after-labor planning target: $7,088.40 and 83.4%.
+- Approved delivery cost basis: $3,935 total approved costs.
+- Deterministic loaded labor cost: $950, visible inside Cost Basis as job costing only.
+- Current implemented protected profit: $4,565.
+- Current implemented protected margin: 53.7%.
+- Blocked-risk impact if allowed: 16.1% margin, below the 50.0% floor.
 
 Visible run sequence:
 
@@ -561,8 +598,8 @@ the sample implementation pass.
   - $300 Launch Asset Kit
   - $1,150 total approved setup spend
   - $3,200 Unapproved Data Broker Enrichment blocked risk
-  - $7,350 protected gross profit
-  - 86.5% protected margin
+  - Current Goal 8R protected profit: $4,565 after $3,935 approved delivery costs
+  - Current Goal 8R protected margin: 53.7%
   - 50% margin floor
 - Local policy remains active now for payment-before-spend, vendor, spend cap, and margin floor.
 - NeMo Guardrails adapter proof is implemented later through Goal 8B/8C; actual NemoClaw remains
@@ -703,8 +740,9 @@ Verified:
 - SQLite proof counts: `planning_runs=1`, `stripe_events=4`, `policy_checks=4`,
   `guardrail_evaluations=4`, `orchestration_calls=19`, `events=14`, `reports=1`, and
   `ledger_entries=4`.
-- Economics remained $1,150 approved setup spend, $3,200 blocked Unapproved Data Broker
-  Enrichment risk, $7,350 protected gross profit, and 86.5% protected margin.
+- Historical economics at that checkpoint remained $1,150 approved setup spend, $3,200 blocked
+  Unapproved Data Broker Enrichment risk, $7,350 protected gross profit, and 86.5% protected
+  margin. Goal 8R later superseded the current demo outcome with cost-basis profit.
 - Blocked spend created policy/evidence records and did not create a spend ledger row.
 - Safety boundaries preserved: synthetic Northstar data only, no live money, no live Stripe key,
   no real client email, no patient data, no PHI, and temporary `/tmp` validation database removed.
@@ -786,8 +824,9 @@ Completed:
 - Preserved Judge Demo Mode as safe without secrets and clearly labeled deterministic/sandbox proof.
 - Preserved Full Proof Mode as real isolated Hermes plus real Stripe test mode only when safe
   ignored local credentials are configured.
-- Preserved Northstar economics: $8,500 revenue, $1,150 approved setup spend, $3,200 blocked risk,
-  $7,350 protected gross profit, 86.5% protected margin, and 50% margin floor.
+- Preserved the then-current Northstar economics: $8,500 revenue, $1,150 approved setup spend,
+  $3,200 blocked risk, $7,350 protected gross profit, 86.5% protected margin, and 50% margin
+  floor. Goal 8R later superseded the current demo outcome with cost-basis profit.
 - Preserved truth boundaries: Northstar is synthetic, no patient data, no PHI, no HIPAA claim,
   local policy active now, real NeMo Guardrails planned/not wired, no live-money support, and no
   production auth claim.
@@ -850,8 +889,9 @@ the old card-dashboard shell with a ClientOps product workspace.
 - Replaced the old Dashboard card-grid console with a business landing page for one revenue-backed
   Northstar Dental Group / Client Implementation Launch operation.
 - Added the hero operation brief with `Open Function Studio` and `Review Evidence Ledger` CTAs.
-- Added the business outcome strip: $8,500 revenue, $1,150 approved setup spend, $3,200 blocked
-  risk, $7,350 protected gross profit, and 86.5% protected margin.
+- Added the historical business outcome strip at that checkpoint: $8,500 revenue, $1,150
+  approved setup spend, $3,200 blocked risk, $7,350 protected gross profit, and 86.5% protected
+  margin. Goal 8R later superseded the current demo outcome with cost-basis profit.
 - Added the ClientOps operating stack: Hermes plans the operation, Stripe provides finance proof,
   Guardrails review spend/risk, SQLite records evidence, and Profit Outcome reports the result.
 - Added the function templates section with Implemented: Client Implementation Launch and Planned:
@@ -949,9 +989,8 @@ OpenShell / `nemohermes` is a separate target and must be handled before MCP.
 ### Goal 8G - Enterprise Demo Narrative UI Lock
 
 - Lock the first screen around governed execution for revenue-backed client operations.
-- Show Northstar Dental Group / Client Implementation Launch with $8,500 revenue, $1,150 approved
-  setup spend, $3,200 blocked risk, $261.60 labor cost shown separately, $7,350 protected gross
-  profit, and 86.5% protected margin.
+- Show Northstar Dental Group / Client Implementation Launch with $8,500 revenue, $3,935 approved
+  delivery costs, $3,200 blocked risk, $4,565 protected profit, and 53.7% protected margin.
 - Make Hermes, Stripe, NeMo/local policy, and ScaleX roles obvious.
 - Reframe the run timeline as governed rails, make blocked risk visually important, centralize
   money control, and make Evidence Ledger read as enterprise audit.

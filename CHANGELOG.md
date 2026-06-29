@@ -10,6 +10,49 @@ Use:
 
 ---
 
+## 2026-06-29 - Goal 8R: Enterprise cost-basis protected profit
+
+Completed:
+- Recalibrated the deterministic Northstar economics so protected profit is calculated after an
+  enterprise approved delivery cost basis, not just setup spend or labor.
+- Added the backend cost-basis source of truth for $3,935 approved costs: $1,150 setup/tool
+  spend, $950 loaded labor cost, $600 campaign/media cost, $375 materials/delivery cost, $285
+  platform/processing fees, $350 QA/compliance overhead, and $225 contingency reserve.
+- Updated the current protected outcome to $4,565 protected profit and 53.7% protected margin.
+- Updated the blocked $3,200 Data Broker Enrichment impact to show $7,135 costs if allowed,
+  $1,365 profit, and 16.1% margin, blocked below the 50.0% floor.
+- Updated command-center/demo state, final reports, agent output, seed outputs, frontend money
+  selectors, control-room metrics, Cost Basis / Delivery Cost Stack, rails, Evidence Ledger rows,
+  blocked-risk copy, and tests.
+- Preserved API-backed state, Judge Demo Mode, Stripe Sandbox Prototype wording, Verified Live
+  Mode locked, local policy, optional NemoClaw/NeMo truthfulness, no live money, no Telegram, no
+  Docker/NemoClaw commands, no production Hermes, no new integrations, no `.env` changes, and no
+  database artifacts.
+
+Verification:
+- `cd frontend && npm run build` passed.
+- Focused backend tests passed: `backend/.venv/bin/python -m pytest
+  backend/tests/test_demo_runner.py backend/tests/test_guardrails_service.py` with 36 tests.
+- `./scripts/test.sh` passed with 68 backend tests and a successful frontend build.
+- `./scripts/check-nemo.sh` passed with `nemoguardrails` 0.21.0 and `guardrails/scalex` loaded.
+- `git diff --check` passed.
+- API deterministic run smoke verified $3,935 approved costs, $4,565 protected profit, 53.7%
+  protected margin, $950 labor cost, and 16.1% blocked-risk impact in backend state.
+- Browser smoke at `http://127.0.0.1:5174/` verified Dashboard, Evidence Ledger, Connection Hub,
+  and Settings route text at 1440x900, no horizontal overflow, no old current-UI profit/labor
+  refs, the updated Cost Basis / Delivery Cost Stack, route-level current economics summaries, and
+  a successful `Start Governed Run` click.
+- Unsafe/generated path scan returned no matches.
+- Staged added-lines secret scan returned no matches.
+
+Suggested commit message:
+Recalibrate ScaleX protected profit cost basis
+
+Next:
+- Goal 9 - final repo/video/submission polish and open-source audit closeout.
+
+---
+
 ## 2026-06-29 - Goal 8Q: Final presentation timing pass
 
 Completed:
