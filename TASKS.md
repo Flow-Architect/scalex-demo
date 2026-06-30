@@ -6,7 +6,9 @@ Final public-release review and GitHub push prep.
 
 Before pushing:
 
-- Push the latest documentation/favicon cleanup commit if it has not been pushed yet.
+- Push the latest README visual polish commit if it has not been pushed yet.
+- Confirm the GitHub README renders the logo, badges, and screenshots from
+  `docs/assets/github/`.
 - Review `docs/OPERATOR_GUIDE.md` as the public local-demo runbook.
 - Re-run the release checks in `docs/OPEN_SOURCE_AUDIT.md` if more files change.
 - Confirm `git status --short` is clean after the final commit.
@@ -26,6 +28,8 @@ Before pushing:
 
 ## Current Demo Checklist
 
+- README screenshot assets show Dashboard Ready, Governed Run Complete, Evidence Ledger, and
+  Connection Hub without terminals, local paths, secrets, or raw logs.
 - Dashboard opens with Northstar Dental Group / Client Implementation Launch.
 - Pre-run outcome values stay pending or zero until the governed run completes.
 - `Start Governed Run` plays the governed-run animation.

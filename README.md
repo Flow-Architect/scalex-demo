@@ -1,69 +1,104 @@
-# ScaleX
+<p align="center">
+  <img src="frontend/public/brand/scalex-logo.png" width="230" alt="ScaleX" />
+</p>
 
-ScaleX is a governed execution layer for revenue-backed client operations.
+<h1 align="center">ScaleX</h1>
 
-Enterprise teams want AI agents to help run client operations, but they cannot let raw agents
-touch money, vendors, client workflows, approvals, or internal systems without proof, policy,
-money control, and audit. ScaleX wraps planning, finance state, policy checks, controlled
-execution, evidence, and profit reporting into one governed run.
+<p align="center">
+  <strong>Governed execution for revenue-backed client operations</strong>
+</p>
 
-## What It Does
+<p align="center">
+  Hermes plans. Stripe proves finance state. NeMo/local policy checks risk. ScaleX blocks unsafe
+  execution and records protected profit.
+</p>
 
-ScaleX turns a paid client operation into a governed run:
+<p align="center">
+  <img alt="MIT License" src="https://img.shields.io/badge/license-MIT-00d084?style=flat-square" />
+  <img alt="Python" src="https://img.shields.io/badge/python-FastAPI-3776AB?style=flat-square" />
+  <img alt="React" src="https://img.shields.io/badge/react-Vite-61DAFB?style=flat-square" />
+  <img alt="SQLite" src="https://img.shields.io/badge/sqlite-evidence_ledger-003B57?style=flat-square" />
+  <img alt="Stripe Sandbox" src="https://img.shields.io/badge/stripe-sandbox_/_test_double-635BFF?style=flat-square" />
+  <img alt="Judge Demo Mode" src="https://img.shields.io/badge/judge_demo-deterministic-fcba03?style=flat-square" />
+  <img alt="No Live Money" src="https://img.shields.io/badge/live_money-disabled-ef4444?style=flat-square" />
+</p>
 
-- Business intake and reviewed operation context
-- Prepared delivery cost basis
-- Hermes planning with a Nemotron 3 Ultra-capable route
-- Stripe sandbox/test finance state
-- NemoClaw / NeMo / local policy guardrails
-- Tool action rail with policy boundaries
-- Blocked risky spend
-- SQLite evidence ledger
-- Protected profit report
+<p align="center">
+  <a href="#quickstart">Quick Start</a> ·
+  <a href="#demo-story">Demo Story</a> ·
+  <a href="#how-it-works">How It Works</a> ·
+  <a href="docs/ARCHITECTURE.md">Architecture</a> ·
+  <a href="#safety-boundaries">Safety Boundaries</a> ·
+  <a href="docs/OPERATOR_GUIDE.md">Operator Guide</a>
+</p>
 
-Judge Demo Mode uses deterministic planning proof unless runtime evidence verifies the selected
-model. Hermes proposes the plan; ScaleX governs execution.
+![ScaleX dashboard ready state](docs/assets/github/dashboard-ready.png)
+
+<p align="center">
+  <em>Judge Demo Mode pre-run state: revenue is loaded, outcomes are pending, and ScaleX is ready
+  to govern the operation.</em>
+</p>
+
+## The Big Idea
+
+Most agents can propose actions. Enterprises need governed execution.
+
+ScaleX turns paid client work into a controlled run:
+
+```text
+Business intake
+-> cost basis
+-> Hermes plan
+-> Stripe sandbox finance state
+-> NeMo/local policy check
+-> approved or blocked action
+-> evidence ledger
+-> protected profit
+```
+
+Hermes proposes the work. ScaleX decides what can execute, records proof, blocks unsafe spend, and
+reports margin after the real cost basis of the operation.
 
 ## Demo Story
 
-Current sample:
+The current public demo uses one synthetic client operation:
 
-- Client: Northstar Dental Group
-- Operation: Client Implementation Launch
-- Revenue secured: $8,500
-- Prepared/approved cost basis after governed run: $3,935
-- Risk contained after blocked vendor action: $3,200
-- Protected profit after governed run: $4,565
-- Protected margin: 53.7%
-- Margin floor: 50.0%
+| Field | Value |
+| --- | --- |
+| Client | Northstar Dental Group |
+| Operation | Client Implementation Launch |
+| Revenue secured | $8,500 |
+| Approved cost basis after run | $3,935 |
+| Risk contained after blocked vendor action | $3,200 |
+| Protected profit after run | $4,565 |
+| Protected margin | 53.7% |
+| Margin floor | 50.0% |
 
-The blocked action is a risky data-broker/vendor enrichment request. ScaleX blocks it because it
-would create uncontrolled spend exposure and push margin below the configured floor.
+Before the governed run, profit, risk, and margin are pending or zero. After the run, ScaleX reports
+the protected outcome and records the proof trail.
 
-## Execution Modes
+## How It Works
 
-- Judge Demo Mode: default deterministic/local mode. No external credentials are required.
-- Stripe Sandbox Prototype: test-mode finance path when configured safely. No live money.
-- Verified Live Mode: locked future mode. It is not enabled for this hackathon project.
+| Layer | Role | Boundary |
+| --- | --- | --- |
+| Business Intake | Loads reviewed operation context | Synthetic/demo data only |
+| Hermes Planning | Proposes the implementation plan | Hermes proposes; ScaleX governs |
+| Stripe Finance | Provides sandbox/test finance state | No live money |
+| NeMo / Local Policy | Checks risky actions before execution | Real NeMo only when runtime evidence proves it |
+| ScaleX Control Plane | Executes allowed actions and blocks unsafe ones | Evidence required |
+| SQLite Ledger | Records audit proof | Local runtime DB recreated from schema/seed |
 
-## System Roles
+## Screenshots
 
-- Hermes / Nemotron 3 Ultra-capable planning route: proposes the plan and next actions.
-- Stripe: provides sandbox/test finance state.
-- NemoClaw / NeMo / local policy: checks risky actions before execution.
-- ScaleX: controls execution, records evidence, blocks unsafe spend, and reports protected profit.
+| Dashboard Ready | Governed Run Complete |
+| --- | --- |
+| ![Dashboard ready](docs/assets/github/dashboard-ready.png) | ![Dashboard complete](docs/assets/github/dashboard-complete.png) |
+| Revenue is loaded; outcomes are pending or zero before execution. | ScaleX records $3,935 approved costs, $3,200 contained risk, $4,565 protected profit, and 53.7% margin. |
 
-## Safety Boundaries
-
-- No live money.
-- No production customer data.
-- Fake/demo clients only.
-- Fake/demo employees only.
-- No payroll or HR compliance processing.
-- No SSNs, tax IDs, bank data, PHI, or real client records.
-- No production Hermes claim.
-- No real NemoClaw or NeMo runtime claim unless runtime evidence proves it.
-- No secrets committed.
+| Evidence Ledger | Connection Hub |
+| --- | --- |
+| ![Evidence Ledger](docs/assets/github/evidence-ledger.png) | ![Connection Hub](docs/assets/github/connection-hub.png) |
+| Audit rows show actor, action, evidence type, safety note, and status. | Hermes, Stripe, NeMo/local policy, SQLite, execution modes, and truth boundaries are visible. |
 
 ## Quickstart
 
@@ -91,11 +126,30 @@ Open:
 http://127.0.0.1:5174/
 ```
 
-You can also use `./scripts/dev.sh` for the local demo workflow. Keep real credentials in an
-ignored `.env` file only.
+You can also use `./scripts/dev.sh` for the local demo workflow. It defaults to backend port
+`8790`, frontend port `5174`, and `VITE_API_BASE_URL=http://127.0.0.1:8790`.
 
-The runtime SQLite database `data/scalex.db` is ignored. A clean checkout can recreate it from
-tracked `data/schema.sql` and `data/seed.json` when the backend starts or the demo is reset/run.
+The runtime SQLite database `data/scalex.db` is ignored and recreated locally from tracked
+`data/schema.sql` and `data/seed.json` when the backend starts or the demo is reset/run.
+
+## Execution Modes
+
+| Mode | Status | Notes |
+| --- | --- | --- |
+| Judge Demo Mode | Default | Deterministic/local; no credentials required. |
+| Stripe Sandbox Prototype | Optional | Test-mode finance path when configured safely; no live money. |
+| Verified Live Mode | Locked/future | Not implemented for this hackathon project. |
+
+## Safety Boundaries
+
+- No live money.
+- No production customer data.
+- Fake/demo clients and employees only.
+- No payroll or HR compliance processing.
+- No PHI, SSNs, tax IDs, bank data, or real client records.
+- No production Hermes claim.
+- No real NemoClaw or NeMo runtime claim unless runtime evidence proves it.
+- No secrets committed.
 
 ## Validation
 
@@ -105,31 +159,23 @@ tracked `data/schema.sql` and `data/seed.json` when the backend starts or the de
 cd frontend && npm run build
 ```
 
-Run the open-source safety checks in `docs/OPEN_SOURCE_AUDIT.md` before publishing or pushing a
-public release.
-
-For a step-by-step local operator flow, see `docs/OPERATOR_GUIDE.md`.
-
-Optional NeMo Guardrails adapter dependencies live in `requirements-nemo-optional.txt`; they are
-not required for normal quickstart or Judge Demo Mode.
+Run the release checks in `docs/OPEN_SOURCE_AUDIT.md` before publishing or pushing a public
+release.
 
 ## Repository Structure
 
 - `backend/` - FastAPI app, deterministic demo runner, policy/guardrail services, and tests.
 - `frontend/` - Vite React control-room UI.
 - `docs/` - product, architecture, demo, operator, audit, attribution, decision, and release notes.
+- `docs/assets/github/` - small public README screenshots.
 - `policies/` - local business-rule policy configuration.
 - `scripts/` - local setup, dev, test, reset, and guardrail check helpers.
-- `data/` - schema and synthetic seed data only. Runtime `data/scalex.db` is ignored and
-  recreated locally.
+- `data/` - schema and synthetic seed data only; runtime DB is ignored.
 - `demo-assets/` - intentionally public demo placeholders only.
 
-## License
+## License And Attribution
 
 This project is licensed under the MIT License. See `LICENSE`.
 
-## Third-Party Names And Logos
-
 Third-party names and logos are trademarks of their respective owners. Their use here is for
-demo/integration identification only and does not imply endorsement. See
-`docs/ATTRIBUTIONS.md`.
+demo/integration identification only and does not imply endorsement. See `docs/ATTRIBUTIONS.md`.

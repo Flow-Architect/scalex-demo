@@ -30,6 +30,8 @@ operations without losing control of money, margin, policy, or audit.
 
 ## Verified Repository State
 
+- GitHub README landing page now uses the ScaleX logo, badges, quick links, and public screenshots
+  under `docs/assets/github/`.
 - Clean-checkout backend install, frontend install, frontend build, full test script, optional
   NeMo adapter check, and runtime smoke have passed.
 - Required frontend, backend, data/config, scripts, docs, brand assets, and optional NeMo
@@ -61,7 +63,7 @@ License selected: MIT.
 
 ## Current Priority
 
-1. Push the latest documentation/favicon cleanup commit after review.
+1. Push the latest README visual polish commit after review.
 2. Review `README.md`, `docs/OPERATOR_GUIDE.md`, `docs/SUBMISSION_WRITEUP.md`,
    `docs/DEMO_SCRIPT.md`, and `docs/OPEN_SOURCE_AUDIT.md`.
 3. Confirm no local artifacts or secrets are staged before any future push.

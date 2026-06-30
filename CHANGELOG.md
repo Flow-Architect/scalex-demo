@@ -2,6 +2,16 @@
 
 This changelog is a concise public release history.
 
+## 2026-06-30 - GitHub README landing page polish
+
+- Rebuilt `README.md` as a visual GitHub landing page with centered branding, badges, quick links,
+  a concise product story, demo economics, execution-mode boundaries, and screenshot sections.
+- Added public README screenshots under `docs/assets/github/` for Dashboard Ready, Governed Run
+  Complete, Evidence Ledger, and Connection Hub.
+- Preserved product behavior, UI code, backend mechanics, animation timing, demo economics, and
+  safety boundaries.
+- Updated STATUS and TASKS to track the README visual polish and follow-up push requirement.
+
 ## 2026-06-30 - Public docs organization and safe notes archival
 
 - Rewrote the public architecture, product spec, demo script, and submission writeup as polished
