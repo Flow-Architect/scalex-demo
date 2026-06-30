@@ -10,6 +10,38 @@ Use:
 
 ---
 
+## 2026-06-29 - Goal 8Z: Nemotron 3 Ultra Hermes attribution
+
+Completed:
+- Added truthful Nemotron 3 Ultra attribution to Hermes planning surfaces.
+- Dashboard Live Run Detail now frames Hermes as a Nemotron 3 Ultra-capable planner in Judge Demo
+  Mode and keeps deterministic planning proof / runtime-backed-when-configured copy visible.
+- Updated the Hermes rail/detail, proof artifact, Evidence Ledger completed safety note,
+  Connection Hub Hermes card, and Settings/Boundaries row to distinguish capable route from
+  runtime-verified active model usage.
+- Updated demo/submission docs to say Hermes provides the planning/operator brain, the route is
+  Nemotron 3 Ultra-capable, Judge Demo Mode remains deterministic, and ScaleX governs execution.
+- Preserved backend mechanics, layout, colors, logo, spacing, animation timing, economics,
+  outcome gating, Stripe/Hermes/NemoClaw runtime behavior, no live money, no Telegram, no new
+  integrations, no `.env` changes, and no database artifacts.
+
+Verification:
+- `cd frontend && npm run build` passed.
+- `./scripts/test.sh` passed with 68 backend tests and a successful frontend build.
+- `./scripts/check-nemo.sh` passed with `nemoguardrails` 0.21.0 and `guardrails/scalex` loaded.
+- `git diff --check`, unsafe/generated path scan, and staged added-lines secret scan passed.
+- Browser smoke at `http://127.0.0.1:5174/` verified Dashboard attribution, Hermes run detail,
+  Connection Hub attribution, pre-run Evidence Ledger gating, completed run state, Settings
+  boundary row, no incorrect reversed spelling, and no horizontal overflow.
+
+Suggested commit message:
+Add Nemotron 3 Ultra Hermes attribution
+
+Next:
+- Goal 9 - final repo/video/submission polish and open-source audit closeout.
+
+---
+
 ## 2026-06-29 - Goal 8Y: Gate outcomes until governed run completion
 
 Completed:

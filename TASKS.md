@@ -4,13 +4,13 @@
 
 Goal 9 - final repo/video/submission polish and open-source audit closeout.
 
-Goal 8Y is complete. Return to final recording and submission readiness:
+Goal 8Z is complete. Return to final recording and submission readiness:
 
 - Rehearse the three-minute recording against `docs/DEMO_SCRIPT.md`.
 - Confirm the local demo opens at `http://127.0.0.1:5174/` with the dark control-room UI.
-- Confirm `Start Governed Run` plays the final timing pass at roughly 29-30 seconds, with the
-  blocked-risk decision visible for about 4.8 seconds and the $0 -> $3,200 count-up taking about
-  1.8 seconds.
+- Confirm `Start Governed Run` plays the final readability timing pass at roughly 45 seconds,
+  with the blocked-risk decision visible for about 6.5 seconds and the $0 -> $3,200 count-up
+  taking about 2.6 seconds.
 - Confirm the pre-run metric strip reads $8,500 revenue, $0 approved costs, $0 risk contained,
   $0 protected profit, and Pending protected margin.
 - Confirm the sidebar Active Operation card shows Revenue $8,500 and Profit Pending before the
@@ -35,6 +35,10 @@ Goal 8Y is complete. Return to final recording and submission readiness:
 - Confirm Live Run Detail shows branded system cards for Hermes Planning, Stripe Finance,
   NemoClaw / NeMo Policy, and ScaleX Control Plane, with subtle active highlighting during the
   governed-run sequence.
+- Confirm Hermes Planning surfaces say `Nemotron 3 Ultra-capable route` in Judge Demo Mode and
+  do not claim Nemotron 3 Ultra active unless runtime evidence verifies it.
+- Confirm Connection Hub and Settings show Hermes Agent / Nemotron 3 Ultra-capable attribution
+  while preserving the boundary that Hermes proposes and ScaleX governs execution.
 - Confirm pre-run Live Run Detail shows the Ready to Govern decision stage, larger Governance
   Stack cards, and visible Start Governed Run button before recording.
 - Capture final screenshots or video assets only if needed for submission.
@@ -48,6 +52,30 @@ new backend features, new external services, production payroll/HR behavior, MCP
 changes, database files, uploaded real files, or secrets.
 
 ## Recently Completed
+
+Goal 8Z is complete. It was a tiny frontend/docs attribution and truthfulness pass:
+
+- Added truthful Nemotron 3 Ultra attribution to Hermes planning surfaces.
+- Dashboard Live Run Detail now identifies Hermes as a Nemotron 3 Ultra-capable planner in Judge
+  Demo Mode and keeps the deterministic planning-proof boundary visible.
+- The Hermes rail/detail and proof artifacts now include the Nemotron 3 Ultra-capable route while
+  preserving the rule that Hermes proposes and ScaleX governs execution.
+- Connection Hub now shows Hermes Agent, Model route, Judge Demo Mode status, runtime-backed
+  boundary, and ScaleX execution boundary.
+- Evidence Ledger completed Hermes row and Settings/Boundaries now include the model attribution
+  without changing ledger gating or claiming a live Nemotron 3 Ultra call in Judge Demo Mode.
+- Preserved backend mechanics, layout, colors, logo, spacing, animation timing, economics,
+  outcome gating, Stripe/Hermes/NemoClaw runtime behavior, no live money, no Telegram, no new
+  integrations, no `.env` changes, and no database artifacts.
+
+Goal 8Z validation:
+
+- `cd frontend && npm run build` passed.
+- `./scripts/test.sh` passed with 68 backend tests and a successful frontend build.
+- `./scripts/check-nemo.sh` passed with `nemoguardrails` 0.21.0 and `guardrails/scalex` loaded.
+- Browser smoke at `http://127.0.0.1:5174/` verified Dashboard attribution, Hermes run detail,
+  Connection Hub attribution, pre-run Evidence Ledger gating, completed run state, Settings
+  boundary row, no incorrect reversed spelling, and no horizontal overflow.
 
 Goal 8Y is complete. It was a frontend-only outcome and evidence display gating pass:
 

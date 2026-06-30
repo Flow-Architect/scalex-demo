@@ -117,6 +117,22 @@ interface DecisionSystemCardView {
   tone: Tone;
 }
 
+interface HermesModelAttribution {
+  active: boolean;
+  auditSafetyNote: string;
+  compactDetail: string;
+  connectionModelRoute: string;
+  connectionStatus: string;
+  detail: string;
+  proofDetail: string;
+  railDetail: string;
+  railSubline: string;
+  role: string;
+  routeLabel: string;
+  settingsBoundary: string;
+  settingsValue: string;
+}
+
 interface ToolActionView {
   name: string;
   status: string;
@@ -711,7 +727,7 @@ function LiveRunDetail({
   const invoiceId = model.state?.stripe?.invoice_id ?? "in_demo_northstar";
   const livemode = String(model.state?.stripe?.livemode ?? false);
   const paid = String(model.state?.stripe?.paid ?? false);
-  const decisionSystemCards = <DecisionSystemCards focusId={focusId} prominent={startCompact} runVisualState={runVisualState} />;
+  const decisionSystemCards = <DecisionSystemCards focusId={focusId} model={model} prominent={startCompact} runVisualState={runVisualState} />;
   const renderDetail = () => {
     if (focusId === "input" || focusId === "cost-basis") {
       return (
@@ -750,6 +766,7 @@ function LiveRunDetail({
           {decisionSystemCards}
           <pre className="proof-terminal mt-3">
 {model.hermesTasks.slice(0, 5).map((task, index) => `$ ${index + 1}. ${task}`).join("\n")}
+{"\n"}$ route: {model.hermesAttribution.routeLabel}
 {"\n"}$ boundary: Hermes proposes. ScaleX governs.
           </pre>
         </section>
@@ -922,13 +939,14 @@ function PreRunDecisionStage({ decisionSystemCards, model }: { decisionSystemCar
   );
 }
 
-function DecisionSystemCards({ focusId, prominent = false, runVisualState }: { focusId: string; prominent?: boolean; runVisualState: RunVisualState }) {
+function DecisionSystemCards({ focusId, model, prominent = false, runVisualState }: { focusId: string; model: ControlRoomModel; prominent?: boolean; runVisualState: RunVisualState }) {
   const activeSystemId = decisionSystemForFocus(focusId, runVisualState);
   const complete = runVisualState === "complete";
+  const cards = decisionSystemCardData(model.hermesAttribution);
 
   return (
     <div className="decision-system-grid" aria-label="Governed execution systems">
-      {decisionSystemCardData.map((card) => (
+      {cards.map((card) => (
         <DecisionSystemCard
           active={activeSystemId === card.id}
           card={card}
@@ -974,14 +992,16 @@ function DecisionSystemCard({ active, card, complete, prominent }: { active: boo
   );
 }
 
-const decisionSystemCardData: DecisionSystemCardView[] = [
+function decisionSystemCardData(hermesAttribution: HermesModelAttribution): DecisionSystemCardView[] {
+  return [
   {
-    compactSubtitle: "Creates the implementation plan.",
-    detail: "Hermes proposes · ScaleX governs",
+    compactDetail: hermesAttribution.compactDetail,
+    compactSubtitle: hermesAttribution.routeLabel,
+    detail: hermesAttribution.detail,
     fallbackIcon: BrainCircuit,
     id: "hermes",
     logoSrc: "/brand/connections/hermes_agent_nous_square_white.png",
-    role: "Planner / Operator Brain",
+    role: hermesAttribution.role,
     subtitle: "Creates the implementation plan",
     title: "Hermes Planning",
     tone: "blue",
@@ -1023,7 +1043,8 @@ const decisionSystemCardData: DecisionSystemCardView[] = [
     title: "ScaleX Control Plane",
     tone: "brand",
   },
-];
+  ];
+}
 
 function decisionSystemForFocus(focusId: string, runVisualState: RunVisualState): DecisionSystemId | null {
   if (runVisualState === "complete") {
@@ -1542,6 +1563,7 @@ function SettingsView({
     ["Data", "Synthetic sample", "No patient data, no PHI, no healthcare compliance or HIPAA claim."],
     ["Stripe test mode only", model.stripeLabel, "Judge Demo uses deterministic/test-double finance; real Stripe test objects only when safely configured."],
     ["Money movement", `livemode=${String(Boolean(state?.stripe?.livemode))}`, "No live-money support; future live execution requires Verified Live Mode."],
+    ["Hermes planning model", model.hermesAttribution.settingsValue, model.hermesAttribution.settingsBoundary],
     ["NemoClaw / NeMo truth", `${state?.guardrails?.mode ?? "local_policy"} / used_real_nemo=${String(Boolean(state?.guardrails?.used_real_nemo))}`, state?.guardrails?.truthfulness_note ?? "Local policy active now; real NeMo requires runtime proof."],
     ["NemoClaw commands", "not invoked", "No Docker, NemoClaw, or production sandbox commands are run by this demo."],
     ["Production Hermes", "not used", "Optional NemoHermes/Hermes runtime routing is configuration-gated and fail-closed."],
@@ -1955,6 +1977,65 @@ function railHoldMs(railId: string): number {
   return DEFAULT_RAIL_DELAY_MS;
 }
 
+const NEMOTRON_MODEL_DISPLAY = "Nemotron 3 Ultra";
+
+function containsNemotron3Ultra(value: string | null | undefined): boolean {
+  if (!value) {
+    return false;
+  }
+  const normalized = value.toLowerCase().replace(/[_-]+/g, " ");
+  return normalized.includes("nemotron") && normalized.includes("ultra") && /\b3\b/.test(normalized);
+}
+
+function buildHermesModelAttribution(state: DemoState | null): HermesModelAttribution {
+  const evidenceValues = [
+    state?.execution?.hermes_upstream_model,
+    state?.execution?.hermes_upstream_provider,
+    state?.hermes?.model,
+    state?.hermes?.provider,
+    state?.hermes?.upstream_model,
+    state?.hermes?.upstream_provider,
+    state?.command_center?.runtime_route?.model,
+    state?.command_center?.runtime_route?.provider,
+    state?.command_center?.runtime_route?.upstream_model,
+  ];
+  const active = evidenceValues.some(containsNemotron3Ultra);
+
+  if (active) {
+    return {
+      active,
+      auditSafetyNote: `Runtime evidence shows ${NEMOTRON_MODEL_DISPLAY}; Hermes plans only and ScaleX executes approved actions.`,
+      compactDetail: `${NEMOTRON_MODEL_DISPLAY} runtime · ScaleX governs`,
+      connectionModelRoute: NEMOTRON_MODEL_DISPLAY,
+      connectionStatus: "runtime evidence available",
+      detail: `Runtime model: ${NEMOTRON_MODEL_DISPLAY} · ScaleX governs execution`,
+      proofDetail: `Hermes planning runtime evidence shows ${NEMOTRON_MODEL_DISPLAY}; ScaleX records the plan before execution.`,
+      railDetail: `Hermes creates the implementation launch plan through runtime evidence for ${NEMOTRON_MODEL_DISPLAY}. Hermes proposes; ScaleX governs what can execute.`,
+      railSubline: `Runtime model: ${NEMOTRON_MODEL_DISPLAY}`,
+      role: `${NEMOTRON_MODEL_DISPLAY} planner`,
+      routeLabel: `Runtime model: ${NEMOTRON_MODEL_DISPLAY}`,
+      settingsBoundary: "Shown as active because runtime model evidence includes Nemotron 3 Ultra.",
+      settingsValue: `${NEMOTRON_MODEL_DISPLAY} active`,
+    };
+  }
+
+  return {
+    active,
+    auditSafetyNote: `${NEMOTRON_MODEL_DISPLAY}-capable planning route; ScaleX executes only approved actions.`,
+    compactDetail: "Judge Demo deterministic · runtime-backed when configured",
+    connectionModelRoute: `${NEMOTRON_MODEL_DISPLAY}-capable`,
+    connectionStatus: "not invoked in Judge Demo Mode",
+    detail: "Judge Demo uses deterministic planning proof · runtime-backed when configured",
+    proofDetail: `${NEMOTRON_MODEL_DISPLAY}-capable route; Judge Demo records deterministic planning proof before execution.`,
+    railDetail: `Hermes creates the implementation launch plan through a ${NEMOTRON_MODEL_DISPLAY}-capable route. Hermes proposes; ScaleX governs what can execute.`,
+    railSubline: `${NEMOTRON_MODEL_DISPLAY}-capable route`,
+    role: `${NEMOTRON_MODEL_DISPLAY}-capable planner`,
+    routeLabel: `${NEMOTRON_MODEL_DISPLAY}-capable route`,
+    settingsBoundary: "Shown as active only when runtime model evidence verifies it; Judge Demo Mode remains deterministic.",
+    settingsValue: `${NEMOTRON_MODEL_DISPLAY}-capable route / deterministic in Judge Demo Mode`,
+  };
+}
+
 function buildControlRoomModel(
   state: DemoState | null,
   money: MoneySnapshot,
@@ -1989,12 +2070,13 @@ function buildControlRoomModel(
   const guardrailEvaluations = state?.guardrail_evaluations ?? [];
   const events = state?.timeline_events ?? state?.events ?? [];
   const hermesLabel = state?.execution?.planning_label ?? (state?.hermes?.used_real_hermes ? "Runtime Hermes plan" : "Deterministic Hermes plan");
+  const hermesAttribution = buildHermesModelAttribution(state);
   const stripeLabel = state?.execution?.finance_label ?? (state?.stripe?.used_real_stripe ? "Real Stripe test finance" : "Stripe sandbox finance");
   const guardrailLabel = state?.execution?.guardrail_label ?? (state?.guardrails?.used_real_nemo ? "NeMo Guardrails verified" : "Local policy active");
-  const rails = buildRails({ approvedCostsCents, blockedSpendCents, guardrailLabel, hasReport, laborCostCents, marginIfBlockedApprovedPercent, marginFloorPercent, marginPercent, protectedProfitCents, revenueCents, setupSpendCents, stripeLabel });
-  const auditRowsData = buildAuditRows({ approvedCostsCents, blockedSpendCents, guardrailLabel, laborCostCents, marginIfBlockedApprovedPercent, protectedProfitCents, setupSpendCents, state });
+  const rails = buildRails({ approvedCostsCents, blockedSpendCents, guardrailLabel, hasReport, hermesAttribution, laborCostCents, marginIfBlockedApprovedPercent, marginFloorPercent, marginPercent, protectedProfitCents, revenueCents, setupSpendCents, stripeLabel });
+  const auditRowsData = buildAuditRows({ approvedCostsCents, blockedSpendCents, guardrailLabel, hermesAttribution, laborCostCents, marginIfBlockedApprovedPercent, protectedProfitCents, setupSpendCents, state });
   const modeCards = buildModeCards(state);
-  const proofArtifacts = buildProofArtifacts({ approvedCostsCents, blockedSpendCents, guardrailLabel, laborCostCents, protectedProfitCents, state, stripeLabel });
+  const proofArtifacts = buildProofArtifacts({ approvedCostsCents, blockedSpendCents, guardrailLabel, hermesAttribution, laborCostCents, protectedProfitCents, state, stripeLabel });
   const primaryMode = modeCards.find((mode) => mode.primary) ?? modeCards[0];
   const costBasisRows = buildCostBasisRows(costBasisLineItems, revenueCents);
   const laborWorkers = buildLaborWorkers(state);
@@ -2014,11 +2096,12 @@ function buildControlRoomModel(
     blockedRiskLabel: formatCurrency(blockedSpendCents),
     blockedSpendCents,
     clientName: displayCustomer,
-    connectionCards: buildConnectionCards(state, auditRows, guardrailLabel, hermesLabel, stripeLabel),
+    connectionCards: buildConnectionCards(state, auditRows, guardrailLabel, hermesAttribution, hermesLabel, stripeLabel),
     costBasisRows,
     guardrailChecks: buildGuardrailChecks(policyChecks, guardrailEvaluations),
     guardrailLabel,
     hasReport,
+    hermesAttribution,
     hermesLabel,
     hermesTasks: buildHermesTasks(state),
     laborCostLabel: formatCurrency(laborCostCents),
@@ -2079,6 +2162,7 @@ interface ControlRoomModel {
   guardrailChecks: Array<{ label: string; status: "Allow" | "Warn" | "Block" }>;
   guardrailLabel: string;
   hasReport: boolean;
+  hermesAttribution: HermesModelAttribution;
   hermesLabel: string;
   hermesTasks: string[];
   laborCostLabel: string;
@@ -2329,6 +2413,7 @@ function buildProofArtifacts({
   approvedCostsCents,
   blockedSpendCents,
   guardrailLabel,
+  hermesAttribution,
   laborCostCents,
   protectedProfitCents,
   state,
@@ -2337,6 +2422,7 @@ function buildProofArtifacts({
   approvedCostsCents: number;
   blockedSpendCents: number;
   guardrailLabel: string;
+  hermesAttribution: HermesModelAttribution;
   laborCostCents: number;
   protectedProfitCents: number;
   state: DemoState | null;
@@ -2350,7 +2436,7 @@ function buildProofArtifacts({
 
   return [
     {
-      detail: "Implementation plan and next actions are captured before ScaleX allows execution.",
+      detail: hermesAttribution.proofDetail,
       icon: BrainCircuit,
       meta: state?.planning_run?.id ?? "planning_run:demo_northstar",
       railId: "hermes",
@@ -2407,6 +2493,7 @@ function buildRails({
   blockedSpendCents,
   guardrailLabel,
   hasReport,
+  hermesAttribution,
   laborCostCents,
   marginFloorPercent,
   marginIfBlockedApprovedPercent,
@@ -2420,6 +2507,7 @@ function buildRails({
   blockedSpendCents: number;
   guardrailLabel: string;
   hasReport: boolean;
+  hermesAttribution: HermesModelAttribution;
   laborCostCents: number;
   marginFloorPercent: number;
   marginIfBlockedApprovedPercent: number;
@@ -2432,7 +2520,7 @@ function buildRails({
   return [
     { actor: "SCALEX", badge: "01", detail: "Client onboarding and reviewed document intake load the synthetic Northstar operation before any agent action.", evidence: "Business intake loaded", id: "input", name: "Business Intake Loaded", proofTag: "intake", riskTag: "data safe", status: "Loaded", subline: "Client record reviewed · document intake supported", tone: "green" },
     { actor: "SCALEX", badge: "02", detail: `${formatCurrency(approvedCostsCents)} approved delivery cost basis is loaded, including ${formatCurrency(laborCostCents)} labor before execution begins.`, evidence: "Cost basis loaded", id: "cost-basis", name: "Cost Basis Loaded", proofTag: "delivery costs", riskTag: "margin basis", status: "Loaded", subline: "Full cost basis included in margin", tone: "green" },
-    { actor: "HERMES", badge: "03", detail: "Hermes creates the implementation launch plan and proposes next tool actions. ScaleX governs what can execute.", evidence: "Hermes operation plan recorded", id: "hermes", name: "Hermes Operation Plan", proofTag: "operator plan", riskTag: "bounded plan", status: "Created", subline: "Implementation plan created · ScaleX governs", tone: "blue" },
+    { actor: "HERMES", badge: "03", detail: hermesAttribution.railDetail, evidence: "Hermes operation plan recorded", id: "hermes", name: "Hermes Operation Plan", proofTag: "operator plan", riskTag: "bounded plan", status: "Created", subline: hermesAttribution.railSubline, tone: "blue" },
     { actor: "STRIPE", badge: "04", detail: "Stripe customer, invoice, and payment-link actions are prepared as controlled tool calls, not raw agent autonomy.", evidence: "Stripe invoice tool prepared", id: "stripe-invoice", name: "Stripe Invoice Tool", proofTag: "tool call", riskTag: "sandbox", status: "Prepared", subline: "Invoice/payment-link action prepared", tone: "purple" },
     { actor: "STRIPE", badge: "05", detail: `Finance state checked for ${formatCurrency(revenueCents)}. ${stripeLabel}.`, evidence: "Stripe payment status retrieved", id: "stripe-status", name: "Stripe Payment Status", proofTag: "livemode=false", riskTag: "money state", status: "Verified", subline: "Invoice state retrieved · paid-state honest", tone: "purple" },
     { actor: "NEMOCLAW / NEMO", badge: "06", detail: "NemoClaw boundary is visible while NeMo Guardrails/local policy checks vendor, margin, live-money, data, and tool-action rules.", evidence: guardrailLabel, id: "policy", name: "NemoClaw / NeMo Check", proofTag: "risk decision", riskTag: "guardrail", status: "Checked", subline: "Policy checked before execution", tone: "cyan" },
@@ -2516,10 +2604,11 @@ function buildSupportingModules(state: DemoState | null, laborCostCents: number)
   ];
 }
 
-function buildAuditRows({ approvedCostsCents, blockedSpendCents, guardrailLabel, laborCostCents, marginIfBlockedApprovedPercent, protectedProfitCents, setupSpendCents, state }: {
+function buildAuditRows({ approvedCostsCents, blockedSpendCents, guardrailLabel, hermesAttribution, laborCostCents, marginIfBlockedApprovedPercent, protectedProfitCents, setupSpendCents, state }: {
   approvedCostsCents: number;
   blockedSpendCents: number;
   guardrailLabel: string;
+  hermesAttribution: HermesModelAttribution;
   laborCostCents: number;
   marginIfBlockedApprovedPercent: number;
   protectedProfitCents: number;
@@ -2528,7 +2617,7 @@ function buildAuditRows({ approvedCostsCents, blockedSpendCents, guardrailLabel,
 }): AuditRowModel[] {
   const stripeResult = state?.stripe?.used_real_stripe ? "real Stripe test" : "sandbox finance";
   return [
-    { order: "001", actor: "Hermes", action: "Implementation plan recorded", evidenceType: "planning_run", safetyNote: "Hermes plans only; ScaleX executes approved actions.", status: "Recorded", tone: "purple" },
+    { order: "001", actor: "Hermes", action: "Implementation plan recorded", evidenceType: "planning_run", safetyNote: hermesAttribution.auditSafetyNote, status: "Recorded", tone: "purple" },
     { order: "002", actor: "Stripe", action: "Finance state recorded", evidenceType: "stripe_event", safetyNote: `Finance state is ${stripeResult}; livemode is not live money.`, status: "Verified", tone: "blue" },
     { order: "003", actor: "NeMo / Local Policy", action: "Guardrail check recorded", evidenceType: "guardrail_evaluation", safetyNote: guardrailLabel, status: "Verified", tone: "green" },
     { order: "004", actor: "ScaleX Economics", action: `Cost basis calculated ${formatCurrency(approvedCostsCents)}`, evidenceType: "cost_basis", safetyNote: "Protected profit is calculated after approved delivery costs, not just labor.", status: "Recorded", tone: "green" },
@@ -2544,16 +2633,23 @@ function buildAuditRows({ approvedCostsCents, blockedSpendCents, guardrailLabel,
   ];
 }
 
-function buildConnectionCards(state: DemoState | null, auditRows: number, guardrailLabel: string, hermesLabel: string, stripeLabel: string): ConnectorCardModel[] {
+function buildConnectionCards(state: DemoState | null, auditRows: number, guardrailLabel: string, hermesAttribution: HermesModelAttribution, hermesLabel: string, stripeLabel: string): ConnectorCardModel[] {
   const guardrails = state?.guardrails ?? null;
   const hermesRuntime = state?.execution?.hermes_runtime ?? "isolated_cli";
   const nemoClawSelected = hermesRuntime === "nemoclaw" || hermesRuntime === "nemohermes_api";
   return [
     {
       badges: [{ label: "active", tone: "green" }, { label: state?.hermes?.used_real_hermes ? "runtime verified" : "demo mode", tone: state?.hermes?.used_real_hermes ? "green" : "amber" }, { label: nemoClawSelected ? "NemoClaw route selected" : "NemoClaw optional", tone: nemoClawSelected ? "green" : "blue" }],
-      boundary: "No production Hermes config is used. Optional NemoClaw/NemoHermes routing is selected only by environment configuration and fails closed if unavailable.",
+      boundary: "No production Hermes config is used. Nemotron 3 Ultra is shown as active only when runtime model evidence verifies it; optional NemoClaw/NemoHermes routing is configuration-gated and fails closed.",
       description: "Creates the client implementation plan and proposes the controlled tool sequence.",
-      facts: [{ label: "Current mode", value: hermesLabel, tone: "purple" }, { label: "Runtime", value: hermesRuntime, tone: "white" }, { label: "NemoClaw route", value: nemoClawSelected ? "selected" : "not selected", tone: nemoClawSelected ? "green" : "blue" }, { label: "Planning runs", value: String(state?.planning_runs?.length ?? 0), tone: "white" }],
+      facts: [
+        { label: "Planning engine", value: "Hermes Agent", tone: "white" },
+        { label: "Model route", value: hermesAttribution.connectionModelRoute, tone: hermesAttribution.active ? "green" : "blue" },
+        { label: "Status", value: hermesAttribution.connectionStatus, tone: hermesAttribution.active ? "green" : "amber" },
+        { label: "Runtime-backed", value: hermesAttribution.active ? "verified" : "when configured", tone: hermesAttribution.active ? "green" : "blue" },
+        { label: "ScaleX boundary", value: "Hermes proposes; ScaleX governs", tone: "green" },
+        { label: "Current mode", value: hermesLabel, tone: "purple" },
+      ],
       icon: BrainCircuit,
       logoSrc: "/brand/connections/hermes_agent_nous_square_white.png",
       title: "Hermes Planning",

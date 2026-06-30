@@ -7,10 +7,9 @@ Last updated: 2026-06-29
 - Project folder exists at `/home/ascabrya/dev/scalex-demo`.
 - Latest committed baseline before Goal 8E: `615a9bd Document NemoClaw correction and next
   integration plan`.
-- Last completed goal: Goal 8Y - outcome and evidence display gating.
-- Last completed implementation/QA goal: Goal 8Y - frontend-only outcome/evidence visibility
-  truthfulness pass.
-- Last completed documentation/tracking update: Goal 8Y outcome/evidence gating closeout.
+- Last completed goal: Goal 8Z - Nemotron 3 Ultra Hermes planning attribution.
+- Last completed implementation/QA goal: Goal 8Z - frontend/docs attribution truthfulness pass.
+- Last completed documentation/tracking update: Goal 8Z Nemotron 3 Ultra attribution closeout.
 - Last completed checkout cleanup: Open Source Checkout Cleanup for judge readiness.
 - Current priority: Goal 9 - final repo/video/submission polish.
 - Goal 8I used the uploaded six-phase control-room visual prompt as a design specification only.
@@ -313,6 +312,19 @@ Last updated: 2026-06-29
   `./scripts/check-nemo.sh`, `git diff --check`, unsafe/generated path scan, staged added-lines
   secret scan, and browser smoke for pre-run pending outcome/evidence state, completed outcome
   reveal, and reset returning to pending.
+- Goal 8Z added truthful Nemotron 3 Ultra attribution to Hermes planning surfaces without
+  changing backend mechanics, layout, colors, logo, spacing, animation timing, economics,
+  outcome gating, Stripe/Hermes/NemoClaw runtime behavior, live mode, Telegram, `.env`, or
+  database artifacts.
+- Goal 8Z shows Hermes as a Nemotron 3 Ultra-capable planning route in Judge Demo Mode and shows
+  Nemotron 3 Ultra as active only when runtime model/provider evidence verifies it. Dashboard
+  Live Run Detail, the Hermes rail/detail, Connection Hub, Evidence Ledger safety note, and
+  Settings/Boundaries all preserve the distinction that Hermes proposes while ScaleX governs.
+- Goal 8Z validation passed `cd frontend && npm run build`, `./scripts/test.sh`,
+  `./scripts/check-nemo.sh`, `git diff --check`, unsafe/generated path scan, staged added-lines
+  secret scan, and browser smoke for Dashboard attribution, Connection Hub attribution,
+  Evidence Ledger gating, completed run state, Settings boundary row, no incorrect reversed
+  spelling, and no horizontal overflow.
 - Goal 9 remains final polish and submission assets.
 - Goal 7B remains future Verified Live Mode hardening.
 

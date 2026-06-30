@@ -19,6 +19,12 @@ unsafe vendor/data enrichment spend, SQLite records evidence, the output rail ve
 honesty, and the final Profit Outcome reports protected profit and blocked risk. Local policy
 remains the deterministic business-rule gate.
 
+Hermes provides the planning/operator brain. The Hermes planning path is Nemotron 3
+Ultra-capable, but Judge Demo Mode uses deterministic planning proof unless runtime evidence
+verifies the selected model. ScaleX shows Nemotron 3 Ultra as active only when model/provider
+runtime evidence proves it; otherwise the UI labels the route as capable and keeps ScaleX as the
+execution control plane: Hermes proposes and ScaleX governs.
+
 The current proof is a functional live working product prototype, not a static mock. Goal 8F
 deepened the browser surface into a command center. Goal 8G locks the judge-facing product
 narrative around ScaleX as the enterprise control plane that lets AI safely execute paid client
@@ -65,6 +71,8 @@ Demo-readiness note:
   execution, evidence ledger, and profit outcome.
 - Judge Demo Mode works without secrets using deterministic local proof/test-double records and
   clearly labels demo/sandbox proof.
+- Hermes planning is labeled as a Nemotron 3 Ultra-capable route in Judge Demo Mode, and as active
+  only if runtime model evidence verifies Nemotron 3 Ultra.
 - Stripe Sandbox Prototype uses real Stripe test-mode objects only when a safe local test key is
   configured; otherwise the recording remains in deterministic Judge Demo Mode.
 - Full Proof Mode preserves real isolated Hermes and real Stripe test-mode proof when local
