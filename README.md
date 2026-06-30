@@ -9,14 +9,8 @@
 </p>
 
 <p align="center">
-  Hermes plans. Nemotron 3 Ultra-capable reasoning supports enterprise planning. Stripe proves
-  finance state. NeMo/local policy checks risk. ScaleX blocks unsafe execution and records
-  protected profit.
-</p>
-
-<p align="center">
-  ScaleX helps enterprise teams turn paid client work into a governed run with proof, policy,
-  money control, audit evidence, and protected margin.
+  ScaleX turns paid client work into a governed run with proof, policy, money control, audit
+  evidence, and protected margin.
 </p>
 
 <div align="center">
