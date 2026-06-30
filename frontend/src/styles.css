@@ -1715,6 +1715,16 @@ dd {
   padding: 0.55rem 0.65rem;
 }
 
+.connector-card {
+  display: flex;
+  min-height: 0;
+  flex-direction: column;
+}
+
+.connector-card-boundary {
+  overflow-wrap: anywhere;
+}
+
 .connector-logo-frame {
   display: flex;
   flex: 0 0 auto;

@@ -1862,7 +1862,7 @@ function ConnectorCard({ card }: { card: ConnectorCardModel }) {
   const [logoFailed, setLogoFailed] = useState(false);
   const showLogo = Boolean(card.logoSrc && !logoFailed);
   return (
-    <article className="rounded-md border border-[#232834] bg-[#111318] p-4 transition hover:border-[#343A46]">
+    <article className="connector-card rounded-md border border-[#232834] bg-[#111318] p-4 transition hover:border-[#343A46]">
       <div className="flex items-start gap-3">
         <span className="connector-logo-frame">
           {showLogo ? (
@@ -1882,7 +1882,7 @@ function ConnectorCard({ card }: { card: ConnectorCardModel }) {
       <dl className="mt-4 grid grid-cols-2 gap-2">
         {card.facts.map((fact) => <FactRow key={fact.label} label={fact.label} value={fact.value} tone={fact.tone} />)}
       </dl>
-      <p className="mt-4 border-t border-[#232834] pt-3 text-xs leading-5 text-[#A1A1AA]">{card.boundary}</p>
+      <p className="connector-card-boundary mt-2 border-t border-[#232834] pt-2 text-[0.68rem] leading-4 text-[#A1A1AA]">{card.boundary}</p>
     </article>
   );
 }
@@ -2640,7 +2640,7 @@ function buildConnectionCards(state: DemoState | null, auditRows: number, guardr
   return [
     {
       badges: [{ label: "active", tone: "green" }, { label: state?.hermes?.used_real_hermes ? "runtime verified" : "demo mode", tone: state?.hermes?.used_real_hermes ? "green" : "amber" }, { label: nemoClawSelected ? "NemoClaw route selected" : "NemoClaw optional", tone: nemoClawSelected ? "green" : "blue" }],
-      boundary: "No production Hermes config is used. Nemotron 3 Ultra is shown as active only when runtime model evidence verifies it; optional NemoClaw/NemoHermes routing is configuration-gated and fails closed.",
+      boundary: "Demo only. Hermes proposes; ScaleX governs. NemoClaw routing is optional and fail-closed.",
       description: "Creates the client implementation plan and proposes the controlled tool sequence.",
       facts: [
         { label: "Planning engine", value: "Hermes Agent", tone: "white" },
