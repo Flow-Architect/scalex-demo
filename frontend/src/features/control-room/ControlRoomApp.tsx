@@ -759,16 +759,7 @@ function LiveRunDetail({
 }
 
 function PreRunDecisionStage({ decisionSystemCards, model }: { decisionSystemCards: ReactNode; model: ControlRoomModel }) {
-  const summary = [
-    { label: "Client", value: model.clientName, tone: "white" as Tone },
-    { label: "Operation", value: model.operationName, tone: "white" as Tone },
-    { label: "Revenue", value: model.metrics.find((metric) => metric.label === "Revenue secured")?.value ?? "$8,500", tone: "green" as Tone },
-    { label: "Planned cost basis", value: model.approvedCostsLabel, tone: "green" as Tone },
-    { label: "Risk to contain", value: model.blockedRiskLabel, tone: "red" as Tone },
-    { label: "Margin floor", value: model.marginFloorLabel, tone: "amber" as Tone },
-  ];
-  const flow = ["Business intake", "Cost basis", "Hermes plan", "Stripe finance", "NemoClaw policy", "Evidence ledger", "Protected profit"];
-  const chips = ["Revenue-backed", "Cost basis loaded", "No live money", "Local policy active", "Evidence ledger ready"];
+  const revenue = model.metrics.find((metric) => metric.label === "Revenue secured")?.value ?? "$8,500";
 
   return (
     <div className="pre-run-stage" aria-label="Ready to govern decision stage">
@@ -777,7 +768,10 @@ function PreRunDecisionStage({ decisionSystemCards, model }: { decisionSystemCar
           <p>Decision stage</p>
           <h3>Ready to govern Northstar operation</h3>
         </div>
-        <span className="pre-run-stage-pulse" aria-hidden="true" />
+        <div className="pre-run-stage-meta" aria-label="Pre-run operation context">
+          <span>{revenue} revenue</span>
+          <span>Profit pending</span>
+        </div>
       </div>
       <p className="pre-run-stage-subtitle">
         ScaleX will inspect the client operation through proof, policy, money control, and audit before execution.
@@ -789,25 +783,6 @@ function PreRunDecisionStage({ decisionSystemCards, model }: { decisionSystemCar
         </div>
         {decisionSystemCards}
       </div>
-      <div className="pre-run-flow" aria-label="Pre-run governance flow">
-        {flow.map((item, index) => (
-          <span key={item}>
-            {item}
-            {index < flow.length - 1 ? <b aria-hidden="true">→</b> : null}
-          </span>
-        ))}
-      </div>
-      <div className="pre-run-chip-row" aria-label="Pre-run readiness checks">
-        {chips.map((chip) => <span key={chip}>{chip}</span>)}
-      </div>
-      <dl className="pre-run-summary-grid">
-        {summary.map((item) => (
-          <div className={`pre-run-summary-item pre-run-summary-item-${item.tone}`} key={item.label}>
-            <dt>{item.label}</dt>
-            <dd>{item.value}</dd>
-          </div>
-        ))}
-      </dl>
     </div>
   );
 }
@@ -906,6 +881,7 @@ const decisionSystemCardData: DecisionSystemCardView[] = [
     detail: "Evidence ledger ready · profit outcome pending",
     fallbackIcon: Database,
     id: "scalex",
+    logoSrc: "/brand/connections/sx_logo.png",
     mark: "SX",
     role: "Execution Control",
     subtitle: "Blocks unsafe action and records audit",
