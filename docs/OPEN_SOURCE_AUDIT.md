@@ -16,7 +16,7 @@ planning, SQLite evidence, blocked risk, and protected profit.
 - Judge Demo Mode default with no secrets required.
 - Local FastAPI backend, Vite React frontend, SQLite schema, deterministic demo fixtures, local
   policy, guardrail adapter boundary, and evidence-ledger behavior.
-- Optional Full Proof Mode documentation for local ignored `.env` values when real isolated
+- Optional real-tool proof documentation for local ignored `.env` values when real isolated
   Hermes and Stripe test mode are safely configured.
 - Optional NemoHermes runtime documentation only as an explicitly selected, fail-closed local
   planning route.

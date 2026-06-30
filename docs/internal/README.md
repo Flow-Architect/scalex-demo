@@ -10,5 +10,8 @@ Public users should start with:
 - `docs/OPERATOR_GUIDE.md`
 - `docs/OPEN_SOURCE_AUDIT.md`
 
+Historical notes that are useful but too detailed for the main public docs live in
+`docs/internal/archive/`.
+
 Keep internal notes public-safe: no local machine paths, credentials, private URLs, raw logs,
 recordings, uploaded real files, or unverified integration claims.

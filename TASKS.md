@@ -2,18 +2,17 @@
 
 ## Current Priority
 
-Final release owner review and GitHub push prep.
+Final public-release review and GitHub push prep.
 
-Before pushing to GitHub:
+Before pushing:
 
-- Push the Goal 9D clean-checkout documentation fix if it has not been pushed yet.
+- Push the latest documentation/favicon cleanup commit if it has not been pushed yet.
 - Review `docs/OPERATOR_GUIDE.md` as the public local-demo runbook.
-- Re-run the release checks in `docs/OPEN_SOURCE_AUDIT.md`.
+- Re-run the release checks in `docs/OPEN_SOURCE_AUDIT.md` if more files change.
 - Confirm `git status --short` is clean after the final commit.
-- Confirm ignored local files such as `.env`, `data/*.db`, `frontend/dist`, `frontend/node_modules`,
-  `backend/.venv`, caches, logs, and recordings are not staged.
+- Confirm ignored local files such as `.env`, `data/*.db`, `frontend/dist`,
+  `frontend/node_modules`, `backend/.venv`, caches, logs, and recordings are not staged.
 - Review third-party logo usage and attribution in `docs/ATTRIBUTIONS.md`.
-- Review README quickstart on a clean checkout if time allows.
 
 ## Do Not Add For This Release
 
@@ -29,14 +28,15 @@ Before pushing to GitHub:
 
 - Dashboard opens with Northstar Dental Group / Client Implementation Launch.
 - Pre-run outcome values stay pending or zero until the governed run completes.
-- `Start Governed Run` plays the readable governed-run animation.
-- Hermes surfaces show a Nemotron 3 Ultra-capable route in Judge Demo Mode.
+- `Start Governed Run` plays the governed-run animation.
+- Hermes surfaces preserve the truthfulness boundary: deterministic proof unless runtime evidence
+  proves a configured route.
 - Connection Hub and Settings preserve the boundary: Hermes proposes; ScaleX governs.
 - Evidence Ledger is empty before the run and shows audit rows after completion.
-- Completed run shows $8,500 revenue, $3,935 cost basis, $3,200 risk contained, $4,565 protected
-  profit, and 53.7% protected margin.
+- Completed run shows `$8,500` revenue, `$3,935` cost basis, `$3,200` risk contained, `$4,565`
+  protected profit, and `53.7%` protected margin.
 - Reset returns outcome and evidence values to pending/zero state.
 
-## Suggested Next Goal
+## Suggested Next Step
 
-Goal 9E - final GitHub push verification and submission packaging.
+Final GitHub push verification and submission packaging.

@@ -1,9 +1,18 @@
 # CHANGELOG - ScaleX
 
-This changelog is a concise public release history. Detailed local handoff notes were removed
-before public GitHub cleanup.
+This changelog is a concise public release history.
 
-## 2026-06-30 - Goal 9D: Clean checkout functionality audit
+## 2026-06-30 - Public docs organization and safe notes archival
+
+- Rewrote the public architecture, product spec, demo script, and submission writeup as polished
+  user-facing docs.
+- Archived verbose build-history versions under `docs/internal/archive/`.
+- Shortened `docs/internal/AGENTS.md` and archived the fuller operator note.
+- Cleaned current-state tracking docs so they describe verified state instead of local build
+  process history.
+- Updated the frontend favicon reference to use the tracked `sx_logo.png` brand asset.
+
+## 2026-06-30 - Clean checkout functionality audit
 
 Completed:
 
@@ -34,11 +43,7 @@ Validation:
 - Release scans found no tracked unsafe artifacts, no stale current economics, and no real-looking
   secrets.
 
-Suggested commit message:
-
-Verify ScaleX clean checkout release
-
-## 2026-06-30 - Goal 9C: MIT license and final public cleanup
+## 2026-06-30 - MIT license and final public cleanup
 
 Completed:
 
@@ -67,15 +72,11 @@ Validation:
 - Full working-tree unsafe/generated scan found ignored local operator artifacts only; they were
   not staged.
 
-Suggested commit message:
-
-Add MIT license for ScaleX release
-
-## 2026-06-30 - Goal 9B: Public repo structure and operator guide
+## 2026-06-30 - Public repo structure and operator guide
 
 Completed:
 
-- Moved internal Codex/operator notes from root `AGENTS.md` to `docs/internal/AGENTS.md`.
+- Moved internal operator notes from root `AGENTS.md` to `docs/internal/AGENTS.md`.
 - Added `docs/internal/README.md` to clarify internal notes are optional and public-safe.
 - Moved root `DECISIONS.md` to `docs/DECISIONS.md`.
 - Added `docs/OPERATOR_GUIDE.md` with local demo startup, execution modes, auth behavior, reset,
@@ -99,11 +100,7 @@ Validation:
 - Full working-tree generated/runtime scan found ignored local operator artifacts only; they were
   not staged.
 
-Suggested commit message:
-
-Finalize ScaleX public repo structure
-
-## 2026-06-30 - Goal 9A: Open-source GitHub release cleanup
+## 2026-06-30 - Open-source GitHub release cleanup
 
 Completed:
 
@@ -131,31 +128,27 @@ Validation:
 - `./scripts/check-nemo.sh` passed.
 - `git diff --check` passed.
 
-Suggested commit message:
-
-Prepare ScaleX open-source GitHub release
-
-## 2026-06-29 - Goal 8Z: Nemotron 3 Ultra Hermes attribution
+## 2026-06-29 - Nemotron 3 Ultra Hermes attribution
 
 - Added truthful Nemotron 3 Ultra-capable attribution to Hermes planning surfaces.
 - Preserved Judge Demo Mode truthfulness: deterministic planning proof unless runtime evidence
   verifies the selected model.
 - Updated Dashboard, Hermes rail/detail, Connection Hub, Evidence Ledger, Settings, and docs.
 
-## 2026-06-29 - Goal 8Y: Outcome and evidence gating
+## 2026-06-29 - Outcome and evidence gating
 
 - Gated protected profit, margin, blocked risk, and evidence rows until the visible governed run
   completes.
 - Preserved completed run behavior and reset-to-pending behavior.
 
-## 2026-06-28 to 2026-06-29 - Goal 8I through 8X: Final control-room polish
+## 2026-06-28 to 2026-06-29 - Final control-room polish
 
 - Rebuilt the UI into a dark enterprise control-room shell with sidebar navigation, governed run
   stage, evidence ledger, connection hub, settings, and supporting intake/costing panels.
 - Improved blocked-risk visibility, economic control, proof artifacts, logo treatment, system
   cards, pre-run truthfulness, and animation readability.
 
-## 2026-06-27 to 2026-06-28 - Goal 8F through 8H: Enterprise demo narrative
+## 2026-06-27 to 2026-06-28 - Enterprise demo narrative
 
 - Added command-center depth: business intake, document review, workforce costing, cost basis,
   guardrails, evidence, and final profit report.
