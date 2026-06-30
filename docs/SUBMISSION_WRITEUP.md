@@ -25,20 +25,12 @@ verifies the selected model. ScaleX shows Nemotron 3 Ultra as active only when m
 runtime evidence proves it; otherwise the UI labels the route as capable and keeps ScaleX as the
 execution control plane: Hermes proposes and ScaleX governs.
 
-The current proof is a functional live working product prototype, not a static mock. Goal 8F
-deepened the browser surface into a command center. Goal 8G locks the judge-facing product
-narrative around ScaleX as the enterprise control plane that lets AI safely execute paid client
-operations without losing control of money, margin, compliance boundaries, or audit proof.
-Goal 8H completed the frontend-first cinematic visual redesign for the recording. It does not add
-a new integration or backend feature; it turns the existing deterministic Northstar story into
-three visible acts: the paid client operation, governed AI execution, and enterprise proof.
-Goal 8I completed the final control-room skin rewrite without replacing the app with a static
-prototype: the dashboard, governed run, evidence ledger, connection hub, and settings boundaries
-views remain API-backed while presenting a fixed dark enterprise shell for the recording.
-Goals 8J through 8O finished the final frontend/story polish on that shell: stronger run
-animation, blocked-risk drama, proof artifacts, evidence drawer clarity, mode language, compact
-rails, brand treatment, overflow fixes, and the current ScaleX logo implementation without adding
-new integrations or changing backend safety behavior.
+The current proof is a functional product prototype, not a static mock. The dashboard, governed
+run, evidence ledger, connection hub, and settings views remain API-backed while presenting a
+fixed dark enterprise shell for the recording. The final frontend/story polish emphasizes the
+paid client operation, governed AI execution, enterprise proof, blocked-risk decision, evidence
+drawer, connection boundaries, and protected profit without adding new integrations or changing
+backend safety behavior.
 
 ScaleX Connection Hub is an implemented internal product layer that shows which
 systems the ClientOps Autopilot is allowed to use, what execution mode each connector is in, what

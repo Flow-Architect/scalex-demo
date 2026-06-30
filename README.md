@@ -1,410 +1,127 @@
-# ScaleX Governed ClientOps
+# ScaleX
 
-ScaleX Governed ClientOps is the judge-facing demo narrative for ScaleX ClientOps Autopilot, an
-Enterprise Function Accelerator for revenue-backed client operations.
+ScaleX is a governed execution layer for revenue-backed client operations.
 
-Core demo line:
+Enterprise teams want AI agents to help run client operations, but they cannot let raw agents
+touch money, vendors, client workflows, approvals, or internal systems without proof, policy,
+money control, and audit. ScaleX wraps planning, finance state, policy checks, controlled
+execution, evidence, and profit reporting into one governed run.
 
-> ScaleX helps enterprise teams safely turn paid client work into governed AI-executed operations.
-> Hermes plans the work, Stripe proves the financial state, NeMo checks actions before execution,
-> and ScaleX records the evidence, blocks unsafe spend, and reports protected profit.
+## What It Does
 
-## Problem
+ScaleX turns a paid client operation into a governed run:
 
-Enterprises want AI agents to help run client operations, but they cannot let raw agents touch
-money, vendors, client workflows, approvals, or internal systems without proof, policy, money
-control, and audit evidence.
+- Business intake and reviewed operation context
+- Prepared delivery cost basis
+- Hermes planning with a Nemotron 3 Ultra-capable route
+- Stripe sandbox/test finance state
+- NemoClaw / NeMo / local policy guardrails
+- Tool action rail with policy boundaries
+- Blocked risky spend
+- SQLite evidence ledger
+- Protected profit report
 
-ScaleX solves that by letting Hermes plan and route the operation, Stripe provide finance proof,
-ScaleX enforce business rules, local policy check spend and margin today, the NeMo Guardrails
-adapter provide optional runtime-verified guardrail proof, optional NemoHermes API routing run
-Hermes through the local NemoClaw/OpenShell sandbox when selected, and SQLite record evidence.
-The result is a governed execution layer for revenue-backed client operations, not a generic
-workflow app, chatbot, integration dashboard, or Zapier/n8n clone.
+Judge Demo Mode uses deterministic planning proof unless runtime evidence verifies the selected
+model. Hermes proposes the plan; ScaleX governs execution.
 
-## Goal 8G Enterprise Demo Narrative Lock
+## Demo Story
 
-Goal 8G locks the judge-facing narrative and UI around ScaleX as the control plane that lets AI
-safely execute paid client operations. The first 10 seconds of the demo should communicate:
+Current sample:
 
-```text
-Governed execution for revenue-backed client operations
+- Client: Northstar Dental Group
+- Operation: Client Implementation Launch
+- Revenue secured: $8,500
+- Prepared/approved cost basis after governed run: $3,935
+- Risk contained after blocked vendor action: $3,200
+- Protected profit after governed run: $4,565
+- Protected margin: 53.7%
+- Margin floor: 50.0%
 
-Hermes plans the work. Stripe proves the money. NeMo checks every risky action.
-ScaleX blocks unsafe execution, records evidence, and protects profit.
-```
+The blocked action is a risky data-broker/vendor enrichment request. ScaleX blocks it because it
+would create uncontrolled spend exposure and push margin below the configured floor.
 
-The visible execution stack is:
+## Execution Modes
 
-```text
-Hermes plans -> Stripe proves -> NeMo checks -> ScaleX records
-```
+- Judge Demo Mode: default deterministic/local mode. No external credentials are required.
+- Stripe Sandbox Prototype: test-mode finance path when configured safely. No live money.
+- Verified Live Mode: locked future mode. It is not enabled for this hackathon project.
 
-The intended run sequence is:
+## System Roles
 
-1. Input rail passed.
-2. Hermes plan created.
-3. Planning rail approved.
-4. Stripe finance proof created.
-5. Revenue gate verified.
-6. NeMo/local policy reviewed action.
-7. Controlled setup spend approved.
-8. Risky vendor/data enrichment spend blocked.
-9. Work execution completed.
-10. Evidence ledger recorded proof.
-11. Output rail verified paid-state honesty.
-12. Profit outcome recorded.
+- Hermes / Nemotron 3 Ultra-capable planning route: proposes the plan and next actions.
+- Stripe: provides sandbox/test finance state.
+- NemoClaw / NeMo / local policy: checks risky actions before execution.
+- ScaleX: controls execution, records evidence, blocks unsafe spend, and reports protected profit.
 
-## Current Implemented Sample
+## Safety Boundaries
 
-The current code implements the Client Implementation Launch template with the synthetic
-Northstar Dental Group account.
+- No live money.
+- No production customer data.
+- Fake/demo clients only.
+- Fake/demo employees only.
+- No payroll or HR compliance processing.
+- No SSNs, tax IDs, bank data, PHI, or real client records.
+- No production Hermes claim.
+- No real NemoClaw or NeMo runtime claim unless runtime evidence proves it.
+- No secrets committed.
 
-- Client/account: Northstar Dental Group
-- Template: Client Implementation Launch
-- Industry label: Multi-location healthcare services group
-- Implementation package revenue: $8,500
-- Setup/tool spend: $1,150
-- Margin floor: 50%
-- Approved setup spend: $350 Secure Workspace Pack, $500 Data Migration Sandbox, and $300 Launch Asset Kit
-- Blocked risk: $3,200 Unapproved Data Broker Enrichment
-- Approved delivery cost basis: $3,935 total approved costs
-- Cost basis line items: $1,150 setup/tool spend, $950 loaded labor cost, $600 campaign/media
-  cost, $375 materials/delivery cost, $285 platform/processing fees, $350 QA/compliance
-  overhead, and $225 contingency reserve
-- Current implemented protected profit: $4,565
-- Current implemented protected margin: 53.7%
-- Blocked-risk impact if allowed: $7,135 total costs, $1,365 profit, and 16.1% margin, blocked
-  because it would violate the 50% margin floor and vendor/risk policy
-- Current formula: protected profit = revenue - total approved costs; protected margin =
-  protected profit / revenue
-- Data boundary: synthetic account only, no patient data, no PHI, no healthcare compliance claim,
-  and no HIPAA support claim
+## Quickstart
 
-Harbor Fleet Services is no longer the current implemented sample. It remains historical only in
-older changelog entries.
-
-## Template Model
-
-Implemented today:
-
-- Template: Client Implementation Launch
-- Sample account: Northstar Dental Group
-- Story: a multi-location client purchased an implementation package, and ScaleX launches the
-  client operation from revenue proof through guarded execution and protected profit reporting.
-
-Future templates are planned, not implemented yet: Invoice-to-Cash, Vendor Spend Approval, Client
-Onboarding, Research-to-Report, Ops Handoff, and Renewal Recommendation.
-
-## Enterprise Demo Surface
-
-Goal 8F added command-center depth. Goal 8G makes those modules support a clearer enterprise
-story: ScaleX knows the client context, secured revenue, approved delivery cost basis, blocked
-spend risk, margin floor, guardrail results, and evidence duties before allowing agent execution.
-
-The first screen should show the Northstar Dental Group / Client Implementation Launch operation,
-the money controls, the Control Stack, the blocked-risk decision, and the Evidence Ledger preview
-without opening on an empty state.
-
-Supporting modules remain available as Business Intake, Document Intake Review, Workforce Costing,
-Economic Control, Guarded Execution Rails, Evidence Ledger, Connection Hub, Runs, and Settings.
-
-Client and employee onboarding should support manual entry plus demo-safe PDF, Excel/spreadsheet,
-and Word/document intake. Extracted values require review and editing before save, saved records
-remain editable, manual entry remains available after extraction failure, and unsupported-file
-states are shown clearly. Intake uses deterministic fixtures or basic local parsing only; no
-external extraction services, credentials, real uploaded files, or raw file contents are committed
-or logged.
-
-Labor costing is job costing only, not payroll. The current deterministic labor model is $950:
-ClientOps Lead at $70/hr for 6h ($420), Implementation Specialist at $55/hr for 6h ($330), and
-QA / Handoff Support at $50/hr for 4h ($200). Labor is one component of the approved delivery
-cost basis; protected profit is revenue minus total approved costs.
-
-Safety boundaries: fake/demo clients and employees only; no SSNs, tax IDs, bank information,
-addresses, birth dates, real HR records, sensitive payroll records, production payroll, HR
-compliance, tax processing, live money, secrets, raw credential headers, or `.env` values.
-
-## Architecture
-
-```text
-Client operation intake
--> Hermes/GPT-5.5 plans and routes the operation
--> ScaleX Connection Hub declares allowed systems, modes, guardrails, and evidence duties
--> Stripe provides finance proof through test invoice/payment state
--> ScaleX executes and enforces business rules
--> local policy active now checks spend, margin, vendors, and payment-before-spend
--> NeMo Guardrails adapter available when runtime verified
--> optional NVIDIA NemoClaw / OpenShell / nemohermes API runtime when selected and verified
--> SQLite records evidence
--> Profit Outcome reports protected profit after approved delivery costs and blocked risk impact
-```
-
-## Safety Boundary
-
-ScaleX is not production software. Product mode is real-integration-first, but every integration
-must run in the appropriate environment.
-
-- Goal 7 uses real Stripe test mode with `sk_test_...` keys and no live-money movement.
-- Live-money payments are a future capability only through Verified Live Mode.
-- No real client data.
-- No production Hermes, Prometheus, OpenClaw, Recall, or xScaleOS connections.
-- Stripe test doubles are for automated tests, CI, local offline development, or explicitly labeled diagnostics.
-- Product-mode integration failures must surface visible errors.
-- Policy enforcement currently runs through a local policy engine.
-- Guardrail mode defaults to `local_policy`; optional `nemo_guardrails` mode can verify the
-  Python `nemoguardrails` runtime through `SCALEX_NEMO_PYTHON` and fails closed if selected but
-  unavailable.
-- Optional NVIDIA NemoClaw / OpenShell / `nemohermes` routing is available through
-  `HERMES_RUNTIME=nemoclaw` after the local API is already validated.
-- Telegram approval is planned and not implemented yet.
-- Hermes planning uses the ScaleX-isolated laptop install, not production Hermes.
-- Stripe test invoices are labeled honestly as open/unpaid unless Stripe reports `paid=true`.
-- Open-source release still needs an explicit license decision before the repo should be called
-  open source.
-
-## Current Prototype State
-
-Implemented today:
-
-- FastAPI backend.
-- SQLite evidence ledger at `data/scalex.db`.
-- Real ScaleX-isolated Hermes Agent planning through the `scalex-operator` skill.
-- Hermes invocation constrained to the `skills` toolset for planning.
-- SQLite planning run and orchestration call audit records.
-- Local policy engine enforcing payment-before-spend, vendor, spend-cap, and margin-floor rules.
-- Real Stripe test-mode invoice flow through the orchestration layer.
-- Stripe test-double records for automated tests, CI, offline development, and diagnostics.
-- Deterministic Finance, Marketing, Research, and Ops outputs.
-- Vite React product shell with local prototype auth, Dashboard, Governed Run Studio, Onboarding,
-  Client Operations, Runs, Evidence Ledger, Connection Hub, and Settings.
-- Connected Governed Run Studio page with proof nodes, selected-node inspector, persisted run history, and
-  historical run inspection.
-- Command Center dashboard sections for Mission Control, Runtime / Connection Hub, Client
-  Onboarding Center, Employee Onboarding Center, Document Intake Review, Workforce / Labor Cost
-  Panel, Economic Control Panel, Policy / Guardrail Console, Agent Workbench, Judge Proof / Audit
-  Ledger, and Final Profit Report.
-- Demo-safe client and employee intake review with local browser-only manual/edit/save controls
-  and upload-triggered deterministic extraction fixtures. Uploaded files are not stored.
-- Fake/demo labor costing for job profitability after approved vendor spend and employee labor.
-- Judge Demo Mode as the default safe local execution path without secrets.
-- Full Proof Mode for safely configured real isolated Hermes plus real Stripe test mode.
-- Optional NeMo Guardrails adapter proof through `nemoguardrails` runtime verification.
-- Optional NemoHermes API runtime for sandboxed Hermes planning; it is not active by default and
-  fails closed if selected but unavailable.
-
-## Open Source Audit Readiness
-
-This checkout has been prepared for source audit as a local prototype, not a production SaaS
-release. See `docs/OPEN_SOURCE_AUDIT.md`, `SECURITY.md`, and `CONTRIBUTING.md` before publishing
-or accepting external changes.
-
-Current audit posture:
-
-- `.env`, SQLite databases, logs, recordings, videos, caches, virtual environments,
-  `node_modules`, and build output are ignored.
-- Judge Demo Mode remains the default and works without secrets.
-- Full Proof Mode stays local-only through ignored `.env` values.
-- No license has been selected yet. Add a license before calling the repo open source.
-- Do not publish claims for live-money Stripe, production auth, production Hermes, Telegram, MCP,
-  real client data, PHI, or production payroll/HR behavior.
-
-## Connection Hub And MCP Plan
-
-ScaleX Connection Hub is an implemented internal product layer, not a separate product. It shows
-which systems the ClientOps Autopilot is allowed to use, which mode each connector is in, what
-guardrails apply, which actions are blocked, what configuration is missing, and what evidence was
-recorded.
-
-Active connector concepts documented today:
-
-- Hermes Planning
-- Stripe Finance Proof
-- Local Policy
-- NemoClaw / OpenShell Sandbox through optional NemoHermes API runtime
-- SQLite Evidence Ledger
-- Prototype Auth
-
-Planned connector concepts:
-
-- Telegram Approval Gate
-- Slack / Email notifications or future approvals
-- CRM client context
-- Docs / Notion workspace
-- Calendar kickoff scheduling
-- MCP local prototype boundary
-
-MCP is documented as a future access pattern only. ScaleX does not currently expose an MCP server,
-and external agents cannot yet call ScaleX through MCP. MCP is paused until the Telegram approval
-boundary, command-center product-depth pass, and guardrail/tool-boundary review are safe. A
-future ScaleX MCP server may expose safe local read-only tools/resources/prompts first, without
-exposing secrets, bypassing policy or approval, or enabling live-money actions.
-
-## Local Browser Demo
-
-Judge Demo Mode is the default checkout path. It works without real secrets, Stripe keys, Hermes
-auth, NeMo, real client data, patient data, or PHI.
-
-Clone the repo, enter it, then install local dependencies:
+Backend:
 
 ```bash
-git clone <repo-url>
-cd scalex-demo
-./scripts/setup.sh
+cd backend
+python -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+uvicorn app.main:app --host 127.0.0.1 --port 8790
 ```
 
-Start the backend and frontend together:
+Frontend:
 
 ```bash
-./scripts/dev.sh
+cd frontend
+npm install
+VITE_API_BASE_URL=http://127.0.0.1:8790 npm run dev -- --host 127.0.0.1 --port 5174 --strictPort
 ```
 
-The dev script loads `.env` automatically if the file exists, without printing values. A `.env`
-file is optional for Judge Demo Mode. Use the frontend URL printed by the script; the default is:
+Open:
 
 ```text
-http://127.0.0.1:5174
+http://127.0.0.1:5174/
 ```
 
-For the judge-safe path, open Dashboard, then Governed Run Studio, then click `Start Governed Run`.
-The run progresses through input rail, Hermes planning proof, planning rail, Stripe sandbox
-finance proof, revenue gate, NeMo/local policy review, approved setup spend, blocked risk, work
-execution, evidence ledger, output rail, and profit outcome.
+You can also use `./scripts/dev.sh` for the local demo workflow. Keep real credentials in an
+ignored `.env` file only.
 
-Optional local overrides can be placed in ignored `.env`:
-
-```bash
-cp .env.example .env
-```
-
-When `SCALEX_AUTH_ENABLED=true`, configure local-only demo credentials in `.env` before opening
-the UI:
-
-```text
-SCALEX_DEMO_USERNAME=
-SCALEX_DEMO_PASSWORD=
-SCALEX_SESSION_SECRET=
-```
-
-After login, use Dashboard or Onboarding to load/select the Northstar Dental Group sample or create
-another synthetic/sample client operation, then open Governed Run Studio and click
-`Start Governed Run`.
-The run uses the active operation values and appends a new run record instead of
-overwriting prior history.
-
-Goal 7.12 is complete: `Start Governed Run` visibly executes from run start through Hermes planning,
-Stripe finance proof, guardrail review, approved setup spend, blocked risk, work execution,
-evidence ledger, and profit outcome.
-
-Judge Demo Mode is the default safe local path. It works without real secrets, uses deterministic
-local planning proof and Stripe test-double/sandbox finance proof, writes SQLite evidence records,
-and labels output as demo/sandbox proof.
-
-Full Proof Mode is available when ignored local `.env` values safely configure real isolated
-Hermes and Stripe test mode:
-
-```text
-SCALEX_EXECUTION_MODE=full_proof
-```
-
-Full Proof Mode should show `used_real_hermes=true` when real isolated Hermes ran,
-`used_real_stripe=true` when real Stripe test mode ran, `stripe_mode=stripe_test`,
-`livemode=false`, a Stripe invoice ID, a hosted invoice URL when Stripe provides it, and no paid
-claim unless Stripe reports `paid=true`.
-
-Hermes plans the finance step but does not create or send invoices directly. ScaleX backend
-executes approved finance actions, Stripe returns test-mode proof objects, and ScaleX stores that
-proof in the Evidence Ledger. Demo mode creates sandbox finance proof and does not call Stripe.
-Full Proof Mode must use Stripe test mode only and must not send invoice email to a real client.
-No mode should claim a real client was emailed unless an explicit send step exists and is verified.
-
-In product mode, Stripe requires a local `.env` `sk_test_...` key and returns a visible Stripe
-integration error if test mode is not configured. Automated tests and CI use
-`STRIPE_TEST_DOUBLE_MODE=true`.
-
-Normal laptop runs use the ScaleX-isolated Hermes install:
-
-```text
-HERMES_HOME=/home/ascabrya/.scalex-hermes/home
-HERMES_CLI_PATH=/home/ascabrya/.scalex-hermes/hermes-agent/venv/bin/hermes
-HERMES_SKILL_NAME=scalex-operator
-HERMES_TOOLSETS=skills
-```
-
-Useful local endpoints:
-
-```text
-GET  http://127.0.0.1:8787/api/health
-GET  http://127.0.0.1:8787/api/demo/state
-POST http://127.0.0.1:8787/api/demo/run
-POST http://127.0.0.1:8787/api/demo/reset
-POST http://127.0.0.1:8787/api/demo/onboarding
-POST http://127.0.0.1:8787/api/demo/workflows
-POST http://127.0.0.1:8787/api/demo/workflows/{workflow_id}/select
-POST http://127.0.0.1:8787/api/demo/workflows/{workflow_id}/delete
-GET  http://127.0.0.1:8787/api/demo/state?run_id={run_id}
-POST http://127.0.0.1:8787/api/auth/login
-GET  http://127.0.0.1:8787/api/auth/me
-POST http://127.0.0.1:8787/api/auth/logout
-```
-
-To run only the backend:
-
-```bash
-SCALEX_BACKEND_ONLY=true ./scripts/dev.sh
-```
-
-Run checks with:
+## Validation
 
 ```bash
 ./scripts/test.sh
+./scripts/check-nemo.sh
+cd frontend && npm run build
 ```
 
-The test script runs backend pytest and the frontend production build.
+Run the open-source safety checks in `docs/OPEN_SOURCE_AUDIT.md` before publishing or pushing a
+public release.
 
-Reset the demo state with:
+## Repository Structure
 
-```bash
-./scripts/reset-demo.sh
-```
+- `backend/` - FastAPI app, deterministic demo runner, policy/guardrail services, and tests.
+- `frontend/` - Vite React control-room UI.
+- `docs/` - product, architecture, demo, submission, audit, attribution, and release notes.
+- `policies/` - local business-rule policy configuration.
+- `scripts/` - local setup, dev, test, reset, and guardrail check helpers.
+- `data/` - schema and synthetic seed data only. Runtime databases are ignored.
+- `demo-assets/` - intentionally public demo placeholders only.
 
-These commands must not use live Stripe mode or production service credentials.
+## License
 
-## Checkout Notes
+License pending. See `docs/LICENSE_DECISION_REQUIRED.md`. Do not treat this repository as
+open-source reusable until a license is selected and added.
 
-- Judge Demo Mode is safe by default and does not require secrets.
-- Full Proof Mode is optional and local-only.
-- Live-money Stripe execution is not implemented.
-- Northstar Dental Group is synthetic; no real client data, patient data, or PHI is used.
-- Connection Hub UI is implemented as the ClientOps operating boundary; MCP remains planned only
-  and no MCP server exists today.
-- Real NeMo is optional through `nemo_guardrails` mode only when runtime verification passes; the
-  default Judge Demo Mode remains `local_policy` and does not require NeMo.
-- No `LICENSE` file is present yet. Select a license such as MIT or Apache-2.0 before public
-  open-source submission.
+## Third-Party Names And Logos
 
-## What Is Real, Test, And Future
-
-- Real now: isolated Hermes planning through `scalex-operator`, real Stripe test-mode invoice
-  creation/finalization, SQLite evidence ledger, local policy enforcement, optional NeMo
-  Guardrails adapter runtime probing through `SCALEX_NEMO_PYTHON`, local prototype auth,
-  SQLite-backed local/sample workflows, selected-workflow runs, persisted run history, and browser
-  product flow.
-- Judge Demo Mode: deterministic Hermes planning and Stripe test-double/sandbox proof for hosted
-  judge-safe demos, automated tests, CI, offline development, or explicitly labeled diagnostics.
-- Implemented now for Goals 8B/8C: guardrail adapter modes `local_policy`, `nemo_guardrails`, and
-  `nemo_compatible`; `guardrail_evaluations` evidence; input/planning/execution/output rails;
-  API/UI proof fields; and setup/check scripts for an external NeMo venv.
-- Implemented now for Goal 7.13B: Connection Hub UI for allowed systems, connector modes,
-  guardrails, evidence duties, blocked policy actions, missing config, Full Proof capability, and
-  planned-only connector boundaries.
-- Verified locally in Goal 7.14B: Full Proof Mode completed with real isolated Hermes, real
-  Stripe test-mode invoice proof, NeMo Guardrails runtime verification through
-  `nemoguardrails`, local policy active, `livemode=false`, and unpaid Stripe state preserved.
-- Optional now: NemoHermes API runtime behind `HERMES_RUNTIME=nemoclaw`; it is not active by
-  default and fails closed when selected but unavailable.
-- Not implemented today: Telegram approval, MCP server, live money, real client email, real client
-  data, and PHI handling.
-- Planned next after Goal 8G: Goal 9 final submission prep. Telegram and MCP remain deferred until
-  the boundaries are explicitly reprioritized.
-- Future: Verified Live Mode remains later work.
+Third-party names and logos are trademarks of their respective owners. Their use here is for
+demo/integration identification only and does not imply endorsement. See
+`docs/ATTRIBUTIONS.md`.

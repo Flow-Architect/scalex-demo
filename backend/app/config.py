@@ -52,9 +52,9 @@ class Settings:
     scalex_live_allowed_customer_emails: str = ""
     scalex_live_confirmation_phrase: str = "LIVE_MONEY_APPROVED"
     scalex_auth_enabled: bool = False
-    scalex_demo_username: str = ""
-    scalex_demo_password: str = ""
-    scalex_session_secret: str = ""
+    scalex_demo_username: str = "admin"
+    scalex_demo_password: str = "change-me"
+    scalex_session_secret: str = "change-me"
 
 
 def get_settings() -> Settings:
@@ -83,14 +83,14 @@ def get_settings() -> Settings:
         hermes_mode=os.getenv("HERMES_MODE", "isolated_cli"),
         hermes_cli_path=os.getenv(
             "HERMES_CLI_PATH",
-            os.getenv("HERMES_BIN", "/home/ascabrya/.scalex-hermes/hermes-agent/venv/bin/hermes"),
+            os.getenv("HERMES_BIN", "hermes"),
         ),
-        hermes_home=os.getenv("HERMES_HOME", "/home/ascabrya/.scalex-hermes/home"),
-        hermes_model=os.getenv("HERMES_MODEL", "gpt-5.5"),
-        hermes_provider=os.getenv("HERMES_PROVIDER", "openai-codex"),
+        hermes_home=os.getenv("HERMES_HOME", ""),
+        hermes_model=os.getenv("HERMES_MODEL", ""),
+        hermes_provider=os.getenv("HERMES_PROVIDER", ""),
         hermes_timeout_seconds=_int_env("HERMES_TIMEOUT_SECONDS", 60),
-        hermes_require_real=_bool_env("HERMES_REQUIRE_REAL", True),
-        hermes_test_mode=_bool_env("HERMES_TEST_MODE", False),
+        hermes_require_real=_bool_env("HERMES_REQUIRE_REAL", False),
+        hermes_test_mode=_bool_env("HERMES_TEST_MODE", True),
         hermes_max_output_chars=_int_env("HERMES_MAX_OUTPUT_CHARS", 12000),
         hermes_skill_name=os.getenv("HERMES_SKILL_NAME", "scalex-operator"),
         hermes_skill_source_path=os.getenv(
@@ -124,9 +124,9 @@ def get_settings() -> Settings:
             "LIVE_MONEY_APPROVED",
         ),
         scalex_auth_enabled=_bool_env("SCALEX_AUTH_ENABLED", False),
-        scalex_demo_username=os.getenv("SCALEX_DEMO_USERNAME", ""),
-        scalex_demo_password=os.getenv("SCALEX_DEMO_PASSWORD", ""),
-        scalex_session_secret=os.getenv("SCALEX_SESSION_SECRET", ""),
+        scalex_demo_username=os.getenv("SCALEX_DEMO_USERNAME", "admin"),
+        scalex_demo_password=os.getenv("SCALEX_DEMO_PASSWORD", "change-me"),
+        scalex_session_secret=os.getenv("SCALEX_SESSION_SECRET", "change-me"),
     )
 
 

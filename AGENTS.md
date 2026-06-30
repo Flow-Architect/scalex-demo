@@ -10,7 +10,7 @@ Category: Enterprise Function Accelerator
 
 Submission title: ScaleX ClientOps Autopilot: Enterprise Function Accelerator for Revenue-Backed Client Operations
 
-Repo path: `/home/ascabrya/dev/scalex-demo`
+Repo path: this repository root.
 
 ScaleX helps B2B teams turn repeatable client operations into autonomous, revenue-backed,
 policy-governed runs with finance proof, guardrail enforcement, and audit evidence. Product mode
@@ -83,8 +83,9 @@ unless that integration is actually wired, tested, and documented.
 - Current implemented approved setup spend: $350, $500, and $300.
 - Current implemented blocked risk: $3,200.
 - Current implemented margin floor: 50%.
-- Current implemented profit outcome should show $8,500 revenue, $1,150 approved setup spend,
-  $3,200 blocked risk, $7,350 protected gross profit, and 86.5% protected margin.
+- Current implemented profit outcome should show $8,500 revenue, $3,935 prepared/approved
+  delivery cost basis after governed run, $3,200 blocked risk, $4,565 protected profit, and
+  53.7% protected margin.
 - Harbor Fleet Services is historical only and is no longer the current implemented sample.
 
 ## Preferred Stack
@@ -141,9 +142,9 @@ Stripe:
 
 Hermes:
 
-- use the ScaleX-isolated laptop Hermes install
-- code: `/home/ascabrya/.scalex-hermes/hermes-agent`
-- home/config/auth: `/home/ascabrya/.scalex-hermes/home`
+- use an operator-configured isolated Hermes install only through ignored local environment
+  variables
+- do not commit local Hermes paths, credentials, auth state, or production configuration
 
 ## Documentation Rules
 

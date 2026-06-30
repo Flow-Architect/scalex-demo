@@ -1,6 +1,6 @@
 # Open Source Audit Readiness
 
-Last reviewed: 2026-06-28
+Last reviewed: 2026-06-30
 
 ## Current Release Posture
 
@@ -33,15 +33,15 @@ planning, SQLite evidence, blocked risk, and protected profit.
 ## Tracked File Hygiene
 
 Current `.gitignore` protects `.env`, local env variants, logs, Python caches, virtual
-environments, `node_modules`, build output, SQLite database files, recordings, common video files,
-and coverage output. Tracked source should not include:
+environments, `node_modules`, build output, SQLite database files, recordings, common media files,
+archives, OS/editor files, and coverage output. Tracked source should not include:
 
 - `.env` or other secret-bearing env files.
 - SQLite `.db`, `.sqlite`, WAL, or backup files.
 - uploaded real files, raw file contents, recordings, logs, browser caches, virtual environments,
   `node_modules`, or build artifacts.
-- API keys, auth cookies, provider tokens, Stripe secrets, raw credential headers, or production
-  config paths.
+- API keys, auth cookies, provider tokens, Stripe secrets, raw credential headers, private local
+  machine paths, or production config paths.
 
 ## Required Checks Before Publishing
 
@@ -62,6 +62,8 @@ return no matches.
 ## Open Items Before Calling It Open Source
 
 - Choose and add a license. Do not call the repo open source until the license owner selects one.
+- Keep `docs/ATTRIBUTIONS.md` with the third-party trademark notice if third-party logos remain
+  in `frontend/public/brand/connections/`.
 - Confirm whether screenshots are allowed in `demo-assets/screenshots/`; recordings remain ignored.
 - Re-run the full validation suite after final docs/UI changes.
 - Review generated dependency lockfiles for expected package names and versions.

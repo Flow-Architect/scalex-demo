@@ -257,12 +257,6 @@ Historical Goal 7.15A local prerequisite probe, superseded by later local runtim
 - `nemoclaw`: missing.
 - `nemohermes`: missing.
 - `openshell`: missing.
-- `docker`: missing / not usable.
-- `node`: present, v22.22.2.
-- `npm`: present, 10.9.7.
-- `zstd`: present.
-- `strings`: present.
-
 Implemented optional NemoHermes mode uses `HERMES_MODE=nemohermes_api` or
 `HERMES_RUNTIME=nemoclaw`, `HERMES_API_BASE_URL=http://127.0.0.1:8642/v1`,
 `HERMES_MODEL=hermes-agent`, and `NEMOCLAW_SANDBOX_NAME=scalex-hermes`. If selected but
@@ -277,11 +271,11 @@ longer the current runtime sample.
 
 ## Hermes Integration
 
-Goal 6 wired the backend to the ScaleX-isolated Hermes install:
+The backend can use an operator-configured isolated Hermes install:
 
 ```text
-code: /home/ascabrya/.scalex-hermes/hermes-agent
-home/config/auth: /home/ascabrya/.scalex-hermes/home
+HERMES_CLI_PATH=<local Hermes executable>
+HERMES_HOME=<local Hermes home>
 skill source: hermes/skills/scalex-operator/SKILL.md
 ```
 

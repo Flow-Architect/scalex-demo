@@ -30,8 +30,8 @@ Implemented template:
 
 ## Recording Path
 
-Use this three-minute script for the recording. The current Goal 8O control-room shell keeps the
-app API-backed, demo-safe, and focused on the Northstar operation, current ScaleX logo treatment,
+Use this three-minute script for the recording. The current control-room shell keeps the app
+API-backed, demo-safe, and focused on the Northstar operation, current ScaleX logo treatment,
 mode clarity, proof artifacts, governed rails, and the blocked-risk moment.
 
 0:00-0:10
