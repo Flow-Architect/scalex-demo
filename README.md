@@ -32,6 +32,10 @@
   <a href="docs/OPERATOR_GUIDE.md">Operator Guide</a>
 </p>
 
+> ScaleX is developed and tested on Linux. Because it uses a Python/FastAPI backend, a Vite
+> frontend, and SQLite, it should run on macOS and on Windows through WSL2. Native Windows support
+> has not been fully tested yet.
+
 ![ScaleX dashboard ready state](docs/assets/github/dashboard-ready.png)
 
 <p align="center">
