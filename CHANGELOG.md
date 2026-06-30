@@ -10,6 +10,37 @@ Use:
 
 ---
 
+## 2026-06-29 - Goal 8Y: Gate outcomes until governed run completion
+
+Completed:
+- Added frontend display gating so completed outcomes and evidence records stay hidden until the
+  visible governed run completes.
+- Kept pre-run Dashboard/sidebar outcomes pending or zero, and extended the same truthfulness to
+  Connection Hub Prototype Modes, the SQLite Evidence Ledger connector card, Governed Run Studio
+  Operation Details, rail proof snippets, proof artifacts, Settings economics rows, and
+  supporting tool/action panels.
+- Changed Evidence Ledger pre-run behavior to show `0` row counts and a pending empty state
+  instead of completed audit rows.
+- Preserved the completed Evidence Ledger table, blocked-risk row, final Profit Outcome/result
+  card, completed metric values, Goal 8R economics, visual design, layout, colors, logo, spacing,
+  animation timing, backend mechanics, run/reset behavior, Stripe/Hermes/NemoClaw behavior, no
+  live money, no Telegram, no new integrations, no `.env` changes, and no database artifacts.
+
+Verification:
+- `cd frontend && npm run build` passed.
+- `./scripts/test.sh` passed with 68 backend tests and a successful frontend build.
+- `./scripts/check-nemo.sh` passed with `nemoguardrails` 0.21.0 and `guardrails/scalex` loaded.
+- Browser smoke at `http://127.0.0.1:5174/` verified pre-run pending outcome/evidence state,
+  completed value reveal after Start Governed Run, and Reset returning the UI to pending/zero.
+
+Suggested commit message:
+Gate ScaleX outcomes until governed run completion
+
+Next:
+- Goal 9 - final repo/video/submission polish and open-source audit closeout.
+
+---
+
 ## 2026-06-29 - Goal 8X: Pre-run stack and outcome metric gating
 
 Completed:

@@ -4,7 +4,7 @@
 
 Goal 9 - final repo/video/submission polish and open-source audit closeout.
 
-Goal 8X is complete. Return to final recording and submission readiness:
+Goal 8Y is complete. Return to final recording and submission readiness:
 
 - Rehearse the three-minute recording against `docs/DEMO_SCRIPT.md`.
 - Confirm the local demo opens at `http://127.0.0.1:5174/` with the dark control-room UI.
@@ -15,8 +15,16 @@ Goal 8X is complete. Return to final recording and submission readiness:
   $0 protected profit, and Pending protected margin.
 - Confirm the sidebar Active Operation card shows Revenue $8,500 and Profit Pending before the
   run.
+- Confirm Connection Hub Prototype Modes and the SQLite Evidence Ledger connector do not show
+  completed profit/risk/margin/evidence values before the run.
+- Confirm Governed Run Studio Operation Details and rail proof snippets show pending outcome
+  state before the run.
+- Confirm Evidence Ledger shows `0` counts and the pending empty state before the run.
 - Confirm the final complete metric strip reads $8,500 revenue, $3,935 approved costs, $3,200
   risk contained, $4,565 protected profit, and 53.7% protected margin.
+- Confirm Connection Hub, Governed Run Studio, Settings, and Evidence Ledger show completed
+  values only after the governed run completes.
+- Confirm Reset returns outcome/evidence values to pending/zero state.
 - Confirm Cost Basis is labeled as planned/prepared before the run, then approved after
   completion; the table should still show the polished cost basis, $950 loaded labor as job
   costing only, and the blocked-risk detail should show 16.1% margin if risky spend were
@@ -28,8 +36,7 @@ Goal 8X is complete. Return to final recording and submission readiness:
   NemoClaw / NeMo Policy, and ScaleX Control Plane, with subtle active highlighting during the
   governed-run sequence.
 - Confirm pre-run Live Run Detail shows the Ready to Govern decision stage, larger Governance
-  Stack cards, operation summary, readiness chips, and visible Start Governed Run button before
-  recording.
+  Stack cards, and visible Start Governed Run button before recording.
 - Capture final screenshots or video assets only if needed for submission.
 - Do a final submission copy check against `docs/SUBMISSION_WRITEUP.md`.
 - Review `docs/OPEN_SOURCE_AUDIT.md`, `SECURITY.md`, and `CONTRIBUTING.md` before public release.
@@ -41,6 +48,29 @@ new backend features, new external services, production payroll/HR behavior, MCP
 changes, database files, uploaded real files, or secrets.
 
 ## Recently Completed
+
+Goal 8Y is complete. It was a frontend-only outcome and evidence display gating pass:
+
+- Added consistent frontend run-state display gating so completed outcomes are hidden until the
+  visible governed run completes.
+- Kept pre-run Dashboard/sidebar outcomes pending or zero, and extended that behavior to
+  Connection Hub Prototype Modes, the SQLite Evidence Ledger connector card, Governed Run Studio
+  Operation Details, rail proof snippets, proof artifacts, Settings economics rows, and
+  supporting tool/action panels.
+- Changed Evidence Ledger pre-run behavior to `0` counts with a pending empty state instead of
+  completed audit rows.
+- Preserved the completed Evidence Ledger table, blocked-risk row, final Profit Outcome/result
+  card, completed metric values, Goal 8R economics, visual design, layout, colors, logo, spacing,
+  animation timing, backend mechanics, run/reset behavior, Stripe/Hermes/NemoClaw behavior, no
+  live money, no Telegram, no new integrations, no `.env` changes, and no database artifacts.
+
+Goal 8Y validation:
+
+- `cd frontend && npm run build` passed.
+- `./scripts/test.sh` passed with 68 backend tests and a successful frontend build.
+- `./scripts/check-nemo.sh` passed with `nemoguardrails` 0.21.0 and `guardrails/scalex` loaded.
+- Browser smoke at `http://127.0.0.1:5174/` verified pre-run pending outcome/evidence state,
+  completed value reveal after Start Governed Run, and Reset returning the UI to pending/zero.
 
 Goal 8X is complete. It was a frontend-only pre-run stack and outcome metric truthfulness pass:
 

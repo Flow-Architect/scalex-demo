@@ -157,7 +157,7 @@ export function ControlRoomApp({
 }: ControlRoomAppProps) {
   const [drawerTab, setDrawerTab] = useState<DrawerTab>("summary");
   const [expandedRailId, setExpandedRailId] = useState("blocked-spend");
-  const [runVisualState, setRunVisualState] = useState<RunVisualState>(state?.report ? "complete" : "idle");
+  const [runVisualState, setRunVisualState] = useState<RunVisualState>("idle");
   const [activeRailId, setActiveRailId] = useState<string | null>(null);
   const [completedRailIds, setCompletedRailIds] = useState<string[]>([]);
   const [blockedFlash, setBlockedFlash] = useState(false);
@@ -232,7 +232,7 @@ export function ControlRoomApp({
       return;
     }
 
-    if (state?.report || runCompletedMoment) {
+    if (runCompletedMoment || (runVisualState === "complete" && state?.report)) {
       setRunVisualState("complete");
       setActiveRailId(null);
       setCompletedRailIds(model.rails.map((rail) => rail.id));
@@ -294,8 +294,8 @@ export function ControlRoomApp({
           />
         ) : null}
         {activeView === "audit" ? <EvidenceLedgerView model={model} runVisualState={runVisualState} /> : null}
-        {activeView === "integrations" ? <ConnectionHubView model={model} /> : null}
-        {activeView === "settings" ? <SettingsView auth={auth} health={health} model={model} state={state} /> : null}
+        {activeView === "integrations" ? <ConnectionHubView model={model} runVisualState={runVisualState} /> : null}
+        {activeView === "settings" ? <SettingsView auth={auth} health={health} model={model} runVisualState={runVisualState} state={state} /> : null}
       </div>
     </div>
   );
@@ -330,8 +330,10 @@ function ControlTopbar({
   runVisualState: RunVisualState;
   runStatus: string;
 }) {
+  const hasCompletedRun = runVisualState === "complete";
+  const evidenceRowsLabel = hasCompletedRun ? `${model.auditRows} evidence rows` : "0 evidence rows";
   const crumbByView: Record<string, string> = {
-    audit: `Evidence Ledger / ${model.auditRows} evidence rows`,
+    audit: `Evidence Ledger / ${evidenceRowsLabel}`,
     dashboard: "Governed execution for revenue-backed client operations",
     integrations: "Connection Hub / active systems · governed demo",
     settings: "Settings / Boundaries & Runtime",
@@ -345,7 +347,7 @@ function ControlTopbar({
       : runStatus);
   const statusLabel = runVisualState === "running"
     ? "Running"
-    : runVisualState === "complete" || model.hasReport
+    : hasCompletedRun
       ? "Complete"
       : "Ready";
   const buttonLabel = runVisualState === "running"
@@ -362,7 +364,7 @@ function ControlTopbar({
       </div>
       <div className="flex flex-none items-center gap-2">
         <StatusBadge label="Judge Demo Mode" tone={model.primaryModeTone} />
-        <StatusBadge label={statusLabel} tone={runVisualState === "running" ? "blue" : runVisualState === "complete" || model.hasReport ? "green" : "muted"} />
+        <StatusBadge label={statusLabel} tone={runVisualState === "running" ? "blue" : hasCompletedRun ? "green" : "muted"} />
         <button className="control-btn" onClick={() => onNavigate("audit")} type="button">Review Ledger</button>
         <button className="control-btn-primary" disabled={runActive} onClick={onRun} type="button">
           {runActive ? <RefreshCw className="h-4 w-4 animate-spin" /> : <Play className="h-4 w-4" />}
@@ -517,11 +519,149 @@ function operationFactsForRunState(model: ControlRoomModel, runVisualState: RunV
     { label: "Operation", value: model.operationName },
     { label: "Revenue", value: model.metrics.find((metric) => metric.label === "Revenue secured")?.value ?? "$8,500", tone: "white" },
     { label: "Cost basis", value: model.approvedCostsLabel, tone: "amber" },
-    { label: "Risk to contain", value: model.blockedRiskLabel, tone: "red" },
+    { label: "Risk to contain", value: "Pending", tone: "muted" },
     { label: "Profit", value: "Pending", tone: "muted" },
     { label: "Margin", value: "Pending", tone: "muted" },
     { label: "Floor", value: model.marginFloorLabel, tone: "amber" },
   ];
+}
+
+function prototypeFactsForRunState(model: ControlRoomModel, runVisualState: RunVisualState): StatPill[] {
+  if (runVisualState === "complete") {
+    return [
+      { label: "Approved costs", value: model.approvedCostsLabel, tone: "green" },
+      { label: "Protected profit", value: model.protectedProfitLabel, tone: "green" },
+      { label: "Protected margin", value: model.marginLabel, tone: "green" },
+      { label: "Blocked risk", value: model.blockedRiskLabel, tone: "red" },
+    ];
+  }
+
+  return [
+    { label: "Planned cost basis", value: model.approvedCostsLabel, tone: "amber" },
+    { label: "Protected profit", value: "Pending", tone: "muted" },
+    { label: "Protected margin", value: "Pending", tone: "muted" },
+    { label: "Blocked risk", value: "Not evaluated", tone: "muted" },
+  ];
+}
+
+function auditPillsForRunState(model: ControlRoomModel, runVisualState: RunVisualState): StatPill[] {
+  if (runVisualState === "complete") {
+    return model.auditPills;
+  }
+
+  return model.auditPills.map((pill) => ({ ...pill, value: "0", tone: "muted" as Tone }));
+}
+
+function connectionCardsForRunState(model: ControlRoomModel, runVisualState: RunVisualState): ConnectorCardModel[] {
+  if (runVisualState === "complete") {
+    return model.connectionCards;
+  }
+
+  return model.connectionCards.map((card) => {
+    if (card.title !== "SQLite Evidence Ledger") {
+      return card;
+    }
+
+    return {
+      ...card,
+      badges: [{ label: "ready", tone: "muted" }, { label: "demo mode", tone: "amber" }, { label: "0 evidence rows", tone: "muted" }],
+      facts: [
+        { label: "Ledger entries", value: "0", tone: "muted" },
+        { label: "Evidence rows", value: "0", tone: "muted" },
+        { label: "Reports", value: "0", tone: "muted" },
+        { label: "Blocked spend rows", value: "0", tone: "green" },
+      ],
+    };
+  });
+}
+
+function toolActionGroupsForRunState(model: ControlRoomModel, runVisualState: RunVisualState): ToolActionGroupView[] {
+  if (runVisualState === "complete") {
+    return model.toolActionGroups;
+  }
+
+  return model.toolActionGroups.map((group) => ({
+    ...group,
+    actions: group.actions.map((action) => {
+      if (/ledger|block_unapproved_spend|retrieve_payment_status|create_invoice|send_invoice|create_customer|guardrail|policy/i.test(action.name)) {
+        return { ...action, status: "Ready", tone: "muted" as Tone };
+      }
+      if (/hermes/i.test(action.name)) {
+        return { ...action, status: "Proposed", tone: "blue" as Tone };
+      }
+      return action;
+    }),
+  }));
+}
+
+function stripeFlowStepsForRunState(model: ControlRoomModel, runVisualState: RunVisualState): FlowStepView[] {
+  if (runVisualState === "complete") {
+    return model.stripeFlowSteps;
+  }
+
+  return model.stripeFlowSteps.map((step) => ({
+    ...step,
+    detail: step.label === "Record finance state" ? "Finance evidence records when the governed run executes." : step.detail,
+    status: step.label === "Retrieve invoice/payment status" ? "Pending" : "Ready",
+    tone: "muted" as Tone,
+  }));
+}
+
+function railProofForRunState(rail: RailView, runVisualState: RunVisualState, active: boolean, complete: boolean): { detail: string; evidence: string } {
+  if (runVisualState === "complete" || active || complete) {
+    return { detail: rail.detail, evidence: rail.evidence };
+  }
+
+  switch (rail.id) {
+    case "approved-spend":
+      return {
+        detail: "Setup spend approval has not been executed yet. Cost basis is prepared for the governed run.",
+        evidence: "Spend approval pending",
+      };
+    case "blocked-spend":
+      return {
+        detail: "Risky vendor action has not been evaluated yet. Start the governed run to record the policy decision.",
+        evidence: "Risk decision pending",
+      };
+    case "evidence":
+      return {
+        detail: "Audit rows are recorded during the governed run. No completed evidence is shown before execution.",
+        evidence: "Ledger recording pending",
+      };
+    case "profit":
+      return {
+        detail: "Protected profit and margin are reported only after the governed run completes.",
+        evidence: "Profit outcome pending",
+      };
+    case "cost-basis":
+      return {
+        detail: "Prepared delivery cost basis is loaded for the run; governed approval is recorded during execution.",
+        evidence: "Cost basis prepared",
+      };
+    default:
+      return { detail: "Rail is ready and will record evidence when the governed run executes.", evidence: "Rail ready" };
+  }
+}
+
+function proofArtifactDetailForRunState(artifact: ProofArtifactModel, queued: boolean): string {
+  if (!queued) {
+    return artifact.detail;
+  }
+
+  switch (artifact.railId) {
+    case "approved-spend":
+      return "Prepared for governed approval during the run.";
+    case "blocked-spend":
+      return "Risk decision pending until the policy rail evaluates the vendor action.";
+    case "evidence":
+      return "Ledger record pending until the governed run records evidence.";
+    case "profit":
+      return "Profit and margin outcome pending until the final rail completes.";
+    case "cost-basis":
+      return "Planned delivery cost basis prepared for execution.";
+    default:
+      return "Ready to record non-secret evidence when this rail runs.";
+  }
 }
 
 function RunSignals({ completedRailIds, runVisualState }: { completedRailIds: string[]; runVisualState: RunVisualState }) {
@@ -913,8 +1053,8 @@ function EnterpriseControlPanel({ model, runVisualState }: { model: ControlRoomM
   return (
     <div className="enterprise-control-stack">
       <BusinessCostBasisCard model={model} runVisualState={runVisualState} />
-      <ToolActionRailCard model={model} />
-      <StripeFinanceFlowCard model={model} />
+      <ToolActionRailCard model={model} runVisualState={runVisualState} />
+      <StripeFinanceFlowCard model={model} runVisualState={runVisualState} />
       <NemoGuardrailLayerCard model={model} />
     </div>
   );
@@ -1017,7 +1157,9 @@ function BusinessCostBasisCard({ model, runVisualState }: { model: ControlRoomMo
   );
 }
 
-function ToolActionRailCard({ model }: { model: ControlRoomModel }) {
+function ToolActionRailCard({ model, runVisualState }: { model: ControlRoomModel; runVisualState: RunVisualState }) {
+  const toolActionGroups = toolActionGroupsForRunState(model, runVisualState);
+
   return (
     <article className="enterprise-card">
       <div className="enterprise-card-head">
@@ -1028,7 +1170,7 @@ function ToolActionRailCard({ model }: { model: ControlRoomModel }) {
         <StatusBadge label="not real MCP" tone="amber" />
       </div>
       <div className="tool-action-groups">
-        {model.toolActionGroups.map((group) => (
+        {toolActionGroups.map((group) => (
           <div className="tool-action-group" key={group.title}>
             <p>{group.title}</p>
             <div>
@@ -1047,8 +1189,10 @@ function ToolActionRailCard({ model }: { model: ControlRoomModel }) {
   );
 }
 
-function StripeFinanceFlowCard({ model }: { model: ControlRoomModel }) {
-  const invoiceId = model.state?.stripe?.invoice_id ?? "test-double/local finance state";
+function StripeFinanceFlowCard({ model, runVisualState }: { model: ControlRoomModel; runVisualState: RunVisualState }) {
+  const hasCompletedRun = runVisualState === "complete";
+  const invoiceId = hasCompletedRun ? model.state?.stripe?.invoice_id ?? "test-double/local finance state" : "pending governed run";
+  const stripeFlowSteps = stripeFlowStepsForRunState(model, runVisualState);
   return (
     <article className="enterprise-card">
       <div className="enterprise-card-head">
@@ -1059,7 +1203,7 @@ function StripeFinanceFlowCard({ model }: { model: ControlRoomModel }) {
         <StatusBadge label={model.state?.stripe?.used_real_stripe ? "test mode" : "demo/test-double"} tone="purple" />
       </div>
       <ol className="finance-flow-list">
-        {model.stripeFlowSteps.map((step, index) => (
+        {stripeFlowSteps.map((step, index) => (
           <li key={step.label}>
             <span className="finance-flow-index">{index + 1}</span>
             <div>
@@ -1154,6 +1298,7 @@ function GovernedRunView({
               const active = activeRailId === rail.id;
               const complete = completedRailIds.includes(rail.id);
               const result = railResult(rail, active, complete);
+              const proof = railProofForRunState(rail, runVisualState, active, complete);
               return (
                 <button
                   className={`rail-card text-left ${active ? "rail-running" : ""} ${complete ? "rail-complete" : ""} ${rail.id === "blocked-spend" && (active || complete) ? "rail-card-blocked" : ""} ${rail.id === "blocked-spend" && blockedFlash ? "blocked-card-flash danger-pulse-on-visible" : ""}`}
@@ -1171,8 +1316,8 @@ function GovernedRunView({
                   </div>
                   {expanded ? (
                     <div className="mt-2 rounded-md border border-[#232834] bg-[#0a0b0e] p-3 text-xs leading-5 text-[#A1A1AA]">
-                      <p className="font-semibold text-[#FFFFFF]">{rail.evidence}</p>
-                      <p className="mt-1">{rail.detail}</p>
+                      <p className="font-semibold text-[#FFFFFF]">{proof.evidence}</p>
+                      <p className="mt-1">{proof.detail}</p>
                     </div>
                   ) : null}
                 </button>
@@ -1217,14 +1362,19 @@ function GovernedRunView({
 }
 
 function EvidenceLedgerView({ model, runVisualState }: { model: ControlRoomModel; runVisualState: RunVisualState }) {
+  const hasCompletedRun = runVisualState === "complete";
+  const auditPills = auditPillsForRunState(model, runVisualState);
+  const auditRows = hasCompletedRun ? model.auditRowsData : [];
+
   return (
     <section className="grid h-full min-h-0 grid-cols-[minmax(0,1fr)_240px] gap-4">
       <Panel
         title="Enterprise Audit Ledger"
         eyebrow="actor · action · evidence · safety"
-        action={<div className="flex flex-wrap gap-2">{model.auditPills.map((pill) => <StatusBadge key={pill.label} label={`${pill.label}: ${pill.value}`} tone={pill.tone ?? "muted"} />)}</div>}
+        action={<div className="flex flex-wrap gap-2">{auditPills.map((pill) => <StatusBadge key={pill.label} label={`${pill.label}: ${pill.value}`} tone={pill.tone ?? "muted"} />)}</div>}
       >
         <div className="h-[calc(100vh-174px)] overflow-auto rounded-md border border-[#232834]">
+          {hasCompletedRun ? (
           <table className="min-w-full border-separate border-spacing-0 text-sm">
             <thead className="sticky top-0 bg-[#0d0e12] text-left text-xs uppercase text-[#A1A1AA]">
               <tr>
@@ -1234,7 +1384,7 @@ function EvidenceLedgerView({ model, runVisualState }: { model: ControlRoomModel
               </tr>
             </thead>
             <tbody>
-              {model.auditRowsData.map((row, index) => (
+              {auditRows.map((row, index) => (
                 <tr
                   className={`ledger-row-enter bg-[#111318] ${row.order === "005" ? "ledger-row-blocked border-l-4 border-[#ef4444]" : ""} ${row.order === "010" ? "ledger-row-profit" : ""}`}
                   key={row.order}
@@ -1250,6 +1400,20 @@ function EvidenceLedgerView({ model, runVisualState }: { model: ControlRoomModel
               ))}
             </tbody>
           </table>
+          ) : (
+            <div className="flex h-full min-h-[22rem] flex-col justify-center bg-[#111318] p-8">
+              <p className="text-xs font-semibold uppercase text-[#fcba03]">No audit evidence recorded yet</p>
+              <h2 className="mt-2 text-2xl font-semibold text-white">Start the governed run to create the audit trail.</h2>
+              <p className="mt-3 max-w-2xl text-sm leading-6 text-[#A1A1AA]">
+                Planning, finance state, guardrail decisions, blocked risk, and protected profit outcome remain pending until ScaleX executes the run.
+              </p>
+              <div className="mt-5 grid max-w-3xl grid-cols-2 gap-2">
+                {["Hermes plan pending", "Stripe finance state pending", "NemoClaw/local policy decision pending", "Blocked risk pending", "Profit outcome pending"].map((item) => (
+                  <div className="rounded-md border border-[#232834] bg-[#0a0b0e] px-3 py-2 text-sm font-semibold text-[#A1A1AA]" key={item}>{item}</div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       </Panel>
       <Panel title="Audit Safety" eyebrow="demo boundaries">
@@ -1274,15 +1438,18 @@ function EvidenceLedgerView({ model, runVisualState }: { model: ControlRoomModel
         </div>
         <div className="mt-5 rounded-md border border-[#10B981]/30 bg-[#10B981]/10 p-3">
           <p className="text-xs font-semibold uppercase text-[#10B981]">Profit Outcome</p>
-          <p className="mt-2 text-3xl font-semibold text-white">{model.protectedProfitLabel}</p>
-          <p className="mt-1 text-sm text-[#A1A1AA]">{model.marginLabel} protected margin</p>
+          <p className="mt-2 text-3xl font-semibold text-white">{hasCompletedRun ? model.protectedProfitLabel : "Pending"}</p>
+          <p className="mt-1 text-sm text-[#A1A1AA]">{hasCompletedRun ? `${model.marginLabel} protected margin` : "Protected margin reports after run"}</p>
         </div>
       </Panel>
     </section>
   );
 }
 
-function ConnectionHubView({ model }: { model: ControlRoomModel }) {
+function ConnectionHubView({ model, runVisualState }: { model: ControlRoomModel; runVisualState: RunVisualState }) {
+  const connectionCards = connectionCardsForRunState(model, runVisualState);
+  const prototypeFacts = prototypeFactsForRunState(model, runVisualState);
+
   return (
     <section className="grid h-full min-h-0 grid-rows-[auto_minmax(0,1fr)_auto] gap-4">
       <div className="flex items-center justify-between rounded-md border border-[#232834] bg-[#111318] p-4">
@@ -1303,7 +1470,7 @@ function ConnectionHubView({ model }: { model: ControlRoomModel }) {
       </div>
       <div className="grid min-h-0 grid-cols-[minmax(0,1fr)_320px] gap-4">
         <div className="grid min-h-0 grid-cols-2 grid-rows-2 gap-4">
-        {model.connectionCards.map((card) => (
+        {connectionCards.map((card) => (
           <ConnectorCard key={card.title} card={card} />
         ))}
         </div>
@@ -1320,10 +1487,9 @@ function ConnectionHubView({ model }: { model: ControlRoomModel }) {
             ))}
           </div>
           <dl className="mt-4 grid grid-cols-2 gap-2">
-            <FactRow label="Approved costs" value={model.approvedCostsLabel} tone="green" />
-            <FactRow label="Protected profit" value={model.protectedProfitLabel} tone="green" />
-            <FactRow label="Protected margin" value={model.marginLabel} tone="green" />
-            <FactRow label="Blocked risk" value={model.blockedRiskLabel} tone="red" />
+            {prototypeFacts.map((fact) => (
+              <FactRow key={fact.label} label={fact.label} value={fact.value} tone={fact.tone} />
+            ))}
           </dl>
           <div className="mt-4 rounded-md border border-[#232834] bg-[#0a0b0e] p-3">
             <p className="text-xs font-semibold uppercase text-[#06B6D4]">NemoClaw / NeMo Guardrails</p>
@@ -1350,13 +1516,23 @@ function SettingsView({
   auth,
   health,
   model,
+  runVisualState,
   state,
 }: {
   auth: AuthStatus | null;
   health: HealthResponse | null;
   model: ControlRoomModel;
+  runVisualState: RunVisualState;
   state: DemoState | null;
 }) {
+  const hasCompletedRun = runVisualState === "complete";
+  const economicsValue = hasCompletedRun
+    ? `${model.approvedCostsLabel} approved costs / ${model.protectedProfitLabel} profit / ${model.marginLabel} margin`
+    : `${model.approvedCostsLabel} planned cost basis / profit Pending / margin Pending`;
+  const blockedRiskValue = hasCompletedRun
+    ? `${model.blockedRiskLabel} blocked / ${model.marginIfBlockedApprovedLabel} margin if approved`
+    : "Blocked risk Pending / margin impact Pending";
+  const recordsValue = `${state?.runs?.length ?? 0} runs / ${hasCompletedRun ? model.auditRows : 0} evidence rows`;
   const rows = [
     ["Prototype auth", auth?.auth_enabled ? auth.authenticated ? `Signed in as ${auth.username ?? "operator"}` : "Enabled" : "Disabled for local judge demo", "Local prototype auth only; not production identity."],
     ["Execution mode", state?.execution?.label ?? "Judge Demo Mode", state?.execution?.truthfulness_note ?? "Demo mode and Full Proof Mode stay explicitly labeled."],
@@ -1366,8 +1542,8 @@ function SettingsView({
     ["MCP-ready tool path", "ScaleX tool action rail / skill path", "No real MCP server execution is claimed in the current app."],
     ["Runtime", `${health?.mode ?? state?.mode ?? "local"} / ${state?.execution?.hermes_runtime ?? "isolated_cli"}`, "Local API and SQLite-backed product workspace."],
     ["Active operation", `${model.clientName} / ${model.operationName}`, "Synthetic Northstar B2B implementation operation only."],
-    ["Protected economics", `${model.approvedCostsLabel} approved costs / ${model.protectedProfitLabel} profit / ${model.marginLabel} margin`, "Protected profit is revenue minus approved delivery costs."],
-    ["Blocked risk impact", `${model.blockedRiskLabel} blocked / ${model.marginIfBlockedApprovedLabel} margin if approved`, "Risky vendor spend remains blocked before execution."],
+    ["Protected economics", economicsValue, "Protected profit is revenue minus approved delivery costs."],
+    ["Blocked risk impact", blockedRiskValue, "Risky vendor spend remains blocked before execution."],
     ["Data", "Synthetic sample", "No patient data, no PHI, no healthcare compliance or HIPAA claim."],
     ["Stripe test mode only", model.stripeLabel, "Judge Demo uses deterministic/test-double finance; real Stripe test objects only when safely configured."],
     ["Money movement", `livemode=${String(Boolean(state?.stripe?.livemode))}`, "No live-money support; future live execution requires Verified Live Mode."],
@@ -1375,7 +1551,7 @@ function SettingsView({
     ["NemoClaw commands", "not invoked", "No Docker, NemoClaw, or production sandbox commands are run by this demo."],
     ["Production Hermes", "not used", "Optional NemoHermes/Hermes runtime routing is configuration-gated and fail-closed."],
     ["Secrets", "not displayed", "No tokens, .env values, credential headers, or live keys are shown or stored in UI state."],
-    ["Records", `${state?.runs?.length ?? 0} runs / ${model.auditRows} evidence rows`, "SQLite evidence is local; no production customer workflow claim."],
+    ["Records", recordsValue, "SQLite evidence is local; no production customer workflow claim."],
   ];
 
   return (
@@ -1599,6 +1775,7 @@ function ProofArtifactGrid({
         const queued = !active && !revealed;
         const statusLabel = queued ? "Ready" : active ? "Running" : artifact.status;
         const statusTone = queued ? "muted" : active ? "blue" : artifact.tone;
+        const detail = proofArtifactDetailForRunState(artifact, queued);
         const Icon = artifact.icon;
         return (
         <article className={`artifact-card ${queued ? "artifact-card-queued" : "artifact-card-revealed"} ${active ? "artifact-card-active" : ""} ${artifact.tone === "red" && revealed ? "artifact-card-blocked" : ""}`} key={artifact.title}>
@@ -1614,7 +1791,7 @@ function ProofArtifactGrid({
             </div>
             <StatusBadge label={statusLabel} tone={statusTone} />
           </div>
-          <p className="mt-2 text-xs leading-5 text-[#A1A1AA]">{artifact.detail}</p>
+          <p className="mt-2 text-xs leading-5 text-[#A1A1AA]">{detail}</p>
           <p className="mt-2 truncate font-mono text-[0.66rem] text-[#52525B]">{artifact.meta}</p>
         </article>
         );

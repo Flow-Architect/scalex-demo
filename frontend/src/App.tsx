@@ -86,7 +86,7 @@ export default function App() {
   const activeWorkflow = state?.workflow ?? null;
   const displayCustomer = activeWorkflow?.client_name ?? state?.job?.client_name ?? "Northstar Dental Group";
   const displayJob = activeWorkflow?.job_name ?? state?.job?.job_name ?? "Client Implementation Launch";
-  const sidebarProfitReady = Boolean(state?.report) && (busyAction !== "run" || runCompletedMoment || sidebarOutcomeReleased);
+  const sidebarProfitReady = Boolean(state?.report) && (runCompletedMoment || sidebarOutcomeReleased);
   const sidebarProfitLabel = sidebarProfitReady ? formatCurrencyText(money.grossProfitCents) : "Pending";
 
   useEffect(() => {
@@ -202,7 +202,6 @@ export default function App() {
     setBusyAction("refresh");
     setError(null);
     setRunCompletedMoment(false);
-    setSidebarOutcomeReleased(false);
     try {
       const [healthResponse, stateResponse] = await Promise.all([
         getHealth(),

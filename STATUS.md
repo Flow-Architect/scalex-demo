@@ -7,10 +7,10 @@ Last updated: 2026-06-29
 - Project folder exists at `/home/ascabrya/dev/scalex-demo`.
 - Latest committed baseline before Goal 8E: `615a9bd Document NemoClaw correction and next
   integration plan`.
-- Last completed goal: Goal 8X - pre-run stack cards and outcome metric gating.
-- Last completed implementation/QA goal: Goal 8X - frontend-only pre-run governance stack and
-  metric truthfulness polish.
-- Last completed documentation/tracking update: Goal 8X pre-run stack / metric gating closeout.
+- Last completed goal: Goal 8Y - outcome and evidence display gating.
+- Last completed implementation/QA goal: Goal 8Y - frontend-only outcome/evidence visibility
+  truthfulness pass.
+- Last completed documentation/tracking update: Goal 8Y outcome/evidence gating closeout.
 - Last completed checkout cleanup: Open Source Checkout Cleanup for judge readiness.
 - Current priority: Goal 9 - final repo/video/submission polish.
 - Goal 8I used the uploaded six-phase control-room visual prompt as a design specification only.
@@ -297,6 +297,22 @@ Last updated: 2026-06-29
   secret scan, and browser smoke for pre-run gated metrics/sidebar, enlarged Governance Stack,
   real run click, blocked-risk reveal, final metrics/result stability, no horizontal overflow,
   Connection Hub, and Settings truthfulness.
+- Goal 8Y completed the frontend-only outcome/evidence display gating pass. It keeps the
+  dashboard, sidebar, Connection Hub Prototype Modes, Governed Run Studio operation details,
+  proof artifacts, Settings economics rows, and tool/action support panels from showing completed
+  blocked-risk, protected-profit, protected-margin, or evidence outcomes before the visible
+  governed run completes.
+- Goal 8Y makes the Evidence Ledger show `0` row counts and a pending empty state before the run,
+  while preserving the existing completed ledger table, blocked-risk row, safety notes, and final
+  Profit Outcome once the run completes.
+- Goal 8Y preserves the current visual design, layout, colors, logo, spacing, animations, final
+  result card, Goal 8R economics, backend mechanics, run/reset behavior, Stripe/Hermes/NemoClaw
+  behavior, no live money, no Telegram, no new integrations, no `.env`, and no database
+  artifacts.
+- Goal 8Y validation passed `cd frontend && npm run build`, `./scripts/test.sh`,
+  `./scripts/check-nemo.sh`, `git diff --check`, unsafe/generated path scan, staged added-lines
+  secret scan, and browser smoke for pre-run pending outcome/evidence state, completed outcome
+  reveal, and reset returning to pending.
 - Goal 9 remains final polish and submission assets.
 - Goal 7B remains future Verified Live Mode hardening.
 
