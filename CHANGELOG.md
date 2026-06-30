@@ -3,6 +3,41 @@
 This changelog is a concise public release history. Detailed local handoff notes were removed
 before public GitHub cleanup.
 
+## 2026-06-30 - Goal 9D: Clean checkout functionality audit
+
+Completed:
+
+- Verified required tracked frontend, backend, data/config, scripts, docs, and brand assets are
+  present.
+- Verified unsafe runtime artifacts are not tracked.
+- Verified script executable modes are preserved in git.
+- Verified frontend asset references resolve from tracked `frontend/public` files and have
+  fallbacks where used.
+- Created `/tmp/scalex-clean-smoke` from the tracked repository and validated clean install,
+  build, tests, and runtime smoke.
+- Confirmed backend startup/reset/run recreates ignored `data/scalex.db` from tracked schema/seed.
+- Updated README and Operator Guide to document `data/scalex.db` as runtime/ignored and recreated
+  locally from tracked `data/schema.sql` and `data/seed.json`.
+
+Validation:
+
+- Clean checkout backend install passed after network approval for PyPI.
+- Clean checkout frontend `npm install` passed after network/execution approval for package
+  postinstall binaries.
+- Clean checkout `npm run build` passed.
+- Clean checkout `./scripts/test.sh` passed with 68 backend tests and frontend build.
+- Clean checkout `./scripts/check-nemo.sh` passed.
+- Clean checkout `git diff --check` passed.
+- Runtime smoke passed for backend health, demo state, reset, governed run, and rendered frontend
+  dashboard. Port `5174` was occupied locally, so frontend runtime smoke used alternate port
+  `5177`.
+- Release scans found no tracked unsafe artifacts, no stale current economics, and no real-looking
+  secrets.
+
+Suggested commit message:
+
+Verify ScaleX clean checkout release
+
 ## 2026-06-30 - Goal 9C: MIT license and final public cleanup
 
 Completed:
@@ -28,8 +63,7 @@ Validation:
 - Tracked generated/runtime path scan passed.
 - Secret/private path scan found only safe placeholders, test fixtures, redaction code, and
   safety-boundary wording.
-- Stale economics scan found no old `$7,088`, `83.4%`, or `$262` values. Harbor Fleet appears
-  only in historical-not-current notes.
+- Stale economics scan found no deprecated protected-profit, margin, or labor values.
 - Full working-tree unsafe/generated scan found ignored local operator artifacts only; they were
   not staged.
 

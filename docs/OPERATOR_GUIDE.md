@@ -37,6 +37,10 @@ You can also run the safe local helper after dependencies are installed:
 `scripts/dev.sh` defaults to backend port `8790`, frontend port `5174`, and
 `VITE_API_BASE_URL=http://127.0.0.1:8790`.
 
+The runtime SQLite database is `data/scalex.db`. It is ignored and should not be committed. A
+clean checkout recreates it locally from tracked `data/schema.sql` and `data/seed.json` when the
+backend starts or the demo is reset/run.
+
 ## Execution Modes
 
 ### Judge Demo Mode

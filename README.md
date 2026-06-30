@@ -94,6 +94,9 @@ http://127.0.0.1:5174/
 You can also use `./scripts/dev.sh` for the local demo workflow. Keep real credentials in an
 ignored `.env` file only.
 
+The runtime SQLite database `data/scalex.db` is ignored. A clean checkout can recreate it from
+tracked `data/schema.sql` and `data/seed.json` when the backend starts or the demo is reset/run.
+
 ## Validation
 
 ```bash
@@ -117,7 +120,8 @@ not required for normal quickstart or Judge Demo Mode.
 - `docs/` - product, architecture, demo, operator, audit, attribution, decision, and release notes.
 - `policies/` - local business-rule policy configuration.
 - `scripts/` - local setup, dev, test, reset, and guardrail check helpers.
-- `data/` - schema and synthetic seed data only. Runtime databases are ignored.
+- `data/` - schema and synthetic seed data only. Runtime `data/scalex.db` is ignored and
+  recreated locally.
 - `demo-assets/` - intentionally public demo placeholders only.
 
 ## License

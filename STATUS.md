@@ -45,6 +45,45 @@ model.
 
 ## Latest Completed Work
 
+Goal 9D verified clean-checkout functionality after the public push:
+
+- Confirmed required tracked frontend, backend, data/config, scripts, docs, brand assets, and
+  optional NeMo requirements are present.
+- Confirmed root `AGENTS.md`, root `DECISIONS.md`, and `requirements-nemo.txt` remain absent.
+- Confirmed `docs/internal/AGENTS.md`, `docs/DECISIONS.md`, `docs/OPERATOR_GUIDE.md`, and
+  `requirements-nemo-optional.txt` remain present.
+- Confirmed scripts are executable in git.
+- Confirmed referenced frontend logo/brand assets are tracked, resolve through Vite, and have UI
+  fallbacks where used.
+- Created `/tmp/scalex-clean-smoke` from the tracked repository, installed backend/frontend
+  dependencies from scratch, built the frontend, ran tests, and performed backend/frontend runtime
+  smoke checks.
+- Confirmed the clean backend recreates ignored `data/scalex.db` from tracked schema/seed on
+  startup/reset/run.
+- Updated README and Operator Guide to state that `data/scalex.db` is runtime/ignored and
+  recreated locally from tracked `data/schema.sql` and `data/seed.json`.
+
+Validation performed for Goal 9D:
+
+- Clean checkout backend install passed after network approval for PyPI.
+- Clean checkout frontend `npm install` passed after network/execution approval for package
+  postinstall binaries.
+- Clean checkout `npm run build` passed.
+- Clean checkout `./scripts/test.sh` passed with 68 backend tests and frontend build.
+- Clean checkout `./scripts/check-nemo.sh` passed using the optional configured local NeMo venv.
+- Clean checkout `git diff --check` passed.
+- Runtime smoke passed: backend health, demo state, reset, governed run, and rendered frontend
+  dashboard all worked.
+- Port `5174` was already occupied in this environment, so Vite correctly failed with
+  `--strictPort`; runtime frontend smoke used alternate port `5177`.
+- Tracked unsafe/generated file scan passed with no matches.
+- Full working-tree unsafe/generated scan found ignored local artifacts only.
+- Secret/private path scan found only safe placeholders, test fixtures, redaction code, and
+  safety-boundary wording.
+- Stale economics scan found no deprecated protected-profit, margin, or labor values.
+
+Previous completed work:
+
 Goal 9C selected the MIT License and completed the final public-push cleanup:
 
 - Added root `LICENSE` with MIT License text for 2026 Bryan Ascasibar.
@@ -67,12 +106,9 @@ Validation performed for Goal 9C:
 - Tracked generated/runtime path scan passed with no matches.
 - Secret/private path scan found only safe placeholders, test fixtures, redaction code, and
   safety-boundary wording.
-- Stale economics scan found no old `$7,088`, `83.4%`, or `$262` values. Harbor Fleet appears
-  only in historical-not-current notes.
+- Stale economics scan found no deprecated protected-profit, margin, or labor values.
 - Full working-tree unsafe/generated scan found ignored local operator artifacts only:
   `.env` and `data/scalex.db`. They are not tracked or staged and were intentionally not modified.
-
-Previous completed work:
 
 Goal 9B finalized the public repository structure and operator guide:
 
@@ -126,7 +162,7 @@ License selected: MIT.
 
 Final release owner review before public push:
 
-1. Review `README.md`, `docs/OPERATOR_GUIDE.md`, `docs/SUBMISSION_WRITEUP.md`,
+1. Push the Goal 9D clean-checkout documentation fix.
+2. Review `README.md`, `docs/OPERATOR_GUIDE.md`, `docs/SUBMISSION_WRITEUP.md`,
    `docs/DEMO_SCRIPT.md`, and `docs/OPEN_SOURCE_AUDIT.md`.
-2. Run a clean-checkout smoke if time allows.
-3. Push to GitHub only after confirming no local artifacts or secrets are staged.
+3. Confirm no local artifacts or secrets are staged before any future push.
