@@ -65,6 +65,6 @@
 
 ## Release
 
-- A license must be selected before the project is described as open-source reusable.
+- MIT License is selected for the public release.
 - `.env`, runtime databases, logs, recordings, build output, virtual environments, caches, and
   `node_modules` must not be committed.

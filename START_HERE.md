@@ -38,7 +38,6 @@ Open `http://127.0.0.1:5174/`.
 - `docs/SUBMISSION_WRITEUP.md` - hackathon submission draft.
 - `docs/OPEN_SOURCE_AUDIT.md` - release safety checks.
 - `docs/ATTRIBUTIONS.md` - third-party trademark notice.
-- `docs/LICENSE_DECISION_REQUIRED.md` - license blocker.
 - `docs/DECISIONS.md` - locked product, safety, and release decisions.
 - `SECURITY.md` - security boundaries.
 - `CONTRIBUTING.md` - contribution rules.

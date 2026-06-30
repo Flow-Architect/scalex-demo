@@ -41,11 +41,10 @@ The current release demonstrates one synthetic operation:
 
 ## Near-Term Next Steps
 
-1. Select and add a license.
-2. Run a clean-checkout smoke test from README commands.
-3. Push the reviewed repository to GitHub.
-4. Record the final three-minute demo.
-5. Submit the hackathon writeup from `docs/SUBMISSION_WRITEUP.md`.
+1. Run a clean-checkout smoke test from README commands if time allows.
+2. Push the reviewed MIT-licensed repository to GitHub.
+3. Record the final three-minute demo.
+4. Submit the hackathon writeup from `docs/SUBMISSION_WRITEUP.md`.
 
 ## Future Product Directions
 

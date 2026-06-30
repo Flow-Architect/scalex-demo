@@ -6,7 +6,6 @@ Final release owner review and GitHub push prep.
 
 Before pushing to GitHub:
 
-- Choose and add a license, or keep the repository source-available only.
 - Review `docs/OPERATOR_GUIDE.md` as the public local-demo runbook.
 - Re-run the release checks in `docs/OPEN_SOURCE_AUDIT.md`.
 - Confirm `git status --short` is clean after the final commit.
@@ -39,4 +38,4 @@ Before pushing to GitHub:
 
 ## Suggested Next Goal
 
-Goal 9C - license decision, final clean-checkout smoke, and GitHub push.
+Goal 9D - final clean-checkout smoke and GitHub push.

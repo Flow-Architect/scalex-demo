@@ -122,8 +122,7 @@ not required for normal quickstart or Judge Demo Mode.
 
 ## License
 
-License pending. See `docs/LICENSE_DECISION_REQUIRED.md`. Do not treat this repository as
-open-source reusable until a license is selected and added.
+This project is licensed under the MIT License. See `LICENSE`.
 
 ## Third-Party Names And Logos
 

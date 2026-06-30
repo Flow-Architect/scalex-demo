@@ -59,9 +59,9 @@ git diff --cached --unified=0 | rg -i 'sk_live|sk_test|api[_-]?key|secret|token|
 Expected tracked-file scan result: no matches. The staged added-lines secret scan should also
 return no matches.
 
-## Open Items Before Calling It Open Source
+## Open Items Before Public Push
 
-- Choose and add a license. Do not call the repo open source until the license owner selects one.
+- MIT License is selected. Confirm root `LICENSE` remains present before pushing.
 - Keep `docs/ATTRIBUTIONS.md` with the third-party trademark notice if third-party logos remain
   in `frontend/public/brand/connections/`.
 - Keep optional NeMo dependencies in `requirements-nemo-optional.txt`; normal quickstart must not

@@ -3,6 +3,40 @@
 This changelog is a concise public release history. Detailed local handoff notes were removed
 before public GitHub cleanup.
 
+## 2026-06-30 - Goal 9C: MIT license and final public cleanup
+
+Completed:
+
+- Added root `LICENSE` with MIT License text for 2026 Bryan Ascasibar.
+- Removed the obsolete license blocker document.
+- Updated README, START_HERE, STATUS, TASKS, ROADMAP, DECISIONS, and open-source audit docs so
+  license status is MIT rather than pending.
+- Verified the public repo structure after internal docs and decisions moved under `docs/`.
+- Confirmed optional NeMo dependencies remain in `requirements-nemo-optional.txt` and are not
+  required for normal quickstart.
+- Preserved UI, backend mechanics, demo economics, animation timing, feature scope, and Judge
+  Demo Mode behavior.
+
+Validation:
+
+- `cd frontend && npm run build` passed.
+- `./scripts/test.sh` passed with 68 backend tests and frontend build.
+- `./scripts/check-nemo.sh` passed.
+- `git diff --check` passed.
+- License-pending reference scan passed with no stale blocker references.
+- Public root structure check passed for the tracked repository.
+- Tracked generated/runtime path scan passed.
+- Secret/private path scan found only safe placeholders, test fixtures, redaction code, and
+  safety-boundary wording.
+- Stale economics scan found no old `$7,088`, `83.4%`, or `$262` values. Harbor Fleet appears
+  only in historical-not-current notes.
+- Full working-tree unsafe/generated scan found ignored local operator artifacts only; they were
+  not staged.
+
+Suggested commit message:
+
+Add MIT license for ScaleX release
+
 ## 2026-06-30 - Goal 9B: Public repo structure and operator guide
 
 Completed:
@@ -44,7 +78,7 @@ Completed:
   and editor artifacts.
 - Cleaned `.env.example` so it contains placeholders only and no private local paths.
 - Removed private local path defaults from backend configuration.
-- Added `docs/ATTRIBUTIONS.md`, `docs/LICENSE_DECISION_REQUIRED.md`, and `CODE_OF_CONDUCT.md`.
+- Added attribution, security, contribution, conduct, and release-safety docs.
 - Polished `CONTRIBUTING.md`, `SECURITY.md`, `STATUS.md`, `TASKS.md`, `ROADMAP.md`,
   `START_HERE.md`, and release-facing docs.
 - Preserved product behavior, UI layout, animation timing, economics, demo state, and backend
