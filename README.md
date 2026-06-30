@@ -105,11 +105,16 @@ cd frontend && npm run build
 Run the open-source safety checks in `docs/OPEN_SOURCE_AUDIT.md` before publishing or pushing a
 public release.
 
+For a step-by-step local operator flow, see `docs/OPERATOR_GUIDE.md`.
+
+Optional NeMo Guardrails adapter dependencies live in `requirements-nemo-optional.txt`; they are
+not required for normal quickstart or Judge Demo Mode.
+
 ## Repository Structure
 
 - `backend/` - FastAPI app, deterministic demo runner, policy/guardrail services, and tests.
 - `frontend/` - Vite React control-room UI.
-- `docs/` - product, architecture, demo, submission, audit, attribution, and release notes.
+- `docs/` - product, architecture, demo, operator, audit, attribution, decision, and release notes.
 - `policies/` - local business-rule policy configuration.
 - `scripts/` - local setup, dev, test, reset, and guardrail check helpers.
 - `data/` - schema and synthetic seed data only. Runtime databases are ignored.

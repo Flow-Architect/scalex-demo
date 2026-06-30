@@ -33,8 +33,10 @@ load_env_file() {
 
 load_env_file
 
-BACKEND_PORT="${BACKEND_PORT:-8787}"
+BACKEND_PORT="${BACKEND_PORT:-8790}"
 FRONTEND_PORT="${FRONTEND_PORT:-5174}"
+VITE_API_BASE_URL="${VITE_API_BASE_URL:-http://127.0.0.1:$BACKEND_PORT}"
+export VITE_API_BASE_URL
 
 if [ ! -x "$ROOT_DIR/backend/.venv/bin/uvicorn" ]; then
   echo "Backend dependencies are missing. Run ./scripts/setup.sh first." >&2
@@ -58,6 +60,7 @@ trap cleanup EXIT
 
 echo "Starting ScaleX backend at http://127.0.0.1:$BACKEND_PORT"
 echo "Starting ScaleX frontend at http://127.0.0.1:$FRONTEND_PORT"
+echo "Frontend API base URL: $VITE_API_BASE_URL"
 
 (cd "$ROOT_DIR/backend" && .venv/bin/uvicorn app.main:app --reload --host 127.0.0.1 --port "$BACKEND_PORT") &
 (cd "$ROOT_DIR/frontend" && npm run dev -- --host 127.0.0.1 --port "$FRONTEND_PORT" --strictPort) &

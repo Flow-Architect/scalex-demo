@@ -50,6 +50,9 @@ Thumbs.db
 .idea/
 .vscode/
 *~
+*.swp
+*.swo
+*.kate-swp
 
 # Local database backups
 /data/backups/

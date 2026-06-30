@@ -3,6 +3,38 @@
 This changelog is a concise public release history. Detailed local handoff notes were removed
 before public GitHub cleanup.
 
+## 2026-06-30 - Goal 9B: Public repo structure and operator guide
+
+Completed:
+
+- Moved internal Codex/operator notes from root `AGENTS.md` to `docs/internal/AGENTS.md`.
+- Added `docs/internal/README.md` to clarify internal notes are optional and public-safe.
+- Moved root `DECISIONS.md` to `docs/DECISIONS.md`.
+- Added `docs/OPERATOR_GUIDE.md` with local demo startup, execution modes, auth behavior, reset,
+  recording, troubleshooting, optional NeMo verification, and safety reminders.
+- Renamed the optional NeMo requirements file to `requirements-nemo-optional.txt` and updated the
+  setup helper plus public docs.
+- Aligned safe local defaults to backend port `8790`, frontend port `5174`, and
+  `VITE_API_BASE_URL=http://127.0.0.1:8790`.
+- Added ignore rules for editor swap files.
+- Preserved UI, backend mechanics, demo economics, animation timing, feature scope, and Judge
+  Demo Mode behavior.
+
+Validation:
+
+- `cd frontend && npm run build` passed.
+- `./scripts/test.sh` passed with 68 backend tests and frontend build.
+- `./scripts/check-nemo.sh` passed.
+- `git diff --check` passed.
+- Tracked generated/runtime path scan passed.
+- Stale economics, renamed requirements, private path, and real-token pattern scans passed.
+- Full working-tree generated/runtime scan found ignored local operator artifacts only; they were
+  not staged.
+
+Suggested commit message:
+
+Finalize ScaleX public repo structure
+
 ## 2026-06-30 - Goal 9A: Open-source GitHub release cleanup
 
 Completed:

@@ -8,7 +8,7 @@ import type {
 } from "./types";
 
 export const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL ?? "http://127.0.0.1:8787";
+  import.meta.env.VITE_API_BASE_URL ?? "http://127.0.0.1:8790";
 
 export class ApiError extends Error {
   status: number;

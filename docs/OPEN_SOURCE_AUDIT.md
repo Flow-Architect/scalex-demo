@@ -64,6 +64,8 @@ return no matches.
 - Choose and add a license. Do not call the repo open source until the license owner selects one.
 - Keep `docs/ATTRIBUTIONS.md` with the third-party trademark notice if third-party logos remain
   in `frontend/public/brand/connections/`.
+- Keep optional NeMo dependencies in `requirements-nemo-optional.txt`; normal quickstart must not
+  require them.
 - Confirm whether screenshots are allowed in `demo-assets/screenshots/`; recordings remain ignored.
 - Re-run the full validation suite after final docs/UI changes.
 - Review generated dependency lockfiles for expected package names and versions.

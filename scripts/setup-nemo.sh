@@ -15,7 +15,7 @@ fi
 
 "$PYTHON_BIN" -m venv "$NEMO_VENV_DIR"
 "$NEMO_VENV_DIR/bin/python" -m pip install --upgrade pip
-"$NEMO_VENV_DIR/bin/python" -m pip install -r "$ROOT_DIR/requirements-nemo.txt"
+"$NEMO_VENV_DIR/bin/python" -m pip install -r "$ROOT_DIR/requirements-nemo-optional.txt"
 
 echo
 echo "Optional NeMo runtime setup complete."

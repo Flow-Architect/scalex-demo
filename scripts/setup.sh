@@ -22,4 +22,4 @@ else
 fi
 
 echo "Setup complete. ./scripts/dev.sh runs Judge Demo Mode without secrets."
-echo "Optional: copy .env.example to .env for local overrides or Full Proof Mode."
+echo "Optional: copy .env.example to .env for local overrides or explicitly configured proof modes."

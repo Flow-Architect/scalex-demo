@@ -1,6 +1,7 @@
 # AGENTS.md - ScaleX Codex Rules
 
-These rules apply to all Codex work in this repo.
+These internal operator notes apply to Codex work in this repo. They are not required for normal
+local demo operation.
 
 ## Project Identity
 
@@ -110,9 +111,8 @@ Database:
 Guardrails:
 
 - local policy engine is active now
-- real NVIDIA NeMo Guardrails is the Goal 8 target
-- NeMo-compatible/local fallback is allowed only if Goal 8A proves real NeMo cannot be safely
-  wired before submission
+- optional NeMo Guardrails adapter probing is available only through explicit local configuration
+- do not claim real NeMo Guardrails usage unless runtime verification proves it for that run
 
 AI planning:
 
@@ -151,7 +151,7 @@ Hermes:
 ROADMAP.md is the long-term plan.
 STATUS.md is verified current state.
 TASKS.md is the next handoff.
-DECISIONS.md is locked decisions.
+docs/DECISIONS.md is locked decisions.
 CHANGELOG.md records completed changes.
 
 Update STATUS.md, TASKS.md, and CHANGELOG.md before session closeout.
@@ -165,6 +165,6 @@ Required:
 - STATUS.md: current verified state, last completed goal, incomplete items, deferred/revisit items, and current priority.
 - TASKS.md: next recommended goal, required outputs, and do-not-work-on-yet items.
 - CHANGELOG.md: chronological summary of what changed, verification performed, and suggested commit message.
-- DECISIONS.md: update only if a locked decision changed.
+- docs/DECISIONS.md: update only if a locked decision changed.
 
 Do not add redundant tracking files. STATUS.md is the current-state tracker.
