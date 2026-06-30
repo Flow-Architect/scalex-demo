@@ -79,6 +79,7 @@ interface RailView {
 
 interface StatPill {
   label: string;
+  sublabel?: string;
   value: string;
   tone?: Tone;
 }
@@ -103,11 +104,14 @@ interface CostBasisRowView {
 type DecisionSystemId = "hermes" | "stripe" | "policy" | "scalex";
 
 interface DecisionSystemCardView {
+  compactDetail?: string;
+  compactSubtitle?: string;
   detail: string;
   fallbackIcon: LucideIcon;
   id: DecisionSystemId;
   logoSrc?: string;
   mark?: string;
+  role: string;
   subtitle: string;
   title: string;
   tone: Tone;
@@ -395,6 +399,7 @@ function DashboardView({
 }) {
   const dashboardRunning = runVisualState === "running";
   const dashboardDetailCompact = dashboardRunning || runVisualState === "idle";
+  const displayMetrics = displayMetricsForRunState(model, runVisualState);
 
   return (
     <section
@@ -408,7 +413,7 @@ function DashboardView({
         blockedRiskDisplayValue={formatCurrency(displayedBlockedRiskCents)}
         compact={dashboardRunning}
         completedRailIds={completedRailIds}
-        metrics={model.metrics}
+        metrics={displayMetrics}
         runActive={runActive}
         runVisualState={runVisualState}
       />
@@ -443,14 +448,14 @@ function DashboardView({
         </Panel>
         {!dashboardRunning ? (
           <Panel title="Enterprise Rails" eyebrow="intake · tools · guardrails" action={<StatusBadge label="MCP-ready" tone="blue" />}>
-            <EnterpriseControlPanel model={model} />
+            <EnterpriseControlPanel model={model} runVisualState={runVisualState} />
           </Panel>
         ) : null}
       </div>
       {dashboardRunning ? (
         <div className="dashboard-support-lower">
           <Panel title="Enterprise Rails" eyebrow="supporting modules below active run" action={<StatusBadge label="MCP-ready" tone="blue" />}>
-            <EnterpriseControlPanel model={model} />
+            <EnterpriseControlPanel model={model} runVisualState={runVisualState} />
           </Panel>
         </div>
       ) : null}
@@ -485,6 +490,38 @@ function OperationIdentityBar({ compact = false, model }: { compact?: boolean; m
       </div>
     </div>
   );
+}
+
+function displayMetricsForRunState(model: ControlRoomModel, runVisualState: RunVisualState): StatPill[] {
+  if (runVisualState === "complete") {
+    return model.metrics;
+  }
+
+  const revenue = model.metrics.find((metric) => metric.label === "Revenue secured")?.value ?? "$8,500";
+  return [
+    { label: "Revenue secured", sublabel: "client revenue context loaded", value: revenue, tone: "white" },
+    { label: "Approved costs", sublabel: "pending governed approval", value: formatCurrency(0), tone: "muted" },
+    { label: "Risk contained", sublabel: "no risky action evaluated yet", value: formatCurrency(0), tone: "red" },
+    { label: "Protected profit", sublabel: "pending profit outcome", value: formatCurrency(0), tone: "muted" },
+    { label: "Protected margin", sublabel: "reported after run", value: "Pending", tone: "amber" },
+  ];
+}
+
+function operationFactsForRunState(model: ControlRoomModel, runVisualState: RunVisualState): StatPill[] {
+  if (runVisualState === "complete") {
+    return model.operationFacts;
+  }
+
+  return [
+    { label: "Client", value: model.clientName },
+    { label: "Operation", value: model.operationName },
+    { label: "Revenue", value: model.metrics.find((metric) => metric.label === "Revenue secured")?.value ?? "$8,500", tone: "white" },
+    { label: "Cost basis", value: model.approvedCostsLabel, tone: "amber" },
+    { label: "Risk to contain", value: model.blockedRiskLabel, tone: "red" },
+    { label: "Profit", value: "Pending", tone: "muted" },
+    { label: "Margin", value: "Pending", tone: "muted" },
+    { label: "Floor", value: model.marginFloorLabel, tone: "amber" },
+  ];
 }
 
 function RunSignals({ completedRailIds, runVisualState }: { completedRailIds: string[]; runVisualState: RunVisualState }) {
@@ -534,7 +571,7 @@ function LiveRunDetail({
   const invoiceId = model.state?.stripe?.invoice_id ?? "in_demo_northstar";
   const livemode = String(model.state?.stripe?.livemode ?? false);
   const paid = String(model.state?.stripe?.paid ?? false);
-  const decisionSystemCards = <DecisionSystemCards focusId={focusId} runVisualState={runVisualState} />;
+  const decisionSystemCards = <DecisionSystemCards focusId={focusId} prominent={startCompact} runVisualState={runVisualState} />;
   const renderDetail = () => {
     if (focusId === "input" || focusId === "cost-basis") {
       return (
@@ -702,8 +739,7 @@ function LiveRunDetail({
 
     return (
       <section className={`live-detail-card live-detail-enter ${startCompact ? "live-detail-start-compact" : ""}`}>
-        <PreRunDecisionStage model={model} />
-        {decisionSystemCards}
+        <PreRunDecisionStage decisionSystemCards={decisionSystemCards} model={model} />
         <button className="control-btn-primary mt-4 w-full" disabled={runActive} onClick={onRun} type="button">
           {runActive ? "Executing governed run..." : "Start Governed Run"}
         </button>
@@ -722,12 +758,12 @@ function LiveRunDetail({
   );
 }
 
-function PreRunDecisionStage({ model }: { model: ControlRoomModel }) {
+function PreRunDecisionStage({ decisionSystemCards, model }: { decisionSystemCards: ReactNode; model: ControlRoomModel }) {
   const summary = [
     { label: "Client", value: model.clientName, tone: "white" as Tone },
     { label: "Operation", value: model.operationName, tone: "white" as Tone },
     { label: "Revenue", value: model.metrics.find((metric) => metric.label === "Revenue secured")?.value ?? "$8,500", tone: "green" as Tone },
-    { label: "Approved costs", value: model.approvedCostsLabel, tone: "green" as Tone },
+    { label: "Planned cost basis", value: model.approvedCostsLabel, tone: "green" as Tone },
     { label: "Risk to contain", value: model.blockedRiskLabel, tone: "red" as Tone },
     { label: "Margin floor", value: model.marginFloorLabel, tone: "amber" as Tone },
   ];
@@ -746,6 +782,13 @@ function PreRunDecisionStage({ model }: { model: ControlRoomModel }) {
       <p className="pre-run-stage-subtitle">
         ScaleX will inspect the client operation through proof, policy, money control, and audit before execution.
       </p>
+      <div className="pre-run-stack-block" aria-label="Governance Stack">
+        <div className="pre-run-stack-heading">
+          <span>Governance Stack</span>
+          <b>controlled execution stack</b>
+        </div>
+        {decisionSystemCards}
+      </div>
       <div className="pre-run-flow" aria-label="Pre-run governance flow">
         {flow.map((item, index) => (
           <span key={item}>
@@ -769,7 +812,7 @@ function PreRunDecisionStage({ model }: { model: ControlRoomModel }) {
   );
 }
 
-function DecisionSystemCards({ focusId, runVisualState }: { focusId: string; runVisualState: RunVisualState }) {
+function DecisionSystemCards({ focusId, prominent = false, runVisualState }: { focusId: string; prominent?: boolean; runVisualState: RunVisualState }) {
   const activeSystemId = decisionSystemForFocus(focusId, runVisualState);
   const complete = runVisualState === "complete";
 
@@ -781,16 +824,19 @@ function DecisionSystemCards({ focusId, runVisualState }: { focusId: string; run
           card={card}
           complete={complete}
           key={card.id}
+          prominent={prominent}
         />
       ))}
     </div>
   );
 }
 
-function DecisionSystemCard({ active, card, complete }: { active: boolean; card: DecisionSystemCardView; complete: boolean }) {
+function DecisionSystemCard({ active, card, complete, prominent }: { active: boolean; card: DecisionSystemCardView; complete: boolean; prominent: boolean }) {
   const [logoFailed, setLogoFailed] = useState(false);
   const Icon = card.fallbackIcon;
   const showLogo = Boolean(card.logoSrc && !logoFailed);
+  const subtitle = prominent ? card.subtitle : card.compactSubtitle ?? card.subtitle;
+  const detail = prominent ? card.detail : card.compactDetail ?? card.detail;
 
   return (
     <article className={`decision-system-card decision-system-card-${card.tone} ${active ? "decision-system-card-active" : ""} ${complete ? "decision-system-card-complete" : ""}`}>
@@ -806,12 +852,13 @@ function DecisionSystemCard({ active, card, complete }: { active: boolean; card:
         </span>
         <div className="min-w-0">
           <h3>{card.title}</h3>
-          <p>{card.subtitle}</p>
+          {prominent ? <p className="decision-system-role">{card.role}</p> : null}
+          <p>{subtitle}</p>
         </div>
       </div>
       <div className="decision-system-detail">
         <span className="decision-system-dot" />
-        <span>{card.detail}</span>
+        <span>{detail}</span>
       </div>
     </article>
   );
@@ -819,38 +866,49 @@ function DecisionSystemCard({ active, card, complete }: { active: boolean; card:
 
 const decisionSystemCardData: DecisionSystemCardView[] = [
   {
-    detail: "Hermes proposes. ScaleX governs.",
+    compactSubtitle: "Creates the implementation plan.",
+    detail: "Hermes proposes · ScaleX governs",
     fallbackIcon: BrainCircuit,
     id: "hermes",
     logoSrc: "/brand/connections/hermes_agent_nous_square_white.png",
-    subtitle: "Creates the implementation plan.",
+    role: "Planner / Operator Brain",
+    subtitle: "Creates the implementation plan",
     title: "Hermes Planning",
     tone: "blue",
   },
   {
-    detail: "livemode=false · no live money",
+    compactDetail: "livemode=false · no live money",
+    compactSubtitle: "Verifies sandbox finance state.",
+    detail: "Sandbox/test · livemode=false · no live money",
     fallbackIcon: CreditCard,
     id: "stripe",
     logoSrc: "/brand/connections/stripe_square_s_mark.png",
-    subtitle: "Verifies sandbox finance state.",
+    role: "Finance State",
+    subtitle: "Prepares invoice and payment-state check",
     title: "Stripe Finance",
     tone: "purple",
   },
   {
-    detail: "Local policy active",
+    compactDetail: "Local policy active",
+    compactSubtitle: "Checks vendor, margin, and tool risk.",
+    detail: "Local policy active · NemoClaw boundary visible",
     fallbackIcon: ShieldCheck,
     id: "policy",
     logoSrc: "/brand/connections/nvidia_square_mark.png",
-    subtitle: "Checks vendor, margin, and tool risk.",
+    role: "Guardrail Runtime",
+    subtitle: "Checks vendor, margin, and tool risk",
     title: "NemoClaw / NeMo Policy",
     tone: "cyan",
   },
   {
-    detail: "Evidence ledger active",
+    compactDetail: "Evidence ledger active",
+    compactSubtitle: "Records audit evidence and protected margin.",
+    detail: "Evidence ledger ready · profit outcome pending",
     fallbackIcon: Database,
     id: "scalex",
     mark: "SX",
-    subtitle: "Records audit evidence and protected margin.",
+    role: "Execution Control",
+    subtitle: "Blocks unsafe action and records audit",
     title: "ScaleX Control Plane",
     tone: "brand",
   },
@@ -875,10 +933,10 @@ function decisionSystemForFocus(focusId: string, runVisualState: RunVisualState)
   return null;
 }
 
-function EnterpriseControlPanel({ model }: { model: ControlRoomModel }) {
+function EnterpriseControlPanel({ model, runVisualState }: { model: ControlRoomModel; runVisualState: RunVisualState }) {
   return (
     <div className="enterprise-control-stack">
-      <BusinessCostBasisCard model={model} />
+      <BusinessCostBasisCard model={model} runVisualState={runVisualState} />
       <ToolActionRailCard model={model} />
       <StripeFinanceFlowCard model={model} />
       <NemoGuardrailLayerCard model={model} />
@@ -886,25 +944,33 @@ function EnterpriseControlPanel({ model }: { model: ControlRoomModel }) {
   );
 }
 
-function BusinessCostBasisCard({ model }: { model: ControlRoomModel }) {
+function BusinessCostBasisCard({ model, runVisualState }: { model: ControlRoomModel; runVisualState: RunVisualState }) {
   const clientSource = model.state?.command_center?.client_onboarding?.saved_record?.source ?? "manual_entry";
   const reviewEditable = model.state?.command_center?.client_onboarding?.extracted_review?.editable_before_save ?? true;
+  const complete = runVisualState === "complete";
+  const costBasisRows = complete
+    ? model.costBasisRows
+    : model.costBasisRows.map((item) => ({
+      ...item,
+      status: item.id === "labor_cost" ? "Loaded" : "Prepared",
+      tone: item.id === "labor_cost" ? "blue" as Tone : "muted" as Tone,
+    }));
   return (
     <article className="enterprise-card">
       <div className="enterprise-card-head">
         <div>
           <p className="enterprise-eyebrow">Cost Basis / Delivery Cost Stack</p>
-          <h2>Approved delivery costs</h2>
+          <h2>{complete ? "Approved delivery costs" : "Planned delivery cost basis"}</h2>
         </div>
-        <StatusBadge label="reviewed" tone="green" />
+        <StatusBadge label={complete ? "approved" : "prepared"} tone={complete ? "green" : "amber"} />
       </div>
       <dl className="enterprise-fact-grid">
-        <FactRow label="Total approved costs" value={model.approvedCostsLabel} tone="green" />
-        <FactRow label="Protected profit" value={model.protectedProfitLabel} tone="green" />
-        <FactRow label="Protected margin" value={model.marginLabel} tone="green" />
+        <FactRow label={complete ? "Total approved costs" : "Planned cost basis"} value={model.approvedCostsLabel} tone={complete ? "green" : "amber"} />
+        <FactRow label="Profit outcome" value={complete ? model.protectedProfitLabel : "Pending"} tone={complete ? "green" : "muted"} />
+        <FactRow label="Margin outcome" value={complete ? model.marginLabel : "Pending"} tone={complete ? "green" : "muted"} />
         <FactRow label="Margin floor" value={model.marginFloorLabel} tone="amber" />
       </dl>
-      <table className="cost-basis-table cost-basis-table-enterprise" aria-label="Approved delivery cost basis">
+      <table className="cost-basis-table cost-basis-table-enterprise" aria-label={complete ? "Approved delivery cost basis" : "Planned delivery cost basis"}>
         <colgroup>
           <col className="cost-basis-col-item" />
           <col className="cost-basis-col-amount" />
@@ -920,7 +986,7 @@ function BusinessCostBasisCard({ model }: { model: ControlRoomModel }) {
           </tr>
         </thead>
         <tbody>
-          {model.costBasisRows.map((item) => (
+          {costBasisRows.map((item) => (
             <tr key={item.id}>
               <td className="cost-item-cell">{item.itemLabel}</td>
               <td className="numeric-cell">{item.amountLabel}</td>
@@ -930,7 +996,7 @@ function BusinessCostBasisCard({ model }: { model: ControlRoomModel }) {
           ))}
         </tbody>
       </table>
-      <p className="enterprise-note">Protected profit is calculated after approved delivery costs, not just labor.</p>
+      <p className="enterprise-note">{complete ? "Protected profit is calculated after approved delivery costs, not just labor." : "Cost basis is prepared before the governed run reports profit."}</p>
       <details className="enterprise-details">
         <summary>
           <span>View Labor Job Costing</span>
@@ -1092,12 +1158,15 @@ function GovernedRunView({
   setDrawerTab: (tab: DrawerTab) => void;
   setExpandedRailId: (id: string) => void;
 }) {
+  const operationFacts = operationFactsForRunState(model, runVisualState);
+  const drawerMetrics = displayMetricsForRunState(model, runVisualState);
+
   return (
     <section className="grid h-full min-h-0 grid-rows-[minmax(0,1fr)_auto] gap-4">
       <div className="grid min-h-0 grid-cols-[220px_minmax(0,1fr)_260px] gap-4">
         <Panel title="Operation Details" eyebrow="Northstar run">
           <dl className="grid gap-2 text-sm">
-            {model.operationFacts.map((fact) => (
+            {operationFacts.map((fact) => (
               <FactRow key={fact.label} label={fact.label} value={fact.value} tone={fact.tone} />
             ))}
           </dl>
@@ -1148,7 +1217,7 @@ function GovernedRunView({
           <div className="mt-3">
             {drawerTab === "summary" ? (
               <dl className="grid gap-2">
-                {model.metrics.slice(0, 5).map((metric) => (
+                {drawerMetrics.slice(0, 5).map((metric) => (
                   <FactRow key={metric.label} label={metric.label} value={metric.value} tone={metric.tone} />
                 ))}
               </dl>
@@ -1398,7 +1467,7 @@ function MetricStrip({
   runActive: boolean;
   runVisualState: RunVisualState;
 }) {
-  const approvedActive = activeRailId === "approved-spend" || completedRailIds.includes("approved-spend");
+  const approvedActive = runVisualState === "complete" && (activeRailId === "approved-spend" || completedRailIds.includes("approved-spend"));
   const blockedActive = activeRailId === "blocked-spend" || completedRailIds.includes("blocked-spend") || blockedFlash;
   const profitActive = activeRailId === "profit" || completedRailIds.includes("profit") || runVisualState === "complete";
 
@@ -1409,6 +1478,20 @@ function MetricStrip({
         const isRiskMetric = metric.label === "Risk contained";
         const isProfitMetric = metric.label === "Protected profit";
         const displayLabel = isRiskMetric && runActive && !blockedActive ? "Risk pending" : metric.label;
+        const defaultSublabel = metric.label === "Revenue secured"
+          ? "client revenue context loaded"
+          : isApprovedMetric
+            ? "approved delivery cost basis"
+            : isRiskMetric
+              ? "unsafe vendor exposure contained"
+              : metric.label === "Protected margin"
+                ? "margin floor preserved"
+                : isProfitMetric
+                  ? "revenue minus approved delivery costs"
+                  : null;
+        const sublabel = isRiskMetric && runActive && blockedActive
+          ? "unsafe vendor exposure contained"
+          : metric.sublabel ?? defaultSublabel;
         return (
           <article
             className={`metric-card ${isApprovedMetric && approvedActive ? "metric-glow-green" : ""} ${isRiskMetric && blockedActive ? "metric-flash-red" : ""} ${isProfitMetric ? "metric-hero" : ""} ${isProfitMetric && profitActive ? "metric-glow-green" : ""}`}
@@ -1418,11 +1501,7 @@ function MetricStrip({
             <p className={`mt-2 font-semibold tabular-nums ${metricClass(metric.tone)} ${isProfitMetric ? "text-4xl" : isRiskMetric ? "text-3xl" : "text-2xl"}`}>
               {isRiskMetric && runActive ? blockedRiskDisplayValue : metric.value}
             </p>
-            {metric.label === "Revenue secured" ? <p className="mt-2 text-xs font-semibold text-[#A1A1AA]">client revenue context loaded</p> : null}
-            {isApprovedMetric ? <p className="mt-2 text-xs font-semibold text-[#10B981]">approved delivery cost basis</p> : null}
-            {isRiskMetric ? <p className="mt-2 text-xs font-semibold text-[#f87171]">unsafe vendor exposure contained</p> : null}
-            {metric.label === "Protected margin" ? <p className="mt-2 text-xs font-semibold text-[#10B981]">margin floor preserved</p> : null}
-            {isProfitMetric ? <p className="mt-2 text-xs font-semibold text-[#10B981]">revenue minus approved delivery costs</p> : null}
+            {sublabel ? <p className={`mt-2 text-xs font-semibold ${metricSublabelClass(metric.tone)}`}>{sublabel}</p> : null}
           </article>
         );
       })}
@@ -2429,5 +2508,28 @@ function metricClass(tone: Tone = "white"): string {
     case "white":
     default:
       return "text-[#FFFFFF]";
+  }
+}
+
+function metricSublabelClass(tone: Tone = "white"): string {
+  switch (tone) {
+    case "brand":
+      return "text-[#fcba03]";
+    case "green":
+      return "text-[#10B981]";
+    case "red":
+      return "text-[#f87171]";
+    case "amber":
+      return "text-[#f59e0b]";
+    case "blue":
+      return "text-[#93c5fd]";
+    case "purple":
+      return "text-[#c4b5fd]";
+    case "cyan":
+      return "text-[#67e8f9]";
+    case "muted":
+    case "white":
+    default:
+      return "text-[#A1A1AA]";
   }
 }

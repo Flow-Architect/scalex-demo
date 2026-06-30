@@ -7,10 +7,10 @@ Last updated: 2026-06-29
 - Project folder exists at `/home/ascabrya/dev/scalex-demo`.
 - Latest committed baseline before Goal 8E: `615a9bd Document NemoClaw correction and next
   integration plan`.
-- Last completed goal: Goal 8W - pre-run Live Run Detail decision stage.
-- Last completed implementation/QA goal: Goal 8W - frontend-only idle-state Live Run Detail
-  composition polish.
-- Last completed documentation/tracking update: Goal 8W pre-run Live Run Detail closeout.
+- Last completed goal: Goal 8X - pre-run stack cards and outcome metric gating.
+- Last completed implementation/QA goal: Goal 8X - frontend-only pre-run governance stack and
+  metric truthfulness polish.
+- Last completed documentation/tracking update: Goal 8X pre-run stack / metric gating closeout.
 - Last completed checkout cleanup: Open Source Checkout Cleanup for judge readiness.
 - Current priority: Goal 9 - final repo/video/submission polish.
 - Goal 8I used the uploaded six-phase control-room visual prompt as a design specification only.
@@ -279,6 +279,24 @@ Last updated: 2026-06-29
   values, a real `Start Governed Run` click, running states without the pre-run stage, final
   `$4,565` Profit Outcome still readable, no horizontal document overflow, and Connection Hub /
   Settings truthfulness.
+- Goal 8X completed the frontend-only pre-run stack and outcome metric truthfulness pass. It
+  moved the idle/pre-run Hermes, Stripe, NemoClaw / NeMo, and ScaleX cards into a larger
+  Governance Stack inside the Ready to Govern stage, with distinct role, action, and boundary
+  copy for each system.
+- Goal 8X gated dashboard and sidebar outcome metrics so pre-run and in-progress states show only
+  revenue as final. Approved costs, protected profit, and protected margin remain `$0`/`Pending`
+  until the Profit Outcome completes; risk contained remains `$0` until the blocked-risk rail
+  reveals the `$3,200` contained risk. The sidebar Active Operation profit remains `Pending`
+  until the final report is available outside the running state.
+- Goal 8X reframed the Cost Basis panel as planned/prepared before completion and approved after
+  completion. It preserved the deterministic Goal 8R economics, cost table values, final
+  Profit Outcome/result card, backend mechanics, rail timing, Stripe/Hermes/NemoClaw behavior, no
+  live money, no Telegram, no new integrations, no `.env`, and no database artifacts.
+- Goal 8X validation passed `cd frontend && npm run build`, `./scripts/test.sh`,
+  `./scripts/check-nemo.sh`, `git diff --check`, unsafe/generated path scan, staged added-lines
+  secret scan, and browser smoke for pre-run gated metrics/sidebar, enlarged Governance Stack,
+  real run click, blocked-risk reveal, final metrics/result stability, no horizontal overflow,
+  Connection Hub, and Settings truthfulness.
 - Goal 9 remains final polish and submission assets.
 - Goal 7B remains future Verified Live Mode hardening.
 

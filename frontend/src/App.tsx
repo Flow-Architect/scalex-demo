@@ -60,6 +60,7 @@ const NORTHSTAR_ONBOARDING_DRAFT: OnboardingDraft = {
   blockedVendors: "Unapproved Data Broker Enrichment",
 };
 const RUN_STEP_MS = 5000;
+const SIDEBAR_OUTCOME_REVEAL_MS = 31_000;
 
 export default function App() {
   const [auth, setAuth] = useState<AuthStatus | null>(null);
@@ -76,6 +77,7 @@ export default function App() {
   const [notice, setNotice] = useState<string | null>(null);
   const [playbackIndex, setPlaybackIndex] = useState(0);
   const [runCompletedMoment, setRunCompletedMoment] = useState(false);
+  const [sidebarOutcomeReleased, setSidebarOutcomeReleased] = useState(false);
 
   const isBusy = busyAction !== null;
   const money = useMemo(() => moneySnapshot(state), [state]);
@@ -84,6 +86,8 @@ export default function App() {
   const activeWorkflow = state?.workflow ?? null;
   const displayCustomer = activeWorkflow?.client_name ?? state?.job?.client_name ?? "Northstar Dental Group";
   const displayJob = activeWorkflow?.job_name ?? state?.job?.job_name ?? "Client Implementation Launch";
+  const sidebarProfitReady = Boolean(state?.report) && (busyAction !== "run" || runCompletedMoment || sidebarOutcomeReleased);
+  const sidebarProfitLabel = sidebarProfitReady ? formatCurrencyText(money.grossProfitCents) : "Pending";
 
   useEffect(() => {
     void loadSession();
@@ -111,6 +115,18 @@ export default function App() {
 
     return () => window.clearTimeout(timer);
   }, [runCompletedMoment]);
+
+  useEffect(() => {
+    if (busyAction !== "run" || !state?.report || sidebarOutcomeReleased) {
+      return undefined;
+    }
+
+    const timer = window.setTimeout(() => {
+      setSidebarOutcomeReleased(true);
+    }, SIDEBAR_OUTCOME_REVEAL_MS);
+
+    return () => window.clearTimeout(timer);
+  }, [busyAction, sidebarOutcomeReleased, state?.report]);
 
   async function loadDashboard() {
     setBusyAction("initial");
@@ -186,6 +202,7 @@ export default function App() {
     setBusyAction("refresh");
     setError(null);
     setRunCompletedMoment(false);
+    setSidebarOutcomeReleased(false);
     try {
       const [healthResponse, stateResponse] = await Promise.all([
         getHealth(),
@@ -206,6 +223,7 @@ export default function App() {
     setError(null);
     setNotice(null);
     setRunCompletedMoment(false);
+    setSidebarOutcomeReleased(false);
     setPlaybackIndex(0);
     setSelectedNodeKey(WORKFLOW_NODE_ORDER[0]);
     let cancelPlayback = false;
@@ -260,6 +278,7 @@ export default function App() {
     setError(null);
     setNotice(null);
     setRunCompletedMoment(false);
+    setSidebarOutcomeReleased(false);
     try {
       const response = await resetDemo();
       setState(response.state);
@@ -400,7 +419,7 @@ export default function App() {
       displayJob={displayJob}
       onNavigate={setActiveView}
       onRun={handleRunDemo}
-      profitLabel={formatCurrencyText(money.grossProfitCents)}
+      profitLabel={sidebarProfitLabel}
       revenueLabel={formatCurrencyText(money.revenueCents)}
     >
       <ControlRoomApp

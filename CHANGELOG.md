@@ -10,6 +10,42 @@ Use:
 
 ---
 
+## 2026-06-29 - Goal 8X: Pre-run stack and outcome metric gating
+
+Completed:
+- Enlarged the idle/pre-run Live Run Detail system cards into a larger Governance Stack inside
+  the Ready to Govern stage.
+- Added distinct pre-run card hierarchy for Hermes Planning, Stripe Finance, NemoClaw / NeMo
+  Policy, and ScaleX Control Plane: system, role, primary action, and boundary/detail line.
+- Gated hero/dashboard outcome metrics so pre-run and in-progress states show only revenue as
+  final; approved costs, protected profit, and protected margin stay `$0`/`Pending` until the
+  Profit Outcome completes, and risk contained stays `$0` until the blocked-risk rail reveals
+  `$3,200`.
+- Gated the sidebar Active Operation profit to `Pending` until completion.
+- Reframed the Cost Basis / Delivery Cost Stack as planned/prepared before completion and
+  approved after completion, while keeping the deterministic cost table values.
+- Intentionally preserved the final Profit Outcome/result card, final economics, completed rail
+  state, blocked-risk completed state, Evidence Ledger final behavior, governed-run timing,
+  backend mechanics, Stripe/Hermes/NemoClaw behavior, no live money, no Telegram, no new
+  integrations, no `.env` changes, and no database artifacts.
+
+Verification:
+- `cd frontend && npm run build` passed.
+- `./scripts/test.sh` passed with 68 backend tests and a successful frontend build.
+- `./scripts/check-nemo.sh` passed with `nemoguardrails` 0.21.0 and `guardrails/scalex` loaded.
+- Browser smoke at `http://127.0.0.1:5174/` verified pre-run gated hero/sidebar metrics, larger
+  Governance Stack cards, visible Start Governed Run button, real run click, blocked-risk reveal,
+  final complete metrics/result stability, no horizontal document overflow, and Connection Hub /
+  Settings truthfulness.
+
+Suggested commit message:
+Polish ScaleX pre-run stack and outcome metrics
+
+Next:
+- Goal 9 - final repo/video/submission polish and open-source audit closeout.
+
+---
+
 ## 2026-06-29 - Goal 8W: Pre-run Live Run Detail decision stage
 
 Completed:
