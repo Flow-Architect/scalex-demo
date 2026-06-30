@@ -23,21 +23,21 @@ type Tone = "brand" | "green" | "red" | "amber" | "blue" | "purple" | "cyan" | "
 type DrawerTab = "summary" | "operation" | "control";
 type RunVisualState = "idle" | "running" | "complete";
 
-const RUN_START_DELAY_MS = 260;
-const RAIL_GAP_MS = 90;
-const DEFAULT_RAIL_DELAY_MS = 2200;
-const INTAKE_RAIL_HOLD_MS = 2200;
-const COST_BASIS_RAIL_HOLD_MS = 2200;
-const HERMES_RAIL_HOLD_MS = 2400;
-const STRIPE_RAIL_HOLD_MS = 3200;
-const POLICY_RAIL_HOLD_MS = 3200;
-const APPROVED_SPEND_RAIL_HOLD_MS = 2400;
-const BLOCKED_RAIL_HOLD_MS = 4800;
-const EVIDENCE_RAIL_HOLD_MS = 2600;
-const PROFIT_RAIL_HOLD_MS = 3200;
-const DETAIL_TRANSITION_MS = 550;
-const BLOCKED_COUNT_DURATION_MS = 1800;
-const BLOCKED_FLASH_DURATION_MS = 1200;
+const RUN_START_DELAY_MS = 400;
+const RAIL_GAP_MS = 160;
+const DEFAULT_RAIL_DELAY_MS = 3200;
+const INTAKE_RAIL_HOLD_MS = 3200;
+const COST_BASIS_RAIL_HOLD_MS = 3200;
+const HERMES_RAIL_HOLD_MS = 3800;
+const STRIPE_RAIL_HOLD_MS = 4800;
+const POLICY_RAIL_HOLD_MS = 4800;
+const APPROVED_SPEND_RAIL_HOLD_MS = 3800;
+const BLOCKED_RAIL_HOLD_MS = 6500;
+const EVIDENCE_RAIL_HOLD_MS = 4200;
+const PROFIT_RAIL_HOLD_MS = 4800;
+const DETAIL_TRANSITION_MS = 700;
+const BLOCKED_COUNT_DURATION_MS = 2600;
+const BLOCKED_FLASH_DURATION_MS = 1600;
 const DETAIL_TRANSITION_STYLE = {
   "--detail-transition-ms": `${DETAIL_TRANSITION_MS}ms`,
 } as CSSProperties;
@@ -865,11 +865,6 @@ function LiveRunDetail({
             <StatusBadge label="protected" tone="green" />
           </div>
           {decisionSystemCards}
-          <dl className="live-profit-facts mt-3 grid gap-2">
-            {model.metrics.map((metric) => (
-              <FactRow key={metric.label} label={metric.label} value={metric.value} tone={metric.tone} />
-            ))}
-          </dl>
           <p className="mt-3 rounded-md border border-[#10B981]/30 bg-[#10B981]/10 p-3 text-sm font-semibold text-[#10B981]">
             Protected margin: {model.marginLabel}. Formula: Revenue - Total Approved Costs.
           </p>
