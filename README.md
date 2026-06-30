@@ -15,25 +15,27 @@
 </p>
 
 <p align="center">
-  <img alt="MIT License" src="https://img.shields.io/badge/license-MIT-00d084?style=flat-square" />
-  <img alt="Python" src="https://img.shields.io/badge/python-FastAPI-3776AB?style=flat-square" />
-  <img alt="React" src="https://img.shields.io/badge/react-Vite-61DAFB?style=flat-square" />
-  <img alt="Nemotron 3 Ultra-ready" src="https://img.shields.io/badge/nemotron_3_ultra-ready-76B900?style=flat-square" />
-  <img alt="SQLite" src="https://img.shields.io/badge/sqlite-evidence_ledger-003B57?style=flat-square" />
-  <img alt="Stripe Sandbox" src="https://img.shields.io/badge/stripe-sandbox_/_test_double-635BFF?style=flat-square" />
-  <img alt="Judge Demo Mode" src="https://img.shields.io/badge/judge_demo-deterministic-fcba03?style=flat-square" />
-  <img alt="No Live Money" src="https://img.shields.io/badge/live_money-disabled-ef4444?style=flat-square" />
+  ScaleX helps enterprise teams turn paid client work into a governed run with proof, policy,
+  money control, audit evidence, and protected margin.
 </p>
 
-<p align="center">
-  <a href="#quickstart">Quick Start</a> ·
-  <a href="#demo-story">Demo Story</a> ·
-  <a href="#hackathon-context">Hackathon Context</a> ·
-  <a href="#how-it-works">How It Works</a> ·
-  <a href="docs/ARCHITECTURE.md">Architecture</a> ·
-  <a href="#safety-boundaries">Safety Boundaries</a> ·
-  <a href="docs/OPERATOR_GUIDE.md">Operator Guide</a>
-</p>
+<div align="center">
+
+[![License: MIT](https://img.shields.io/badge/license-MIT-00d084?style=flat-square)](LICENSE)
+[![Python / FastAPI](https://img.shields.io/badge/python-FastAPI-3776AB?logo=python&logoColor=white&style=flat-square)](#quickstart)
+[![React / Vite](https://img.shields.io/badge/react-Vite-61DAFB?logo=react&logoColor=white&style=flat-square)](frontend/)
+[![Hermes Agent](https://img.shields.io/badge/Hermes_Agent-Nous_Research-111827?style=flat-square)](#hackathon-context)
+[![Nemotron 3 Ultra-ready](https://img.shields.io/badge/NVIDIA_Nemotron_3_Ultra-ready-76B900?logo=nvidia&logoColor=white&style=flat-square)](#hackathon-context)
+[![Stripe Sandbox](https://img.shields.io/badge/Stripe-sandbox-635BFF?logo=stripe&logoColor=white&style=flat-square)](#execution-modes)
+[![Stars](https://img.shields.io/github/stars/Flow-Architect/scalex-demo?style=social)](https://github.com/Flow-Architect/scalex-demo/stargazers)
+
+</div>
+
+<div align="center">
+
+[**Quick Start**](#quickstart) · [**Demo Story**](#demo-story) · [**Hackathon Context**](#hackathon-context) · [**How It Works**](#how-it-works) · [**Architecture**](docs/ARCHITECTURE.md) · [**Safety Boundaries**](#safety-boundaries) · [**Operator Guide**](docs/OPERATOR_GUIDE.md)
+
+</div>
 
 > ScaleX is developed and tested on Linux. Because it uses a Python/FastAPI backend, a Vite
 > frontend, and SQLite, it should run on macOS and on Windows through WSL2. Native Windows support
