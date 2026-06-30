@@ -9,14 +9,16 @@
 </p>
 
 <p align="center">
-  Hermes plans. Stripe proves finance state. NeMo/local policy checks risk. ScaleX blocks unsafe
-  execution and records protected profit.
+  Hermes plans. Nemotron 3 Ultra-capable reasoning supports enterprise planning. Stripe proves
+  finance state. NeMo/local policy checks risk. ScaleX blocks unsafe execution and records
+  protected profit.
 </p>
 
 <p align="center">
   <img alt="MIT License" src="https://img.shields.io/badge/license-MIT-00d084?style=flat-square" />
   <img alt="Python" src="https://img.shields.io/badge/python-FastAPI-3776AB?style=flat-square" />
   <img alt="React" src="https://img.shields.io/badge/react-Vite-61DAFB?style=flat-square" />
+  <img alt="Nemotron 3 Ultra-ready" src="https://img.shields.io/badge/nemotron_3_ultra-ready-76B900?style=flat-square" />
   <img alt="SQLite" src="https://img.shields.io/badge/sqlite-evidence_ledger-003B57?style=flat-square" />
   <img alt="Stripe Sandbox" src="https://img.shields.io/badge/stripe-sandbox_/_test_double-635BFF?style=flat-square" />
   <img alt="Judge Demo Mode" src="https://img.shields.io/badge/judge_demo-deterministic-fcba03?style=flat-square" />
@@ -26,6 +28,7 @@
 <p align="center">
   <a href="#quickstart">Quick Start</a> ·
   <a href="#demo-story">Demo Story</a> ·
+  <a href="#hackathon-context">Hackathon Context</a> ·
   <a href="#how-it-works">How It Works</a> ·
   <a href="docs/ARCHITECTURE.md">Architecture</a> ·
   <a href="#safety-boundaries">Safety Boundaries</a> ·
@@ -35,6 +38,28 @@
 > ScaleX is developed and tested on Linux. Because it uses a Python/FastAPI backend, a Vite
 > frontend, and SQLite, it should run on macOS and on Windows through WSL2. Native Windows support
 > has not been fully tested yet.
+
+## Hackathon Context
+
+ScaleX was built as a hackathon demo for governed AI execution in revenue-backed client operations.
+
+The demo highlights an enterprise control stack using **Hermes Agent by Nous Research** for
+planning, a **NVIDIA Nemotron 3 Ultra-capable reasoning route** for enterprise planning
+intelligence, **NVIDIA NeMo / NemoClaw-style policy guardrails** for governed execution checks, and
+**Stripe sandbox/test mode** for financial proof. **ScaleX** acts as the control plane for proof,
+policy, money control, margin protection, and audit.
+
+<p align="center">
+  <img src="frontend/public/brand/connections/hermes_agent_nous_square_white.png" width="56" alt="Hermes Agent by Nous Research" />
+  &nbsp;&nbsp;
+  <img src="frontend/public/brand/connections/nvidia_square_mark.png" width="56" alt="NVIDIA" />
+  &nbsp;&nbsp;
+  <img src="frontend/public/brand/connections/stripe_square_s_mark.png" width="56" alt="Stripe" />
+</p>
+
+<p align="center">
+  <em>Technology logos are shown for demo/integration identification only and do not imply endorsement.</em>
+</p>
 
 ![ScaleX dashboard ready state](docs/assets/github/dashboard-ready.png)
 
@@ -52,7 +77,7 @@ ScaleX turns paid client work into a controlled run:
 ```text
 Business intake
 -> cost basis
--> Hermes plan
+-> Hermes plan / Nemotron 3 Ultra-capable reasoning route
 -> Stripe sandbox finance state
 -> NeMo/local policy check
 -> approved or blocked action
@@ -86,9 +111,9 @@ the protected outcome and records the proof trail.
 | Layer | Role | Boundary |
 | --- | --- | --- |
 | Business Intake | Loads reviewed operation context | Synthetic/demo data only |
-| Hermes Planning | Proposes the implementation plan | Hermes proposes; ScaleX governs |
+| Hermes Planning | Proposes the implementation plan and supports a Nemotron 3 Ultra-capable reasoning route | Hermes proposes; ScaleX governs |
 | Stripe Finance | Provides sandbox/test finance state | No live money |
-| NeMo / Local Policy | Checks risky actions before execution | Real NeMo only when runtime evidence proves it |
+| NeMo / Local Policy | Checks risky actions before execution | Real NeMo/NemoClaw only when runtime evidence proves it |
 | ScaleX Control Plane | Executes allowed actions and blocks unsafe ones | Evidence required |
 | SQLite Ledger | Records audit proof | Local runtime DB recreated from schema/seed |
 
